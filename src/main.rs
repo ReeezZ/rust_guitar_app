@@ -1,6 +1,8 @@
-use leptos::prelude::*;
+mod my_app;
+
+use leptos::mount::mount_to_body;
 
 fn main() {
     console_error_panic_hook::set_once();
-    leptos::mount::mount_to_body(|| view! { <p>"Hello, world!"</p> })
+    mount_to_body(my_app::App);
 }
