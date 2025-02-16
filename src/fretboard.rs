@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 
 #[component]
-pub fn FretboardV2(
+pub fn Fretboard(
     #[prop(default = 6)] num_strings: u8,
     #[prop(default = 15)] num_frets: u8,
 ) -> impl IntoView {
