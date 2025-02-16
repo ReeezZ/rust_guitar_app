@@ -1,3 +1,4 @@
+use leptos::either::EitherOf3;
 use leptos::prelude::*;
 
 #[component]
@@ -18,10 +19,10 @@ pub fn Fretboard(
 
               // Fretboard Section (Holds both string + frets)
               <div class="flex relative grow">
-                // String (spans full width after nut)
+                // String
                 <div class="absolute right-0 left-0 top-1/2 h-1 -translate-y-1/2 bg-slate-300"></div>
 
-                // Frets (sit on top of string)
+                // Frets
                 {(1..=num_frets)
                   .map(|fret_no| {
                     view! {
@@ -35,7 +36,38 @@ pub fn Fretboard(
             </div>
           }
         })
-        .collect::<Vec<_>>()}
+        .collect::<Vec<_>>()} // Fret markers row (positioned below the frets)
+      <div class="flex justify-start w-full">
+        // Empty space for the nut
+        <div class="w-20 h-6"></div>
+        {(1..=num_frets)
+          .map(|fret_no| {
+            let has_marker = [3, 5, 7, 9, 15, 17, 19, 21].contains(&(fret_no % 12));
+            let is_double = fret_no % 12 == 0;
+
+            view! {
+              <div class="flex relative justify-center items-center w-20 h-6">
+                {move || {
+                  if is_double {
+                    EitherOf3::A(
+                      view! {
+                        <>
+                          <div class="absolute left-1/4 w-2 h-2 bg-black rounded-full"></div>
+                          <div class="absolute right-1/4 w-2 h-2 bg-black rounded-full"></div>
+                        </>
+                      },
+                    )
+                  } else if has_marker {
+                    EitherOf3::B(view! { <div class="w-2 h-2 bg-black rounded-full"></div> })
+                  } else {
+                    EitherOf3::C(view! { <></> })
+                  }
+                }}
+              </div>
+            }
+          })
+          .collect::<Vec<_>>()}
+      </div>
     </div>
   }
 }
