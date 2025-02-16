@@ -11,13 +11,13 @@ pub fn Fretboard(
                 .map(|string_no| {
                     view! {
                         <div class="flex relative items-center">
-                            // Nut (Fret 0) - thicker border
+                            // Nut (Fret 0) - thicker left border
                             <div class="content-center w-20 h-12 text-center border-l-8 border-slate-900 bg-gray-800 text-white font-bold flex items-center justify-center">
                                 {string_no}- 0
                             </div>
-                            
-                            // String - positioned behind the frets
-                            <div class="absolute left-0 top-1/2 h-1 w-full bg-slate-300"></div>
+
+                            // String - Now starts *after* the nut
+                            <div class="absolute left-20 top-1/2 h-1 bg-slate-300" style="width: calc(100% - 20px);"></div>
 
                             // Frets
                             {(1..=num_frets)
