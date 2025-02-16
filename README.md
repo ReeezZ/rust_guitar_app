@@ -45,3 +45,24 @@ A big challenge will probably be to have a GUI that is multi platform. I'd like 
 
 TODO link other comparable software
 
+## Possible inspirations
+
+[Code pen fretboard example](https://codepen.io/DreySkee/pen/bddpqM)
+[JS fretboard](https://github.com/metaescape/js-fretboard)
+
+
+## Brainstroming
+
+- Circle of Fifths trainer
+  - Noten/Tonarten auf den Kreis ziehen
+- Fretboard trainer
+  - Find notes on the fretboard
+  - Show scales
+    - Triads
+- Ear training
+- Tuner
+- Metronome
+  - Maybe a simple drum machine
+- Knowledge base
+  - Chords
+- Some info about achords in a key?
