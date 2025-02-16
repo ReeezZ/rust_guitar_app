@@ -51,7 +51,6 @@ pub fn Fretboard(
                 {move || {
                   if is_double {
                     EitherOf3::A(
-                      // Return a Fragment for the two markers
                       view! {
                         <>
                           <div class="absolute left-1/4 w-2 h-2 bg-black rounded-full"></div>
@@ -60,23 +59,9 @@ pub fn Fretboard(
                       },
                     )
                   } else if has_marker {
-                    EitherOf3::B(
-                      // Return a single marker as a Fragment (even if it's one element)
-                      view! {
-                        <>
-                          <div class="w-2 h-2 bg-black rounded-full"></div>
-                        </>
-                      },
-                    )
+                    EitherOf3::B(view! { <div class="w-2 h-2 bg-black rounded-full"></div> })
                   } else {
-                    EitherOf3::C(
-                      // Return an empty div as a Fragment (even if it's empty)
-                      view! {
-                        <>
-                          <div class="w-0 h-0"></div>
-                        </>
-                      },
-                    )
+                    EitherOf3::C(view! { <></> })
                   }
                 }}
               </div>
