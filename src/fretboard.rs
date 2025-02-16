@@ -6,7 +6,7 @@ pub fn Fretboard(
   #[prop(default = 15)] num_frets: u8,
 ) -> impl IntoView {
   view! {
-    <div class="flex-col p-4 my-12 w-full h-96 bg-amber-500">
+    <div class="flex-col w-full bg-amber-500">
       // Strings and frets
       {(0..num_strings)
         .map(|string_no| {
