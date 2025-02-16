@@ -15,8 +15,8 @@ pub fn Fretboard(
                                 .map({
                                     |fret_no| {
                                         view! {
-                                            <div class="justify-center content-center mx-3 w-20 h-12 border-r-4 border-slate-700">
-                                                <span>{string_no} - {fret_no}</span>
+                                            <div class="content-center w-20 h-12 text-center border-r-4 border-slate-700">
+                                                {string_no}- {fret_no}
                                             </div>
                                         }
                                     }
