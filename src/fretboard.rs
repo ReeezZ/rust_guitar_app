@@ -6,13 +6,13 @@ pub fn Fretboard(
     #[prop(default = 15)] num_frets: u8,
 ) -> impl IntoView {
     view! {
-        <div class="fretboard bg-100">
+        <div class="flex-col mt-12 w-full h-72 bg-amber-500">
             {(0..num_strings)
                 .map(|_| {
                     view! {
-                        <div class="py-2 px-3 m-1 text-white bg-blue-700 rounded border-l-2 border-b-4 border-blue-800 shadow-lg">
+                        <div class="flex relative w-full h-2 before:w-full before:h-2 before:bg-gradient-to-r before:from-[#eee] to-[#999] shadow-[76px_3px_10px_#806233]">
                             {(0..num_frets)
-                                .map({ |_| view! { <div class="note-string">LUL</div> } })
+                                .map({ |_| view! { <div class=""></div> } })
                                 .collect::<Vec<_>>()}
                         </div>
                     }

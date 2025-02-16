@@ -50,6 +50,8 @@ TODO link other comparable software
 [Code pen fretboard example](https://codepen.io/DreySkee/pen/bddpqM)
 [JS fretboard](https://github.com/metaescape/js-fretboard)
 
+https://www.youtube.com/watch?v=C6VLedW5Dwk&list=PLXAhCH9FJ8zViqdqhsSP7iyCrVDoUGb3P&index=2
+
 
 ## Brainstroming
 
