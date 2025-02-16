@@ -10,6 +10,8 @@ cargo install trunk
 cargo install leptosfmt
 ```
 
+You might have to downgrade the Tailwind CSS IntelliSense VS Code plugin to v0.10.5. See: https://github.com/tailwindlabs/tailwindcss-intellisense/issues/988
+
 ## Usage
 
 `trunk serve --open`
