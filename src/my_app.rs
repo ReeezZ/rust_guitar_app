@@ -15,6 +15,7 @@ fn get_note_for_fret(string: usize, fret: usize) -> &'static str {
     let start_index = NOTES.iter().position(|&n| n == open_note).unwrap();
     NOTES[(start_index + fret) % 12]
 }
+
 #[component]
 fn Fretboard() -> impl IntoView {
     let selected_note = RwSignal::new("".to_string());
