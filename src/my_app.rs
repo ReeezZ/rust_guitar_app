@@ -1,30 +1,61 @@
-use leptos::prelude::*;
+use leptos::{
+    prelude::{ClassAttribute, ElementChild, Get, OnAttribute, RwSignal, Set},
+    *,
+};
+
+// Standard-Stimmung (EADGBE, tiefste bis höchste Saite)
+const STANDARD_TUNING: [&str; 6] = ["E", "A", "D", "G", "B", "E"];
+// Chromatische Skala
+const NOTES: [&str; 12] = [
+    "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
+];
+
+fn get_note_for_fret(string: usize, fret: usize) -> &'static str {
+    let open_note = STANDARD_TUNING[string];
+    let start_index = NOTES.iter().position(|&n| n == open_note).unwrap();
+    NOTES[(start_index + fret) % 12]
+}
+#[component]
+fn Fretboard() -> impl IntoView {
+    let selected_note = RwSignal::new("".to_string());
+
+    view! {
+        <div class="fretboard">
+            {move || {
+                (0..6)
+                    .rev()
+                    .map(|string| {
+                        view! {
+                            <div class="string">
+                                {move || {
+                                    (0..12)
+                                        .map(move |fret| {
+                                            let note = get_note_for_fret(string, fret);
+                                            let onclick = {
+                                                let selected_note = selected_note.clone();
+                                                move |_| selected_note.set(note.to_string())
+                                            };
+                                            view! {
+                                                <button class="fret" on:click=onclick>
+                                                    {note}
+                                                </button>
+                                            }
+                                        })
+                                        .collect::<Vec<_>>()
+                                }}
+                            </div>
+                        }
+                    })
+                    .collect::<Vec<_>>()
+            }} <p>"Ausgewählte Note: " {move || selected_note.get()}</p>
+        </div>
+    }
+}
 
 #[component]
 pub fn App() -> impl IntoView {
-    let (count, set_count) = signal(0);
-
     view! {
-        <button
-            on:click=move |_| {
-                *set_count.write() += 10;
-            }
-            // set the `style` attribute
-            style="position: absolute"
-            // and toggle individual CSS properties with `style:`
-            style:left=move || format!("{}px", count.get() + 100)
-            style:background-color=move || format!("rgb({}, {}, 100)", count.get(), 100)
-            style:max-width="400px"
-            // Set a CSS variable for stylesheet use
-            style=("--columns", move || count.get().to_string())
-        >
-            "Click to Move"
-        </button>
-        <progress
-    max="50"
-    // signals are functions, so `value=count` and `value=move || count.get()`
-    // are interchangeable.
-    value=count
-/>
+        <h1>"Gitarren Griffbrett"</h1>
+        <Fretboard />
     }
 }
