@@ -10,28 +10,28 @@ pub fn Fretboard(
       {(0..num_strings)
         .map(|string_no| {
           view! {
-            <div class="flex relative items-center">
-              // Nut (Fret 0) - thicker left border
-              <div class="flex justify-center content-center items-center w-20 h-12 font-bold text-center text-white bg-gray-800 border-l-8 border-slate-900">
+            <div class="flex relative items-center w-full">
+              // Nut (Thick first fret)
+              <div class="flex justify-center items-center w-20 h-12 font-bold text-center text-white bg-gray-800 border-r-8 border-slate-900">
                 {string_no}- 0
               </div>
 
-              // String - Now starts *after* the nut
-              <div
-                class="absolute left-20 top-1/2 h-1 bg-slate-300"
-                style="width: calc(100% - 20px);"
-              ></div>
+              // Fretboard Section (Holds both string + frets)
+              <div class="flex relative grow">
+                // String (spans full width after nut)
+                <div class="absolute right-0 left-0 top-1/2 h-1 -translate-y-1/2 bg-slate-300"></div>
 
-              // Frets
-              {(1..=num_frets)
-                .map(|fret_no| {
-                  view! {
-                    <div class="flex relative justify-center content-center items-center w-20 h-12 text-center border-r-4 border-slate-700">
-                      {string_no}- {fret_no}
-                    </div>
-                  }
-                })
-                .collect::<Vec<_>>()}
+                // Frets (sit on top of string)
+                {(1..=num_frets)
+                  .map(|fret_no| {
+                    view! {
+                      <div class="flex justify-center items-center w-20 h-12 text-center bg-transparent border-r-4 border-slate-700">
+                        {string_no}- {fret_no}
+                      </div>
+                    }
+                  })
+                  .collect::<Vec<_>>()}
+              </div>
             </div>
           }
         })
