@@ -7,6 +7,7 @@ pub fn Fretboard(
 ) -> impl IntoView {
   view! {
     <div class="flex-col p-4 my-12 w-full h-96 bg-amber-500">
+      // Strings and frets
       {(0..num_strings)
         .map(|string_no| {
           view! {
@@ -18,14 +19,14 @@ pub fn Fretboard(
 
               // Fretboard Section (Holds both string + frets)
               <div class="flex relative grow">
-                // String (spans full width after nut)
+                // String
                 <div class="absolute right-0 left-0 top-1/2 h-1 -translate-y-1/2 bg-slate-300"></div>
 
-                // Frets (sit on top of string)
+                // Frets
                 {(1..=num_frets)
                   .map(|fret_no| {
                     view! {
-                      <div class="flex justify-center items-center w-20 h-12 text-center bg-transparent border-r-4 border-slate-700">
+                      <div class="flex z-10 justify-center items-center w-20 h-12 text-center bg-transparent border-r-4 border-slate-700">
                         {string_no}- {fret_no}
                       </div>
                     }
@@ -35,7 +36,29 @@ pub fn Fretboard(
             </div>
           }
         })
-        .collect::<Vec<_>>()}
+        .collect::<Vec<_>>()} // Fret markers row (positioned below the frets)
+      <div class="flex justify-start w-full">
+        // Empty space for the nut
+        <div class="w-20 h-6"></div>
+        {(1..=num_frets)
+          .map(|fret_no| {
+            let has_marker = [3, 5, 7, 9, 15, 17, 19, 21].contains(&(fret_no % 12));
+            let is_double = fret_no % 12 == 0;
+
+            view! {
+              <div class="flex justify-center items-center w-20 h-6">
+                {if is_double {
+                  view! { <div class="w-3 h-3 bg-black rounded-full"></div> }
+                } else if has_marker {
+                  view! { <div class="w-2 h-2 rounded-full bg-slate-900"></div> }
+                } else {
+                  view! { <div class=""></div> }
+                }}
+              </div>
+            }
+          })
+          .collect::<Vec<_>>()}
+      </div>
     </div>
   }
 }
