@@ -1,10 +1,49 @@
 <!DOCTYPE html>
 <html>
-  <head></head>
-  <body></body>
-  <style>
-    .red {
-      color: red
-    }
-  </style>
+
+<head></head>
+
+<body></body>
+<style>
+  .fretboard {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px;
+    background-color: #222;
+    border-radius: 10px;
+    width: fit-content;
+  }
+
+  .string {
+    display: flex;
+    gap: 5px;
+  }
+
+  .fret {
+    width: 40px;
+    height: 40px;
+    background-color: #444;
+    color: white;
+    border: 1px solid #666;
+    border-radius: 5px;
+    font-size: 14px;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .fret:hover {
+    background-color: #666;
+  }
+
+  .fret:active {
+    background-color: #888;
+  }
+
+  p {
+    color: white;
+    margin-top: 10px;
+  }
+</style>
+
 </html>
