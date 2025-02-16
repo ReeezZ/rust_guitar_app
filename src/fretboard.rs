@@ -1,3 +1,4 @@
+use leptos::either::EitherOf3;
 use leptos::prelude::*;
 
 #[component]
@@ -46,13 +47,37 @@ pub fn Fretboard(
             let is_double = fret_no % 12 == 0;
 
             view! {
-              <div class="flex justify-center items-center w-20 h-6">
-                {if is_double {
-                  view! { <div class="w-3 h-3 bg-black rounded-full"></div> }
-                } else if has_marker {
-                  view! { <div class="w-2 h-2 rounded-full bg-slate-900"></div> }
-                } else {
-                  view! { <div class=""></div> }
+              <div class="flex relative justify-center items-center w-20 h-6">
+                {move || {
+                  if is_double {
+                    EitherOf3::A(
+                      // Return a Fragment for the two markers
+                      view! {
+                        <>
+                          <div class="absolute left-1/4 w-2 h-2 bg-black rounded-full"></div>
+                          <div class="absolute right-1/4 w-2 h-2 bg-black rounded-full"></div>
+                        </>
+                      },
+                    )
+                  } else if has_marker {
+                    EitherOf3::B(
+                      // Return a single marker as a Fragment (even if it's one element)
+                      view! {
+                        <>
+                          <div class="w-2 h-2 bg-black rounded-full"></div>
+                        </>
+                      },
+                    )
+                  } else {
+                    EitherOf3::C(
+                      // Return an empty div as a Fragment (even if it's empty)
+                      view! {
+                        <>
+                          <div class="w-0 h-0"></div>
+                        </>
+                      },
+                    )
+                  }
                 }}
               </div>
             }
