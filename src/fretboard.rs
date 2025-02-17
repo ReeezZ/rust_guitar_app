@@ -19,7 +19,8 @@ pub fn Fretboard(
             view! {
               <div class="flex relative justify-start items-center w-full">
                 // Nut (Thick first fret)
-                <div class="flex justify-center items-center w-16 h-12 font-bold text-center text-white bg-[#494949] border-r-8 border-slate-900">
+                // background: linear-gradient(0.25turn, #c9c9c9, #ffffff, #c9c9c9);
+                <div class="flex justify-center items-center w-16 h-12 font-bold text-center text-white bg-[linear-gradient(90deg,_#000_20%,_#333333_100%,_#a8a499)] border-r-8 [border-image:linear-gradient(0.25turn,#aaaaaa,#ffffff,#aaaaaa)_1_100%]">
                   <span>{string_no}- 0</span>
                 </div>
                 // Fretboard Section (Holds both string + frets)
