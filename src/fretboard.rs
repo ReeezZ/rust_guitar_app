@@ -11,41 +11,42 @@ pub fn Fretboard(
   #[prop(default = 15)] num_frets: u8,
 ) -> impl IntoView {
   view! {
-    <div class="p-6 pt-6 pb-2 mx-auto mt-12 bg-amber-500 rounded min-w-fit max-w-fit min-h-fit">
-    <div class="rounded bg-[#be975b] bg-fretboard ">
-      {(0..num_strings)
-        .map(|string_no| {
-          let string_strength = 2.0 + 0.65 * string_no as f64;
-          view! {
-            <div class="flex relative items-center w-full">
-              // Nut (Thick first fret)
-              <div class="flex justify-center items-center w-20 h-12 font-bold text-center text-white bg-gray-800 border-r-8 border-slate-900">
-              {string_no}- 0
-              </div>
-              // Fretboard Section (Holds both string + frets)
-              <div class="flex relative grow">
-                // String
-                <div
-                  class="absolute right-0 left-0 top-1/2 -translate-y-1/2 bg-slate-300"
-                  style:height=move || format!("{}px", string_strength)
-                ></div>
+    <div class="p-6 pt-6 pb-2 mx-auto mt-12 bg-amber-500 bg-opacity-70 rounded max-w-fit">
+      <div class="bg-[#be975b] bg-fretboard">
+        {(0..num_strings)
+          .map(|string_no| {
+            let string_strength = 2.0 + 0.65 * string_no as f64;
+            view! {
+              <div class="flex relative items-center w-full">
+                // Nut (Thick first fret)
+                <div class="flex justify-center items-center w-16 h-12 font-bold text-center text-white bg-gray-800 border-r-8 border-slate-900">
+                  <span>{string_no}- 0</span>
+                </div>
+                // Fretboard Section (Holds both string + frets)
+                <div class="flex relative grow">
+                  // String
+                  <div
+                    class="absolute right-0 left-0 top-1/2 z-20 -translate-y-1/2 bg-slate-300"
+                    style:height=move || format!("{}px", string_strength)
+                  ></div>
 
-                // Frets
-                {(1..=num_frets)
-                  .map(|fret_no| {
-                    view! {
-                      <div class="flex z-30 justify-center items-center w-20 h-12 text-center bg-transparent border-r-[3px] border-gray-800">
-                        {string_no}- {fret_no}
-                      </div>
-                    }
-                  })
-                  .collect::<Vec<_>>()}
+                  // Frets
+                  {(1..=num_frets)
+                    .map(|fret_no| {
+                      view! {
+                        <div class="relative flex flex-grow justify-center items-center h-12 text-center bg-transparent border-r-4 [border-image:linear-gradient(0.25turn,#7c7c7c,#bbbbbb,#7c7c7c)_1_60%]">
+                          <span class="z-20">{string_no}- {fret_no}</span>
+                        </div>
+                      }
+                    })
+                    .collect::<Vec<_>>()}
+                </div>
               </div>
-            </div>
-          }
-        })
-        .collect::<Vec<_>>()} // Fret markers row (positioned below the frets)
-        </div>
+            }
+          })
+          .collect::<Vec<_>>()}
+      // Fret markers row (positioned below the frets)
+      </div>
       <FretboardMarker num_frets=num_frets />
     </div>
   }
