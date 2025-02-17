@@ -7,7 +7,11 @@ module.exports = {
     },
   },
   theme: {
-    extend: {},
+    extend: {
+        backgroundImage: {
+          'fretboard': "url('/img/assets/wood-pattern.png')",
+        }
+    },
   },
   plugins: [],
 }
