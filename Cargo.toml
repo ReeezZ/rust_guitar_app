@@ -8,6 +8,10 @@ console_error_panic_hook = "0.1.7"
 leptos = { version = "0.7.7", features = ["csr"] }
 web-sys = { version = "0.3", features = ["console"] }
 
+[lib]
+name = "lib"
+path = "src/lib.rs"
+
 [[example]]
 name = "playground"
 path = "example/playground.rs"
