@@ -11,13 +11,13 @@ pub fn Fretboard(
   #[prop(default = 15)] num_frets: u8,
 ) -> impl IntoView {
   view! {
-    <div class="p-6 pt-6 pb-2 mx-auto mt-12 bg-amber-500 bg-opacity-70 rounded max-w-fit">
+    <div class="p-6 pt-6 pb-2 mx-16 mt-12 bg-amber-500 bg-opacity-70 rounded">
       <div class="bg-[#be975b] bg-fretboard">
         {(0..num_strings)
           .map(|string_no| {
             let string_strength = 2.0 + 0.65 * string_no as f64;
             view! {
-              <div class="flex relative items-center w-full">
+              <div class="flex relative justify-start items-center w-full">
                 // Nut (Thick first fret)
                 <div class="flex justify-center items-center w-16 h-12 font-bold text-center text-white bg-gray-800 border-r-8 border-slate-900">
                   <span>{string_no}- 0</span>
@@ -34,7 +34,7 @@ pub fn Fretboard(
                   {(1..=num_frets)
                     .map(|fret_no| {
                       view! {
-                        <div class="relative flex flex-grow justify-center items-center h-12 text-center bg-transparent border-r-4 [border-image:linear-gradient(0.25turn,#7c7c7c,#bbbbbb,#7c7c7c)_1_60%]">
+                        <div class="relative flex grow shrink w-full justify-center items-center h-12 text-center bg-transparent border-r-4 [border-image:linear-gradient(0.25turn,#7c7c7c,#bbbbbb,#7c7c7c)_1_60%]">
                           <span class="z-20">{string_no}- {fret_no}</span>
                         </div>
                       }
@@ -57,14 +57,14 @@ pub fn FretboardMarker(#[prop()] num_frets: u8) -> impl IntoView {
   view! {
     <div class="flex justify-start w-full">
       // Empty space for the nut
-      <div class="w-20 h-4"></div>
+      <div class="flex w-16 h-4 border-transparent border-r-[8px] "></div>
       {(1..=num_frets)
         .map(|fret_no| {
           let has_marker = [3, 5, 7, 9, 15, 17, 19, 21].contains(&(fret_no % 12));
           let is_double = fret_no % 12 == 0;
 
           view! {
-            <div class="flex relative justify-center items-center w-20 h-4">
+            <div class="flex relative justify-center flex-grow items-center h-4 border-r border-black">
               {move || {
                 if is_double {
                   EitherOf3::A(
@@ -76,7 +76,7 @@ pub fn FretboardMarker(#[prop()] num_frets: u8) -> impl IntoView {
                     },
                   )
                 } else if has_marker {
-                  EitherOf3::B(view! { <div class="w-2 h-2 bg-black rounded-full"></div> })
+                  EitherOf3::B(view! { <div class="absolute w-2 h-2 bg-black rounded-full"></div> })
                 } else {
                   EitherOf3::C(view! { <></> })
                 }
