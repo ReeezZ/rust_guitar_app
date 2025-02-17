@@ -12,14 +12,15 @@ pub fn Fretboard(
 ) -> impl IntoView {
   view! {
     <div class="p-6 pt-6 pb-2 mx-auto mt-12 bg-amber-500 rounded min-w-fit max-w-fit min-h-fit">
+    <div class="rounded bg-[#be975b] bg-fretboard ">
       {(0..num_strings)
         .map(|string_no| {
           let string_strength = 2.0 + 0.65 * string_no as f64;
           view! {
             <div class="flex relative items-center w-full">
               // Nut (Thick first fret)
-              <div class="flex justify-center items-center w-20 h-12 font-bold text-center text-white bg-gray-800 rounded-l border-r-8 border-slate-900">
-                {string_no}- 0
+              <div class="flex justify-center items-center w-20 h-12 font-bold text-center text-white bg-gray-800 border-r-8 border-slate-900">
+              {string_no}- 0
               </div>
               // Fretboard Section (Holds both string + frets)
               <div class="flex relative grow">
@@ -33,7 +34,7 @@ pub fn Fretboard(
                 {(1..=num_frets)
                   .map(|fret_no| {
                     view! {
-                      <div class="flex z-30 justify-center items-center w-20 h-12 text-center bg-transparent border-r-[3px] border-slate-700">
+                      <div class="flex z-30 justify-center items-center w-20 h-12 text-center bg-transparent border-r-[3px] border-gray-800">
                         {string_no}- {fret_no}
                       </div>
                     }
@@ -44,6 +45,7 @@ pub fn Fretboard(
           }
         })
         .collect::<Vec<_>>()} // Fret markers row (positioned below the frets)
+        </div>
       <FretboardMarker num_frets=num_frets />
     </div>
   }
