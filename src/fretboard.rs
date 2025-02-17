@@ -7,10 +7,10 @@ pub fn Fretboard(
   #[prop(default = 15)] num_frets: u8,
 ) -> impl IntoView {
   view! {
-    <div class="pt-6 pb-2 p-6 mt-12 mx-auto min-w-fit max-w-fit min-h-fit bg-amber-500">
+    <div class="pt-6 pb-2 p-6 mt-12 mx-auto min-w-fit max-w-fit min-h-fit bg-amber-500 rounded">
       {(0..num_strings)
         .map(|string_no| {
-          let string_strength = 2.0 + 0.5 * string_no as f64;
+          let string_strength = 2.0 + 0.65 * string_no as f64;
           view! {
             <div class="flex relative items-center w-full">
               // Nut (Thick first fret)
@@ -20,7 +20,6 @@ pub fn Fretboard(
               // Fretboard Section (Holds both string + frets)
               <div class="flex relative grow">
                 // String
-              
                   <div 
                     class="absolute right-0 left-0 top-1/2 -translate-y-1/2 bg-slate-300"
                     style:height = move || format!("{}px", string_strength)
@@ -30,7 +29,7 @@ pub fn Fretboard(
                 {(1..=num_frets)
                   .map(|fret_no| {
                     view! {
-                      <div class="flex justify-center items-center w-20 h-12 z-30 text-center bg-transparent border-r-4 border-slate-700">
+                      <div class=format!("flex justify-center items-center w-20 h-12 z-30 text-center bg-transparent border-r-[3px] border-slate-700")>
                         {string_no}- {fret_no}
                       </div>
                     }
