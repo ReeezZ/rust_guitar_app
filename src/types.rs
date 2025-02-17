@@ -16,10 +16,6 @@ pub enum Note {
 }
 
 impl Note {
-  fn iterator() -> impl Iterator<Item = Note> {
-    [Note::C, Note::CisOrDes, Note::D].into_iter()
-  }
-
   fn as_str(&self) -> &'static str {
     match self {
       Note::C => "C",
@@ -55,11 +51,11 @@ impl Note {
   }
 
   fn get_notes_from(start: Note, length: usize) -> Vec<Note> {
-    let all_notes = Self::get_all();
-    let start_index = all_notes.iter().position(|&note| note == start).unwrap();
+    let all_notes: Vec<Note> = Self::get_all();
+    let start_index: usize = all_notes.iter().position(|&note| note == start).unwrap();
 
     (0..length)
-      .map(|i| all_notes[(start_index + i) % 12])
+      .map(|i: usize| all_notes[(start_index + i) % 12])
       .collect()
   }
 }
