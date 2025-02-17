@@ -33,8 +33,8 @@ impl Note {
     }
   }
 
-  fn get_all() -> Vec<Note> {
-    vec![
+  fn iter() -> impl Iterator<Item = Note> {
+    [
       Note::C,
       Note::CisOrDes,
       Note::D,
@@ -48,14 +48,13 @@ impl Note {
       Note::AisOrB,
       Note::H,
     ]
+    .into_iter()
   }
 
-  fn get_notes_from(start: Note, length: usize) -> Vec<Note> {
-    let all_notes: Vec<Note> = Self::get_all();
-    let start_index: usize = all_notes.iter().position(|&note| note == start).unwrap();
+  fn get_notes_from(start: Note, length: usize) -> impl Iterator<Item = Note> {
+    let notes: Vec<Note> = Note::iter().collect();
+    let start_index: usize = notes.iter().position(|&n| n == start).unwrap();
 
-    (0..length)
-      .map(|i: usize| all_notes[(start_index + i) % 12])
-      .collect()
+    notes.into_iter().cycle().skip(start_index).take(length)
   }
 }
