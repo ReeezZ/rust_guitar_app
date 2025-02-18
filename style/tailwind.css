@@ -2,26 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
-  .trapezoid {
-      clip-path: polygon(0% 94%, 0% 6%, 100% 0%, 100% 100%); 
-      box-shadow: 10px 10px 15px rgba(0, 0, 0, 0.4);   
+  .trapezoid-shadow {
+    filter: drop-shadow(0px 3px 8px rgba(0, 0, 0, 0.8));
   }
 
-  .trapezoid .string:nth-child(1) {
+  .trapezoid {
+      clip-path: polygon(0% 94%, 0% 6%, 100% 0%, 100% 100%); 
+  }
+
+  .trapezoid .tilt:nth-child(1) {
     transform: rotate(-0.65deg);
   }
-  .trapezoid .string:nth-child(2) {
+  .trapezoid .tilt:nth-child(2) {
     transform: rotate(-0.45deg);
   }
-  .trapezoid .string:nth-child(3) {
+  .trapezoid .tilt:nth-child(3) {
     transform: rotate(-0.2deg);
   }
-  .trapezoid .string:nth-child(4) {
+  .trapezoid .tilt:nth-child(4) {
     transform: rotate(0.2deg);
   }
-  .trapezoid .string:nth-child(5) {
+  .trapezoid .tilt:nth-child(5) {
     transform: rotate(0.45deg);
   }
-  .trapezoid .string:nth-child(6) {
+  .trapezoid .tilt:nth-child(6) {
     transform: rotate(0.65deg);
   }
