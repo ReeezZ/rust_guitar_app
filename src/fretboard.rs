@@ -12,11 +12,11 @@ pub fn Fretboard(
 ) -> impl IntoView {
   view! {
     <div class="relative py-10 px-14 bg-cyan-700">
-    <div class="trapezoid-shadow flex justify-center items-center">
-    // fretboard end 
-    <div class="w-10 absolute -right-5 h-[288px] trapezoid-end bg-[#be975b] bg-fretboard">
-      <div class="absolute w-1 h-[288px] right-4 bg-[linear-gradient(90deg,_#bbbbbb_40%,_#444433_100%,_#48a499)] z-10"></div>
-    </div>
+      <div class="flex justify-center items-center trapezoid-shadow">
+        // fretboard end
+        <div class="absolute -right-5 w-10 h-[288px] trapezoid-end bg-[#be975b] bg-fretboard">
+          <div class="absolute right-4 z-10 w-1 h-[288px] bg-[linear-gradient(90deg,_#bbbbbb_40%,_#444433_100%,_#48a499)]"></div>
+        </div>
         <div class="relative flex-col trapezoid grow bg-[#be975b] bg-fretboard">
           {(0..num_strings)
             .map(|string_no| {
@@ -25,7 +25,7 @@ pub fn Fretboard(
                 <div class="flex relative justify-start items-center w-full tilt">
                   // Nut (Thick first fret)
                   <div class="relative z-30 justify-center items-center w-8 h-6 border-r-8 border-transparent">
-                    <span class="transition-transform hover:scale-110 active:scale-[98%] absolute w-12 font-bold text-center text-white cursor-pointer drop-shadow-[0_2px_2px_rgba(0,0,0,1)]">
+                    <span class="absolute w-12 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
                       {string_no}-0
                     </span>
                   </div>
@@ -42,7 +42,7 @@ pub fn Fretboard(
                       .map(|fret_no| {
                         view! {
                           <div class="flex relative justify-center items-center w-full h-12 text-center bg-transparent grow fretbar-container">
-                            <span class="transition-transform hover:scale-110 active:scale-[98%] z-20 font-bold text-center text-white cursor-pointer drop-shadow-[0_2px_2px_rgba(0,0,0,1)]">
+                            <span class="z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
                               {string_no}- {fret_no}
                             </span>
                           </div>
@@ -73,7 +73,7 @@ pub fn FretboardDetails(#[prop()] num_frets: u8) -> impl IntoView {
           let is_double = fret_no % 12 == 0;
 
           view! {
-            <div class="flex relative grow justify-center items-center h-4">
+            <div class="flex relative justify-center items-center h-4 grow">
               {move || {
                 if is_double {
                   EitherOf3::A(
@@ -102,8 +102,7 @@ pub fn FretboardDetails(#[prop()] num_frets: u8) -> impl IntoView {
                     },
                   )
                 }
-              }
-            }
+              }}
             </div>
           }
         })
