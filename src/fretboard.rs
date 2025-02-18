@@ -20,14 +20,14 @@ pub fn Fretboard(
               <div class="flex relative justify-start items-center w-full string">
                 // Nut (Thick first fret)
                 // background: linear-gradient(0.25turn, #c9c9c9, #ffffff, #c9c9c9);
-                <div class="justify-center items-center w-14 font-bold text-center text-white border-r-8 border-transparent">
-                  <span>{string_no}- 0</span>
+                <div class="justify-center items-center z-30 w-14 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] font-bold text-center text-white border-r-8 border-transparent">
+                  <span>{string_no}-0</span>
                 </div>
                 // Fretboard Section (Holds both string + frets)
                 <div class="flex relative grow">
                   // String
                   <div
-                    class="absolute right-0 left-0 top-1/2 z-20 -translate-y-1/2 bg-[repeating-linear-gradient(45deg,_#dddddd,_#555555_2px,_#333333_2px)]"
+                    class="absolute drop-shadow-[0_2px_2px_rgba(0,0,0,0.6)] right-0 -left-20 top-1/2 z-20 -translate-y-1/2 bg-[repeating-linear-gradient(45deg,_#dddddd,_#555555_2px,_#333333_2px)]"
                     style:height=move || format!("{}px", string_strength)
                   ></div>
 
@@ -37,7 +37,7 @@ pub fn Fretboard(
                       view! {
                         // bg-[linear-gradient(90deg,_#bbbbbb_40%,_#444433_100%,_#48a499)]
                         <div class="flex relative justify-center items-center w-full h-12 text-center bg-transparent grow fretbar-container">
-                          <span class="z-20">{string_no}- {fret_no}</span>
+                          <span class="drop-shadow-[0_2px_2px_rgba(0,0,0,1)] font-bold text-center text-white z-20 cursor-pointer">{string_no}- {fret_no}</span>
                         // <div class="absolute w-1 h-14 left-1 fretbar border-[1px] border-black"></div>
                         </div>
                       }
@@ -50,8 +50,6 @@ pub fn Fretboard(
           .collect::<Vec<_>>()} // Fret markers row (positioned below the frets)
         <FretboardMarker num_frets=num_frets />
       </div>
-      // shadow
-      <div class="z-50 w-full h-1 shadow-2xl -translate-y-4 rotate-[0.65deg]"></div>
     </div>
   }
 }
@@ -76,7 +74,7 @@ pub fn FretboardMarker(#[prop()] num_frets: u8) -> impl IntoView {
                       <>
                         <div class="absolute w-4 h-4 rounded-full border translate-y-12 border-[#a1a09f] bg-[linear-gradient(152deg,_#fff_20%,_#a8a499_100%,_#a8a499)]"></div>
                         <div class="absolute w-4 h-4 rounded-full border -translate-y-12 border-[#a1a09f] bg-[linear-gradient(152deg,_#fff_20%,_#a8a499_100%,_#a8a499)]"></div>
-                        <div class="absolute left-full w-1 h-80 bg-[linear-gradient(90deg,_#bbbbbb_40%,_#444433_100%,_#48a499)]"></div>
+                        <div class="absolute -z-10 left-full w-1 h-80 bg-[linear-gradient(90deg,_#bbbbbb_40%,_#444433_100%,_#48a499)]"></div>
                       </>
                     },
                   )
@@ -84,14 +82,14 @@ pub fn FretboardMarker(#[prop()] num_frets: u8) -> impl IntoView {
                   EitherOf3::B(
                     view! {
                       <div class="absolute w-4 h-4 rounded-full border border-[#a1a09f] bg-[linear-gradient(152deg,_#fff_20%,_#a8a499_100%,_#a8a499)]"></div>
-                      <div class="absolute left-full w-1 h-80 bg-[linear-gradient(90deg,_#bbbbbb_40%,_#444433_100%,_#48a499)]"></div>
+                      <div class="absolute -z-10 left-full w-1 h-80 bg-[linear-gradient(90deg,_#bbbbbb_40%,_#444433_100%,_#48a499)]"></div>
                     },
                   )
                 } else {
                   EitherOf3::C(
                     view! {
                       <>
-                        <div class="absolute left-full w-1 h-80 bg-[linear-gradient(90deg,_#bbbbbb_40%,_#444433_100%,_#48a499)]"></div>
+                        <div class="absolute -z-10 left-full w-1 h-80 bg-[linear-gradient(90deg,_#bbbbbb_40%,_#444433_100%,_#48a499)]"></div>
                       </>
                     },
                   )
