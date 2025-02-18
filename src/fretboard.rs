@@ -11,8 +11,12 @@ pub fn Fretboard(
   #[prop(default = 15)] num_frets: u8,
 ) -> impl IntoView {
   view! {
-    <div class="relative py-10 px-14 w-screen bg-cyan-700 rounded">
-      <div class="trapezoid-shadow">
+    <div class="relative py-10 px-14 bg-cyan-700">
+    <div class="trapezoid-shadow flex justify-center items-center">
+    // fretboard end 
+    <div class="w-10 absolute -right-5 h-[288px] trapezoid-end bg-[#be975b] bg-fretboard">
+      <div class="absolute w-1 h-[288px] right-4 bg-[linear-gradient(90deg,_#bbbbbb_40%,_#444433_100%,_#48a499)] z-10"></div>
+    </div>
         <div class="relative flex-col trapezoid grow bg-[#be975b] bg-fretboard">
           {(0..num_strings)
             .map(|string_no| {
@@ -21,7 +25,7 @@ pub fn Fretboard(
                 <div class="flex relative justify-start items-center w-full tilt">
                   // Nut (Thick first fret)
                   <div class="relative z-30 justify-center items-center w-8 h-6 border-r-8 border-transparent">
-                    <span class="absolute w-12 font-bold text-center text-white cursor-pointer drop-shadow-[0_2px_2px_rgba(0,0,0,1)]">
+                    <span class="transition-transform hover:scale-110 active:scale-[98%] absolute w-12 font-bold text-center text-white cursor-pointer drop-shadow-[0_2px_2px_rgba(0,0,0,1)]">
                       {string_no}-0
                     </span>
                   </div>
@@ -37,12 +41,10 @@ pub fn Fretboard(
                     {(1..=num_frets)
                       .map(|fret_no| {
                         view! {
-                          // bg-[linear-gradient(90deg,_#bbbbbb_40%,_#444433_100%,_#48a499)]
                           <div class="flex relative justify-center items-center w-full h-12 text-center bg-transparent grow fretbar-container">
-                            <span class="z-20 font-bold text-center text-white cursor-pointer drop-shadow-[0_2px_2px_rgba(0,0,0,1)]">
+                            <span class="transition-transform hover:scale-110 active:scale-[98%] z-20 font-bold text-center text-white cursor-pointer drop-shadow-[0_2px_2px_rgba(0,0,0,1)]">
                               {string_no}- {fret_no}
                             </span>
-                          // <div class="absolute w-1 h-14 left-1 fretbar border-[1px] border-black"></div>
                           </div>
                         }
                       })
@@ -62,8 +64,8 @@ pub fn Fretboard(
 #[component]
 pub fn FretboardDetails(#[prop()] num_frets: u8) -> impl IntoView {
   view! {
-    <div class="flex absolute justify-start w-full top-[48%]">
-      // Empty space for the nut
+    <div class="flex absolute justify-start w-full top-[48%] -z-10">
+      // First fret/String guide details
       <div class="flex relative -top-32 w-8 h-80 -z-10 bg-[linear-gradient(90deg,_#000_20%,_#333333_100%,_#a8a499)] border-r-[8px] [border-image:linear-gradient(0.25turn,#aaaaaa,#ffffff,#aaaaaa)_1_100%]"></div>
       {(1..=num_frets)
         .map(|fret_no| {
@@ -71,12 +73,13 @@ pub fn FretboardDetails(#[prop()] num_frets: u8) -> impl IntoView {
           let is_double = fret_no % 12 == 0;
 
           view! {
-            <div class="flex relative flex-grow justify-center items-center h-4">
+            <div class="flex relative grow justify-center items-center h-4">
               {move || {
                 if is_double {
                   EitherOf3::A(
                     view! {
                       <>
+                        // is_double
                         <div class="absolute w-4 h-4 rounded-full border translate-y-12 border-[#a1a09f] bg-[linear-gradient(152deg,_#fff_20%,_#a8a499_100%,_#a8a499)]"></div>
                         <div class="absolute w-4 h-4 rounded-full border -translate-y-12 border-[#a1a09f] bg-[linear-gradient(152deg,_#fff_20%,_#a8a499_100%,_#a8a499)]"></div>
                         <div class="absolute left-full w-1 h-80 -z-10 bg-[linear-gradient(90deg,_#bbbbbb_40%,_#444433_100%,_#48a499)]"></div>
@@ -99,7 +102,8 @@ pub fn FretboardDetails(#[prop()] num_frets: u8) -> impl IntoView {
                     },
                   )
                 }
-              }}
+              }
+            }
             </div>
           }
         })
