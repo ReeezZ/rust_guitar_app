@@ -1,3 +1,5 @@
+// TODO split into multiple files
+
 use std::ops::Index;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -44,6 +46,7 @@ pub enum ScaleDegree {
   Seventh,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum ScaleType {
   Major,
   Minor,
@@ -53,31 +56,40 @@ pub enum ScaleType {
   MinorBlues,
 }
 
+// TODO add more scales
+// TODO consider non septa scales
+// TODO No copy, contains a Vec, is this lightweight enough for a scale type?
+#[derive(Debug, Clone, PartialEq)]
 pub struct Scale {
   root_note: Note,
   scale_type: ScaleType,
+  notes: Vec<Note>,
 }
 
 impl Scale {
   pub fn new(root_note: Note, scale_type: ScaleType) -> Self {
+    let notes = Self::get_notes(root_note, scale_type);
     Scale {
       root_note,
       scale_type,
+      notes,
     }
   }
 
-  fn get_notes(&self) -> impl Iterator<Item = Note> {
+  fn get_notes(root_note: Note, scale_type: ScaleType) -> Vec<Note> {
     let notes = match scale_type {
+      // TODO open closed principle violoation
       ScaleType::Major => Self::generate_major_scale(root_note),
       ScaleType::Minor => Self::generate_minor_scale(root_note),
       _ => panic!("Scale type not implemented"),
     };
 
-    notes.into_iter()
+    notes
   }
 
   fn generate_major_scale(root_note: Note) -> Vec<Note> {
     let intervals = [
+      // TODO using intervals might be cleaner
       0,  // Unison
       2,  // Major Second
       4,  // Major Third
@@ -102,13 +114,16 @@ impl Scale {
     Self::generate_scale(root_note, &intervals)
   }
 
-  fn generate_scale(root_note: Note, intervals: &[usize]) -> impl Iterator<Item = Note> {
+  fn generate_scale(root_note: Note, intervals: &[usize]) -> Vec<Note> {
     let all_notes = Note::all_notes();
     let start_index = all_notes.iter().position(|&n| n == root_note).unwrap();
-    intervals.iter().map(move |&interval| {
-      let index = (start_index + interval) % all_notes.len();
-      all_notes[index]
-    })
+    intervals
+      .iter()
+      .map(move |&interval| {
+        let index = (start_index + interval) % all_notes.len();
+        all_notes[index]
+      })
+      .collect()
   }
 
   fn get_note_by_degree(&self, degree: ScaleDegree) -> &Note {
@@ -183,6 +198,8 @@ fn fun_name(interval: Interval) -> usize {
 #[cfg(test)]
 mod tests {
   use super::*;
+
+  // TODO add tests
 
   #[test]
   fn test_major_scale() {
