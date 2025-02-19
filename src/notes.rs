@@ -120,6 +120,14 @@ impl Scale {
   }
 }
 
+impl Index<ScaleDegree> for Scale {
+  type Output = Note;
+
+  fn index(&self, index: ScaleDegree) -> &Self::Output {
+    &self.get_note_by_degree(index)
+  }
+}
+
 impl Note {
   fn all_notes() -> &'static [Note; 12] {
     static ALL_NOTES: [Note; 12] = [
@@ -149,22 +157,22 @@ impl Note {
 }
 
 fn fun_name(interval: Interval) -> usize {
-    let interval_steps = match interval {
-      Interval::Unison => 0,
-      Interval::MinorSecond => 1,
-      Interval::MajorSecond => 2,
-      Interval::MinorThird => 3,
-      Interval::MajorThird => 4,
-      Interval::PerfectFourth => 5,
-      Interval::Tritone => 6,
-      Interval::PerfectFifth => 7,
-      Interval::MinorSixth => 8,
-      Interval::MajorSixth => 9,
-      Interval::MinorSeventh => 10,
-      Interval::MajorSeventh => 11,
-      Interval::Octave => 12,
-    };
-    interval_steps
+  let interval_steps = match interval {
+    Interval::Unison => 0,
+    Interval::MinorSecond => 1,
+    Interval::MajorSecond => 2,
+    Interval::MinorThird => 3,
+    Interval::MajorThird => 4,
+    Interval::PerfectFourth => 5,
+    Interval::Tritone => 6,
+    Interval::PerfectFifth => 7,
+    Interval::MinorSixth => 8,
+    Interval::MajorSixth => 9,
+    Interval::MinorSeventh => 10,
+    Interval::MajorSeventh => 11,
+    Interval::Octave => 12,
+  };
+  interval_steps
 }
 
 #[cfg(test)]
