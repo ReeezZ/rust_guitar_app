@@ -106,7 +106,7 @@ impl Scale {
       .collect()
   }
 
-  pub fn get_note_by_degree(&self, degree: ScaleDegree) -> Note {
+  fn get_note_by_degree(&self, degree: ScaleDegree) -> &Note {
     let index = match degree {
       ScaleDegree::First => 0,
       ScaleDegree::Second => 1,
@@ -116,7 +116,7 @@ impl Scale {
       ScaleDegree::Sixth => 5,
       ScaleDegree::Seventh => 6,
     };
-    self.notes[index]
+    &self.notes[index]
   }
 }
 
@@ -147,12 +147,12 @@ impl Note {
     &ALL_NOTES
   }
 
-  pub fn get_note_by_interval(&self, interval: Interval) -> Note {
+  pub fn get_note_by_interval(&self, interval: Interval) -> &Note {
     let all_notes = Note::all_notes();
     let start_index = all_notes.iter().position(|&n| n == *self).unwrap();
     let interval_steps = fun_name(interval);
     let index = (start_index + interval_steps) % all_notes.len();
-    all_notes[index]
+    &all_notes[index]
   }
 }
 
@@ -183,34 +183,27 @@ mod tests {
   fn test_major_scale() {
     let c_major = Scale::new(Note::C, ScaleType::Major);
     assert_eq!(c_major[ScaleDegree::First], Note::C);
-    assert_eq!(c_major.get_note_by_degree(ScaleDegree::Third), Note::E);
+    assert_eq!(c_major[ScaleDegree::Third], Note::E);
   }
 
   #[test]
   fn test_minor_scale() {
     let a_minor = Scale::new(Note::A, ScaleType::Minor);
-    assert_eq!(a_minor.get_note_by_degree(ScaleDegree::First), Note::A);
-    assert_eq!(a_minor.get_note_by_degree(ScaleDegree::Third), Note::C);
+    assert_eq!(a_minor[ScaleDegree::First], Note::A);
+    assert_eq!(a_minor[ScaleDegree::Third], Note::C);
 
     let a_minor = Scale::new(Note::A, ScaleType::Major);
-    assert_eq!(a_minor.get_note_by_degree(ScaleDegree::First), Note::A);
-    assert_eq!(
-      a_minor.get_note_by_degree(ScaleDegree::Third),
-      Note::CisOrDes
-    );
+    assert_eq!(a_minor[ScaleDegree::First], Note::A);
+    assert_eq!(a_minor[ScaleDegree::Third], Note::CisOrDes);
   }
 
   #[test]
   fn test_note_by_interval() {
-    assert_eq!(Note::C.get_note_by_interval(Interval::MajorThird), Note::E);
-    assert_eq!(Note::A.get_note_by_interval(Interval::MinorThird), Note::C);
+    assert_eq!(*Note::C.get_note_by_interval(Interval::MajorThird), Note::E);
+    assert_eq!(*Note::A.get_note_by_interval(Interval::MinorThird), Note::C);
     assert_eq!(
-      Note::A.get_note_by_interval(Interval::MajorThird),
+      *Note::A.get_note_by_interval(Interval::MajorThird),
       Note::CisOrDes
     );
   }
-}
-
-fn main() {
-  println!("Hello Leptos");
 }

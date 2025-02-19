@@ -1,3 +1,4 @@
-#![allow(dead_code)]
-
 pub mod types;
+
+// todo remove
+pub mod notes;
