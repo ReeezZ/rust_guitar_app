@@ -55,17 +55,25 @@ pub enum ScaleType {
 
 pub struct Scale {
   root_note: Note,
-  notes: Vec<Note>,
+  scale_type: ScaleType,
 }
 
 impl Scale {
   pub fn new(root_note: Note, scale_type: ScaleType) -> Self {
+    Scale {
+      root_note,
+      scale_type,
+    }
+  }
+
+  fn get_notes(&self) -> impl Iterator<Item = Note> {
     let notes = match scale_type {
       ScaleType::Major => Self::generate_major_scale(root_note),
       ScaleType::Minor => Self::generate_minor_scale(root_note),
       _ => panic!("Scale type not implemented"),
     };
-    Scale { root_note, notes }
+
+    notes.into_iter()
   }
 
   fn generate_major_scale(root_note: Note) -> Vec<Note> {
@@ -94,16 +102,13 @@ impl Scale {
     Self::generate_scale(root_note, &intervals)
   }
 
-  fn generate_scale(root_note: Note, intervals: &[usize]) -> Vec<Note> {
+  fn generate_scale(root_note: Note, intervals: &[usize]) -> impl Iterator<Item = Note> {
     let all_notes = Note::all_notes();
     let start_index = all_notes.iter().position(|&n| n == root_note).unwrap();
-    intervals
-      .iter()
-      .map(|&interval| {
-        let index = (start_index + interval) % all_notes.len();
-        all_notes[index]
-      })
-      .collect()
+    intervals.iter().map(move |&interval| {
+      let index = (start_index + interval) % all_notes.len();
+      all_notes[index]
+    })
   }
 
   fn get_note_by_degree(&self, degree: ScaleDegree) -> &Note {
@@ -157,7 +162,7 @@ impl Note {
 }
 
 fn fun_name(interval: Interval) -> usize {
-  let interval_steps = match interval {
+  let half_tone_steps = match interval {
     Interval::Unison => 0,
     Interval::MinorSecond => 1,
     Interval::MajorSecond => 2,
@@ -172,7 +177,7 @@ fn fun_name(interval: Interval) -> usize {
     Interval::MajorSeventh => 11,
     Interval::Octave => 12,
   };
-  interval_steps
+  half_tone_steps
 }
 
 #[cfg(test)]
