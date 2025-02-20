@@ -1,7 +1,6 @@
 use leptos::{prelude::ElementChild, *};
-pub mod notes;
-pub mod types;
 
+mod music;
 mod components;
 
 use crate::components::fretboard::Fretboard;
