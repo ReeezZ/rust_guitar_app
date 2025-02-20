@@ -11,10 +11,6 @@ leptos_meta = { version = "0.7" }
 leptos_router = { version = "0.7" }
 leptos-use = "0.15.6"
 
-# [lib]
-# name = "lib"
-# path = "src/lib.rs"
-
 [[example]]
 name = "playground"
 path = "example/playground.rs"
