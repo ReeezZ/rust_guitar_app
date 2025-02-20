@@ -1074,19 +1074,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "leptos_stuff"
-version = "0.1.0"
-dependencies = [
- "codee 0.3.0",
- "console_error_panic_hook",
- "leptos",
- "leptos-use",
- "leptos_meta",
- "leptos_router",
- "web-sys",
-]
-
-[[package]]
 name = "libc"
 version = "0.2.169"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1499,6 +1486,18 @@ dependencies = [
  "syn",
  "syn_derive",
  "thiserror 2.0.11",
+]
+
+[[package]]
+name = "rust_guitar_app"
+version = "0.1.0"
+dependencies = [
+ "console_error_panic_hook",
+ "leptos",
+ "leptos-use",
+ "leptos_meta",
+ "leptos_router",
+ "web-sys",
 ]
 
 [[package]]

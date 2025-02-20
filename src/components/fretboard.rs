@@ -1,9 +1,8 @@
 use leptos::either::EitherOf3;
 use leptos::prelude::*;
-use lib::types::Note;
 
-#[component]
-pub fn FretNoteButton(#[prop()] _note: Note) -> impl IntoView {}
+// #[component]
+// pub fn FretNoteButton(#[prop()] _note: Note) -> impl IntoView {}
 
 #[component]
 pub fn Fretboard(

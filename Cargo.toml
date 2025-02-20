@@ -1,5 +1,5 @@
 [package]
-name = "leptos_stuff"
+name = "rust_guitar_app"
 version = "0.1.0"
 edition = "2021"
 
@@ -10,12 +10,10 @@ leptos = { version = "0.7.7", features = ["csr"] }
 leptos_meta = { version = "0.7" }
 leptos_router = { version = "0.7" }
 leptos-use = "0.15.6"
-codee = { version = "*" }
 
-
-[lib]
-name = "lib"
-path = "src/lib.rs"
+# [lib]
+# name = "lib"
+# path = "src/lib.rs"
 
 [[example]]
 name = "playground"
