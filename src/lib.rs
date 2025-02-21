@@ -5,10 +5,9 @@ use leptos_router::{components::*, path};
 mod components;
 mod pages;
 
-use crate::components::fretboard::Fretboard;
 use crate::components::navbar::Navbar;
-use crate::pages::home::Home;
 use crate::pages::not_found::NotFound;
+use crate::pages::{guitar_v1::GuitarV1, home::Home};
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -26,17 +25,7 @@ pub fn App() -> impl IntoView {
       <main>
         <Routes fallback=|| view! { <NotFound /> }>
           <Route path=path!("/") view=Home />
-          <Route
-            path=path!("/guitar_v1")
-            view= || view! {
-              <div>
-                <h1 class="py-12 text-6xl font-bold text-center text-primary-rev trans">
-                  "Gitarren Griffbrett"
-                </h1>
-                <Fretboard num_frets=24 num_strings=6 />
-              </div>
-            }
-          />
+          <Route path=path!("/guitar_v1") view=GuitarV1 />
         </Routes>
       </main>
     </Router>
