@@ -1492,6 +1492,7 @@ dependencies = [
 name = "rust_guitar_app"
 version = "0.1.0"
 dependencies = [
+ "codee 0.2.0",
  "console_error_panic_hook",
  "leptos",
  "leptos-use",
