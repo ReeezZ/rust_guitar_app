@@ -37,7 +37,7 @@ fn FretboardString(string_no: u8, num_frets: u8) -> impl IntoView {
       // Nut (Thick first fret)
       <div class="relative z-30 justify-center items-center w-8 h-6 border-r-8 border-transparent">
         <span class="absolute w-12 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
-          {string_no}-0
+          {format!("{}-0", string_no)}
         </span>
       </div>
       // Fretboard Section (Holds both string + frets)
@@ -54,7 +54,7 @@ fn FretboardString(string_no: u8, num_frets: u8) -> impl IntoView {
             view! {
               <div class="flex relative justify-center items-center w-full h-12 text-center bg-transparent grow fretbar-container">
                 <span class="z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
-                  {string_no}- {fret_no}
+                  {format!("{}-{}", string_no, fret_no)}
                 </span>
               </div>
             }
