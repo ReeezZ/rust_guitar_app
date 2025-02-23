@@ -1,6 +1,8 @@
 use leptos::either::EitherOf3;
 use leptos::prelude::*;
 
+use crate::music::notes::Note;
+
 // #[component]
 // pub fn FretNoteButton(#[prop()] _note: Note) -> impl IntoView {}
 
@@ -9,6 +11,9 @@ pub fn Fretboard(
   #[prop(default = 6)] num_strings: u8,
   #[prop(default = 15)] num_frets: u8,
 ) -> impl IntoView {
+  let (note_in_scale, set_note_in_scale) = signal(move |note: Note| -> bool { true });
+  let (note_to_string, set_note_to_string) =
+    signal(move |note: Note| -> String { note.to_string() });
   view! {
     <div class="relative py-10 px-14 bg-cyan-700">
       <div class="flex justify-center items-center trapezoid-shadow">
@@ -19,7 +24,25 @@ pub fn Fretboard(
         <div class="relative flex-col trapezoid grow bg-[#be975b] bg-fretboard">
           {(0..num_strings)
             .map(|string_no| {
-              view! { <FretboardString string_no=string_no num_frets=num_frets /> }
+              let string_note = match string_no {
+                0 => Note::E,
+                1 => Note::A,
+                2 => Note::D,
+                3 => Note::G,
+                4 => Note::H,
+                5 => Note::E,
+                _ => Note::E,
+              };
+
+              view! {
+                <FretboardString
+                  string_no=string_no
+                  num_frets=num_frets
+                  string_note=string_note
+                  filter=Box::new(note_in_scale.get())
+                  note_to_string=Box::new(note_to_string.get())
+                />
+              }
             })
             .collect::<Vec<_>>()} // Fret markers row (positioned below the frets)
           <FretboardDetails num_frets=num_frets />
@@ -29,32 +52,52 @@ pub fn Fretboard(
   }
 }
 
+fn note_for_fret(
+  string_note: Note,
+  fret_no: u8,
+  filter: Box<dyn Fn(Note) -> bool>,
+  note_to_string: Box<dyn Fn(Note) -> String>,
+) -> Option<String>
+{
+  let note = string_note.add_steps(fret_no as usize);
+  if filter(note) {
+    Some(note_to_string(note))
+  } else {
+    None
+  }
+}
+
 #[component]
-fn FretboardString(string_no: u8, num_frets: u8) -> impl IntoView {
+fn FretboardString(
+  #[prop()] string_no: u8,
+  #[prop()] num_frets: u8,
+  #[prop()] string_note: Note, // TODO change to Note trait, keep the depency clean
+  filter: Box<dyn Fn(Note) -> bool>,
+  note_to_string: Box<dyn Fn(Note) -> String>,
+) -> impl IntoView {
   let string_strength = 2.0 + 0.5 * string_no as f64;
+
   view! {
     <div class="flex relative justify-start items-center w-full tilt">
-      // Nut (Thick first fret)
       <div class="relative z-30 justify-center items-center w-8 h-6 border-r-8 border-transparent">
         <span class="absolute w-12 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
           {format!("{}-0", string_no)}
         </span>
       </div>
-      // Fretboard Section (Holds both string + frets)
+
       <div class="flex relative grow">
-        // String
         <div
           class="absolute right-0 -left-60 top-1/2 z-20 -translate-y-1/2 drop-shadow-[0_2px_2px_rgba(0,0,0,0.6)] bg-[repeating-linear-gradient(45deg,_#dddddd,_#555555_2px,_#333333_2px)]"
           style:height=move || format!("{}px", string_strength)
         ></div>
 
-        // Frets
         {(1..=num_frets)
           .map(|fret_no| {
+            let note = note_for_fret(string_note, fret_no, filter, note_to_string);
             view! {
               <div class="flex relative justify-center items-center w-full h-12 text-center bg-transparent grow fretbar-container">
                 <span class="z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
-                  {format!("{}-{}", string_no, fret_no)}
+                  {note.map_or("".to_string(), |n| n.to_string())}
                 </span>
               </div>
             }

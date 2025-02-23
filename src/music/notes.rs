@@ -1,3 +1,5 @@
+use std::fmt;
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Note {
   C,
@@ -47,6 +49,26 @@ impl Note {
     let interval_steps = interval.half_tone_steps();
     let index = (start_index + interval_steps) % all_notes.len();
     all_notes[index]
+  }
+}
+
+impl fmt::Display for Note {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    let note_str = match self {
+      Note::C => "C",
+      Note::CisOrDes => "C#/Db",
+      Note::D => "D",
+      Note::DisOrEs => "D#/Eb",
+      Note::E => "E",
+      Note::F => "F",
+      Note::FisOrGes => "F#/Gb",
+      Note::G => "G",
+      Note::GisOrAs => "G#/Ab",
+      Note::A => "A",
+      Note::AisOrB => "A#/Bb",
+      Note::H => "H",
+    };
+    write!(f, "{}", note_str)
   }
 }
 
