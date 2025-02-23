@@ -1,5 +1,3 @@
-// TODO split into multiple files
-
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Note {
   C,
@@ -35,7 +33,15 @@ impl Note {
     &ALL_NOTES
   }
 
-  pub fn get_note_by_interval(&self, interval: Interval) -> Note {
+  /// Returns the note that is `steps` half-tone steps away from the current note.
+  pub fn add_steps(&self, steps: usize) -> Note {
+    let all_notes = Note::all_notes();
+    let index = all_notes.iter().position(|&n| n == *self).unwrap();
+    let new_index = (index + steps) % all_notes.len();
+    all_notes[new_index]
+  }
+
+  pub fn add_interval(&self, interval: Interval) -> Note {
     let all_notes = Note::all_notes();
     let start_index = all_notes.iter().position(|&n| n == *self).unwrap();
     let interval_steps = interval.half_tone_steps();
@@ -62,10 +68,8 @@ pub enum Interval {
 }
 
 impl Interval {
-  pub fn of(note: Note) -> Note {
-    match note {
-      // TODO: Implement this
-    }
+  pub fn of(self, note: Note) -> Note {
+    note.add_interval(self)
   }
 
   fn half_tone_steps(self) -> usize {
@@ -92,19 +96,36 @@ mod tests {
   use super::*;
 
   #[test]
-  fn test_interval_half_tone_steps() {
-    assert_eq!(Interval::Unison.half_tone_steps(), 0);
-    assert_eq!(Interval::MinorSecond.half_tone_steps(), 1);
-    assert_eq!(Interval::MajorSecond.half_tone_steps(), 2);
-    assert_eq!(Interval::MinorThird.half_tone_steps(), 3);
-    assert_eq!(Interval::MajorThird.half_tone_steps(), 4);
-    assert_eq!(Interval::PerfectFourth.half_tone_steps(), 5);
-    assert_eq!(Interval::Tritone.half_tone_steps(), 6);
-    assert_eq!(Interval::PerfectFifth.half_tone_steps(), 7);
-    assert_eq!(Interval::MinorSixth.half_tone_steps(), 8);
-    assert_eq!(Interval::MajorSixth.half_tone_steps(), 9);
-    assert_eq!(Interval::MinorSeventh.half_tone_steps(), 10);
-    assert_eq!(Interval::MajorSeventh.half_tone_steps(), 11);
-    assert_eq!(Interval::Octave.half_tone_steps(), 12);
+  fn test_intervals_of_c() {
+    assert_eq!(Interval::Unison.of(Note::C), Note::C);
+    assert_eq!(Interval::MinorSecond.of(Note::C), Note::CisOrDes);
+    assert_eq!(Interval::MajorSecond.of(Note::C), Note::D);
+    assert_eq!(Interval::MinorThird.of(Note::C), Note::DisOrEs);
+    assert_eq!(Interval::MajorThird.of(Note::C), Note::E);
+    assert_eq!(Interval::PerfectFourth.of(Note::C), Note::F);
+    assert_eq!(Interval::Tritone.of(Note::C), Note::FisOrGes);
+    assert_eq!(Interval::PerfectFifth.of(Note::C), Note::G);
+    assert_eq!(Interval::MinorSixth.of(Note::C), Note::GisOrAs);
+    assert_eq!(Interval::MajorSixth.of(Note::C), Note::A);
+    assert_eq!(Interval::MinorSeventh.of(Note::C), Note::AisOrB);
+    assert_eq!(Interval::MajorSeventh.of(Note::C), Note::H);
+    assert_eq!(Interval::Octave.of(Note::C), Note::C);
+  }
+
+  #[test]
+  fn test_add_steps_of_c() {
+    assert_eq!(Note::C.add_steps(0), Note::C);
+    assert_eq!(Note::C.add_steps(1), Note::CisOrDes);
+    assert_eq!(Note::C.add_steps(2), Note::D);
+    assert_eq!(Note::C.add_steps(3), Note::DisOrEs);
+    assert_eq!(Note::C.add_steps(4), Note::E);
+    assert_eq!(Note::C.add_steps(5), Note::F);
+    assert_eq!(Note::C.add_steps(6), Note::FisOrGes);
+    assert_eq!(Note::C.add_steps(7), Note::G);
+    assert_eq!(Note::C.add_steps(8), Note::GisOrAs);
+    assert_eq!(Note::C.add_steps(9), Note::A);
+    assert_eq!(Note::C.add_steps(10), Note::AisOrB);
+    assert_eq!(Note::C.add_steps(11), Note::H);
+    assert_eq!(Note::C.add_steps(12), Note::C);
   }
 }

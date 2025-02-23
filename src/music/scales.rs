@@ -25,7 +25,6 @@ pub enum ScaleType {
 
 // TODO add more scales
 // TODO consider non septa scales
-// TODO No copy, contains a Vec, is this lightweight enough for a scale type?
 #[derive(Debug, Clone, PartialEq)]
 pub struct Scale {
   root_note: Note,
@@ -46,6 +45,7 @@ impl Scale {
   fn get_notes(root_note: Note, scale_type: ScaleType) -> Vec<Note> {
     let notes = match scale_type {
       // TODO open closed principle violoation
+      // maybe i should use traits?
       ScaleType::Major => Self::generate_major_scale(root_note),
       ScaleType::Minor => Self::generate_minor_scale(root_note),
       _ => panic!("Scale type not implemented"),
