@@ -11,9 +11,13 @@ pub fn Fretboard(
   #[prop(default = 6)] num_strings: u8,
   #[prop(default = 15)] num_frets: u8,
 ) -> impl IntoView {
-  let (note_in_scale, set_note_in_scale) = signal(move |note: Note| -> bool { true });
-  let (note_to_string, set_note_to_string) =
-    signal(move |note: Note| -> String { note.to_string() });
+  // let (note_in_scale, set_note_in_scale) = signal(move |note: Note| -> bool { true });
+  // let (note_to_string, set_note_to_string) =
+  //   signal(move |note: Note| -> String { note.to_string() });
+
+  let note_to_string = |note: Note| -> String { note.to_string() };
+  let note_in_scale = |_: Note| -> bool { true };
+
   view! {
     <div class="relative py-10 px-14 bg-cyan-700">
       <div class="flex justify-center items-center trapezoid-shadow">
@@ -39,8 +43,8 @@ pub fn Fretboard(
                   string_no=string_no
                   num_frets=num_frets
                   string_note=string_note
-                  filter=Box::new(note_in_scale.get())
-                  note_to_string=Box::new(note_to_string.get())
+                  filter=&note_in_scale
+                  note_to_string=&note_to_string
                 />
               }
             })
@@ -55,10 +59,9 @@ pub fn Fretboard(
 fn note_for_fret(
   string_note: Note,
   fret_no: u8,
-  filter: Box<dyn Fn(Note) -> bool>,
-  note_to_string: Box<dyn Fn(Note) -> String>,
-) -> Option<String>
-{
+  filter: &dyn Fn(Note) -> bool,
+  note_to_string: &dyn Fn(Note) -> String,
+) -> Option<String> {
   let note = string_note.add_steps(fret_no as usize);
   if filter(note) {
     Some(note_to_string(note))
@@ -68,12 +71,12 @@ fn note_for_fret(
 }
 
 #[component]
-fn FretboardString(
+fn FretboardString<'a, 'b>(
   #[prop()] string_no: u8,
   #[prop()] num_frets: u8,
   #[prop()] string_note: Note, // TODO change to Note trait, keep the depency clean
-  filter: Box<dyn Fn(Note) -> bool>,
-  note_to_string: Box<dyn Fn(Note) -> String>,
+  filter: &'a dyn Fn(Note) -> bool,
+  note_to_string: &'b dyn Fn(Note) -> String,
 ) -> impl IntoView {
   let string_strength = 2.0 + 0.5 * string_no as f64;
 
