@@ -6,17 +6,22 @@ use crate::music::notes::Note;
 // #[component]
 // pub fn FretNoteButton(#[prop()] _note: Note) -> impl IntoView {}
 
+// We can change the return type of the Function to a struct that contains more info like is_blue_note, is_root_note, etc.
+type NoteToStringFn = fn(Note) -> String;
+type IsNoteVisible = fn(Note) -> bool;
+
 #[component]
 pub fn Fretboard(
   #[prop(default = 6)] num_strings: u8,
   #[prop(default = 15)] num_frets: u8,
+  is_note_visible_signal: ReadSignal<IsNoteVisible>,
+  note_to_string_signal: ReadSignal<NoteToStringFn>,
 ) -> impl IntoView {
   // let (note_in_scale, set_note_in_scale) = signal(move |note: Note| -> bool { true });
   // let (note_to_string, set_note_to_string) =
   //   signal(move |note: Note| -> String { note.to_string() });
-
-  let note_to_string = |note: Note| -> String { note.to_string() };
-  let note_in_scale = |_: Note| -> bool { true };
+  let is_note_visible = is_note_visible_signal.get();
+  let note_to_string = note_to_string_signal.get();
 
   view! {
     <div class="relative py-10 px-14 bg-cyan-700">
@@ -43,7 +48,7 @@ pub fn Fretboard(
                   string_no=string_no
                   num_frets=num_frets
                   string_note=string_note
-                  filter=&note_in_scale
+                  filter=&is_note_visible
                   note_to_string=&note_to_string
                 />
               }
@@ -59,8 +64,8 @@ pub fn Fretboard(
 fn note_for_fret(
   string_note: Note,
   fret_no: u8,
-  filter: &dyn Fn(Note) -> bool,
-  note_to_string: &dyn Fn(Note) -> String,
+  filter: &IsNoteVisible,
+  note_to_string: &NoteToStringFn,
 ) -> Option<String> {
   let note = string_note.add_steps(fret_no as usize);
   if filter(note) {
@@ -75,8 +80,8 @@ fn FretboardString<'a, 'b>(
   #[prop()] string_no: u8,
   #[prop()] num_frets: u8,
   #[prop()] string_note: Note, // TODO change to Note trait, keep the depency clean
-  filter: &'a dyn Fn(Note) -> bool,
-  note_to_string: &'b dyn Fn(Note) -> String,
+  filter: &'a IsNoteVisible,
+  note_to_string: &'b NoteToStringFn,
 ) -> impl IntoView {
   let string_strength = 2.0 + 0.5 * string_no as f64;
 
