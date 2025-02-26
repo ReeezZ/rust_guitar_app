@@ -1,9 +1,10 @@
 use leptos::prelude::*;
 
+use crate::music::scales::{Scale, ScaleType};
 use crate::{components::fretboard::Fretboard, music::notes::Note};
 
 fn is_note_visible(note: Note) -> bool {
-  true
+  Scale::new(Note::C, ScaleType::Major).contains_note(note)
 }
 
 fn note_to_string(note: Note) -> String {

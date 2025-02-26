@@ -105,6 +105,10 @@ impl Scale {
     };
     &self.notes[index]
   }
+
+  pub fn contains_note(&self, note: Note) -> bool {
+    self.notes.contains(&note)
+  }
 }
 
 impl Index<ScaleDegree> for Scale {
