@@ -48,8 +48,8 @@ pub fn Fretboard(
                   string_no=string_no
                   num_frets=num_frets
                   string_note=string_note
-                  filter=&is_note_visible
-                  note_to_string=&note_to_string
+                  filter=is_note_visible
+                  note_to_string=note_to_string
                 />
               }
             })
@@ -64,8 +64,8 @@ pub fn Fretboard(
 fn note_for_fret(
   string_note: Note,
   fret_no: u8,
-  filter: &IsNoteVisible,
-  note_to_string: &NoteToStringFn,
+  filter: IsNoteVisible,
+  note_to_string: NoteToStringFn,
 ) -> Option<String> {
   let note = string_note.add_steps(fret_no as usize);
   if filter(note) {
@@ -76,20 +76,20 @@ fn note_for_fret(
 }
 
 #[component]
-fn FretboardString<'a, 'b>(
+fn FretboardString(
   #[prop()] string_no: u8,
   #[prop()] num_frets: u8,
   #[prop()] string_note: Note, // TODO change to Note trait, keep the depency clean
-  filter: &'a IsNoteVisible,
-  note_to_string: &'b NoteToStringFn,
+  filter: IsNoteVisible,
+  note_to_string: NoteToStringFn,
 ) -> impl IntoView {
   let string_strength = 2.0 + 0.5 * string_no as f64;
-
+  let note = note_for_fret(string_note, 0, filter, note_to_string);
   view! {
     <div class="flex relative justify-start items-center w-full tilt">
       <div class="relative z-30 justify-center items-center w-8 h-6 border-r-8 border-transparent">
         <span class="absolute w-12 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
-          {format!("{}-0", string_no)}
+          {note.unwrap_or("".to_string())}
         </span>
       </div>
 
@@ -105,7 +105,7 @@ fn FretboardString<'a, 'b>(
             view! {
               <div class="flex relative justify-center items-center w-full h-12 text-center bg-transparent grow fretbar-container">
                 <span class="z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
-                  {note.map_or("".to_string(), |n| n.to_string())}
+                  {note.unwrap_or("".to_string())}
                 </span>
               </div>
             }

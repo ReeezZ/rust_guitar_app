@@ -13,10 +13,8 @@ fn note_to_string(note: Note) -> String {
 
 #[component]
 pub fn FretboardScaleSelection() -> impl IntoView {
-  let (is_note_visible_signal, set_is_note_visible_signal) =
-    signal::<fn(Note) -> bool>(is_note_visible);
-  let (note_to_string_signal, set_note_to_string_signal) =
-    signal::<fn(Note) -> String>(note_to_string);
+  let (is_note_visible_signal, _) = signal::<fn(Note) -> bool>(is_note_visible);
+  let (note_to_string_signal, _) = signal::<fn(Note) -> String>(note_to_string);
   view! {
     <div class="">
       <Fretboard num_frets=24 num_strings=6 is_note_visible_signal note_to_string_signal />
