@@ -71,3 +71,10 @@ TODO link other comparable software
 - Knowledge base
   - Chords
 - Some info about achords in a key?
+- MIDI input
+
+
+## Potential things to use
+
+https://github.com/new-data-services/tailwindcss-animated
+
