@@ -94,7 +94,7 @@ impl Interval {
     note.add_interval(self)
   }
 
-  fn half_tone_steps(self) -> usize {
+  pub fn half_tone_steps(self) -> usize {
     match self {
       Interval::Unison => 0,
       Interval::MinorSecond => 1,

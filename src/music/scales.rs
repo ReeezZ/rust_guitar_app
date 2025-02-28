@@ -2,6 +2,8 @@ use std::ops::Index;
 
 use crate::music::notes::Note;
 
+use super::notes::Interval;
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum ScaleDegree {
   First,
@@ -56,38 +58,39 @@ impl Scale {
 
   fn generate_major_scale(root_note: Note) -> Vec<Note> {
     let intervals = [
-      // TODO using intervals might be cleaner
-      0,  // Unison
-      2,  // Major Second
-      4,  // Major Third
-      5,  // Perfect Fourth
-      7,  // Perfect Fifth
-      9,  // Major Sixth
-      11, // Major Seventh
+      Interval::Unison,
+      Interval::MajorSecond,
+      Interval::MajorThird,
+      Interval::PerfectFourth,
+      Interval::PerfectFifth,
+      Interval::MajorSixth,
+      Interval::MajorSeventh,
     ];
     Self::generate_scale(root_note, &intervals)
   }
 
   fn generate_minor_scale(root_note: Note) -> Vec<Note> {
     let intervals = [
-      0,  // Unison
-      2,  // Major Second
-      3,  // Minor Third
-      5,  // Perfect Fourth
-      7,  // Perfect Fifth
-      8,  // Minor Sixth
-      10, // Minor Seventh
+      Interval::Unison,
+      Interval::MajorSecond,
+      Interval::MinorThird,
+      Interval::PerfectFourth,
+      Interval::PerfectFifth,
+      Interval::MinorSixth,
+      Interval::MinorSeventh,
     ];
+
     Self::generate_scale(root_note, &intervals)
   }
 
-  fn generate_scale(root_note: Note, intervals: &[usize]) -> Vec<Note> {
+  fn generate_scale(root_note: Note, intervals: &[Interval]) -> Vec<Note> {
     let all_notes = Note::all_notes();
     let start_index = all_notes.iter().position(|&n| n == root_note).unwrap();
+
     intervals
       .iter()
       .map(move |&interval| {
-        let index = (start_index + interval) % all_notes.len();
+        let index = (start_index + interval.half_tone_steps()) % all_notes.len();
         all_notes[index]
       })
       .collect()
