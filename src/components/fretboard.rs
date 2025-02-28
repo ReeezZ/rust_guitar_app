@@ -53,7 +53,7 @@ pub fn Fretboard(
                 />
               }
             })
-            .collect::<Vec<_>>()} // Fret markers row (positioned below the frets)
+            .collect_view()} // Fret markers row (positioned below the frets)
           <FretboardDetails num_frets=num_frets />
         </div>
       </div>
@@ -110,7 +110,7 @@ fn FretboardString(
               </div>
             }
           })
-          .collect::<Vec<_>>()}
+          .collect_view()}
       </div>
     </div>
   }
@@ -161,7 +161,7 @@ pub fn FretboardDetails(#[prop()] num_frets: u8) -> impl IntoView {
             </div>
           }
         })
-        .collect::<Vec<_>>()}
+        .collect_view()}
     </div>
   }
 }
