@@ -35,6 +35,37 @@ impl Note {
     &ALL_NOTES
   }
 
+  pub fn mapping() -> &'static [(Note, &'static str)] {
+    static MAPPING: [(Note, &'static str); 12] = [
+      (Note::C, "C"),
+      (Note::CisOrDes, "C#/Db"),
+      (Note::D, "D"),
+      (Note::DisOrEs, "D#/Eb"),
+      (Note::E, "E"),
+      (Note::F, "F"),
+      (Note::FisOrGes, "F#/Gb"),
+      (Note::G, "G"),
+      (Note::GisOrAs, "G#/Ab"),
+      (Note::A, "A"),
+      (Note::AisOrB, "A#/Bb"),
+      (Note::H, "H"),
+    ];
+    &MAPPING
+  }
+
+  pub fn as_str(&self) -> &'static str {
+    Self::mapping()
+      .iter()
+      .find_map(|(note, s)| if note == self { Some(*s) } else { None })
+      .unwrap()
+  }
+
+  pub fn from_str(s: &str) -> Option<Self> {
+    Self::mapping()
+      .iter()
+      .find_map(|(note, str)| if *str == s { Some(*note) } else { None })
+  }
+
   /// Returns the note that is `steps` half-tone steps away from the current note.
   pub fn add_steps(&self, steps: usize) -> Note {
     let all_notes = Note::all_notes();
@@ -72,7 +103,7 @@ impl fmt::Display for Note {
   }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 pub enum Interval {
   Unison,
   MinorSecond,
