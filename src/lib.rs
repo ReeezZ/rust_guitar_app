@@ -3,13 +3,12 @@ use leptos_meta::*;
 use leptos_router::{components::*, path};
 
 mod components;
-mod pages;
 mod music;
+mod pages;
 
 use crate::components::navbar::Navbar;
 use crate::pages::not_found::NotFound;
 use crate::pages::{guitar_v1::GuitarV1, home::Home};
-use crate::components::fretboard_scale_selection::FretboardScaleSelection;
 
 #[component]
 pub fn App() -> impl IntoView {
