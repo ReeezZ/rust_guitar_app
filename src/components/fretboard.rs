@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use leptos::either::EitherOf3;
 use leptos::prelude::*;
 
@@ -7,15 +9,13 @@ use crate::music::notes::Note;
 // pub fn FretNoteButton(#[prop()] _note: Note) -> impl IntoView {}
 
 // We can change the return type of the Function to a struct that contains more info like is_blue_note, is_root_note, etc.
-type NoteToStringFn = fn(Note) -> String;
-type IsNoteVisible = fn(Note) -> bool;
 
 #[component]
 pub fn Fretboard(
   #[prop(default = 6)] num_strings: u8,
   #[prop(default = 15)] num_frets: u8,
-  is_note_visible_signal: ReadSignal<IsNoteVisible>,
-  note_to_string_signal: ReadSignal<NoteToStringFn>,
+  is_note_visible_signal: ReadSignal<Rc<impl Fn(Note) -> bool>>,
+  note_to_string_signal: ReadSignal<Rc<impl Fn(Note) -> String>>,
 ) -> impl IntoView {
   // let (note_in_scale, set_note_in_scale) = signal(move |note: Note| -> bool { true });
   // let (note_to_string, set_note_to_string) =
@@ -80,8 +80,8 @@ fn FretboardString(
   #[prop()] string_no: u8,
   #[prop()] num_frets: u8,
   #[prop()] string_note: Note, // TODO change to Note trait, keep the depency clean
-  filter: IsNoteVisible,
-  note_to_string: NoteToStringFn,
+  filter: &IsNoteVisible,
+  note_to_string: &NoteToStringFn,
 ) -> impl IntoView {
   let string_strength = 2.0 + 0.5 * string_no as f64;
   let note = note_for_fret(string_note, 0, filter, note_to_string);
