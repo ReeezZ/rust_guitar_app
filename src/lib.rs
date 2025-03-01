@@ -3,7 +3,6 @@ use leptos_meta::*;
 use leptos_router::{components::*, path};
 
 mod components;
-mod models;
 mod music;
 mod pages;
 

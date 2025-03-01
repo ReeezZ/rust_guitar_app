@@ -1,6 +1,5 @@
 use leptos::prelude::*;
 
-use crate::models::fretboard_model::FretboardModel;
 use crate::music::scales::{Scale, ScaleType};
 use crate::{components::fretboard::Fretboard, music::notes::Note};
 
@@ -15,10 +14,7 @@ fn ScaleSelection() -> impl IntoView {
 }
 
 #[component]
-fn RootNoteSelection() -> impl IntoView {
-  // Get the write signal from context
-  let set_root_note = use_context::<WriteSignal<Note>>().expect("set_root_note must be provided");
-
+fn RootNoteSelection(set_root_note: WriteSignal<Note>) -> impl IntoView {
   view! {
     <div>
       <label>"Root Note"</label>
@@ -30,6 +26,7 @@ fn RootNoteSelection() -> impl IntoView {
           }
         }
       >
+        // on:change:target=
         {Note::all_notes()
           .iter()
           .map(|note| {
@@ -45,29 +42,29 @@ fn is_note_visible(root_note: Note) -> impl Fn(Note) -> bool {
   move |note: Note| Scale::new(root_note, ScaleType::Major).contains_note(note)
 }
 
+fn is_note_visible(note: Note) -> bool {
+  Scale::new(Note::D, ScaleType::Minor).contains_note(note)
+}
+
 fn note_to_string(note: Note) -> String {
   note.to_string()
 }
 
 #[component]
 pub fn GuitarV2() -> impl IntoView {
-  // Create the model
-  let model = FretboardModel::new();
+  let (is_note_visible_signal, _) = signal::<fn(Note) -> bool>(is_note_visible);
+  let (root_note, set_root_note) = signal(Note::C);
 
-  // Get the write signals from context
-  let set_root_note = use_context::<WriteSignal<Note>>().expect("set_root_note must be provided");
-  let set_scale_type =
-    use_context::<WriteSignal<ScaleType>>().expect("set_scale_type must be provided");
+  let (is_note_visible_signal, _) = signal::<fn(Note) -> bool>(|note| is_note_visible);
+  let (note_to_string_signal, _) = signal::<fn(Note) -> String>(note_to_string);
 
   view! {
-    <div class="flex flex-col space-y-4">
-      <Fretboard num_frets=24 num_strings=6 />
-      <div class="flex flex-row justify-center space-x-4">
-        <RootNoteSelection />
+    <div class="flex-row space-y-4">
+      <Fretboard num_frets=24 num_strings=6 is_note_visible_signal note_to_string_signal />
+      <div class="flex flex-row justify-center space-y-4 space-x-4">
+        <RootNoteSelection set_root_note />
         <ScaleSelection />
       </div>
     </div>
   }
 }
-
-// Similar for ScaleTypeSelection
