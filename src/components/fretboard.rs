@@ -55,15 +55,6 @@ pub fn Fretboard(
   }
 }
 
-fn note_for_fret(string_note: Note, fret_no: u8, scale: &Scale) -> Option<String> {
-  let note = string_note.add_steps(fret_no as usize);
-  if scale.contains_note(note) {
-    Some(note.to_string())
-  } else {
-    None
-  }
-}
-
 #[component]
 fn FretboardString(
   #[prop()] string_no: u8,

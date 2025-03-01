@@ -2,7 +2,7 @@ use std::ops::Index;
 
 use crate::music::notes::Note;
 
-use super::notes::Interval;
+use crate::music::intervals::Interval;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum ScaleDegree {
