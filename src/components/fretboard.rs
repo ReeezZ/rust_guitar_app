@@ -24,13 +24,13 @@ pub fn Fretboard(
   let note_to_string = note_to_string_signal.get();
 
   view! {
-    <div class="relative py-10 px-14 bg-cyan-700">
+    <div class="relative py-16 px-14 bg-primary-shades trans">
       <div class="flex justify-center items-center trapezoid-shadow">
         // fretboard end
-        <div class="absolute -right-5 w-10 h-[288px] trapezoid-end bg-[#be975b] bg-fretboard">
+        <div class="absolute -right-5 w-10 h-[288px] trapezoid-end bg-[#917140] bg-fretboard">
           <div class="absolute right-4 z-10 w-1 h-[288px] bg-[linear-gradient(90deg,_#bbbbbb_40%,_#444433_100%,_#48a499)]"></div>
         </div>
-        <div class="relative flex-col trapezoid grow bg-[#be975b] bg-fretboard">
+        <div class="relative flex-col trapezoid grow bg-[#917140] bg-fretboard">
           {(0..num_strings)
             .map(|string_no| {
               let string_note = match string_no {
