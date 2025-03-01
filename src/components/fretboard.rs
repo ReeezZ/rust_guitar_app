@@ -1,9 +1,8 @@
-use std::rc::Rc;
-
 use leptos::either::EitherOf3;
 use leptos::prelude::*;
 
 use crate::music::notes::Note;
+use crate::music::scales::{Scale, ScaleType};
 
 // #[component]
 // pub fn FretNoteButton(#[prop()] _note: Note) -> impl IntoView {}
@@ -14,14 +13,10 @@ use crate::music::notes::Note;
 pub fn Fretboard(
   #[prop(default = 6)] num_strings: u8,
   #[prop(default = 15)] num_frets: u8,
-  is_note_visible_signal: ReadSignal<Rc<impl Fn(Note) -> bool>>,
-  note_to_string_signal: ReadSignal<Rc<impl Fn(Note) -> String>>,
+  root_note: ReadSignal<Note>,
+  scale_type: ReadSignal<ScaleType>,
 ) -> impl IntoView {
-  // let (note_in_scale, set_note_in_scale) = signal(move |note: Note| -> bool { true });
-  // let (note_to_string, set_note_to_string) =
-  //   signal(move |note: Note| -> String { note.to_string() });
-  let is_note_visible = is_note_visible_signal.get();
-  let note_to_string = note_to_string_signal.get();
+  let scale = Scale::new(root_note.get(), scale_type.get());
 
   view! {
     <div class="relative py-16 px-14 bg-primary-shades trans">
@@ -48,8 +43,7 @@ pub fn Fretboard(
                   string_no=string_no
                   num_frets=num_frets
                   string_note=string_note
-                  filter=is_note_visible
-                  note_to_string=note_to_string
+                  scale=&scale
                 />
               }
             })
@@ -61,30 +55,24 @@ pub fn Fretboard(
   }
 }
 
-fn note_for_fret(
-  string_note: Note,
-  fret_no: u8,
-  filter: IsNoteVisible,
-  note_to_string: NoteToStringFn,
-) -> Option<String> {
+fn note_for_fret(string_note: Note, fret_no: u8, scale: &Scale) -> Option<String> {
   let note = string_note.add_steps(fret_no as usize);
-  if filter(note) {
-    Some(note_to_string(note))
+  if scale.contains_note(note) {
+    Some(note.to_string())
   } else {
     None
   }
 }
 
 #[component]
-fn FretboardString(
+fn FretboardString<'a>(
   #[prop()] string_no: u8,
   #[prop()] num_frets: u8,
   #[prop()] string_note: Note, // TODO change to Note trait, keep the depency clean
-  filter: &IsNoteVisible,
-  note_to_string: &NoteToStringFn,
+  scale: &'a Scale,
 ) -> impl IntoView {
   let string_strength = 2.0 + 0.5 * string_no as f64;
-  let note = note_for_fret(string_note, 0, filter, note_to_string);
+  let note = note_for_fret(string_note, 0, &scale);
   view! {
     <div class="flex relative justify-start items-center w-full tilt">
       <div class="relative z-30 justify-center items-center w-8 h-6 border-r-8 border-transparent">
@@ -101,7 +89,7 @@ fn FretboardString(
 
         {(1..=num_frets)
           .map(|fret_no| {
-            let note = note_for_fret(string_note, fret_no, filter, note_to_string);
+            let note = note_for_fret(string_note, fret_no, &scale);
             view! {
               <div class="flex relative justify-center items-center w-full h-12 text-center bg-transparent grow fretbar-container">
                 <span class="z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
