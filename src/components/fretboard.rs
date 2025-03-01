@@ -1,4 +1,4 @@
-use leptos::either::EitherOf3;
+use leptos::either::{Either, EitherOf3};
 use leptos::prelude::*;
 
 use crate::music::notes::Note;
@@ -16,7 +16,7 @@ pub fn Fretboard(
   root_note: ReadSignal<Note>,
   scale_type: ReadSignal<ScaleType>,
 ) -> impl IntoView {
-  let scale = Scale::new(root_note.get(), scale_type.get());
+  let scale = Memo::new(move |_| Scale::new(root_note.get(), scale_type.get()));
 
   view! {
     <div class="relative py-16 px-14 bg-primary-shades trans">
@@ -43,7 +43,7 @@ pub fn Fretboard(
                   string_no=string_no
                   num_frets=num_frets
                   string_note=string_note
-                  scale=&scale
+                  scale=scale
                 />
               }
             })
@@ -65,20 +65,32 @@ fn note_for_fret(string_note: Note, fret_no: u8, scale: &Scale) -> Option<String
 }
 
 #[component]
-fn FretboardString<'a>(
+fn FretboardString(
   #[prop()] string_no: u8,
   #[prop()] num_frets: u8,
   #[prop()] string_note: Note, // TODO change to Note trait, keep the depency clean
-  scale: &'a Scale,
+  scale: Memo<Scale>,
 ) -> impl IntoView {
   let string_strength = 2.0 + 0.5 * string_no as f64;
-  let note = note_for_fret(string_note, 0, &scale);
+
   view! {
     <div class="flex relative justify-start items-center w-full tilt">
       <div class="relative z-30 justify-center items-center w-8 h-6 border-r-8 border-transparent">
-        <span class="absolute w-12 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
-          {note.unwrap_or("".to_string())}
-        </span>
+        {move || {
+          let note = string_note.add_steps(0);
+          let scale_value = scale.get();
+          if scale_value.contains_note(note) {
+            Either::Left(
+              view! {
+                <span class="absolute w-12 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
+                  {note.to_string()}
+                </span>
+              },
+            )
+          } else {
+            Either::Right(view! { <span></span> })
+          }
+        }}
       </div>
 
       <div class="flex relative grow">
@@ -89,12 +101,23 @@ fn FretboardString<'a>(
 
         {(1..=num_frets)
           .map(|fret_no| {
-            let note = note_for_fret(string_note, fret_no, &scale);
             view! {
               <div class="flex relative justify-center items-center w-full h-12 text-center bg-transparent grow fretbar-container">
-                <span class="z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
-                  {note.unwrap_or("".to_string())}
-                </span>
+                {move || {
+                  let note = string_note.add_steps(fret_no as usize);
+                  let scale_value = scale.get();
+                  if scale_value.contains_note(note) {
+                    Either::Left(
+                      view! {
+                        <span class="z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
+                          {note.to_string()}
+                        </span>
+                      },
+                    )
+                  } else {
+                    Either::Right(view! { <span></span> })
+                  }
+                }}
               </div>
             }
           })
