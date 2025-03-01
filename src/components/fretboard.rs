@@ -1,9 +1,9 @@
 use std::rc::Rc;
 
-use leptos::either::EitherOf3;
-use leptos::prelude::*;
-
+use crate::models::fretboard_model::FretboardModel;
 use crate::music::notes::Note;
+use leptos::either::{Either, EitherOf3};
+use leptos::prelude::*;
 
 // #[component]
 // pub fn FretNoteButton(#[prop()] _note: Note) -> impl IntoView {}
@@ -14,64 +14,38 @@ use crate::music::notes::Note;
 pub fn Fretboard(
   #[prop(default = 6)] num_strings: u8,
   #[prop(default = 15)] num_frets: u8,
-  is_note_visible_signal: ReadSignal<Rc<impl Fn(Note) -> bool>>,
-  note_to_string_signal: ReadSignal<Rc<impl Fn(Note) -> String>>,
 ) -> impl IntoView {
-  // let (note_in_scale, set_note_in_scale) = signal(move |note: Note| -> bool { true });
-  // let (note_to_string, set_note_to_string) =
-  //   signal(move |note: Note| -> String { note.to_string() });
-  let is_note_visible = is_note_visible_signal.get();
-  let note_to_string = note_to_string_signal.get();
+  let model = use_context::<FretboardModel>().expect("FretboardModel not in context");
 
+  // Render code similar to what you have, but simpler props
   view! {
     <div class="relative py-16 px-14 bg-primary-shades trans">
-      <div class="flex justify-center items-center trapezoid-shadow">
-        // fretboard end
-        <div class="absolute -right-5 w-10 h-[288px] trapezoid-end bg-[#917140] bg-fretboard">
-          <div class="absolute right-4 z-10 w-1 h-[288px] bg-[linear-gradient(90deg,_#bbbbbb_40%,_#444433_100%,_#48a499)]"></div>
-        </div>
-        <div class="relative flex-col trapezoid grow bg-[#917140] bg-fretboard">
-          {(0..num_strings)
-            .map(|string_no| {
-              let string_note = match string_no {
-                0 => Note::E,
-                1 => Note::A,
-                2 => Note::D,
-                3 => Note::G,
-                4 => Note::H,
-                5 => Note::E,
-                _ => Note::E,
-              };
+      // Your fretboard HTML
+      <div class="relative flex-col trapezoid grow bg-[#917140] bg-fretboard">
+        {(0..num_strings)
+          .map(|string_no| {
+            let string_note = match string_no {
+              0 => Note::E,
+              1 => Note::A,
+              2 => Note::D,
+              3 => Note::G,
+              4 => Note::H,
+              5 => Note::E,
+              _ => Note::E,
+            };
 
-              view! {
-                <FretboardString
-                  string_no=string_no
-                  num_frets=num_frets
-                  string_note=string_note
-                  filter=is_note_visible
-                  note_to_string=note_to_string
-                />
-              }
-            })
-            .collect_view()} // Fret markers row (positioned below the frets)
-          <FretboardDetails num_frets=num_frets />
-        </div>
+            view! {
+              <FretboardString
+                string_no=string_no
+                num_frets=num_frets
+                string_note=string_note
+                model=model.clone()
+              />
+            }
+          })
+          .collect_view()} <FretboardDetails num_frets=num_frets />
       </div>
     </div>
-  }
-}
-
-fn note_for_fret(
-  string_note: Note,
-  fret_no: u8,
-  filter: IsNoteVisible,
-  note_to_string: NoteToStringFn,
-) -> Option<String> {
-  let note = string_note.add_steps(fret_no as usize);
-  if filter(note) {
-    Some(note_to_string(note))
-  } else {
-    None
   }
 }
 
@@ -79,34 +53,72 @@ fn note_for_fret(
 fn FretboardString(
   #[prop()] string_no: u8,
   #[prop()] num_frets: u8,
-  #[prop()] string_note: Note, // TODO change to Note trait, keep the depency clean
-  filter: &IsNoteVisible,
-  note_to_string: &NoteToStringFn,
+  #[prop()] string_note: Note,
+  model: FretboardModel,
 ) -> impl IntoView {
   let string_strength = 2.0 + 0.5 * string_no as f64;
-  let note = note_for_fret(string_note, 0, filter, note_to_string);
+  let open_note = string_note;
+  let open_note_display = model.evaluate_note(open_note);
+
   view! {
     <div class="flex relative justify-start items-center w-full tilt">
       <div class="relative z-30 justify-center items-center w-8 h-6 border-r-8 border-transparent">
-        <span class="absolute w-12 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
-          {note.unwrap_or("".to_string())}
-        </span>
+        {move || {
+          let display = open_note_display.get();
+          if display.visible {
+            Either::Left(
+              view! {
+                <span class=move || {
+                  let mut classes = "absolute w-12 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]"
+                    .to_string();
+                  if display.is_root {
+                    classes.push_str(" bg-red-500 rounded-full");
+                  }
+                  classes
+                }>{display.display_text}</span>
+              },
+            )
+          } else {
+            Either::Right(view! { <span></span> })
+          }
+        }}
       </div>
 
+      // Rest of the string rendering
       <div class="flex relative grow">
+        // String line
         <div
           class="absolute right-0 -left-60 top-1/2 z-20 -translate-y-1/2 drop-shadow-[0_2px_2px_rgba(0,0,0,0.6)] bg-[repeating-linear-gradient(45deg,_#dddddd,_#555555_2px,_#333333_2px)]"
           style:height=move || format!("{}px", string_strength)
         ></div>
 
+        // Frets
         {(1..=num_frets)
           .map(|fret_no| {
-            let note = note_for_fret(string_note, fret_no, filter, note_to_string);
+            let fret_note = string_note.add_steps(fret_no as usize);
+            let fret_note_display = model.evaluate_note(fret_note);
+
             view! {
               <div class="flex relative justify-center items-center w-full h-12 text-center bg-transparent grow fretbar-container">
-                <span class="z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
-                  {note.unwrap_or("".to_string())}
-                </span>
+                {move || {
+                  let display = fret_note_display.get();
+                  if display.visible {
+                    Either::Left(
+                      view! {
+                        <span class=move || {
+                          let mut classes = "z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]"
+                            .to_string();
+                          if display.is_root {
+                            classes.push_str(" bg-red-500 rounded-full px-1");
+                          }
+                          classes
+                        }>{display.display_text}</span>
+                      },
+                    )
+                  } else {
+                    Either::Right(view! { <span></span> })
+                  }
+                }}
               </div>
             }
           })
