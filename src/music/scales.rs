@@ -5,6 +5,7 @@ use super::heptatonic_scales::{HeptaScaleImpl, HeptaScaleType};
 #[derive(Clone, PartialEq, Copy)]
 pub enum ScaleType {
   Hepatonic(HeptaScaleType),
+  Chromatic,
 }
 
 impl ScaleType {
@@ -13,6 +14,7 @@ impl ScaleType {
     match s {
       "Major" => Some(ScaleType::Hepatonic(HeptaScaleType::Major)),
       "Minor" => Some(ScaleType::Hepatonic(HeptaScaleType::Minor)),
+      "Chromatic" => Some(ScaleType::Chromatic),
       _ => None,
     }
   }
@@ -20,6 +22,7 @@ impl ScaleType {
   pub fn to_string(&self) -> String {
     match self {
       ScaleType::Hepatonic(hepta_scale_type) => hepta_scale_type.to_string(),
+      ScaleType::Chromatic => "Chromatic".to_string(),
     }
   }
 
@@ -28,6 +31,7 @@ impl ScaleType {
     vec![
       ScaleType::Hepatonic(HeptaScaleType::Major),
       ScaleType::Hepatonic(HeptaScaleType::Minor),
+      ScaleType::Chromatic,
     ]
   }
 }
@@ -35,6 +39,7 @@ impl ScaleType {
 #[derive(Clone, PartialEq)]
 pub enum Scale {
   Heptatonic(HeptaScaleImpl),
+  Chromatic,
   // TODO add more scale types
   // pentatonic,
   // blues (8 notes)
@@ -51,6 +56,7 @@ impl ScaleCreator for Scale {
         let scale = HeptaScaleImpl::new(root_note, hepta_scale_type);
         Scale::Heptatonic(scale)
       }
+      ScaleType::Chromatic => Scale::Chromatic,
     }
   }
 }
@@ -65,18 +71,22 @@ impl ScaleTrait for Scale {
   fn contains_note(&self, note: Note) -> bool {
     match self {
       Scale::Heptatonic(scale) => scale.contains_note(note),
+      Scale::Chromatic => true,
     }
   }
 
   fn root_note(&self) -> Note {
     match self {
       Scale::Heptatonic(scale) => scale.root_note(),
+      // chromatic does not really have a root note, so we just return C
+      Scale::Chromatic => Note::C,
     }
   }
 
   fn to_string(&self) -> String {
     match self {
       Scale::Heptatonic(scale) => scale.to_string(),
+      Scale::Chromatic => "Chromatic".to_string(),
     }
   }
 }
