@@ -1,7 +1,10 @@
 use leptos::{component, logging::log, prelude::*};
 
 use crate::{
-  components::{fretboard_model::FretboardModel, fretboard::Fretboard},
+  components::{
+    fretboard::{FretClickEvent, Fretboard},
+    fretboard_model::FretboardModel,
+  },
   music::{
     heptatonic_scales::{HeptaScaleImpl, HeptaScaleType},
     notes::Note,
@@ -35,5 +38,9 @@ pub fn FretboardScaleDisplay(
     });
   });
 
-  view! { <Fretboard fretboard=fretboard_model /> }
+  let on_fret_clicked = Callback::new(move |fret_click_event: FretClickEvent| {
+    log!("Fret clicked: {:?}", fret_click_event);
+  });
+
+  view! { <Fretboard fretboard=fretboard_model on_fret_clicked=on_fret_clicked /> }
 }

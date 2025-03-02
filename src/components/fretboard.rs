@@ -6,8 +6,18 @@ use crate::music::notes::Note;
 
 use super::fretboard_model::{FretCoord, FretState, FretboardModel};
 
+#[derive(Clone, Copy, Debug)]
+pub struct FretClickEvent {
+  pub note: Note,
+  pub string_idx: u8,
+  pub fret_idx: u8,
+}
+
 #[component]
-pub fn Fretboard(#[prop()] fretboard: RwSignal<FretboardModel>) -> impl IntoView {
+pub fn Fretboard(
+  #[prop()] fretboard: RwSignal<FretboardModel>,
+  on_fret_clicked: Callback<FretClickEvent>,
+) -> impl IntoView {
   view! {
     <div class="relative py-16 px-14 bg-primary-shades trans">
       <div class="flex justify-center items-center trapezoid-shadow">
@@ -23,7 +33,7 @@ pub fn Fretboard(#[prop()] fretboard: RwSignal<FretboardModel>) -> impl IntoView
               .map(|string_no| {
                 let string_note = fretboard.with(|fb| fb.get_tuning()[string_no as usize]);
                 let fretboard_for_string = fretboard;
-
+                // let on_fret_clicked_cloned = on_fret_clicked.clone();
                 // clone the fretboard for each string
 
                 view! {
@@ -33,6 +43,7 @@ pub fn Fretboard(#[prop()] fretboard: RwSignal<FretboardModel>) -> impl IntoView
                     string_note=string_note
                     fret_state_signals=fretboard_for_string
                       .with(|fb| fb.get_frets_of_string(string_no).clone())
+                    on_fret_clicked=on_fret_clicked
                   />
                 }
               })
@@ -51,6 +62,7 @@ fn FretboardString(
   #[prop()] num_frets: u8,
   #[prop()] string_note: Note,
   #[prop()] fret_state_signals: Vec<RwSignal<FretState>>,
+  on_fret_clicked: Callback<FretClickEvent>,
 ) -> impl IntoView {
   let string_strength = 2.0 + 0.5 * string_no as f64;
 
@@ -64,6 +76,7 @@ fn FretboardString(
             fret_idx: 0,
           }
           fret_state_signal=fret_state_signals[0]
+          on_fret_clicked=on_fret_clicked
         />
       </div>
 
@@ -85,6 +98,7 @@ fn FretboardString(
                       fret_idx: fret_no,
                     }
                     fret_state_signal=fret_state_signals[fret_no as usize]
+                    on_fret_clicked=on_fret_clicked
                   />
                 </div>
               }
@@ -101,25 +115,19 @@ fn FretboardNote(
   #[prop()] note: Note,
   #[prop()] coord: FretCoord,
   #[prop()] fret_state_signal: RwSignal<FretState>,
+  on_fret_clicked: Callback<FretClickEvent>,
 ) -> impl IntoView {
   // Toggle function to demonstrate interaction
-  let toggle = move |_| {
-    // Debug output
-    log!(
-      "Toggled fret at string {} fret {}",
-      coord.string_idx,
-      coord.fret_idx
-    );
-
-    match fret_state_signal.get() {
-      FretState::Hidden => fret_state_signal.set(FretState::Normal),
-      FretState::Normal => fret_state_signal.set(FretState::Root),
-      FretState::Root => fret_state_signal.set(FretState::Hidden),
-    };
+  let on_click = move |_| {
+    on_fret_clicked.run(FretClickEvent {
+      note,
+      string_idx: coord.string_idx,
+      fret_idx: coord.fret_idx,
+    });
   };
 
   view! {
-    <div on:click=toggle>
+    <div on:click=on_click>
       {move || {
         match fret_state_signal.get() {
           FretState::Root => {

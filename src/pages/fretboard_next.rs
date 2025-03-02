@@ -4,8 +4,8 @@
 use leptos::logging::log;
 use leptos::prelude::*;
 
-use crate::components::fretboard_model::FretboardModel;
 use crate::components::fretboard::Fretboard;
+use crate::components::fretboard_model::FretboardModel;
 use crate::music::heptatonic_scales::HeptaScaleType::Major;
 use crate::music::heptatonic_scales::{HeptaScaleImpl, HeptaScaleType};
 use crate::music::notes::Note;
@@ -99,7 +99,10 @@ pub fn FretboardNext() -> impl IntoView {
 
   view! {
     <div class="flex-row y-4">
-      <Fretboard fretboard=fretboard_model />
+      <Fretboard
+        fretboard=fretboard_model
+        on_fret_clicked=Callback::new(|evt| log!("Fret clicked: {:?}", evt))
+      />
       <div class="flex flex-row justify-center items-center text-center">
         <RootNoteSelection set_root_note root_note />
         <ScaleSelection set_scale_type />
