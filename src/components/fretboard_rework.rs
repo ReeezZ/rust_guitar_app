@@ -1,5 +1,8 @@
+use leptos::attr::Scope;
 use leptos::either::{Either, EitherOf3};
+use leptos::logging::log;
 use leptos::prelude::*;
+use std::fmt::Debug;
 
 use crate::music::notes::Note;
 use crate::music::scales::{Scale, ScaleCreator, ScaleTrait, ScaleType};
@@ -9,6 +12,118 @@ use crate::music::scales::{Scale, ScaleCreator, ScaleTrait, ScaleType};
 
 // We can change the return type of the Function to a struct that contains more info like is_blue_note, is_root_note, etc.
 
+struct FretboardCoordinates {
+  string_no: u8,
+  fret_no: u8,
+}
+
+struct FretboardControls {
+  root_note: ReadSignal<Note>,
+  set_root_note: WriteSignal<Note>,
+  scale_type: ReadSignal<ScaleType>,
+  set_scale_type: WriteSignal<ScaleType>,
+}
+
+#[derive(Clone, Copy, PartialEq, Debug)]
+enum FretState {
+  Hidden,
+  Normal,
+  Root,
+}
+
+#[derive(Clone, PartialEq, Debug)]
+struct FretboardModel {
+  frets: Vec<Vec<RwSignal<FretState>>>,
+  num_strings: u8,
+  num_frets: u8,
+}
+
+#[derive(Clone, Copy, PartialEq, Debug)]
+struct FretCoord {
+  string_idx: u8,
+  fret_idx: u8,
+}
+
+impl FretboardModel {
+  fn new(num_strings: u8, num_frets: u8) -> Self {
+    let mut frets = Vec::with_capacity(num_strings as usize);
+
+    for _ in 0..num_strings {
+      let mut string_frets = Vec::with_capacity(num_frets as usize);
+      for _ in 0..num_frets {
+        string_frets.push(RwSignal::new(FretState::Hidden));
+      }
+      frets.push(string_frets);
+    }
+
+    FretboardModel {
+      frets,
+      num_strings,
+      num_frets,
+    }
+  }
+
+  fn get_fret_state(&self, coord: FretCoord) -> RwSignal<FretState> {
+    self.frets[coord.string_idx as usize][coord.fret_idx as usize]
+  }
+
+  fn set_all(&self, state: FretState) {
+    for string in &self.frets {
+      for &fret in string {
+        fret.set(state);
+      }
+    }
+  }
+
+  fn update_from_scale(&self, string_tunings: &[Note], scale: &Scale) {
+    for (string_idx, &tuning) in string_tunings.iter().enumerate() {
+      let string_idx = string_idx as u8;
+
+      // Open string (fret 0)
+      let open_state = if scale.contains_note(tuning) {
+        if scale.root_note() == tuning {
+          FretState::Root
+        } else {
+          FretState::Normal
+        }
+      } else {
+        FretState::Hidden
+      };
+
+      if string_idx < self.num_strings {
+        let coord = FretCoord {
+          string_idx,
+          fret_idx: 0,
+        };
+        self.get_fret_state(coord).set(open_state);
+      }
+
+      // Fretted notes
+      for fret_idx in 1..=self.num_frets {
+        let note = tuning.add_steps(fret_idx as usize);
+
+        let state = if scale.contains_note(note) {
+          if scale.root_note() == note {
+            FretState::Root
+          } else {
+            FretState::Normal
+          }
+        } else {
+          FretState::Hidden
+        };
+
+        if string_idx < self.num_strings && fret_idx <= self.num_frets {
+          let coord = FretCoord {
+            string_idx,
+            fret_idx,
+          };
+          self.get_fret_state(coord).set(state);
+        }
+      }
+    }
+  }
+}
+
 #[component]
 pub fn FretboardRework(
   #[prop(default = 6)] num_strings: u8,
@@ -17,6 +132,30 @@ pub fn FretboardRework(
   scale_type: ReadSignal<ScaleType>,
 ) -> impl IntoView {
   let scale = Memo::new(move |_| Scale::new(root_note.get(), scale_type.get()));
+
+  // Create string tuning array
+  let string_tunings = vec![
+    Note::E, // High E
+    Note::H, // B
+    Note::G,
+    Note::D,
+    Note::A,
+    Note::E, // Low E
+  ];
+
+  let fretboard = FretboardModel::new(num_strings, num_frets);
+
+  // Update the fretboard whenever scale changes
+  Effect::new(move |_| {
+    let current_scale = scale.get();
+    fretboard.update_from_scale(&string_tunings, &current_scale);
+
+    // Log for debugging
+    log!(
+      "Updated fretboard with scale: {}",
+      current_scale.to_string()
+    );
+  });
 
   view! {
     <div class="relative py-16 px-14 bg-primary-shades trans">
@@ -45,13 +184,12 @@ pub fn FretboardRework(
                     string_no=string_no
                     num_frets=num_frets
                     string_note=string_note
-                    scale=scale
+                    fretboard=&fretboard
                   />
                 }
               })
               .collect_view()
-          }} // Fret markers row (positioned below the frets)
-          <FretboardDetails num_frets=num_frets />
+          }} <FretboardDetails num_frets=num_frets />
         </div>
       </div>
     </div>
@@ -59,18 +197,25 @@ pub fn FretboardRework(
 }
 
 #[component]
-fn FretboardString(
+fn FretboardString<'a>(
   #[prop()] string_no: u8,
   #[prop()] num_frets: u8,
   #[prop()] string_note: Note,
-  scale: Memo<Scale>,
+  #[prop()] fretboard: &'a FretboardModel,
 ) -> impl IntoView {
   let string_strength = 2.0 + 0.5 * string_no as f64;
 
   view! {
     <div class="flex relative justify-start items-center w-full tilt">
       <div class="relative z-30 justify-center items-center w-8 h-6 border-r-8 border-transparent">
-        <FretboardNote note=string_note scale />
+        <FretboardNote
+          note=string_note
+          coord=FretCoord {
+            string_idx: string_no,
+            fret_idx: 0,
+          }
+          fretboard=fretboard
+        />
       </div>
 
       <div class="flex relative grow">
@@ -84,7 +229,14 @@ fn FretboardString(
             .map(|fret_no| {
               view! {
                 <div class="flex relative justify-center items-center w-full h-12 text-center bg-transparent grow fretbar-container">
-                  <FretboardNote note=string_note.add_steps(fret_no as usize) scale />
+                  <FretboardNote
+                    note=string_note.add_steps(fret_no as usize)
+                    coord=FretCoord {
+                      string_idx: string_no,
+                      fret_idx: fret_no,
+                    }
+                    fretboard=&fretboard
+                  />
                 </div>
               }
             })
@@ -96,27 +248,59 @@ fn FretboardString(
 }
 
 #[component]
-fn FretboardNote(#[prop()] note: Note, #[prop()] scale: Memo<Scale>) -> impl IntoView {
-  move || {
-    if scale.get().contains_note(note) {
-      Either::Left(view! {
-        <span class="relative z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
-          {move || {
-            if scale.get().root_note() == note {
-              view! {
-                <span class="absolute inset-0 z-10 w-full h-full bg-red-500 rounded-full opacity-50"></span>
-              }
-            } else {
-              view! {
-                <span class="absolute inset-0 z-10 w-full h-full rounded-full opacity-20 bg-slate-400"></span>
-              }
-            }
-          }} <span class="relative z-20">{note.to_string()}</span>
-        </span>
-      })
-    } else {
-      Either::Right(view! { <span></span> })
+fn FretboardNote<'a>(
+  #[prop()] note: Note,
+  #[prop()] coord: FretCoord,
+  #[prop()] fretboard: &'a FretboardModel,
+) -> impl IntoView {
+  let fret_state = fretboard.get_fret_state(coord);
+
+  // Toggle function to demonstrate interaction
+  let toggle = move |_| {
+    let current = fret_state.get();
+    match current {
+      FretState::Hidden => fret_state.set(FretState::Normal),
+      FretState::Normal => fret_state.set(FretState::Root),
+      FretState::Root => fret_state.set(FretState::Hidden),
+      _ => fret_state.set(FretState::Hidden),
     }
+
+    // Debug output
+    log!(
+      "Toggled fret at string {} fret {}",
+      coord.string_idx,
+      coord.fret_idx
+    );
+  };
+
+  view! {
+    <div on:click=toggle>
+      {move || {
+        match fret_state.get() {
+          FretState::Root => {
+            EitherOf3::A(
+              view! {
+                <span class="relative z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
+                  <span class="absolute inset-0 z-10 w-full h-full bg-red-500 rounded-full opacity-50"></span>
+                  <span class="relative z-20">{note.to_string()}</span>
+                </span>
+              },
+            )
+          }
+          FretState::Normal => {
+            EitherOf3::B(
+              view! {
+                <span class="relative z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
+                  <span class="absolute inset-0 z-10 w-full h-full rounded-full opacity-20 bg-slate-400"></span>
+                  <span class="relative z-20">{note.to_string()}</span>
+                </span>
+              },
+            )
+          }
+          _ => EitherOf3::C(view! { <span></span> }),
+        }
+      }}
+    </div>
   }
 }
 
