@@ -7,9 +7,8 @@ use leptos::prelude::*;
 use crate::components::fretboard::Fretboard;
 use crate::components::fretboard_model::FretboardModel;
 use crate::music::heptatonic_scales::HeptaScaleType::Major;
-use crate::music::heptatonic_scales::{HeptaScaleImpl, HeptaScaleType};
 use crate::music::notes::Note;
-use crate::music::scales::{Scale, ScaleType};
+use crate::music::scales::{Scale, ScaleTrait, ScaleType};
 
 #[component]
 fn ScaleSelection(set_scale_type: WriteSignal<ScaleType>) -> impl IntoView {
@@ -73,25 +72,17 @@ pub fn FretboardNext() -> impl IntoView {
   let (root_note, set_root_note) = signal(Note::C);
   let (scale_type, set_scale_type) = signal(ScaleType::Hepatonic(Major));
 
-  // Create a signal to hold the fretboard model
-  let string_tunings = vec![Note::E, Note::H, Note::G, Note::D, Note::A, Note::E];
-  let fretboard_model = RwSignal::new(FretboardModel::new(6, 12, string_tunings));
-
-  // String tunings
+  let fretboard_model = RwSignal::new(FretboardModel::new(
+    6,
+    12,
+    FretboardModel::standard_tuning(),
+  ));
 
   // Create an effect to update the fretboard whenever signals change
   Effect::new(move |_| {
-    let current_root = root_note.get();
-    let current_scale = scale_type.get();
-    let current_scale = match current_scale {
-      ScaleType::Hepatonic(scale) => scale,
-      _ => HeptaScaleType::Major,
-    };
-    let scale = Scale::Heptatonic(HeptaScaleImpl::new(current_root, current_scale));
+    let scale = Scale::new(root_note.get(), scale_type.get());
     log!("Updating fretboard with scale: {:?}", &scale);
 
-    // Update the model by creating a new one
-    // This assumes FretboardModel implements Clone
     fretboard_model.update(|model| {
       model.update_from_scale(&scale);
     });

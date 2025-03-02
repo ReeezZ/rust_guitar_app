@@ -53,9 +53,7 @@ impl FretboardModel {
   }
 
   pub fn six_string_standard_tuning(num_frets: u8) -> Self {
-    let tuning = vec![Note::E, Note::A, Note::D, Note::G, Note::H, Note::E];
-
-    Self::new(6, num_frets, tuning)
+    Self::new(6, num_frets, Self::standard_tuning())
   }
 
   fn get_fret_state(&self, coord: FretCoord) -> RwSignal<FretState> {
@@ -84,6 +82,10 @@ impl FretboardModel {
 
   pub fn get_tuning(&self) -> &[Note] {
     &self.tuning
+  }
+
+  pub fn standard_tuning() -> Vec<Note> {
+    vec![Note::E, Note::A, Note::D, Note::G, Note::H, Note::E]
   }
 
   pub fn get_frets_of_string(&self, string_no: u8) -> &Vec<RwSignal<FretState>> {

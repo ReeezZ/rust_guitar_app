@@ -46,26 +46,11 @@ pub enum Scale {
   // blues (8 notes)
 }
 
-pub trait ScaleCreator {
-  fn new(root_note: Note, scale_type: ScaleType) -> Scale;
-}
-
-impl ScaleCreator for Scale {
-  fn new(root_note: Note, scale_type: ScaleType) -> Scale {
-    match scale_type {
-      ScaleType::Hepatonic(hepta_scale_type) => {
-        let scale = HeptaScaleImpl::new(root_note, hepta_scale_type);
-        Scale::Heptatonic(scale)
-      }
-      ScaleType::Chromatic => Scale::Chromatic,
-    }
-  }
-}
-
 pub trait ScaleTrait {
   fn contains_note(&self, note: Note) -> bool;
   fn root_note(&self) -> Option<Note>;
   fn to_string(&self) -> String;
+  fn new(root_note: Note, scale_type: ScaleType) -> Scale;
 }
 
 impl ScaleTrait for Scale {
@@ -88,6 +73,16 @@ impl ScaleTrait for Scale {
     match self {
       Scale::Heptatonic(scale) => scale.to_string(),
       Scale::Chromatic => "Chromatic".to_string(),
+    }
+  }
+
+  fn new(root_note: Note, scale_type: ScaleType) -> Scale {
+    match scale_type {
+      ScaleType::Hepatonic(hepta_scale_type) => {
+        let scale = HeptaScaleImpl::new(root_note, hepta_scale_type);
+        Scale::Heptatonic(scale)
+      }
+      ScaleType::Chromatic => Scale::Chromatic,
     }
   }
 }
