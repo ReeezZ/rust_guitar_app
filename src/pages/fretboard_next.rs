@@ -4,7 +4,8 @@
 use leptos::logging::log;
 use leptos::prelude::*;
 
-use crate::components::fretboard_rework::{FretboardModel, FretboardRework};
+use crate::components::fretboard_model::FretboardModel;
+use crate::components::fretboard_rework::FretboardRework;
 use crate::music::heptatonic_scales::HeptaScaleType::Major;
 use crate::music::heptatonic_scales::{HeptaScaleImpl, HeptaScaleType};
 use crate::music::notes::Note;

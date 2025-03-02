@@ -64,7 +64,7 @@ impl ScaleCreator for Scale {
 
 pub trait ScaleTrait {
   fn contains_note(&self, note: Note) -> bool;
-  fn root_note(&self) -> Note;
+  fn root_note(&self) -> Option<Note>;
   fn to_string(&self) -> String;
 }
 
@@ -76,11 +76,11 @@ impl ScaleTrait for Scale {
     }
   }
 
-  fn root_note(&self) -> Note {
+  fn root_note(&self) -> Option<Note> {
     match self {
-      Scale::Heptatonic(scale) => scale.root_note(),
+      Scale::Heptatonic(scale) => Some(scale.root_note()),
       // chromatic does not really have a root note, so we just return C
-      Scale::Chromatic => Note::C,
+      Scale::Chromatic => None,
     }
   }
 

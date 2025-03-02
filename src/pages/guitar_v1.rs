@@ -1,6 +1,9 @@
 use crate::{
-  components::fretboard::Fretboard,
-  music::{notes::Note, scales::ScaleType},
+  components::{fretboard_model::FretboardModel, fretboard_rework::FretboardRework},
+  music::{
+    notes::Note,
+    scales::{Scale, ScaleCreator, ScaleType},
+  },
 };
 use leptos::prelude::*;
 
@@ -8,6 +11,11 @@ use leptos::prelude::*;
 pub fn GuitarV1() -> impl IntoView {
   let (root_note, _) = signal(Note::C);
   let (scale_type, _) = signal(ScaleType::Chromatic);
+  let fretboard_model = RwSignal::new(FretboardModel::six_string_standard_tuning(24));
+  Effect::new(move || {
+    let scale = Scale::new(root_note.get(), scale_type.get());
+    fretboard_model.get().update_from_scale(&scale);
+  });
 
   view! {
     <ErrorBoundary fallback=|errors| {
@@ -29,7 +37,7 @@ pub fn GuitarV1() -> impl IntoView {
         <h1 class="py-12 text-6xl font-bold text-center text-primary-rev trans">
           "Gitarren Griffbrett"
         </h1>
-        <Fretboard num_frets=24 num_strings=6 root_note scale_type />
+        <FretboardRework fretboard=fretboard_model />
       </div>
     </ErrorBoundary>
   }

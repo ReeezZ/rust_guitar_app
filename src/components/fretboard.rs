@@ -102,7 +102,7 @@ fn FretboardNote(#[prop()] note: Note, #[prop()] scale: Memo<Scale>) -> impl Int
       Either::Left(view! {
         <span class="relative z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
           {move || {
-            if scale.get().root_note() == note {
+            if scale.get().root_note() == Some(note) {
               view! {
                 <span class="absolute inset-0 z-10 w-full h-full bg-red-500 rounded-full opacity-50"></span>
               }
