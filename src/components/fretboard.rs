@@ -62,7 +62,7 @@ pub fn Fretboard(
 fn FretboardString(
   #[prop()] string_no: u8,
   #[prop()] num_frets: u8,
-  #[prop()] string_note: Note, // TODO change to Note trait, keep the depency clean
+  #[prop()] string_note: Note,
   scale: Memo<Scale>,
 ) -> impl IntoView {
   let string_strength = 2.0 + 0.5 * string_no as f64;
