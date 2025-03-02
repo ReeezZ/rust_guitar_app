@@ -28,11 +28,12 @@ impl ScaleType {
 
   pub fn all_scale_types() -> Vec<ScaleType> {
     // TODO this is not so nice for maintainability
-    vec![
-      ScaleType::Hepatonic(HeptaScaleType::Major),
-      ScaleType::Hepatonic(HeptaScaleType::Minor),
-      ScaleType::Chromatic,
-    ]
+
+    HeptaScaleType::all_scale_types()
+      .iter()
+      .map(|&hepta_scale_type| ScaleType::Hepatonic(hepta_scale_type))
+      .chain(Some(ScaleType::Chromatic).into_iter())
+      .collect()
   }
 }
 
