@@ -104,8 +104,16 @@ fn FretboardString(
 #[component]
 fn FretboardNote(#[prop()] note: Note, #[prop()] is_root_note: bool) -> impl IntoView {
   view! {
-    <span class="z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
-      {note.to_string()}
+    <span class="relative z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
+      {if is_root_note {
+        view! {
+          <span class="absolute inset-0 z-10 w-full h-full bg-red-500 rounded-full opacity-50"></span>
+        }
+      } else {
+        view! {
+          <span class="absolute inset-0 z-10 w-full h-full rounded-full opacity-20 bg-slate-400"></span>
+        }
+      }} <span class="relative z-20">{note.to_string()}</span>
     </span>
   }
 }
