@@ -56,6 +56,16 @@ pub fn Fretboard(
   }
 }
 
+fn render_fretboard_note_button(note: Note, scale: Memo<Scale>) -> impl IntoView {
+  let scale_value = scale.get();
+  let is_root_note = note == scale_value.root_note();
+  if scale_value.contains_note(note) {
+    Either::Left(view! { <FretboardNote note is_root_note /> })
+  } else {
+    Either::Right(view! { <span></span> })
+  }
+}
+
 #[component]
 fn FretboardString(
   #[prop()] string_no: u8,
@@ -68,21 +78,7 @@ fn FretboardString(
   view! {
     <div class="flex relative justify-start items-center w-full tilt">
       <div class="relative z-30 justify-center items-center w-8 h-6 border-r-8 border-transparent">
-        {move || {
-          let note = string_note.add_steps(0);
-          let scale_value = scale.get();
-          if scale_value.contains_note(note) {
-            Either::Left(
-              view! {
-                <span class="absolute w-12 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
-                  {note.to_string()}
-                </span>
-              },
-            )
-          } else {
-            Either::Right(view! { <span></span> })
-          }
-        }}
+        {render_fretboard_note_button(string_note, scale)}
       </div>
 
       <div class="flex relative grow">
@@ -95,27 +91,22 @@ fn FretboardString(
           .map(|fret_no| {
             view! {
               <div class="flex relative justify-center items-center w-full h-12 text-center bg-transparent grow fretbar-container">
-                {move || {
-                  let note = string_note.add_steps(fret_no as usize);
-                  let scale_value = scale.get();
-                  if scale_value.contains_note(note) {
-                    Either::Left(
-                      view! {
-                        <span class="z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
-                          {note.to_string()}
-                        </span>
-                      },
-                    )
-                  } else {
-                    Either::Right(view! { <span></span> })
-                  }
-                }}
+                {render_fretboard_note_button(string_note.add_steps(fret_no as usize), scale)}
               </div>
             }
           })
           .collect_view()}
       </div>
     </div>
+  }
+}
+
+#[component]
+fn FretboardNote(#[prop()] note: Note, #[prop()] is_root_note: bool) -> impl IntoView {
+  view! {
+    <span class="z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
+      {note.to_string()}
+    </span>
   }
 }
 
