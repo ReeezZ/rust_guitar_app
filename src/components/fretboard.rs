@@ -27,6 +27,7 @@ pub fn Fretboard(
         </div>
         <div class="relative flex-col trapezoid grow bg-[#917140] bg-fretboard">
           {(0..num_strings)
+            .rev()
             .map(|string_no| {
               let string_note = match string_no {
                 0 => Note::E,
