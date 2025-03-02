@@ -44,7 +44,6 @@ fn RootNoteSelection(
           }
         }
       >
-        // on:change:target=
         {move || {
           Note::all_notes()
             .iter()
@@ -63,7 +62,7 @@ fn RootNoteSelection(
 }
 
 #[component]
-pub fn GuitarV2() -> impl IntoView {
+pub fn FretboardViewer() -> impl IntoView {
   let (root_note, set_root_note) = signal(Note::C);
   let (scale_type, set_scale_type) = signal(ScaleType::Hepatonic(Major));
 

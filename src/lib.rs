@@ -8,7 +8,7 @@ mod pages;
 
 use crate::components::navbar::Navbar;
 use crate::pages::not_found::NotFound;
-use crate::pages::{guitar_v1::GuitarV1, guitar_v2::GuitarV2, home::Home};
+use crate::pages::{fretboard_viewer::FretboardViewer, guitar_v1::GuitarV1, home::Home};
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -27,7 +27,7 @@ pub fn App() -> impl IntoView {
         <Routes fallback=|| view! { <NotFound /> }>
           <Route path=path!("/") view=Home />
           <Route path=path!("/guitar_v1") view=GuitarV1 />
-          <Route path=path!("/guitar_v2") view=GuitarV2 />
+          <Route path=path!("/fretboard_viewer") view=FretboardViewer />
         </Routes>
       </main>
     </Router>
