@@ -2,7 +2,7 @@ use leptos::either::{Either, EitherOf3};
 use leptos::prelude::*;
 
 use crate::music::notes::Note;
-use crate::music::scales::{Scale, ScaleType};
+use crate::music::scales::{Scale, ScaleCreator, ScaleTrait, ScaleType};
 
 // #[component]
 // pub fn FretNoteButton(#[prop()] _note: Note) -> impl IntoView {}

@@ -1,14 +1,29 @@
 use leptos::prelude::*;
 
-use crate::music::scales::{Scale, ScaleType};
+use crate::music::heptatonic_scales::HeptaScaleType::Major;
+use crate::music::scales::ScaleType;
 use crate::{components::fretboard::Fretboard, music::notes::Note};
 
 #[component]
 fn ScaleSelection(set_scale_type: WriteSignal<ScaleType>) -> impl IntoView {
   view! {
-    <div class="flex justify-center text-center align-middle">
-      <h1 class="text-4xl font-bold text-center">"Scale Selection"</h1>
-
+    <div>
+      <label>"Scale"</label>
+      <select
+        class="py-2 px-3 rounded border border-gray-300"
+        on:change=move |ev| {
+          if let Some(scale_type) = ScaleType::from_str(&event_target_value(&ev)) {
+            set_scale_type.set(scale_type);
+          }
+        }
+      >
+        {ScaleType::all_scale_types()
+          .iter()
+          .map(|scale_type| {
+            view! { <option value=scale_type.to_string()>{scale_type.to_string()}</option> }
+          })
+          .collect_view()}
+      </select>
     </div>
   }
 }
@@ -48,7 +63,7 @@ fn RootNoteSelection(
 #[component]
 pub fn GuitarV2() -> impl IntoView {
   let (root_note, set_root_note) = signal(Note::C);
-  let (scale_type, set_scale_type) = signal(ScaleType::Major);
+  let (scale_type, set_scale_type) = signal(ScaleType::Hepatonic(Major));
 
   view! {
     <div class="flex-row space-y-4">
