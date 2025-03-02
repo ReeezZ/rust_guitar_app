@@ -70,7 +70,7 @@ impl FretboardModel {
   }
 
   pub fn update_from_scale(&self, scale: &Scale) {
-    for (string_idx, &tuning) in self.tuning.iter().rev().enumerate() {
+    for (string_idx, &tuning) in self.tuning.iter().enumerate() {
       let string_idx = string_idx as u8;
 
       // Open string (fret 0)
@@ -133,18 +133,10 @@ pub fn FretboardRework(#[prop()] fretboard: RwSignal<FretboardModel>) -> impl In
             (0..num_strings)
               .rev()
               .map(|string_no| {
-                let string_note = match string_no {
-                  0 => Note::E,
-                  1 => Note::A,
-                  2 => Note::D,
-                  3 => Note::G,
-                  4 => Note::H,
-                  5 => Note::E,
-                  _ => Note::E,
-                };
+                let string_note = fretboard.with(|fb| fb.tuning[string_no as usize]);
                 let fretboard_for_string = fretboard;
 
-                // TODO move tuning out
+                // clone the fretboard for each string
 
                 view! {
                   <FretboardString
