@@ -1,7 +1,7 @@
 use leptos::{component, logging::log, prelude::*};
 
 use crate::{
-  components::{fretboard_model::FretboardModel, fretboard_rework::FretboardRework},
+  components::{fretboard_model::FretboardModel, fretboard::Fretboard},
   music::{
     heptatonic_scales::{HeptaScaleImpl, HeptaScaleType},
     notes::Note,
@@ -35,5 +35,5 @@ pub fn FretboardScaleDisplay(
     });
   });
 
-  view! { <FretboardRework fretboard=fretboard_model /> }
+  view! { <Fretboard fretboard=fretboard_model /> }
 }

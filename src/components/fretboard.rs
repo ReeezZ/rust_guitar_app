@@ -7,7 +7,7 @@ use crate::music::notes::Note;
 use super::fretboard_model::{FretCoord, FretState, FretboardModel};
 
 #[component]
-pub fn FretboardRework(#[prop()] fretboard: RwSignal<FretboardModel>) -> impl IntoView {
+pub fn Fretboard(#[prop()] fretboard: RwSignal<FretboardModel>) -> impl IntoView {
   view! {
     <div class="relative py-16 px-14 bg-primary-shades trans">
       <div class="flex justify-center items-center trapezoid-shadow">
