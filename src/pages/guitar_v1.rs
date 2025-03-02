@@ -1,8 +1,14 @@
-use crate::components::fretboard::Fretboard;
+use crate::{
+  components::fretboard::Fretboard,
+  music::{notes::Note, scales::ScaleType},
+};
 use leptos::prelude::*;
 
 #[component]
 pub fn GuitarV1() -> impl IntoView {
+  let (root_note, _) = signal(Note::C);
+  let (scale_type, _) = signal(ScaleType::Chromatic);
+
   view! {
     <ErrorBoundary fallback=|errors| {
       view! {
@@ -23,7 +29,7 @@ pub fn GuitarV1() -> impl IntoView {
         <h1 class="py-12 text-6xl font-bold text-center text-primary-rev trans">
           "Gitarren Griffbrett"
         </h1>
-        // <Fretboard num_frets=24 num_strings=6 />
+        <Fretboard num_frets=24 num_strings=6 root_note scale_type />
       </div>
     </ErrorBoundary>
   }

@@ -1,160 +1,93 @@
-use std::ops::Index;
-
 use crate::music::notes::Note;
 
-use super::notes::Interval;
+use super::heptatonic_scales::{HeptaScaleImpl, HeptaScaleType};
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum ScaleDegree {
-  First,
-  Second,
-  Third,
-  Fourth,
-  Fifth,
-  Sixth,
-  Seventh,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Clone, PartialEq, Copy, Debug)]
 pub enum ScaleType {
-  Major,
-  Minor,
-  MajorPentatonic,
-  MinorPentatonic,
-  MajorBlues,
-  MinorBlues,
+  Hepatonic(HeptaScaleType),
+  Chromatic,
 }
 
-// TODO add more scales
-// TODO consider non septa scales
-#[derive(Debug, Clone, PartialEq)]
-pub struct Scale {
-  root_note: Note,
-  scale_type: ScaleType,
-  notes: Vec<Note>,
-}
-
-impl Scale {
-  pub fn new(root_note: Note, scale_type: ScaleType) -> Self {
-    let notes = Self::get_notes(root_note, scale_type);
-    Scale {
-      root_note,
-      scale_type,
-      notes,
+impl ScaleType {
+  pub fn from_str(s: &str) -> Option<ScaleType> {
+    // TODO this is not so nice for maintainability
+    match s {
+      "Major" => Some(ScaleType::Hepatonic(HeptaScaleType::Major)),
+      "Minor" => Some(ScaleType::Hepatonic(HeptaScaleType::Minor)),
+      "Chromatic" => Some(ScaleType::Chromatic),
+      _ => None,
     }
   }
 
-  fn get_notes(root_note: Note, scale_type: ScaleType) -> Vec<Note> {
-    let notes = match scale_type {
-      // TODO open closed principle violoation
-      // maybe i should use traits?
-      ScaleType::Major => Self::generate_major_scale(root_note),
-      ScaleType::Minor => Self::generate_minor_scale(root_note),
-      _ => panic!("Scale type not implemented"),
-    };
-
-    notes
+  pub fn to_string(&self) -> String {
+    match self {
+      ScaleType::Hepatonic(hepta_scale_type) => hepta_scale_type.to_string(),
+      ScaleType::Chromatic => "Chromatic".to_string(),
+    }
   }
 
-  fn generate_major_scale(root_note: Note) -> Vec<Note> {
-    let intervals = [
-      Interval::Unison,
-      Interval::MajorSecond,
-      Interval::MajorThird,
-      Interval::PerfectFourth,
-      Interval::PerfectFifth,
-      Interval::MajorSixth,
-      Interval::MajorSeventh,
-    ];
-    Self::generate_scale(root_note, &intervals)
-  }
+  pub fn all_scale_types() -> Vec<ScaleType> {
+    // TODO this is not so nice for maintainability
 
-  fn generate_minor_scale(root_note: Note) -> Vec<Note> {
-    let intervals = [
-      Interval::Unison,
-      Interval::MajorSecond,
-      Interval::MinorThird,
-      Interval::PerfectFourth,
-      Interval::PerfectFifth,
-      Interval::MinorSixth,
-      Interval::MinorSeventh,
-    ];
-
-    Self::generate_scale(root_note, &intervals)
-  }
-
-  fn generate_scale(root_note: Note, intervals: &[Interval]) -> Vec<Note> {
-    let all_notes = Note::all_notes();
-    let start_index = all_notes.iter().position(|&n| n == root_note).unwrap();
-
-    intervals
+    HeptaScaleType::all_scale_types()
       .iter()
-      .map(move |&interval| {
-        let index = (start_index + interval.half_tone_steps()) % all_notes.len();
-        all_notes[index]
-      })
+      .map(|&hepta_scale_type| ScaleType::Hepatonic(hepta_scale_type))
+      .chain(Some(ScaleType::Chromatic).into_iter())
       .collect()
   }
+}
 
-  fn get_note_by_degree(&self, degree: ScaleDegree) -> &Note {
-    let index = match degree {
-      ScaleDegree::First => 0,
-      ScaleDegree::Second => 1,
-      ScaleDegree::Third => 2,
-      ScaleDegree::Fourth => 3,
-      ScaleDegree::Fifth => 4,
-      ScaleDegree::Sixth => 5,
-      ScaleDegree::Seventh => 6,
-    };
-    &self.notes[index]
-  }
+#[derive(Clone, PartialEq)]
+pub enum Scale {
+  Heptatonic(HeptaScaleImpl),
+  Chromatic,
+  // TODO add more scale types
+  // pentatonic,
+  // blues (8 notes)
+}
 
-  pub fn contains_note(&self, note: Note) -> bool {
-    self.notes.contains(&note)
+pub trait ScaleCreator {
+  fn new(root_note: Note, scale_type: ScaleType) -> Scale;
+}
+
+impl ScaleCreator for Scale {
+  fn new(root_note: Note, scale_type: ScaleType) -> Scale {
+    match scale_type {
+      ScaleType::Hepatonic(hepta_scale_type) => {
+        let scale = HeptaScaleImpl::new(root_note, hepta_scale_type);
+        Scale::Heptatonic(scale)
+      }
+      ScaleType::Chromatic => Scale::Chromatic,
+    }
   }
 }
 
-impl Index<ScaleDegree> for Scale {
-  type Output = Note;
-
-  fn index(&self, index: ScaleDegree) -> &Self::Output {
-    &self.get_note_by_degree(index)
-  }
+pub trait ScaleTrait {
+  fn contains_note(&self, note: Note) -> bool;
+  fn root_note(&self) -> Note;
+  fn to_string(&self) -> String;
 }
-#[cfg(test)]
-mod tests {
-  use super::*;
 
-  // TODO add tests
-
-  #[test]
-  fn test_c_major_scale() {
-    let c_major = Scale::new(Note::C, ScaleType::Major);
-    assert_eq!(c_major[ScaleDegree::First], Note::C);
-    assert_eq!(c_major[ScaleDegree::Second], Note::D);
-    assert_eq!(c_major[ScaleDegree::Third], Note::E);
-    assert_eq!(c_major[ScaleDegree::Fourth], Note::F);
-    assert_eq!(c_major[ScaleDegree::Fifth], Note::G);
-    assert_eq!(c_major[ScaleDegree::Sixth], Note::A);
-    assert_eq!(c_major[ScaleDegree::Seventh], Note::H);
+impl ScaleTrait for Scale {
+  fn contains_note(&self, note: Note) -> bool {
+    match self {
+      Scale::Heptatonic(scale) => scale.contains_note(note),
+      Scale::Chromatic => true,
+    }
   }
 
-  #[test]
-  fn test_a_minor_scale() {
-    let a_minor = Scale::new(Note::A, ScaleType::Minor);
-    assert_eq!(a_minor[ScaleDegree::First], Note::A);
-    assert_eq!(a_minor[ScaleDegree::Third], Note::C);
+  fn root_note(&self) -> Note {
+    match self {
+      Scale::Heptatonic(scale) => scale.root_note(),
+      // chromatic does not really have a root note, so we just return C
+      Scale::Chromatic => Note::C,
+    }
   }
 
-  #[test]
-  fn test_a_major_scale() {
-    let a_minor = Scale::new(Note::A, ScaleType::Major);
-    assert_eq!(a_minor[ScaleDegree::First], Note::A);
-    assert_eq!(a_minor[ScaleDegree::Second], Note::H);
-    assert_eq!(a_minor[ScaleDegree::Third], Note::CisOrDes);
-    assert_eq!(a_minor[ScaleDegree::Fourth], Note::D);
-    assert_eq!(a_minor[ScaleDegree::Fifth], Note::E);
-    assert_eq!(a_minor[ScaleDegree::Sixth], Note::FisOrGes);
-    assert_eq!(a_minor[ScaleDegree::Seventh], Note::GisOrAs);
+  fn to_string(&self) -> String {
+    match self {
+      Scale::Heptatonic(scale) => scale.to_string(),
+      Scale::Chromatic => "Chromatic".to_string(),
+    }
   }
 }
