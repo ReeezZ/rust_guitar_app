@@ -4,24 +4,7 @@ use leptos::prelude::*;
 use std::fmt::Debug;
 
 use crate::music::notes::Note;
-use crate::music::scales::{Scale, ScaleTrait, ScaleType};
-
-// #[component]
-// pub fn FretNoteButton(#[prop()] _note: Note) -> impl IntoView {}
-
-// We can change the return type of the Function to a struct that contains more info like is_blue_note, is_root_note, etc.
-
-struct FretboardCoordinates {
-  string_no: u8,
-  fret_no: u8,
-}
-
-struct FretboardControls {
-  root_note: ReadSignal<Note>,
-  set_root_note: WriteSignal<Note>,
-  scale_type: ReadSignal<ScaleType>,
-  set_scale_type: WriteSignal<ScaleType>,
-}
+use crate::music::scales::{Scale, ScaleTrait};
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 enum FretState {
@@ -35,6 +18,7 @@ pub struct FretboardModel {
   frets: Vec<Vec<RwSignal<FretState>>>,
   num_strings: u8,
   num_frets: u8,
+  tuning: Vec<Note>,
 }
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -44,7 +28,13 @@ struct FretCoord {
 }
 
 impl FretboardModel {
-  pub fn new(num_strings: u8, num_frets: u8) -> Self {
+  pub fn new(num_strings: u8, num_frets: u8, tuning: Vec<Note>) -> Self {
+    assert_eq!(
+      num_strings as usize,
+      tuning.len(),
+      "Tuning vector length must match the number of strings"
+    );
+
     let mut frets = Vec::with_capacity(num_strings as usize);
 
     for _ in 0..=num_strings {
@@ -59,6 +49,7 @@ impl FretboardModel {
       frets,
       num_strings,
       num_frets,
+      tuning,
     }
   }
 
@@ -78,8 +69,8 @@ impl FretboardModel {
     }
   }
 
-  pub fn update_from_scale(&self, string_tunings: &[Note], scale: &Scale) {
-    for (string_idx, &tuning) in string_tunings.iter().enumerate() {
+  pub fn update_from_scale(&self, scale: &Scale) {
+    for (string_idx, &tuning) in self.tuning.iter().rev().enumerate() {
       let string_idx = string_idx as u8;
 
       // Open string (fret 0)
@@ -98,7 +89,7 @@ impl FretboardModel {
           string_idx,
           fret_idx: 0,
         };
-        self.get_fret_state(coord).set(open_state);
+        self.set_fret_state(coord, open_state);
       }
 
       // Fretted notes
@@ -120,7 +111,7 @@ impl FretboardModel {
             string_idx,
             fret_idx,
           };
-          self.get_fret_state(coord).set(state);
+          self.set_fret_state(coord, state);
         }
       }
     }
@@ -129,8 +120,6 @@ impl FretboardModel {
 
 #[component]
 pub fn FretboardRework(#[prop()] fretboard: RwSignal<FretboardModel>) -> impl IntoView {
-  let num_frets = move || fretboard.get().num_frets;
-  let num_strings = move || fretboard.get().num_strings;
   view! {
     <div class="relative py-16 px-14 bg-primary-shades trans">
       <div class="flex justify-center items-center trapezoid-shadow">
@@ -140,7 +129,8 @@ pub fn FretboardRework(#[prop()] fretboard: RwSignal<FretboardModel>) -> impl In
         </div>
         <div class="relative flex-col trapezoid grow bg-[#917140] bg-fretboard">
           {move || {
-            (0..num_strings())
+            let num_strings = fretboard.with(|fb| fb.num_strings);
+            (0..num_strings)
               .rev()
               .map(|string_no| {
                 let string_note = match string_no {
@@ -152,18 +142,22 @@ pub fn FretboardRework(#[prop()] fretboard: RwSignal<FretboardModel>) -> impl In
                   5 => Note::E,
                   _ => Note::E,
                 };
+                let fretboard_for_string = fretboard;
+
+                // TODO move tuning out
+
                 view! {
                   <FretboardString
                     string_no=string_no
-                    num_frets=num_frets()
+                    num_frets=fretboard_for_string.with(|fb| fb.num_frets)
                     string_note=string_note
-                    // TODO this clone should probably be avoided
-                    fret_state_signals=fretboard.get().frets[string_no as usize].clone()
+                    fret_state_signals=fretboard_for_string
+                      .with(|fb| fb.frets[string_no as usize].clone())
                   />
                 }
               })
               .collect_view()
-          }} <FretboardDetails num_frets=num_frets() />
+          }} {move || view! { <FretboardDetails num_frets=fretboard.with(|fb| fb.num_frets) /> }}
         </div>
       </div>
     </div>
@@ -229,19 +223,18 @@ fn FretboardNote(
 ) -> impl IntoView {
   // Toggle function to demonstrate interaction
   let toggle = move |_| {
-    match fret_state_signal.get() {
-      FretState::Hidden => fret_state_signal.set(FretState::Normal),
-      FretState::Normal => fret_state_signal.set(FretState::Root),
-      FretState::Root => fret_state_signal.set(FretState::Hidden),
-      _ => fret_state_signal.set(FretState::Hidden),
-    }
-
     // Debug output
     log!(
       "Toggled fret at string {} fret {}",
       coord.string_idx,
       coord.fret_idx
     );
+
+    match fret_state_signal.get() {
+      FretState::Hidden => fret_state_signal.set(FretState::Normal),
+      FretState::Normal => fret_state_signal.set(FretState::Root),
+      FretState::Root => fret_state_signal.set(FretState::Hidden),
+    };
   };
 
   view! {

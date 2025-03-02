@@ -1,6 +1,7 @@
 //! The next version of the fretboard viewer.
 //! WIP
 
+use leptos::logging::log;
 use leptos::prelude::*;
 
 use crate::components::fretboard_rework::{FretboardModel, FretboardRework};
@@ -72,10 +73,10 @@ pub fn FretboardNext() -> impl IntoView {
   let (scale_type, set_scale_type) = signal(ScaleType::Hepatonic(Major));
 
   // Create a signal to hold the fretboard model
-  let fretboard_model = RwSignal::new(FretboardModel::new(6, 12));
+  let string_tunings = vec![Note::E, Note::H, Note::G, Note::D, Note::A, Note::E];
+  let fretboard_model = RwSignal::new(FretboardModel::new(6, 12, string_tunings));
 
   // String tunings
-  let string_tunings = vec![Note::E, Note::H, Note::G, Note::D, Note::A, Note::E];
 
   // Create an effect to update the fretboard whenever signals change
   Effect::new(move |_| {
@@ -86,11 +87,12 @@ pub fn FretboardNext() -> impl IntoView {
       _ => HeptaScaleType::Major,
     };
     let scale = Scale::Heptatonic(HeptaScaleImpl::new(current_root, current_scale));
+    log!("Updating fretboard with scale: {:?}", &scale);
 
     // Update the model by creating a new one
     // This assumes FretboardModel implements Clone
     fretboard_model.update(|model| {
-      model.update_from_scale(&string_tunings, &scale);
+      model.update_from_scale(&scale);
     });
   });
 
