@@ -7,7 +7,7 @@ use crate::{components::fretboard::Fretboard, music::notes::Note};
 #[component]
 fn ScaleSelection(set_scale_type: WriteSignal<ScaleType>) -> impl IntoView {
   view! {
-    <div>
+    <div class="flex flex-row justify-center items-center m-4 text-center align-middle">
       <label>"Scale"</label>
       <select
         class="py-2 px-3 rounded border border-gray-300"
@@ -34,7 +34,7 @@ fn RootNoteSelection(
   set_root_note: WriteSignal<Note>,
 ) -> impl IntoView {
   view! {
-    <div>
+    <div class="flex flex-row items-center m-4 text-center align-middle">
       <label>"Root Note"</label>
       <select
         class="py-2 px-3 rounded border border-gray-300"
@@ -66,9 +66,9 @@ pub fn GuitarV2() -> impl IntoView {
   let (scale_type, set_scale_type) = signal(ScaleType::Hepatonic(Major));
 
   view! {
-    <div class="flex-row space-y-4">
+    <div class="flex-row y-4">
       <Fretboard num_frets=24 num_strings=6 root_note scale_type />
-      <div class="flex flex-row justify-center space-y-4 space-x-4">
+      <div class="flex flex-row justify-center items-center text-center">
         <RootNoteSelection set_root_note root_note />
         <ScaleSelection set_scale_type />
       </div>
