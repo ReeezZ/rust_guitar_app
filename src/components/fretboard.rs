@@ -11,6 +11,7 @@ pub struct FretClickEvent {
   pub note: Note,
   pub string_idx: u8,
   pub fret_idx: u8,
+  pub fret_state: FretState,
 }
 
 #[component]
@@ -123,11 +124,15 @@ fn FretboardNote(
       note,
       string_idx: coord.string_idx,
       fret_idx: coord.fret_idx,
+      fret_state: fret_state_signal.get(),
     });
   };
 
   view! {
-    <div on:click=on_click>
+    <div
+      class="flex flex-grow justify-center items-center w-1/4 h-1/2 text-center align-middle cursor-pointer"
+      on:click=on_click
+    >
       {move || {
         match fret_state_signal.get() {
           FretState::Root => {
