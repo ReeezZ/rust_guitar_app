@@ -1,8 +1,9 @@
 use leptos::prelude::*;
 
+use crate::components::fretboard_scale_display::FretboardScaleDisplay;
 use crate::music::heptatonic_scales::HeptaScaleType::Major;
+use crate::music::notes::Note;
 use crate::music::scales::ScaleType;
-use crate::{components::fretboard::Fretboard, music::notes::Note};
 
 #[component]
 fn ScaleSelection(set_scale_type: WriteSignal<ScaleType>) -> impl IntoView {
@@ -68,7 +69,7 @@ pub fn FretboardViewer() -> impl IntoView {
 
   view! {
     <div class="flex-row y-4">
-      <Fretboard num_frets=24 num_strings=6 root_note scale_type />
+      <FretboardScaleDisplay num_frets=24 root_note scale_type />
       <div class="flex flex-row justify-center items-center text-center">
         <RootNoteSelection set_root_note root_note />
         <ScaleSelection set_scale_type />
