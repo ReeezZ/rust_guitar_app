@@ -45,16 +45,18 @@ fn RootNoteSelection(
         }
       >
         // on:change:target=
-        {Note::all_notes()
-          .iter()
-          .map(|note| {
-            view! {
-              <option value=note.to_string() selected=*note == root_note.get()>
-                {note.to_string()}
-              </option>
-            }
-          })
-          .collect_view()}
+        {move || {
+          Note::all_notes()
+            .iter()
+            .map(|note| {
+              view! {
+                <option value=note.to_string() selected=*note == root_note.get()>
+                  {note.to_string()}
+                </option>
+              }
+            })
+            .collect_view()
+        }}
       </select>
     </div>
   }

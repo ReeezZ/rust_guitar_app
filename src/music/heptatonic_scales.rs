@@ -123,7 +123,10 @@ impl HeptaScaleImpl {
   }
 
   pub fn to_string(&self) -> String {
-    todo!()
+    match self.scale_type {
+      HeptaScaleType::Major => format!("{} Major", self.root_note()),
+      HeptaScaleType::Minor => format!("{} Minor", self.root_note()),
+    }
   }
 }
 
