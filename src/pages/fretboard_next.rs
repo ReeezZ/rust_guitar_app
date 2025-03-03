@@ -75,9 +75,13 @@ pub fn FretboardNext() -> impl IntoView {
 
   let fretboard_model = RwSignal::new(FretboardModel::new(
     6,
-    num_frets,
+    num_frets.get(),
     FretboardModel::standard_tuning(),
   ));
+
+  Effect::new(move |_| {
+    fretboard_model.get().update_num_frets(num_frets.get());
+  });
 
   // Create an effect to update the fretboard whenever signals change
   Effect::new(move |_| {

@@ -16,7 +16,7 @@ pub enum FretState {
 pub struct FretboardModel {
   frets: Vec<Vec<RwSignal<FretState>>>,
   num_strings: u8,
-  num_frets: ReadSignal<u8>,
+  num_frets: RwSignal<u8>,
   tuning: Vec<Note>,
 }
 
@@ -27,21 +27,23 @@ pub struct FretCoord {
 }
 
 impl FretboardModel {
-  pub fn new(num_strings: u8, num_frets: ReadSignal<u8>, tuning: Vec<Note>) -> Self {
+  pub fn new(num_strings: u8, num_frets: u8, tuning: Vec<Note>) -> Self {
     assert_eq!(
       num_strings as usize,
       tuning.len(),
       "Tuning vector length must match the number of strings"
     );
 
-    let frets = Self::generate_frets(num_strings, num_frets.get());
+    let frets = Self::generate_frets(num_strings, num_frets);
 
-    FretboardModel {
+    let mut model = FretboardModel {
       frets,
       num_strings,
-      num_frets,
+      num_frets: RwSignal::new(num_frets),
       tuning,
-    }
+    };
+
+    model
   }
 
   fn generate_frets(num_strings: u8, num_frets: u8) -> Vec<Vec<RwSignal<FretState>>> {
@@ -59,10 +61,20 @@ impl FretboardModel {
   }
 
   pub fn update_num_frets(&mut self, num_frets: u8) {
-    self.frets = Self::generate_frets(self.num_strings, num_frets);
+    if num_frets <= self.num_frets.get() {
+      return;
+    }
+
+    for i in 0..=self.num_strings as usize {
+      for _ in self.frets[i].len() as u8..=num_frets {
+        self.frets[i].push(RwSignal::new(FretState::Hidden));
+      }
+    }
+
+    self.num_frets.set(num_frets);
   }
 
-  pub fn six_string_standard_tuning(num_frets: ReadSignal<u8>) -> Self {
+  pub fn six_string_standard_tuning(num_frets: u8) -> Self {
     Self::new(6, num_frets, Self::standard_tuning())
   }
 
@@ -86,8 +98,8 @@ impl FretboardModel {
     self.num_strings
   }
 
-  pub fn get_num_frets(&self) -> u8 {
-    self.num_frets.get()
+  pub fn get_num_frets(&self) -> RwSignal<u8> {
+    self.num_frets
   }
 
   pub fn get_tuning(&self) -> &[Note] {

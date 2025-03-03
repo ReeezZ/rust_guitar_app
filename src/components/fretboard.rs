@@ -40,7 +40,7 @@ pub fn Fretboard(
                 view! {
                   <FretboardString
                     string_no=string_no
-                    num_frets=fretboard_for_string.with(|fb| fb.get_num_frets())
+                    num_frets=fretboard_for_string.get().get_num_frets()
                     string_note=string_note
                     fret_state_signals=fretboard_for_string
                       .with(|fb| fb.get_frets_of_string(string_no).clone())
@@ -60,7 +60,7 @@ pub fn Fretboard(
 #[component]
 fn FretboardString(
   #[prop()] string_no: u8,
-  #[prop()] num_frets: u8,
+  #[prop()] num_frets: RwSignal<u8>,
   #[prop()] string_note: Note,
   #[prop()] fret_state_signals: Vec<RwSignal<FretState>>,
   on_fret_clicked: Callback<FretClickEvent>,
@@ -88,7 +88,7 @@ fn FretboardString(
         ></div>
 
         {move || {
-          (1..=num_frets)
+          (1..=num_frets.get())
             .map(|fret_no| {
               view! {
                 <div class="flex relative justify-center items-center w-full h-12 text-center bg-transparent grow fretbar-container">
@@ -163,13 +163,13 @@ fn FretboardNote(
 }
 
 #[component]
-pub fn FretboardDetails(#[prop()] num_frets: u8) -> impl IntoView {
+pub fn FretboardDetails(#[prop()] num_frets: RwSignal<u8>) -> impl IntoView {
   view! {
     <div class="flex absolute justify-start w-full top-[48%] -z-10">
       // First fret/String guide details
       <div class="flex relative -top-32 w-8 h-80 -z-10 bg-[linear-gradient(90deg,_#000_20%,_#333333_100%,_#a8a499)] border-r-[8px] [border-image:linear-gradient(0.25turn,#aaaaaa,#ffffff,#aaaaaa)_1_100%]"></div>
       {move || {
-        (1..=num_frets)
+        (1..=num_frets.get())
           .map(|fret_no| {
             let has_marker = [3, 5, 7, 9, 15, 17, 19, 21].contains(&(fret_no % 12));
             let is_double = fret_no % 12 == 0;

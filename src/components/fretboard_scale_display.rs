@@ -6,7 +6,6 @@ use crate::{
     fretboard_model::FretboardModel,
   },
   music::{
-    heptatonic_scales::{HeptaScaleImpl, HeptaScaleType},
     notes::Note,
     scales::{Scale, ScaleTrait, ScaleType},
   },
@@ -18,10 +17,11 @@ pub fn FretboardScaleDisplay(
   #[prop()] scale_type: ReadSignal<ScaleType>,
   #[prop()] num_frets: ReadSignal<u8>,
 ) -> impl IntoView {
-  let fretboard_model = RwSignal::new(FretboardModel::six_string_standard_tuning(num_frets));
+  let fretboard_model = RwSignal::new(FretboardModel::six_string_standard_tuning(num_frets.get()));
 
   Effect::new(move |_| {
-    fretboard_model.get().update_num_frets(num_frets.get());
+    let num_frets = num_frets.get();
+    fretboard_model.get().update_num_frets(num_frets);
     fretboard_model
       .get()
       .update_from_scale(&Scale::new(root_note.get(), scale_type.get()));
