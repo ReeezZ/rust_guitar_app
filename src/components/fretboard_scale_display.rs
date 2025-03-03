@@ -16,9 +16,16 @@ use crate::{
 pub fn FretboardScaleDisplay(
   #[prop()] root_note: ReadSignal<Note>,
   #[prop()] scale_type: ReadSignal<ScaleType>,
-  #[prop()] num_frets: u8,
+  #[prop()] num_frets: ReadSignal<u8>,
 ) -> impl IntoView {
   let fretboard_model = RwSignal::new(FretboardModel::six_string_standard_tuning(num_frets));
+
+  Effect::new(move |_| {
+    fretboard_model.get().update_num_frets(num_frets.get());
+    fretboard_model
+      .get()
+      .update_from_scale(&Scale::new(root_note.get(), scale_type.get()));
+  });
 
   // Create an effect to update the fretboard whenever signals change
   Effect::new(move |_| {

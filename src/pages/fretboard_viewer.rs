@@ -63,16 +63,55 @@ fn RootNoteSelection(
 }
 
 #[component]
+fn NumFretsSelection(num_frets: ReadSignal<u8>, set_num_frets: WriteSignal<u8>) -> impl IntoView {
+  let min_frets = 5;
+  let max_frets = 24;
+
+  view! {
+    <div class="flex flex-row items-center m-4 text-center align-middle">
+      <label class="mr-2">"Number of Frets"</label>
+      <div class="flex items-center">
+        <button
+          class="py-1 px-2 rounded border border-gray-300 hover:bg-gray-100"
+          on:click=move |_| {
+            let current = num_frets.get();
+            if current > min_frets {
+              set_num_frets.set(current - 1);
+            }
+          }
+        >
+          "-"
+        </button>
+        <span class="px-3 text-center min-w-[2rem]">{move || num_frets.get()}</span>
+        <button
+          class="py-1 px-2 rounded border border-gray-300 hover:bg-gray-100"
+          on:click=move |_| {
+            let current = num_frets.get();
+            if current < max_frets {
+              set_num_frets.set(current + 1);
+            }
+          }
+        >
+          "+"
+        </button>
+      </div>
+    </div>
+  }
+}
+
+#[component]
 pub fn FretboardViewer() -> impl IntoView {
   let (root_note, set_root_note) = signal(Note::C);
   let (scale_type, set_scale_type) = signal(ScaleType::Hepatonic(Major));
+  let (num_frets, set_num_frets) = signal(12); // Default to 12 frets
 
   view! {
     <div class="flex-row y-4">
-      <FretboardScaleDisplay num_frets=24 root_note scale_type />
-      <div class="flex flex-row justify-center items-center text-center">
-        <RootNoteSelection set_root_note root_note />
-        <ScaleSelection set_scale_type />
+      <FretboardScaleDisplay num_frets=num_frets root_note=root_note scale_type=scale_type />
+      <div class="flex flex-row flex-wrap justify-center items-center text-center">
+        <RootNoteSelection set_root_note=set_root_note root_note=root_note />
+        <ScaleSelection set_scale_type=set_scale_type />
+        <NumFretsSelection num_frets=num_frets set_num_frets=set_num_frets />
       </div>
     </div>
   }

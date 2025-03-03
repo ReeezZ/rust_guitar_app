@@ -71,10 +71,11 @@ fn RootNoteSelection(
 pub fn FretboardNext() -> impl IntoView {
   let (root_note, set_root_note) = signal(Note::C);
   let (scale_type, set_scale_type) = signal(ScaleType::Hepatonic(Major));
+  let (num_frets, set_num_frets) = signal(12);
 
   let fretboard_model = RwSignal::new(FretboardModel::new(
     6,
-    12,
+    num_frets,
     FretboardModel::standard_tuning(),
   ));
 

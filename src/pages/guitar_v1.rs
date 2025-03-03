@@ -8,6 +8,7 @@ use leptos::prelude::*;
 pub fn GuitarV1() -> impl IntoView {
   let (root_note, _) = signal(Note::C);
   let (scale_type, _) = signal(ScaleType::Chromatic);
+  let (num_frets, _) = signal(24);
 
   view! {
     <ErrorBoundary fallback=|errors| {
@@ -29,7 +30,7 @@ pub fn GuitarV1() -> impl IntoView {
         <h1 class="py-12 text-6xl font-bold text-center text-primary-rev trans">
           "Gitarren Griffbrett"
         </h1>
-        <FretboardScaleDisplay num_frets=24 root_note scale_type />
+        <FretboardScaleDisplay num_frets root_note scale_type />
       </div>
     </ErrorBoundary>
   }
