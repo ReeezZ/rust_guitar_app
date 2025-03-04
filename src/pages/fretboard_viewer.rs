@@ -1,3 +1,6 @@
+use std::str::FromStr;
+
+use leptos::logging::debug_warn;
 use leptos::prelude::*;
 
 use crate::components::fretboard_scale_display::FretboardScaleDisplay;
@@ -40,8 +43,11 @@ fn RootNoteSelection(
       <select
         class="py-2 px-3 rounded border border-gray-300"
         on:change=move |ev| {
-          if let Some(note) = Note::from_str(&event_target_value(&ev)) {
+          let event_value = event_target_value(&ev);
+          if let Ok(note) = Note::from_str(&event_value) {
             set_root_note.set(note);
+          } else {
+            debug_warn!("Failed to parse note from this value: {}", &event_value);
           }
         }
       >

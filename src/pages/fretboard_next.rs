@@ -1,6 +1,8 @@
 //! The next version of the fretboard viewer.
 //! WIP
 
+use std::str::FromStr;
+
 use leptos::logging::log;
 use leptos::prelude::*;
 
@@ -45,8 +47,11 @@ fn RootNoteSelection(
       <select
         class="py-2 px-3 rounded border border-gray-300"
         on:change=move |ev| {
-          if let Some(note) = Note::from_str(&event_target_value(&ev)) {
+          let event_value = event_target_value(&ev);
+          if let Ok(note) = Note::from_str(&event_value) {
             set_root_note.set(note);
+          } else {
+            log!("Failed to parse note from this value: {}", &event_value);
           }
         }
       >

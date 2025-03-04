@@ -1,5 +1,3 @@
-use std::{borrow::Cow, str::FromStr};
-
 use crate::music::notes::Note;
 
 use super::heptatonic_scales::{HeptaScaleImpl, HeptaScaleType};
@@ -54,19 +52,12 @@ pub trait ScaleTrait: ToString {
   fn new(root_note: Note, scale_type: ScaleType) -> Scale;
 }
 
-// TODO into / from methods from std might help avoiding the hard coded "Chromatic.to_string()" call
-impl Into<Cow<'static, str>> for Scale {
-  fn into(self) -> Cow<'static, str> {
-    match self {
-      Scale::Heptatonic(scale) => Cow::Owned(scale.to_string()),
-      Scale::Chromatic => Cow::Borrowed("Chromatic"),
-    }
-  }
-}
-
 impl ToString for Scale {
   fn to_string(&self) -> String {
-    Cow::<'static, str>::from(*self).to_string()
+    match self {
+      Scale::Heptatonic(scale) => scale.to_string(),
+      Scale::Chromatic => "Chromatic".to_string(),
+    }
   }
 }
 
