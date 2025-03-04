@@ -1,3 +1,5 @@
+use std::{borrow::Cow, str::FromStr};
+
 use crate::music::notes::Note;
 
 use super::heptatonic_scales::{HeptaScaleImpl, HeptaScaleType};
@@ -46,11 +48,26 @@ pub enum Scale {
   // blues (8 notes)
 }
 
-pub trait ScaleTrait {
+pub trait ScaleTrait: ToString {
   fn contains_note(&self, note: Note) -> bool;
   fn root_note(&self) -> Option<Note>;
-  fn to_string(&self) -> String;
   fn new(root_note: Note, scale_type: ScaleType) -> Scale;
+}
+
+// TODO into / from methods from std might help avoiding the hard coded "Chromatic.to_string()" call
+impl Into<Cow<'static, str>> for Scale {
+  fn into(self) -> Cow<'static, str> {
+    match self {
+      Scale::Heptatonic(scale) => Cow::Owned(scale.to_string()),
+      Scale::Chromatic => Cow::Borrowed("Chromatic"),
+    }
+  }
+}
+
+impl ToString for Scale {
+  fn to_string(&self) -> String {
+    Cow::<'static, str>::from(*self).to_string()
+  }
 }
 
 impl ScaleTrait for Scale {
@@ -66,13 +83,6 @@ impl ScaleTrait for Scale {
       Scale::Heptatonic(scale) => Some(scale.root_note()),
       // chromatic does not really have a root note, so we just return C
       Scale::Chromatic => None,
-    }
-  }
-
-  fn to_string(&self) -> String {
-    match self {
-      Scale::Heptatonic(scale) => scale.to_string(),
-      Scale::Chromatic => "Chromatic".to_string(),
     }
   }
 

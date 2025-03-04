@@ -1,5 +1,8 @@
 use std::fmt;
 
+// TODO use strum::enumIter
+// https://docs.rs/strum/latest/strum/derive.EnumIter.html
+// it's even a simple derive macro :>
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Note {
   C,
@@ -17,7 +20,8 @@ pub enum Note {
 }
 
 impl Note {
-  pub fn all_notes() -> &'static [Note; 12] {
+  pub const fn all_notes() -> &'static [Note; 12] {
+    // TODO maybe lazy init
     static ALL_NOTES: [Note; 12] = [
       Note::C,
       Note::CisOrDes,
@@ -35,7 +39,7 @@ impl Note {
     &ALL_NOTES
   }
 
-  pub fn mapping() -> &'static [(Note, &'static str)] {
+  pub const fn mapping() -> &'static [(Note, &'static str)] {
     static MAPPING: [(Note, &'static str); 12] = [
       (Note::C, "C"),
       (Note::CisOrDes, "C#/Db"),
@@ -67,16 +71,27 @@ impl Note {
   }
 
   /// Returns the note that is `steps` half-tone steps away from the current note.
-  pub fn add_steps(&self, steps: usize) -> Note {
+  pub const fn add_steps(&self, steps: usize) -> Note {
     let all_notes = Note::all_notes();
-    let index = all_notes.iter().position(|&n| n == *self).unwrap();
-    let new_index = (index + steps) % all_notes.len();
-    all_notes[new_index]
+    let len = all_notes.len();
+    let mut i = 0;
+    while i < len {
+      // TODO if this worked it would be super nice
+      if all_notes[i] == *self {
+        let new_index = (i + steps) % len;
+        return all_notes[new_index];
+      }
+      i += 1;
+    }
+
+    // This should never happen if the Note is valid
+    all_notes[0] // Return C as a fallback
   }
 }
 
 impl fmt::Display for Note {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    // TODO use unicode sharp and flat symbols
     let note_str = match self {
       Note::C => "C",
       Note::CisOrDes => "C#/Db",
