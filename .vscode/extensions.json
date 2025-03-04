@@ -2,7 +2,6 @@
   "recommendations": [
     "bradlc.vscode-tailwindcss",
     "rust-lang.rust-analyzer",
-    "dustypomerleau.rust-syntax",
     "tamasfe.even-better-toml"
   ]
 }
