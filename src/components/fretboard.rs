@@ -59,7 +59,7 @@ fn FretboardString(
   #[prop()] string_no: u8,
   #[prop()] string_note: Note,
   #[prop()] fret_state_signals: FretStringSignals,
-  #[prop()] num_frets: ReadSignal<u8>,
+  #[prop(into)] num_frets: ReadSignal<u8>,
   on_fret_clicked: Callback<FretClickEvent>,
 ) -> impl IntoView {
   let string_strength = 2.0 + 0.5 * string_no as f64;
@@ -73,7 +73,7 @@ fn FretboardString(
             string_idx: string_no,
             fret_idx: 0,
           }
-          fret_state_signal=fret_state_signals.get()[0]
+          fret_state_signal=Signal::derive(move || fret_state_signals.get()[0].get())
           on_fret_clicked=on_fret_clicked
         />
       </div>
@@ -117,7 +117,7 @@ fn FretboardString(
 fn FretboardNote(
   #[prop()] note: Note,
   #[prop()] coord: FretCoord,
-  #[prop()] fret_state_signal: FretNoteSignal,
+  #[prop(into)] fret_state_signal: Signal<FretState>,
   on_fret_clicked: Callback<FretClickEvent>,
 ) -> impl IntoView {
   // Toggle function to demonstrate interaction

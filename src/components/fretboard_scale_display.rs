@@ -17,7 +17,9 @@ pub fn FretboardScaleDisplay(
   #[prop()] scale_type: ReadSignal<ScaleType>,
   #[prop()] num_frets: ReadSignal<u8>,
 ) -> impl IntoView {
-  let fretboard_model = RwSignal::new(FretboardModel::six_string_standard_tuning(num_frets.get()));
+  let fretboard_model = RwSignal::new(FretboardModel::six_string_standard_tuning(
+    num_frets.get_untracked(),
+  ));
 
   Effect::new(move |_| {
     let current_root = root_note.get();
