@@ -4,7 +4,9 @@ use leptos::prelude::*;
 
 use crate::music::notes::Note;
 
-use super::fretboard_model::{FretCoord, FretState, FretboardModel};
+use super::fretboard_model::{
+  FretCoord, FretNoteSignal, FretState, FretStringSignals, FretboardModel,
+};
 
 #[derive(Clone, Copy, Debug)]
 pub struct FretClickEvent {
@@ -33,18 +35,13 @@ pub fn Fretboard(
               .rev()
               .map(|string_no| {
                 let string_note = fretboard.with(|fb| fb.get_tuning()[string_no as usize]);
-                let fretboard_for_string = fretboard;
-                // let on_fret_clicked_cloned = on_fret_clicked.clone();
-                // clone the fretboard for each string
-
                 view! {
                   <FretboardString
                     string_no=string_no
-                    num_frets=fretboard_for_string.get().get_num_frets()
                     string_note=string_note
-                    fret_state_signals=fretboard_for_string
-                      .with(|fb| fb.get_frets_of_string(string_no).clone())
                     on_fret_clicked=on_fret_clicked
+                    fret_state_signals=fretboard.get().get_frets_of_string(string_no)
+                    num_frets=fretboard.with(|fb| fb.get_num_frets())
                   />
                 }
               })
@@ -60,9 +57,9 @@ pub fn Fretboard(
 #[component]
 fn FretboardString(
   #[prop()] string_no: u8,
-  #[prop()] num_frets: RwSignal<u8>,
   #[prop()] string_note: Note,
-  #[prop()] fret_state_signals: Vec<RwSignal<FretState>>,
+  #[prop()] fret_state_signals: FretStringSignals,
+  #[prop()] num_frets: ReadSignal<u8>,
   on_fret_clicked: Callback<FretClickEvent>,
 ) -> impl IntoView {
   let string_strength = 2.0 + 0.5 * string_no as f64;
@@ -76,7 +73,7 @@ fn FretboardString(
             string_idx: string_no,
             fret_idx: 0,
           }
-          fret_state_signal=fret_state_signals[0]
+          fret_state_signal=fret_state_signals.get()[0]
           on_fret_clicked=on_fret_clicked
         />
       </div>
@@ -87,18 +84,23 @@ fn FretboardString(
           style:height=move || format!("{}px", string_strength)
         ></div>
 
+        // get min of num_frets and fret_state_signals.len() - 1
+
+        // TODO what if fret_state_signals is 1 or 0?
         {move || {
-          (1..=num_frets.get())
+          let max_idx = std::cmp::min(num_frets.get() as usize, fret_state_signals.get().len() - 1);
+          (1..=max_idx)
             .map(|fret_no| {
+
               view! {
                 <div class="flex relative justify-center items-center w-full h-12 text-center bg-transparent grow fretbar-container">
                   <FretboardNote
                     note=string_note.add_steps(fret_no as usize)
                     coord=FretCoord {
                       string_idx: string_no,
-                      fret_idx: fret_no,
+                      fret_idx: fret_no as u8,
                     }
-                    fret_state_signal=fret_state_signals[fret_no as usize]
+                    fret_state_signal=fret_state_signals.get()[fret_no]
                     on_fret_clicked=on_fret_clicked
                   />
                 </div>
@@ -115,7 +117,7 @@ fn FretboardString(
 fn FretboardNote(
   #[prop()] note: Note,
   #[prop()] coord: FretCoord,
-  #[prop()] fret_state_signal: RwSignal<FretState>,
+  #[prop()] fret_state_signal: FretNoteSignal,
   on_fret_clicked: Callback<FretClickEvent>,
 ) -> impl IntoView {
   // Toggle function to demonstrate interaction
@@ -163,7 +165,7 @@ fn FretboardNote(
 }
 
 #[component]
-pub fn FretboardDetails(#[prop()] num_frets: RwSignal<u8>) -> impl IntoView {
+pub fn FretboardDetails(#[prop()] num_frets: ReadSignal<u8>) -> impl IntoView {
   view! {
     <div class="flex absolute justify-start w-full top-[48%] -z-10">
       // First fret/String guide details

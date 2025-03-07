@@ -20,21 +20,19 @@ pub fn FretboardScaleDisplay(
   let fretboard_model = RwSignal::new(FretboardModel::six_string_standard_tuning(num_frets.get()));
 
   Effect::new(move |_| {
+    let current_root = root_note.get();
+    let current_scale_type = scale_type.get();
+    let scale = Scale::new(current_root, current_scale_type);
     let num_frets = num_frets.get();
-    fretboard_model.get().update_num_frets(num_frets);
-    fretboard_model
-      .get()
-      .update_from_scale(&Scale::new(root_note.get(), scale_type.get()));
-  });
 
-  // Create an effect to update the fretboard whenever signals change
-  Effect::new(move |_| {
-    let scale = Scale::new(root_note.get(), scale_type.get());
-    log!("Updating fretboard with scale: {:?}", &scale);
+    log!(
+      "FretboardScaleDisplay: Updating fretboard with scale: {:?} and num_frets {:?}",
+      scale,
+      num_frets
+    );
 
-    // Update the model by creating a new one
-    // This assumes FretboardModel implements Clone
     fretboard_model.update(|model| {
+      model.update_num_frets(num_frets);
       model.update_from_scale(&scale);
     });
   });

@@ -1,4 +1,4 @@
-use leptos::prelude::*;
+use leptos::{logging::log, prelude::*};
 
 use crate::music::{
   notes::Note,
@@ -12,9 +12,13 @@ pub enum FretState {
   Root,
 }
 
+pub type FretNoteSignal = RwSignal<FretState>;
+pub type FretStringSignals = RwSignal<Vec<FretNoteSignal>>;
+pub type FretboardSignals = Vec<FretStringSignals>;
+
 #[derive(Clone, Debug)]
 pub struct FretboardModel {
-  frets: Vec<Vec<RwSignal<FretState>>>,
+  frets: FretboardSignals,
   num_strings: u8,
   num_frets: RwSignal<u8>,
   tuning: Vec<Note>,
@@ -46,32 +50,44 @@ impl FretboardModel {
     model
   }
 
-  fn generate_frets(num_strings: u8, num_frets: u8) -> Vec<Vec<RwSignal<FretState>>> {
-    let mut frets = Vec::with_capacity(num_strings as usize);
+  fn generate_frets(num_strings: u8, num_frets: u8) -> FretboardSignals {
+    let mut frets: FretboardSignals = Vec::with_capacity(num_strings as usize);
 
     for _ in 0..=num_strings {
       let mut string_frets = Vec::with_capacity(num_frets as usize);
       for _ in 0..=num_frets {
         string_frets.push(RwSignal::new(FretState::Hidden));
       }
-      frets.push(string_frets);
+      frets.push(RwSignal::new(string_frets));
     }
 
     frets
   }
 
   pub fn update_num_frets(&mut self, num_frets: u8) {
-    if num_frets <= self.num_frets.get() {
+    let current = self.num_frets.get();
+
+    // Only update if actually changing
+    if num_frets == current {
       return;
     }
 
-    for i in 0..=self.num_strings as usize {
-      for _ in self.frets[i].len() as u8..=num_frets {
-        self.frets[i].push(RwSignal::new(FretState::Hidden));
+    log!("Updating number of frets from {} to {}", current, num_frets);
+    // Set the new number of frets
+    self.num_frets.set(num_frets);
+
+    if num_frets > current {
+      for string_idx in 0..self.num_strings as usize {
+        let string_frets = &mut self.frets[string_idx];
+
+        // Add additional fret signals
+        for _ in (current + 1)..=num_frets {
+          string_frets.update(|string_frets| string_frets.push(RwSignal::new(FretState::Hidden)));
+        }
       }
     }
-
-    self.num_frets.set(num_frets);
+    // If decreasing, we can leave the extra frets in the array
+    // as they won't be displayed or accessed
   }
 
   pub fn six_string_standard_tuning(num_frets: u8) -> Self {
@@ -79,7 +95,7 @@ impl FretboardModel {
   }
 
   fn get_fret_state(&self, coord: FretCoord) -> RwSignal<FretState> {
-    self.frets[coord.string_idx as usize][coord.fret_idx as usize]
+    self.frets[coord.string_idx as usize].get()[coord.fret_idx as usize]
   }
 
   fn set_fret_state(&self, coord: FretCoord, state: FretState) {
@@ -88,7 +104,7 @@ impl FretboardModel {
 
   fn set_all(&self, state: FretState) {
     for string in &self.frets {
-      for &fret in string {
+      for fret in string.get() {
         fret.set(state);
       }
     }
@@ -98,8 +114,8 @@ impl FretboardModel {
     self.num_strings
   }
 
-  pub fn get_num_frets(&self) -> RwSignal<u8> {
-    self.num_frets
+  pub fn get_num_frets(&self) -> ReadSignal<u8> {
+    self.num_frets.read_only()
   }
 
   pub fn get_tuning(&self) -> &[Note] {
@@ -110,8 +126,8 @@ impl FretboardModel {
     vec![Note::E, Note::A, Note::D, Note::G, Note::H, Note::E]
   }
 
-  pub fn get_frets_of_string(&self, string_no: u8) -> &Vec<RwSignal<FretState>> {
-    &self.frets[string_no as usize]
+  pub fn get_frets_of_string(&self, string_no: u8) -> FretStringSignals {
+    self.frets[string_no as usize]
   }
 
   fn determine_fret_state(note: Note, scale: &Scale) -> FretState {
