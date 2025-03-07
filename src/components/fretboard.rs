@@ -1,3 +1,8 @@
+use std::{
+  rc::Rc,
+  sync::{Arc, Mutex},
+};
+
 use leptos::either::EitherOf3;
 use leptos::logging::log;
 use leptos::prelude::*;
@@ -18,9 +23,10 @@ pub struct FretClickEvent {
 
 #[component]
 pub fn Fretboard(
-  #[prop()] fretboard: RwSignal<FretboardModel>,
+  #[prop()] fretboard: Arc<Mutex<FretboardModel>>,
   on_fret_clicked: Callback<FretClickEvent>,
 ) -> impl IntoView {
+  let fretboard_for_details = fretboard.clone();
   view! {
     <div class="relative py-16 px-14 bg-primary-shades trans">
       <div class="flex justify-center items-center trapezoid-shadow">
@@ -30,24 +36,37 @@ pub fn Fretboard(
         </div>
         <div class="relative flex-col trapezoid grow bg-[#917140] bg-fretboard">
           {move || {
-            let num_strings = fretboard.with(|fb| fb.get_num_strings());
+            let num_strings = fretboard.lock().expect("mutex lock failed").get_num_strings();
             (0..num_strings)
               .rev()
               .map(|string_no| {
-                let string_note = fretboard.with(|fb| fb.get_tuning()[string_no as usize]);
+                let string_note = fretboard
+                  .lock()
+                  .expect("mutex lock failed")
+                  .get_tuning()[string_no as usize];
                 view! {
                   <FretboardString
                     string_no=string_no
                     string_note=string_note
                     on_fret_clicked=on_fret_clicked
-                    fret_state_signals=fretboard.get().get_frets_of_string(string_no)
-                    num_frets=fretboard.with(|fb| fb.get_num_frets())
+                    fret_state_signals=fretboard
+                      .lock()
+                      .expect("mutex lock failed")
+                      .get_frets_of_string(string_no)
+                    num_frets=fretboard.lock().expect("mutex lock failed").get_num_frets()
                   />
                 }
               })
               .collect_view()
           }}
-          {move || view! { <FretboardDetails num_frets=fretboard.with(|fb| fb.get_num_frets()) /> }}
+          {move || {
+            view! {
+              <FretboardDetails num_frets=fretboard_for_details
+                .lock()
+                .expect("mutex lock failed")
+                .get_num_frets() />
+            }
+          }}
         </div>
       </div>
     </div>
@@ -120,6 +139,12 @@ fn FretboardNote(
   #[prop(into)] fret_state_signal: Signal<FretState>,
   on_fret_clicked: Callback<FretClickEvent>,
 ) -> impl IntoView {
+  // log!(
+  //   "FretboardNote: note: {:?}, coord: {:?}",
+  //   note,
+  //   coord,
+  //   // fret_state_signal.get()
+  // );
   // Toggle function to demonstrate interaction
   let on_click = move |_| {
     on_fret_clicked.run(FretClickEvent {

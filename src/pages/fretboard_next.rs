@@ -2,6 +2,7 @@
 //! WIP
 
 use std::str::FromStr;
+use std::sync::{Arc, Mutex};
 
 use leptos::logging::log;
 use leptos::prelude::*;
@@ -78,14 +79,20 @@ pub fn FretboardNext() -> impl IntoView {
   let (scale_type, set_scale_type) = signal(ScaleType::Hepatonic(Major));
   let (num_frets, set_num_frets) = signal(12);
 
-  let fretboard_model = RwSignal::new(FretboardModel::new(
+  let fretboard_model = Arc::new(Mutex::new(FretboardModel::new(
     6,
     num_frets.get(),
     FretboardModel::standard_tuning(),
-  ));
+  )));
+
+  let fb_for_num_frets = fretboard_model.clone();
+  let fb_scale_effect = fretboard_model.clone();
 
   Effect::new(move |_| {
-    fretboard_model.get().update_num_frets(num_frets.get());
+    fb_for_num_frets
+      .lock()
+      .expect("mutex lock failed")
+      .update_num_frets(num_frets.get());
   });
 
   // Create an effect to update the fretboard whenever signals change
@@ -93,9 +100,10 @@ pub fn FretboardNext() -> impl IntoView {
     let scale = Scale::new(root_note.get(), scale_type.get());
     log!("Updating fretboard with scale: {:?}", &scale);
 
-    fretboard_model.update(|model| {
-      model.update_from_scale(&scale);
-    });
+    fb_scale_effect
+      .lock()
+      .expect("mutex lock failed")
+      .update_from_scale(&scale);
   });
 
   view! {
