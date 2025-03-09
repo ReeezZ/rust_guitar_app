@@ -1,8 +1,3 @@
-use std::{
-  rc::Rc,
-  sync::{Arc, Mutex},
-};
-
 use leptos::{component, logging::log, prelude::*};
 
 use crate::{
@@ -22,11 +17,10 @@ pub fn FretboardScaleDisplay(
   #[prop()] scale_type: ReadSignal<ScaleType>,
   #[prop()] num_frets: ReadSignal<u8>,
 ) -> impl IntoView {
-  let fretboard_model = Arc::new(Mutex::new(FretboardModel::six_string_standard_tuning(
+  let fretboard_model = RwSignal::new(FretboardModel::six_string_standard_tuning(
     num_frets.get_untracked(),
-  )));
+  ));
 
-  let model_clone = fretboard_model.clone();
   Effect::new(move |_| {
     let current_root = root_note.get();
     let current_scale_type = scale_type.get();
@@ -39,9 +33,10 @@ pub fn FretboardScaleDisplay(
       num_frets
     );
 
-    let mut locked_model = model_clone.lock().expect("mutex could not be locked");
-    locked_model.update_num_frets(num_frets);
-    locked_model.update_from_scale(&scale);
+    fretboard_model.update(|model| {
+      model.update_num_frets(num_frets);
+      model.update_from_scale(&scale);
+    });
   });
 
   let on_fret_clicked = Callback::new(move |fret_click_event: FretClickEvent| {

@@ -72,6 +72,10 @@ impl FretboardModel {
       return;
     }
 
+    log!("Updating number of frets from {} to {}", current, num_frets);
+    // Set the new number of frets
+    self.num_frets.set(num_frets);
+
     if num_frets > current {
       for string_idx in 0..self.num_strings as usize {
         let string_frets = &mut self.frets[string_idx];
@@ -82,10 +86,6 @@ impl FretboardModel {
         }
       }
     }
-
-    log!("Updating number of frets from {} to {}", current, num_frets);
-    // Set the new number of frets
-    self.num_frets.set(num_frets);
     // If decreasing, we can leave the extra frets in the array
     // as they won't be displayed or accessed
   }
