@@ -12,11 +12,13 @@ pub enum FretState {
   Root,
 }
 
-type FretboardSignals = Vec<Vec<RwSignal<FretState>>>;
+pub type FretNoteSignal = RwSignal<FretState>;
+pub type FretStringSignals = RwSignal<Vec<FretNoteSignal>>;
+pub type FretboardSignals = Vec<FretStringSignals>;
 
 #[derive(Clone, Debug)]
 pub struct FretboardModel {
-  frets: Vec<Vec<RwSignal<FretState>>>, // Just a 2D array of signals
+  frets: FretboardSignals,
   num_strings: u8,
   num_frets: RwSignal<u8>,
   tuning: Vec<Note>,
@@ -38,7 +40,7 @@ impl FretboardModel {
 
     let frets = Self::generate_frets(num_strings, num_frets);
 
-    let model = FretboardModel {
+    let mut model = FretboardModel {
       frets,
       num_strings,
       num_frets: RwSignal::new(num_frets),
@@ -56,7 +58,7 @@ impl FretboardModel {
       for _ in 0..=num_frets {
         string_frets.push(RwSignal::new(FretState::Hidden));
       }
-      frets.push(string_frets);
+      frets.push(RwSignal::new(string_frets));
     }
 
     frets
@@ -80,7 +82,7 @@ impl FretboardModel {
 
         // Add additional fret signals
         for _ in (current + 1)..=num_frets {
-          string_frets.push(RwSignal::new(FretState::Hidden));
+          string_frets.update(|string_frets| string_frets.push(RwSignal::new(FretState::Hidden)));
         }
       }
     }
@@ -92,8 +94,8 @@ impl FretboardModel {
     Self::new(6, num_frets, Self::standard_tuning())
   }
 
-  pub fn get_fret_state(&self, coord: FretCoord) -> RwSignal<FretState> {
-    self.frets[coord.string_idx as usize][coord.fret_idx as usize]
+  fn get_fret_state(&self, coord: FretCoord) -> RwSignal<FretState> {
+    self.frets[coord.string_idx as usize].get()[coord.fret_idx as usize]
   }
 
   fn set_fret_state(&self, coord: FretCoord, state: FretState) {
@@ -102,7 +104,7 @@ impl FretboardModel {
 
   fn set_all(&self, state: FretState) {
     for string in &self.frets {
-      for fret in string {
+      for fret in string.get() {
         fret.set(state);
       }
     }
@@ -124,8 +126,8 @@ impl FretboardModel {
     vec![Note::E, Note::A, Note::D, Note::G, Note::H, Note::E]
   }
 
-  pub fn get_frets_of_string(&self, string_no: u8) -> &[RwSignal<FretState>] {
-    &self.frets[string_no as usize]
+  pub fn get_frets_of_string(&self, string_no: u8) -> FretStringSignals {
+    self.frets[string_no as usize]
   }
 
   fn determine_fret_state(note: Note, scale: &Scale) -> FretState {

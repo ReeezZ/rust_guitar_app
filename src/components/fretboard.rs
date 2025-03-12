@@ -4,7 +4,9 @@ use leptos::prelude::*;
 
 use crate::music::notes::Note;
 
-use super::fretboard_model::{FretCoord, FretState, FretboardModel};
+use super::fretboard_model::{
+  FretCoord, FretNoteSignal, FretState, FretStringSignals, FretboardModel,
+};
 
 #[derive(Clone, Copy, Debug)]
 pub struct FretClickEvent {
@@ -38,7 +40,7 @@ pub fn Fretboard(
                     string_no=string_no
                     string_note=string_note
                     on_fret_clicked=on_fret_clicked
-                    fretboard
+                    fret_state_signals=fretboard.get().get_frets_of_string(string_no)
                     num_frets=fretboard.with(|fb| fb.get_num_frets())
                   />
                 }
@@ -56,14 +58,10 @@ pub fn Fretboard(
 fn FretboardString(
   #[prop()] string_no: u8,
   #[prop()] string_note: Note,
-  #[prop()] fretboard: RwSignal<FretboardModel>,
+  #[prop()] fret_state_signals: FretStringSignals,
   #[prop(into)] num_frets: ReadSignal<u8>,
   on_fret_clicked: Callback<FretClickEvent>,
 ) -> impl IntoView {
-  let coord = FretCoord {
-    string_idx: string_no,
-    fret_idx: 0,
-  };
   let string_strength = 2.0 + 0.5 * string_no as f64;
 
   view! {
@@ -71,8 +69,11 @@ fn FretboardString(
       <div class="relative z-30 justify-center items-center w-8 h-6 border-r-8 border-transparent">
         <FretboardNote
           note=string_note
-          coord
-          fret_state_signal=fretboard.get().get_fret_state(coord).read_only()
+          coord=FretCoord {
+            string_idx: string_no,
+            fret_idx: 0,
+          }
+          fret_state_signal=Signal::derive(move || fret_state_signals.get()[0].get())
           on_fret_clicked=on_fret_clicked
         />
       </div>
@@ -83,35 +84,30 @@ fn FretboardString(
           style:height=move || format!("{}px", string_strength)
         ></div>
 
+        // get min of num_frets and fret_state_signals.len() - 1
+
+        // TODO what if fret_state_signals is 1 or 0?
         {move || {
-          num_frets
-            .with(move |num_frets| {
-              (1..=*num_frets as u8)
-                .map(|fret_no| {
-                  let coord = FretCoord {
-                    string_idx: string_no,
-                    fret_idx: fret_no,
-                  };
+          let max_idx = std::cmp::min(num_frets.get() as usize, fret_state_signals.get().len() - 1);
+          (1..=max_idx)
+            .map(|fret_no| {
 
-                  // get min of num_frets and fret_state_signals.len() - 1
-
-                  view! {
-                    <div class="flex relative justify-center items-center w-full h-12 text-center bg-transparent grow fretbar-container">
-                      <FretboardNote
-                        note=string_note.add_steps(fret_no as usize)
-                        coord
-                        fret_state_signal=(move || {
-                          fretboard.with(|fb| fb.get_fret_state(coord)).read_only()
-                        })
-                        on_fret_clicked=on_fret_clicked
-                      />
-                    </div>
-                  }
-                })
-                .collect_view()
+              view! {
+                <div class="flex relative justify-center items-center w-full h-12 text-center bg-transparent grow fretbar-container">
+                  <FretboardNote
+                    note=string_note.add_steps(fret_no as usize)
+                    coord=FretCoord {
+                      string_idx: string_no,
+                      fret_idx: fret_no as u8,
+                    }
+                    fret_state_signal=fret_state_signals.get()[fret_no]
+                    on_fret_clicked=on_fret_clicked
+                  />
+                </div>
+              }
             })
+            .collect_view()
         }}
-
       </div>
     </div>
   }
@@ -161,7 +157,7 @@ fn FretboardNote(
               },
             )
           }
-          FretState::Hidden => EitherOf3::C(view! { <span></span> }),
+          _ => EitherOf3::C(view! { <span></span> }),
         }
       }}
     </div>
