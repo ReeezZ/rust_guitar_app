@@ -40,14 +40,12 @@ impl FretboardModel {
 
     let frets = Self::generate_frets(num_strings, num_frets);
 
-    let mut model = FretboardModel {
+    FretboardModel {
       frets,
       num_strings,
       num_frets: RwSignal::new(num_frets),
       tuning,
-    };
-
-    model
+    }
   }
 
   fn generate_frets(num_strings: u8, num_frets: u8) -> FretboardSignals {

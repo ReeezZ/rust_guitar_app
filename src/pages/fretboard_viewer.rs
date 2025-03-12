@@ -68,10 +68,11 @@ fn RootNoteSelection(
   }
 }
 
+const MAX_NUM_FRETS: u8 = 24;
+
 #[component]
 fn NumFretsSelection(num_frets: ReadSignal<u8>, set_num_frets: WriteSignal<u8>) -> impl IntoView {
   let min_frets = 5;
-  let max_frets = 24;
 
   view! {
     <div class="flex flex-row items-center m-4 text-center align-middle">
@@ -93,7 +94,7 @@ fn NumFretsSelection(num_frets: ReadSignal<u8>, set_num_frets: WriteSignal<u8>) 
           class="py-1 px-2 rounded border border-gray-300 hover:bg-gray-100"
           on:click=move |_| {
             let current = num_frets.get();
-            if current < max_frets {
+            if current < MAX_NUM_FRETS {
               set_num_frets.set(current + 1);
             }
           }
@@ -109,7 +110,9 @@ fn NumFretsSelection(num_frets: ReadSignal<u8>, set_num_frets: WriteSignal<u8>) 
 pub fn FretboardViewer() -> impl IntoView {
   let (root_note, set_root_note) = signal(Note::C);
   let (scale_type, set_scale_type) = signal(ScaleType::Hepatonic(Major));
-  let (num_frets, set_num_frets) = signal(12); // Default to 12 frets
+
+  // Using max num frets for now. https://gitlab.com/ReeeZ/leptos_stuff/-/issues/10
+  let (num_frets, set_num_frets) = signal(MAX_NUM_FRETS);
 
   view! {
     <div class="flex-row y-4">
