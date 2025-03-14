@@ -1,10 +1,8 @@
 use leptos::{component, logging::log, prelude::*};
 
 use crate::{
-  components::{
-    fretboard::{FretClickEvent, Fretboard},
-    fretboard_model::FretboardModel,
-  },
+  components::fretboard::{FretClickEvent, Fretboard},
+  models::fretboard_model::FretboardModel,
   music::{
     notes::Note,
     scales::{Scale, ScaleTrait, ScaleType},

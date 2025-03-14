@@ -3,7 +3,7 @@ use leptos::prelude::*;
 
 use crate::music::notes::Note;
 
-use super::fretboard_model::{FretCoord, FretState, FretStringSignals, FretboardModel};
+use crate::models::fretboard_model::{FretCoord, FretState, FretStringSignals, FretboardModel};
 
 #[derive(Clone, Copy, Debug)]
 pub struct FretClickEvent {

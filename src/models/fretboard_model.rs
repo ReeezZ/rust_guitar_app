@@ -96,7 +96,7 @@ impl FretboardModel {
     self.frets[coord.string_idx as usize].get()[coord.fret_idx as usize]
   }
 
-  fn set_fret_state(&self, coord: FretCoord, state: FretState) {
+  pub fn set_fret_state(&self, coord: FretCoord, state: FretState) {
     self.get_fret_state(coord).set(state);
   }
 

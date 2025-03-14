@@ -4,6 +4,7 @@ use leptos_router::{components::*, path};
 use pages::fretboard_next::FretboardNext;
 
 mod components;
+mod models;
 mod music;
 mod pages;
 
