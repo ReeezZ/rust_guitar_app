@@ -80,9 +80,6 @@ fn FretboardString(
           style:height=move || format!("{}px", string_strength)
         ></div>
 
-        // get min of num_frets and fret_state_signals.len() - 1
-
-        // TODO what if fret_state_signals is 1 or 0?
         {move || {
           let max_idx = std::cmp::min(num_frets.get() as usize, fret_state_signals.get().len() - 1);
           (1..=max_idx)

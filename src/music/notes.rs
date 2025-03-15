@@ -1,8 +1,5 @@
 use std::{fmt, str::FromStr};
 
-// TODO use strum::enumIter
-// https://docs.rs/strum/latest/strum/derive.EnumIter.html
-// it's even a simple derive macro :>
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Note {
   C,
@@ -21,7 +18,6 @@ pub enum Note {
 
 impl Note {
   pub const fn all_notes() -> &'static [Note; 12] {
-    // TODO maybe lazy init
     static ALL_NOTES: [Note; 12] = [
       Note::C,
       Note::CisOrDes,
