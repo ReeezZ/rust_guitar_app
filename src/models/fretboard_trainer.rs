@@ -2,7 +2,6 @@ use crate::music::{intervals::Interval, notes::Note};
 
 use super::fretboard_model::{FretCoord, FretboardModel};
 use leptos::prelude::Get;
-use rand::Rng;
 
 pub trait FretboardTrainerTrait {
   fn note_from_fret(&self, coord: FretCoord) -> Note;
@@ -17,13 +16,15 @@ pub trait FretboardTrainerTrait {
 
 impl FretboardTrainerTrait for FretboardModel {
   fn get_random_fret(&self) -> FretCoord {
-    let string_idx = rand::rng().random_range(0..self.get_num_strings() as u8);
-    let fret_idx = rand::rng().random_range(0..self.get_num_frets().get() as u8);
+    // TODO https://gitlab.com/ReeeZ/leptos_stuff/-/issues/11
+    unimplemented!();
+    // let string_idx = rand::rng().random_range(0..self.get_num_strings() as u8);
+    // let fret_idx = rand::rng().random_range(0..self.get_num_frets().get() as u8);
 
-    FretCoord {
-      string_idx,
-      fret_idx,
-    }
+    // FretCoord {
+    //   string_idx,
+    //   fret_idx,
+    // }
   }
 
   fn is_interval_of(
