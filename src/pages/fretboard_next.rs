@@ -1,8 +1,7 @@
 //! The next version of the fretboard viewer.
 //! WIP
 
-use leptos::logging::log;
-use leptos::{ev, prelude::*};
+use leptos::prelude::*;
 
 use crate::components::fretboard::{FretClickEvent, Fretboard};
 use crate::models::fretboard_model::{FretState, FretboardModel};
@@ -26,7 +25,7 @@ pub fn FretboardNext() -> impl IntoView {
   let on_fret_clicked = Callback::new(move |evt: FretClickEvent| {
     let toggle_fret_state = match evt.fret_state {
       FretState::Hidden => FretState::Normal,
-      FretState::Normal => FretState::Root,
+      FretState::Normal => FretState::Hidden,
       FretState::Root => FretState::Hidden,
     };
 
