@@ -38,8 +38,9 @@ Tailwind CSS IntelliSense VS Code plugin problem: You might have to downgrade to
 
 ## Usage
 
-`trunk serve --open`
+`RUSTFLAGS='--cfg getrandom_backend="wasm_js"' trunk serve --open`
 
+Since we are using the rand crate, the `getrandom_backend` has to be specified. See [getrandom docs - webassembly support](https://docs.rs/getrandom/latest/getrandom/#webassembly-support) for more information.
 
 ## Feature Ideas and Status
 

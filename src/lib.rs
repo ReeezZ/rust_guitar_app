@@ -1,8 +1,10 @@
 use leptos::{prelude::ElementChild, prelude::*};
 use leptos_meta::*;
 use leptos_router::{components::*, path};
+use pages::fretboard_next::FretboardNext;
 
 mod components;
+mod models;
 mod music;
 mod pages;
 
@@ -28,6 +30,7 @@ pub fn App() -> impl IntoView {
           <Route path=path!("/") view=Home />
           <Route path=path!("/guitar_v1") view=GuitarV1 />
           <Route path=path!("/fretboard_viewer") view=FretboardViewer />
+          <Route path=path!("/fretboard_next") view=FretboardNext />
         </Routes>
       </main>
     </Router>

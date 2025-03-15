@@ -3,6 +3,9 @@ name = "rust_guitar_app"
 version = "0.1.0"
 edition = "2021"
 
+[target.wasm32-unknown-unknown]
+rustflags = "--cfg getrandom_backend=\"wasm_js\""
+
 [dependencies]
 console_error_panic_hook = "0.1.7"
 web-sys = { version = "0.3", features = ["console"] }
@@ -10,7 +13,9 @@ leptos = { version = "0.7.7", features = ["csr"] }
 leptos_meta = { version = "0.7" }
 leptos_router = { version = "0.7" }
 leptos-use = "0.15.6"
-codee = { version = "*" }
+codee = "0.2.0"
+rand = "0.9.0"
+getrandom = { version = "0.3.1", features = ["wasm_js"] }
 
 [[example]]
 name = "playground"

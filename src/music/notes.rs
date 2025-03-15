@@ -1,4 +1,4 @@
-use std::fmt;
+use std::{fmt, str::FromStr};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Note {
@@ -17,7 +17,7 @@ pub enum Note {
 }
 
 impl Note {
-  pub fn all_notes() -> &'static [Note; 12] {
+  pub const fn all_notes() -> &'static [Note; 12] {
     static ALL_NOTES: [Note; 12] = [
       Note::C,
       Note::CisOrDes,
@@ -35,35 +35,22 @@ impl Note {
     &ALL_NOTES
   }
 
-  pub fn mapping() -> &'static [(Note, &'static str)] {
+  pub const fn mapping() -> &'static [(Note, &'static str)] {
     static MAPPING: [(Note, &'static str); 12] = [
       (Note::C, "C"),
-      (Note::CisOrDes, "C#/Db"),
+      (Note::CisOrDes, "C♯/D♭"),
       (Note::D, "D"),
-      (Note::DisOrEs, "D#/Eb"),
+      (Note::DisOrEs, "D♯/E♭"),
       (Note::E, "E"),
       (Note::F, "F"),
-      (Note::FisOrGes, "F#/Gb"),
+      (Note::FisOrGes, "F♯/G♭"),
       (Note::G, "G"),
-      (Note::GisOrAs, "G#/Ab"),
+      (Note::GisOrAs, "G♯/A♭"),
       (Note::A, "A"),
-      (Note::AisOrB, "A#/Bb"),
+      (Note::AisOrB, "A♯/B♭"),
       (Note::H, "H"),
     ];
     &MAPPING
-  }
-
-  pub fn as_str(&self) -> &'static str {
-    Self::mapping()
-      .iter()
-      .find_map(|(note, s)| if note == self { Some(*s) } else { None })
-      .unwrap()
-  }
-
-  pub fn from_str(s: &str) -> Option<Self> {
-    Self::mapping()
-      .iter()
-      .find_map(|(note, str)| if *str == s { Some(*note) } else { None })
   }
 
   /// Returns the note that is `steps` half-tone steps away from the current note.
@@ -77,21 +64,24 @@ impl Note {
 
 impl fmt::Display for Note {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    let note_str = match self {
-      Note::C => "C",
-      Note::CisOrDes => "C#/Db",
-      Note::D => "D",
-      Note::DisOrEs => "D#/Eb",
-      Note::E => "E",
-      Note::F => "F",
-      Note::FisOrGes => "F#/Gb",
-      Note::G => "G",
-      Note::GisOrAs => "G#/Ab",
-      Note::A => "A",
-      Note::AisOrB => "A#/Bb",
-      Note::H => "H",
-    };
+    let note_str = Self::mapping()
+      .iter()
+      .find_map(|(note, s)| if note == self { Some(*s) } else { None })
+      .unwrap()
+      .to_string();
+
     write!(f, "{}", note_str)
+  }
+}
+
+impl FromStr for Note {
+  type Err = ();
+
+  fn from_str(s: &str) -> Result<Self, Self::Err> {
+    Self::mapping()
+      .iter()
+      .find_map(|(note, str)| if *str == s { Some(*note) } else { None })
+      .ok_or(())
   }
 }
 
