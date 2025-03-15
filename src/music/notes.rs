@@ -40,19 +40,18 @@ impl Note {
   }
 
   pub const fn mapping() -> &'static [(Note, &'static str)] {
-    // TODO use unicode characters
     static MAPPING: [(Note, &'static str); 12] = [
       (Note::C, "C"),
-      (Note::CisOrDes, "C#/Db"),
+      (Note::CisOrDes, "C♯/D♭"),
       (Note::D, "D"),
-      (Note::DisOrEs, "D#/Eb"),
+      (Note::DisOrEs, "D♯/E♭"),
       (Note::E, "E"),
       (Note::F, "F"),
-      (Note::FisOrGes, "F#/Gb"),
+      (Note::FisOrGes, "F♯/G♭"),
       (Note::G, "G"),
-      (Note::GisOrAs, "G#/Ab"),
+      (Note::GisOrAs, "G♯/A♭"),
       (Note::A, "A"),
-      (Note::AisOrB, "A#/Bb"),
+      (Note::AisOrB, "A♯/B♭"),
       (Note::H, "H"),
     ];
     &MAPPING
@@ -69,7 +68,6 @@ impl Note {
 
 impl fmt::Display for Note {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    // TODO use unicode sharp and flat symbols
     let note_str = Self::mapping()
       .iter()
       .find_map(|(note, s)| if note == self { Some(*s) } else { None })
