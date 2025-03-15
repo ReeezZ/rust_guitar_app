@@ -8,8 +8,7 @@ use crate::models::fretboard_model::{FretCoord, FretState, FretStringSignals, Fr
 #[derive(Clone, Copy, Debug)]
 pub struct FretClickEvent {
   pub note: Note,
-  pub string_idx: u8,
-  pub fret_idx: u8,
+  pub coord: FretCoord,
   pub fret_state: FretState,
 }
 
@@ -121,8 +120,7 @@ fn FretboardNote(
   let on_click = move |_| {
     on_fret_clicked.run(FretClickEvent {
       note,
-      string_idx: coord.string_idx,
-      fret_idx: coord.fret_idx,
+      coord,
       fret_state: fret_state_signal.get(),
     });
   };
