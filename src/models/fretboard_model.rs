@@ -100,7 +100,7 @@ impl FretboardModel {
     self.get_fret_state(coord).set(state);
   }
 
-  fn set_all(&self, state: FretState) {
+  pub fn set_all(&self, state: FretState) {
     for string in &self.frets {
       for fret in string.get() {
         fret.set(state);

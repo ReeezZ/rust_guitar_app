@@ -35,14 +35,24 @@ pub fn FretboardNext() -> impl IntoView {
   });
 
   view! {
-    <div class="flex-row y-4">
+    <div class="flex flex-col space-y-4">
       <Fretboard fretboard=fretboard_model on_fret_clicked />
-      <button
-        class="bg-blue-200 rounded-md border-4 border-slate-500"
-        on:click=on_click_random_note
-      >
-        "Random note"
-      </button>
+      <div class="flex flex-row justify-center space-x-4">
+        <button
+          class="py-2 px-4 bg-blue-200 rounded-md border-4 border-slate-500"
+          on:click=on_click_random_note
+        >
+          "Random note"
+        </button>
+        <button
+          class="py-2 px-4 bg-blue-200 rounded-md border-4 border-slate-500"
+          on:click=move |_| {
+            fretboard_model.with(|model| model.set_all(FretState::Hidden));
+          }
+        >
+          "Hide all"
+        </button>
+      </div>
     </div>
   }
 }
