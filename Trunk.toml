@@ -26,6 +26,14 @@ inject_scripts = true
 # An optional cargo profile to use
 # cargo_profile = "release-trunk"
 
+# command = "cargo build --cfg getrandom_backend=\"wasm_js\" --target=wasm32-unknown-unknown --manifest-path /Users/mba/git/leptos_stuff/Cargo.toml "
+
+rustflags = "--cfg getrandom_backend=\"wasm_js\""
+
+# [[hooks]]
+# stage = "pre_build"
+# command = "RUSTFLAGS='--cfg getrandom_backend=\"linux_getrandom\"'"
+
 [watch]
 # Paths to watch. The `build.target`'s parent folder is watched by default.
 watch = []
@@ -33,6 +41,9 @@ watch = []
 ignore = []
 
 [serve]
+command = "cargo build --cfg getrandom_backend=\"wasm_js\" --target=wasm32-unknown-unknown --manifest-path /Users/mba/git/leptos_stuff/Cargo.toml "
+
+rustflags = "--cfg getrandom_backend=\"wasm_js\""
 # The address to serve on.
 addresses = ["127.0.0.1"]
 # The port to serve on.
