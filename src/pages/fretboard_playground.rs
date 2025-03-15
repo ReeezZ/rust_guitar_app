@@ -1,5 +1,4 @@
-//! The next version of the fretboard viewer.
-//! WIP
+//! This page is for testing features and ideas
 
 use leptos::prelude::*;
 
@@ -8,7 +7,7 @@ use crate::models::fretboard_model::{FretState, FretboardModel};
 use crate::models::fretboard_trainer::FretboardTrainerTrait;
 
 #[component]
-pub fn FretboardNext() -> impl IntoView {
+pub fn FretboardPlayground() -> impl IntoView {
   let fretboard_model = RwSignal::new(FretboardModel::new(
     6,
     12,
@@ -36,6 +35,10 @@ pub fn FretboardNext() -> impl IntoView {
 
   view! {
     <div class="flex flex-col space-y-4">
+      <div class="flex flex-col items-center space-y-4">
+        <h1 class="text-2xl font-bold">"Fretboard Playground"</h1>
+        <p>"This page is for testing features and ideas"</p>
+      </div>
       <Fretboard fretboard=fretboard_model on_fret_clicked />
       <div class="flex flex-row justify-center space-x-4">
         <button
