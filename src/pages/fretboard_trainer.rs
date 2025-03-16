@@ -1,23 +1,34 @@
 use leptos::prelude::*;
+use rand::seq::IteratorRandom;
+use strum::IntoEnumIterator;
 
 use crate::components::fretboard::{FretClickEvent, Fretboard};
 use crate::models::fretboard_model::{FretState, FretboardModel};
-use crate::models::fretboard_trainer::{get_random_interval, FretboardTrainerTrait};
+use crate::models::fretboard_trainer::FretboardTrainerTrait;
+use crate::music::intervals::Interval;
 use crate::music::notes::Note;
+
+/// Random interval except Unison
+fn random_interval() -> Interval {
+  Interval::iter()
+    .filter(|i| i != &Interval::Unison)
+    .choose(&mut rand::rng())
+    .unwrap()
+}
 
 #[component]
 pub fn FretboardTrainer() -> impl IntoView {
   let fretboard_model = RwSignal::new(FretboardModel::new(6, 5, FretboardModel::standard_tuning()));
 
   let (note, set_note) = signal(Note::C);
-  let (interval, set_interval) = signal(get_random_interval());
+  let (interval, set_interval) = signal(random_interval());
   let (error_text, set_error_text) = signal("".to_string());
 
   let on_fret_clicked = Callback::new(move |evt: FretClickEvent| {
     fretboard_model.with(|model| {
       let note_of_clicked_fret = model.note_from_fret(evt.coord);
       if interval.get().of(note.get()) == note_of_clicked_fret {
-        set_interval.set(get_random_interval());
+        set_interval.set(random_interval());
         model.set_all(FretState::Hidden);
         let new_fret = model.get_random_fret();
         model.set_fret_state(new_fret, FretState::Root);
