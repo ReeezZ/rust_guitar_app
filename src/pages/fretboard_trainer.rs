@@ -1,5 +1,6 @@
 use core::fmt;
 
+use leptos::logging::log;
 use leptos::prelude::*;
 
 use crate::components::fretboard::{FretClickEvent, Fretboard};
@@ -16,15 +17,14 @@ pub fn FretboardTrainer() -> impl IntoView {
   let (interval, set_interval) = signal(Interval::MajorSecond);
 
   let on_fret_clicked = Callback::new(move |evt: FretClickEvent| {
-    let toggle_fret_state = match evt.fret_state {
-      FretState::Hidden => FretState::Normal,
-      FretState::Normal => FretState::Hidden,
-      FretState::Root => FretState::Hidden,
-    };
-
-    fretboard_model
-      .get()
-      .set_fret_state(evt.coord, toggle_fret_state);
+    fretboard_model.with(|model| {
+      let note_of_clicked_fret = model.note_from_fret(evt.coord);
+      if interval.get().of(note.get()) == note_of_clicked_fret {
+        log!("Correct!");
+      } else {
+        log!("Incorrect!");
+      }
+    });
   });
 
   fretboard_model.update(move |model| {
