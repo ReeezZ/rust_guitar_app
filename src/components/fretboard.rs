@@ -76,7 +76,7 @@ fn FretboardString(
 
       <div class="flex relative grow">
         <div
-          class="absolute right-0 -left-60 top-1/2 z-20 -translate-y-1/2 drop-shadow-[0_2px_2px_rgba(0,0,0,0.6)] bg-[repeating-linear-gradient(45deg,_#dddddd,_#555555_2px,_#333333_2px)]"
+          class="absolute right-0 -left-60 top-1/2 z-20 -translate-y-1/2 pointer-events-none drop-shadow-[0_2px_2px_rgba(0,0,0,0.6)] bg-[repeating-linear-gradient(45deg,_#dddddd,_#555555_2px,_#333333_2px)]"
           style:height=move || format!("{}px", string_strength)
         ></div>
 
@@ -124,7 +124,7 @@ fn FretboardNote(
 
   view! {
     <div
-      class="flex flex-grow justify-center items-center w-1/4 h-1/2 text-center align-middle cursor-pointer"
+      class="flex flex-grow justify-center items-center w-8 h-3/4 text-center align-middle cursor-pointer"
       on:click=on_click
     >
       {move || {
