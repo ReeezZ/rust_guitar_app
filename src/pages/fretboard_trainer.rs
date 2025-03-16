@@ -1,10 +1,8 @@
-use leptos::logging::log;
 use leptos::prelude::*;
 
 use crate::components::fretboard::{FretClickEvent, Fretboard};
 use crate::models::fretboard_model::{FretState, FretboardModel};
 use crate::models::fretboard_trainer::{get_random_interval, FretboardTrainerTrait};
-use crate::music::intervals::Interval;
 use crate::music::notes::Note;
 
 #[component]
@@ -19,7 +17,6 @@ pub fn FretboardTrainer() -> impl IntoView {
     fretboard_model.with(|model| {
       let note_of_clicked_fret = model.note_from_fret(evt.coord);
       if interval.get().of(note.get()) == note_of_clicked_fret {
-        log!("Correct!");
         set_interval.set(get_random_interval());
         model.set_all(FretState::Hidden);
         let new_fret = model.get_random_fret();
