@@ -13,6 +13,7 @@ pub fn FretboardTrainer() -> impl IntoView {
 
   let (note, set_note) = signal(Note::C);
   let (interval, set_interval) = signal(get_random_interval());
+  let (error_text, set_error_text) = signal("".to_string());
 
   let on_fret_clicked = Callback::new(move |evt: FretClickEvent| {
     fretboard_model.with(|model| {
@@ -21,10 +22,12 @@ pub fn FretboardTrainer() -> impl IntoView {
         log!("Correct!");
         set_interval.set(get_random_interval());
         model.set_all(FretState::Hidden);
-        model.set_fret_state(evt.coord, FretState::Root);
-        set_note.set(model.note_from_fret(model.get_random_fret()));
+        let new_fret = model.get_random_fret();
+        model.set_fret_state(new_fret, FretState::Root);
+        set_note.set(model.note_from_fret(new_fret));
+        set_error_text.set("".to_string());
       } else {
-        log!("Incorrect!");
+        set_error_text.set("Incorrect!".to_string());
       }
     });
   });
@@ -47,6 +50,9 @@ pub fn FretboardTrainer() -> impl IntoView {
       <Fretboard fretboard=fretboard_model on_fret_clicked />
       <div>
         <p>Looking for <b>{interval_str}</b>of <b>{note_str}</b></p>
+      </div>
+      <div>
+        <p class="text-red-600">{error_text}</p>
       </div>
     </div>
   }
