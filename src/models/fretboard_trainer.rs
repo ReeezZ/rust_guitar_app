@@ -2,7 +2,8 @@ use crate::music::{intervals::Interval, notes::Note};
 
 use super::fretboard_model::{FretCoord, FretboardModel};
 use leptos::prelude::{Get, GetUntracked};
-use rand::Rng;
+use rand::{seq::IteratorRandom, Rng};
+use strum::IntoEnumIterator;
 
 pub trait FretboardTrainerTrait {
   fn note_from_fret(&self, coord: FretCoord) -> Note;
@@ -43,6 +44,11 @@ impl FretboardTrainerTrait for FretboardModel {
     let string_note = self.get_tuning()[coord.string_idx as usize];
     string_note.add_steps(coord.fret_idx as usize)
   }
+}
+pub fn get_random_interval() -> Interval {
+  Interval::iter()
+    .choose(&mut rand::rng())
+    .expect("Failed to get random interval")
 }
 
 // tests

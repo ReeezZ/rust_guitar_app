@@ -3,7 +3,7 @@ use leptos::prelude::*;
 
 use crate::components::fretboard::{FretClickEvent, Fretboard};
 use crate::models::fretboard_model::{FretState, FretboardModel};
-use crate::models::fretboard_trainer::FretboardTrainerTrait;
+use crate::models::fretboard_trainer::{get_random_interval, FretboardTrainerTrait};
 use crate::music::intervals::Interval;
 use crate::music::notes::Note;
 
@@ -12,7 +12,7 @@ pub fn FretboardTrainer() -> impl IntoView {
   let fretboard_model = RwSignal::new(FretboardModel::new(6, 5, FretboardModel::standard_tuning()));
 
   let (note, set_note) = signal(Note::C);
-  let (interval, set_interval) = signal(Interval::MajorSecond);
+  let (interval, set_interval) = signal(get_random_interval());
 
   let on_fret_clicked = Callback::new(move |evt: FretClickEvent| {
     fretboard_model.with(|model| {

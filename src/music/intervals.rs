@@ -1,7 +1,8 @@
 use crate::music::notes::Note;
+use strum_macros::EnumIter;
 use ToString;
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, EnumIter)]
 pub enum Interval {
   Unison,
   MinorSecond,
