@@ -1,4 +1,5 @@
 use crate::music::notes::Note;
+use ToString;
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum Interval {
@@ -37,6 +38,26 @@ impl Interval {
       Interval::MinorSeventh => 10,
       Interval::MajorSeventh => 11,
       Interval::Octave => 12,
+    }
+  }
+}
+
+impl ToString for Interval {
+  fn to_string(&self) -> String {
+    match self {
+      Interval::Unison => "Unison".to_string(),
+      Interval::MinorSecond => "Minor Second".to_string(),
+      Interval::MajorSecond => "Major Second".to_string(),
+      Interval::MinorThird => "Minor Third".to_string(),
+      Interval::MajorThird => "Major Third".to_string(),
+      Interval::PerfectFourth => "Perfect Fourth".to_string(),
+      Interval::Tritone => "Tritone".to_string(),
+      Interval::PerfectFifth => "Perfect Fifth".to_string(),
+      Interval::MinorSixth => "Minor Sixth".to_string(),
+      Interval::MajorSixth => "Major Sixth".to_string(),
+      Interval::MinorSeventh => "Minor Seventh".to_string(),
+      Interval::MajorSeventh => "Major Seventh".to_string(),
+      Interval::Octave => "Octave".to_string(),
     }
   }
 }
