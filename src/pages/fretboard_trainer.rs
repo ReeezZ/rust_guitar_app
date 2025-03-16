@@ -1,5 +1,3 @@
-use core::fmt;
-
 use leptos::logging::log;
 use leptos::prelude::*;
 

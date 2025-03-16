@@ -1,7 +1,7 @@
 use crate::music::{intervals::Interval, notes::Note};
 
 use super::fretboard_model::{FretCoord, FretboardModel};
-use leptos::prelude::Get;
+use leptos::prelude::{Get, GetUntracked};
 use rand::Rng;
 
 pub trait FretboardTrainerTrait {
@@ -18,7 +18,7 @@ pub trait FretboardTrainerTrait {
 impl FretboardTrainerTrait for FretboardModel {
   fn get_random_fret(&self) -> FretCoord {
     let string_idx = rand::rng().random_range(0..self.get_num_strings() as u8);
-    let fret_idx = rand::rng().random_range(0..self.get_num_frets().get() as u8);
+    let fret_idx = rand::rng().random_range(0..self.get_num_frets().get_untracked() as u8);
 
     FretCoord {
       string_idx,
