@@ -19,6 +19,10 @@ pub fn FretboardTrainer() -> impl IntoView {
       let note_of_clicked_fret = model.note_from_fret(evt.coord);
       if interval.get().of(note.get()) == note_of_clicked_fret {
         log!("Correct!");
+        set_interval.set(get_random_interval());
+        model.set_all(FretState::Hidden);
+        model.set_fret_state(evt.coord, FretState::Root);
+        set_note.set(model.note_from_fret(model.get_random_fret()));
       } else {
         log!("Incorrect!");
       }
