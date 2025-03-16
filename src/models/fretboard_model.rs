@@ -93,7 +93,7 @@ impl FretboardModel {
   }
 
   fn get_fret_state(&self, coord: FretCoord) -> RwSignal<FretState> {
-    self.frets[coord.string_idx as usize].get()[coord.fret_idx as usize]
+    self.frets[coord.string_idx as usize].get_untracked()[coord.fret_idx as usize]
   }
 
   pub fn set_fret_state(&self, coord: FretCoord, state: FretState) {
