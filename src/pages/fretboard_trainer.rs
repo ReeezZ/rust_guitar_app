@@ -33,6 +33,9 @@ pub fn FretboardTrainer() -> impl IntoView {
     model.set_fret_state(random_fret, FretState::Root);
   });
 
+  let interval_str = move || format!(" {} ", interval.get().to_string());
+  let note_str = move || format!(" {} ", note.get().to_string());
+
   view! {
     <div class="flex flex-col space-y-4">
       <div class="flex flex-col items-center space-y-4">
@@ -41,10 +44,7 @@ pub fn FretboardTrainer() -> impl IntoView {
       </div>
       <Fretboard fretboard=fretboard_model on_fret_clicked />
       <div>
-        <p>
-          Looking for <b>{move || format!(" {} ", interval.get().to_string())}</b>of
-          <b>{move || format!(" {} ", note.get().to_string())}</b>
-        </p>
+        <p>Looking for <b>{interval_str}</b>of <b>{note_str}</b></p>
       </div>
     </div>
   }
