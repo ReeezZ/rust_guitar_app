@@ -62,7 +62,7 @@ fn FretboardString(
 
   view! {
     <div class="flex relative justify-start items-center w-full tilt">
-      <div class="relative z-30 justify-center items-center w-8 h-6 border-r-8 border-transparent">
+      <div class="flex relative z-30 justify-center items-center w-8 h-9 border-r-8 border-transparent">
         <FretboardNote
           note=string_note
           coord=FretCoord {
@@ -86,7 +86,7 @@ fn FretboardString(
             .map(|fret_no| {
 
               view! {
-                <div class="flex relative justify-center items-center w-full h-12 text-center bg-transparent grow fretbar-container">
+                <div class="flex relative justify-center items-center mx-3 w-8 h-12 text-center bg-transparent grow fretbar-container">
                   <FretboardNote
                     note=string_note.add_steps(fret_no as usize)
                     coord=FretCoord {
@@ -124,8 +124,8 @@ fn FretboardNote(
 
   view! {
     <div
-      class="flex flex-grow justify-center items-center w-8 h-3/4 text-center align-middle cursor-pointer"
       on:click=on_click
+      class="flex flex-grow justify-center items-center h-3/4 text-center rounded-md cursor-pointer hover:border-2 hover:border-slate-400"
     >
       {move || {
         match fret_state_signal.get() {
