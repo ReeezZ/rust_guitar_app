@@ -39,7 +39,18 @@ pub fn FretboardTrainer() -> impl IntoView {
         set_note.set(model.note_from_fret(new_fret));
         set_error_text.set("".to_string());
       } else {
-        set_error_text.set("Incorrect!".to_string());
+        if error_text.get().is_empty() {
+          set_error_text.set("Incorrect!".to_string());
+        } else {
+          if let Some(node) = error_text_node_ref.get() {
+            // TODO Trying retrigger animation
+            // https://stackoverflow.com/a/45037551/6938024
+            // This approach is probably not good anyways..
+            (*node).style().set_property("animationName", "");
+            (*node).offset_height();
+            (*node).style().set_property("animationName", "animate-shake");
+          }
+        }
         model.set_fret_state(evt.coord, FretState::Colored(FretStateColor::Red));
       }
     });
