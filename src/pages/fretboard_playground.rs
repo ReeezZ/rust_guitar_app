@@ -3,7 +3,7 @@
 use leptos::prelude::*;
 
 use crate::components::fretboard::{FretClickEvent, Fretboard};
-use crate::models::fretboard_model::{FretState, FretboardModel};
+use crate::models::fretboard_model::{FretState, FretStateColor, FretboardModel};
 use crate::models::fretboard_trainer::FretboardTrainerTrait;
 
 #[component]
@@ -17,7 +17,7 @@ pub fn FretboardPlayground() -> impl IntoView {
   let on_click_random_note = move |_| {
     fretboard_model.with(|model| {
       let random_fret = model.get_random_fret();
-      model.set_fret_state(random_fret, FretState::Root);
+      model.set_fret_state(random_fret, FretState::Colored(FretStateColor::Red));
     });
   };
 
@@ -25,7 +25,7 @@ pub fn FretboardPlayground() -> impl IntoView {
     let toggle_fret_state = match evt.fret_state {
       FretState::Hidden => FretState::Normal,
       FretState::Normal => FretState::Hidden,
-      FretState::Root => FretState::Hidden,
+      FretState::Colored(_) => FretState::Hidden,
     };
 
     fretboard_model

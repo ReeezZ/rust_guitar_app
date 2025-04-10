@@ -1,9 +1,12 @@
 use leptos::either::EitherOf3;
+use leptos::logging::log;
 use leptos::prelude::*;
 
 use crate::music::notes::Note;
 
-use crate::models::fretboard_model::{FretCoord, FretState, FretStringSignals, FretboardModel};
+use crate::models::fretboard_model::{
+  FretCoord, FretState, FretStateColor, FretStringSignals, FretboardModel,
+};
 
 #[derive(Clone, Copy, Debug)]
 pub struct FretClickEvent {
@@ -129,8 +132,29 @@ fn FretboardNote(
     >
       {move || {
         match fret_state_signal.get() {
-          FretState::Root => {
+          FretState::Colored(color) => {
+            let bg_css_str = format!(
+              "bg-{}-500",
+              match color {
+                FretStateColor::Green => "green",
+                FretStateColor::Red => "red",
+                FretStateColor::Blue => "blue",
+              },
+            );
+            log!("bg_css_str: {}", bg_css_str);
             EitherOf3::A(
+
+              // view! {
+              // <span class="bg-red-500 relative z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
+              // <span class=move || {
+              // format!(
+              // "absolute inset-0 z-10 w-full h-full rounded-full opacity-50 {}",
+              // bg_css_str,
+              // )
+              // }></span>
+              // <span class="relative z-20">{note.to_string()}</span>
+              // </span>
+              // },
               view! {
                 <span class="relative z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
                   <span class="absolute inset-0 z-10 w-full h-full bg-red-500 rounded-full opacity-50"></span>
