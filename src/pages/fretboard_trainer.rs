@@ -64,14 +64,14 @@ pub fn FretboardTrainer() -> impl IntoView {
       <div>
         <p>Looking for <b>{interval_str}</b>of <b>{note_str}</b></p>
       </div>
-      <div>
+      <div class="overflow-hidden">
         {move || {
           if !error_text.get().is_empty() {
             Some(
               view! {
                 <p
                   node_ref=error_text_node_ref
-                  class="text-center text-red-600 animate-once animate-duration-150 animate-jump-in"
+                  class="text-center text-red-600 animate-shake animate-thrice animate-duration-[160ms] animate-ease-linear"
                 >
                   {error_text}
                 </p>
