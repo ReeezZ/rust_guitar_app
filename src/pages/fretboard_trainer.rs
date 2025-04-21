@@ -1,4 +1,5 @@
 use leptos::html::{Style, P};
+use leptos::logging::log;
 use leptos::prelude::*;
 use rand::seq::IteratorRandom;
 use strum::IntoEnumIterator;
@@ -46,9 +47,26 @@ pub fn FretboardTrainer() -> impl IntoView {
             // TODO Trying retrigger animation
             // https://stackoverflow.com/a/45037551/6938024
             // This approach is probably not good anyways..
-            (*node).style().set_property("animationName", "");
+
+            log!("aaa");
+            let animation_name = (*node)
+              .style()
+              .get_property_value("animate-shake")
+              .unwrap();
+            let class = (*node).style().get_property_value("class").unwrap();
+            log!("class: {:?}", class);
+            log!("animation_name: {:?}", animation_name);
+
+            (*node)
+              .style()
+              .set_property("class", "")
+              .unwrap_or_else(|err| log!("Failed to set animationName: {:?}", err));
             (*node).offset_height();
-            (*node).style().set_property("animationName", "animate-shake");
+            if let Err(err) = (*node).style().set_property("class", "animate-shake") {
+              log!("Failed to set animationName: {:?}", err);
+            }
+          } else {
+            log!("Error: node_ref is None");
           }
         }
         model.set_fret_state(evt.coord, FretState::Colored(FretStateColor::Red));
