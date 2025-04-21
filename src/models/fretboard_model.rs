@@ -6,10 +6,17 @@ use crate::music::{
 };
 
 #[derive(Clone, Copy, PartialEq, Debug)]
+pub enum FretStateColor {
+  Red,
+  Green,
+  Blue,
+}
+
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum FretState {
   Hidden,
   Normal,
-  Root,
+  Colored(FretStateColor),
 }
 
 pub type FretNoteSignal = RwSignal<FretState>;
@@ -131,7 +138,7 @@ impl FretboardModel {
   fn determine_fret_state(note: Note, scale: &Scale) -> FretState {
     if scale.contains_note(note) {
       match scale.root_note() {
-        Some(root_note) if root_note == note => FretState::Root,
+        Some(root_note) if root_note == note => FretState::Colored(FretStateColor::Red),
         _ => FretState::Normal,
       }
     } else {

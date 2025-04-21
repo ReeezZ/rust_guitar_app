@@ -1,9 +1,12 @@
 use leptos::either::EitherOf3;
+use leptos::logging::log;
 use leptos::prelude::*;
 
 use crate::music::notes::Note;
 
-use crate::models::fretboard_model::{FretCoord, FretState, FretStringSignals, FretboardModel};
+use crate::models::fretboard_model::{
+  FretCoord, FretState, FretStateColor, FretStringSignals, FretboardModel,
+};
 
 #[derive(Clone, Copy, Debug)]
 pub struct FretClickEvent {
@@ -62,7 +65,7 @@ fn FretboardString(
 
   view! {
     <div class="flex relative justify-start items-center w-full tilt">
-      <div class="relative z-30 justify-center items-center w-8 h-6 border-r-8 border-transparent">
+      <div class="flex relative z-30 justify-center items-center w-8 h-9 border-r-8 border-transparent">
         <FretboardNote
           note=string_note
           coord=FretCoord {
@@ -86,7 +89,7 @@ fn FretboardString(
             .map(|fret_no| {
 
               view! {
-                <div class="flex relative justify-center items-center w-full h-12 text-center bg-transparent grow fretbar-container">
+                <div class="flex relative justify-center items-center mx-3 w-8 h-12 text-center bg-transparent grow fretbar-container">
                   <FretboardNote
                     note=string_note.add_steps(fret_no as usize)
                     coord=FretCoord {
@@ -124,16 +127,26 @@ fn FretboardNote(
 
   view! {
     <div
-      class="flex flex-grow justify-center items-center w-8 h-3/4 text-center align-middle cursor-pointer"
       on:click=on_click
+      class="flex flex-grow justify-center items-center h-3/4 text-center rounded-md cursor-pointer hover:border-2 hover:border-slate-400"
     >
       {move || {
         match fret_state_signal.get() {
-          FretState::Root => {
+          FretState::Colored(color) => {
+            let bg_css_str = match color {
+              FretStateColor::Green => "bg-green-500",
+              FretStateColor::Red => "bg-red-500",
+              FretStateColor::Blue => "bg-blue-500",
+            };
             EitherOf3::A(
               view! {
                 <span class="relative z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
-                  <span class="absolute inset-0 z-10 w-full h-full bg-red-500 rounded-full opacity-50"></span>
+                  <span class=move || {
+                    format!(
+                      "absolute inset-0 z-10 w-full h-full rounded-full opacity-50 {}",
+                      bg_css_str,
+                    )
+                  }></span>
                   <span class="relative z-20">{note.to_string()}</span>
                 </span>
               },
@@ -142,7 +155,7 @@ fn FretboardNote(
           FretState::Normal => {
             EitherOf3::B(
               view! {
-                <span class="relative z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
+                <span class="relative z-20 font-bold text-center text-white bg-green-500 transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
                   <span class="absolute inset-0 z-10 w-full h-full rounded-full opacity-20 bg-slate-400"></span>
                   <span class="relative z-20">{note.to_string()}</span>
                 </span>
