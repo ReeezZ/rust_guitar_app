@@ -1,5 +1,3 @@
-use leptos::html::{Style, P};
-use leptos::logging::log;
 use leptos::prelude::*;
 use rand::seq::IteratorRandom;
 use strum::IntoEnumIterator;
@@ -20,8 +18,6 @@ fn random_interval() -> Interval {
 
 #[component]
 pub fn FretboardTrainer() -> impl IntoView {
-  let error_text_node_ref = NodeRef::<P>::new();
-
   let fretboard_model = RwSignal::new(FretboardModel::new(6, 5, FretboardModel::standard_tuning()));
 
   let (note, set_note) = signal(Note::C);
@@ -42,32 +38,6 @@ pub fn FretboardTrainer() -> impl IntoView {
       } else {
         if error_text.get().is_empty() {
           set_error_text.set("Incorrect!".to_string());
-        } else {
-          if let Some(node) = error_text_node_ref.get() {
-            // TODO Trying retrigger animation
-            // https://stackoverflow.com/a/45037551/6938024
-            // This approach is probably not good anyways..
-
-            log!("aaa");
-            let animation_name = (*node)
-              .style()
-              .get_property_value("animate-shake")
-              .unwrap();
-            let class = (*node).style().get_property_value("class").unwrap();
-            log!("class: {:?}", class);
-            log!("animation_name: {:?}", animation_name);
-
-            (*node)
-              .style()
-              .set_property("class", "")
-              .unwrap_or_else(|err| log!("Failed to set animationName: {:?}", err));
-            (*node).offset_height();
-            if let Err(err) = (*node).style().set_property("class", "animate-shake") {
-              log!("Failed to set animationName: {:?}", err);
-            }
-          } else {
-            log!("Error: node_ref is None");
-          }
         }
         model.set_fret_state(evt.coord, FretState::Colored(FretStateColor::Red));
       }
@@ -98,10 +68,7 @@ pub fn FretboardTrainer() -> impl IntoView {
           if !error_text.get().is_empty() {
             Some(
               view! {
-                <p
-                  node_ref=error_text_node_ref
-                  class="text-center text-red-600 animate-shake animate-thrice animate-duration-[160ms] animate-ease-linear"
-                >
+                <p class="text-center text-red-600 animate-shake animate-thrice animate-duration-[160ms] animate-ease-linear">
                   {error_text}
                 </p>
               },
