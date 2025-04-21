@@ -1,46 +1,109 @@
-# Rust guitar app
+# Rust Guitar App
 
-This project is currently mostly for learning rust and leptos.
+This project is currently mostly for learning Rust and Leptos.
 
-The idea is to create a guitar learning companion app. For learning and exercising on the guitar.
+The idea is to create a guitar learning companion app for learning and practicing on the guitar.
 
-There are many guitar practice apps, but so far I know of none that are truly free and open source. So i want to build something like that.
+There are many guitar practice apps, but so far I know of none that are truly free and open source. So I want to build something like that.
 
+---
 
-## Current status: Early phase
+## Current Status: Early Phase
 
 This project is in an early phase and is a bit chaotic currently.
 
 ### Current Problems / TODOs
 
-- The git branches are a bit chaotic
-  - doing multiple different things on different feature branches
-  - gitlab issues do not map to branches clearly
-  - I will realign all this rather soon hopefully
-- Dead code warnings
-  - I wanted to overengineer a music library and not everything is used yet 
-  - The warnings hurt me too, trust me
+- The git branches are a bit chaotic:
+  - Doing multiple different things on different feature branches.
+  - I will realign all this rather soon, hopefully.
+- Dead code warnings:
+  - I wanted to overengineer a music library, and not everything is used yet.
+  - The warnings hurt me too, trust me.
 
-
+---
 
 ## Prerequisites
 
-```sh
-rustup target add wasm32-unknown-unknown
+### For VS Code Users
 
-# Trunk is a WASM web application bundler for Rust
-cargo install trunk
-# For formatting the leptos view! macro
-cargo install leptosfmt
+1. **Install VS Code**:
+- Download and install [Visual Studio Code](https://code.visualstudio.com/).
+
+2. **Install the Dev Containers Extension**:
+- Open VS Code.
+- Go to the Extensions view (`Ctrl+Shift+X` or `Cmd+Shift+X` on macOS).
+- Search for "Dev Containers" and install the extension.
+
+3. **Install Docker**:
+- Download and install [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+- Ensure Docker is running.
+
+4. **Clone the Repository**:
+```sh
+git clone https://github.com/your-username/leptos_stuff.git
+cd leptos_stuff
 ```
 
-Tailwind CSS IntelliSense VS Code plugin problem: You might have to downgrade to v0.10.5. See: https://github.com/tailwindlabs/tailwindcss-intellisense/issues/988
+5. **Open the Project in VS Code:**
+- Open the project folder in VS Code.
 
-## Usage
+6. **Reopen in Devcontainer:**
 
-`RUSTFLAGS='--cfg getrandom_backend="wasm_js"' trunk serve --open`
+- Press Ctrl+Shift+P (or Cmd+Shift+P on macOS) to open the Command Palette.
+- Select "Dev Containers: Rebuild and Reopen in Container".
+- Wait for the container to build and start.
 
-Since we are using the rand crate, the `getrandom_backend` has to be specified. See [getrandom docs - webassembly support](https://docs.rs/getrandom/latest/getrandom/#webassembly-support) for more information.
+7. **Verify the Setup:**
+
+- Open a terminal in VS Code (`Ctrl+ or Cmd+ on macOS).
+- Run the following commands to verify the setup:
+
+```sh
+rustc --version
+cargo --version
+trunk --version
+```
+
+### For Non-VS Code Users
+
+This project is designed to work with VS Code's devcontainer setup. If you're not using VS Code, you can still set up the environment manually:
+
+1. **Install Rust**:
+    
+- Install Rust using [rustup](vscode-file://vscode-app/c:/Users/mario/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/code/electron-sandbox/workbench/workbench.html).
+- Add the WebAssembly target:
+  
+  rustup target add wasm32-unknown-unknown
+        
+2. **Install Trunk**:
+
+- Install Trunk, the WASM bundler:  
+  - `cargo install trunk`
+        
+3. **Install Leptosfmt**:
+- Install Leptosfmt for formatting Leptos macros:
+  - `cargo install leptosfmt`
+        
+4. **Install Node.js**:
+   
+- Install Node.js (LTS version) from [nodejs.org](vscode-file://vscode-app/c:/Users/mario/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/code/electron-sandbox/workbench/workbench.html).
+
+
+5. **Install Tailwind CSS**:
+
+- Install Tailwind CSS globally:
+  - `npm install -g tailwindcss`
+    
+2. **Run the Project**:
+
+- Use Trunk to serve the project:
+  - `RUSTFLAGS='--cfg getrandom_backend="wasm_js"' trunk serve --open`
+        
+
+Note: You may need to manually configure caching for Rust dependencies and build artifacts.
+
+---
 
 ## Feature Ideas and Status
 
@@ -95,3 +158,16 @@ Drawing this with CSS is probably very tricky. Using a SVG would be probably goo
 
 https://github.com/new-data-services/tailwindcss-animated
 
+
+
+---
+
+## Contributing
+
+Contributions are welcome! Feel free to open issues or submit pull requests.
+
+---
+
+## License
+
+This project is licensed under the MIT License.
