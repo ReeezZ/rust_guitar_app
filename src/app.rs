@@ -5,7 +5,9 @@ use leptos_router::{components::*, path};
 use crate::{
   components::navbar::Navbar,
   pages::{
-    fretboard_playground::FretboardPlayground, fretboard_trainer::FretboardTrainer, fretboard_viewer::FretboardViewer, guitar_v1::GuitarV1, home::Home, not_found::NotFound
+    fretboard_playground::FretboardPlayground, fretboard_trainer::FretboardTrainer,
+    fretboard_viewer::FretboardViewer, guitar_v1::GuitarV1, home::Home, not_found::NotFound,
+    svg_fretboard::SvgFretboardPage,
   },
 };
 #[component]
@@ -28,6 +30,7 @@ pub fn App() -> impl IntoView {
           <Route path=path!("/fretboard_viewer") view=FretboardViewer />
           <Route path=path!("/fretboard_playground") view=FretboardPlayground />
           <Route path=path!("/fretboard_trainer") view=FretboardTrainer />
+          <Route path=path!("/svg_fretboard") view=SvgFretboardPage />
         </Routes>
       </main>
     </Router>

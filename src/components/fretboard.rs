@@ -125,6 +125,8 @@ fn FretboardNote(
     });
   };
 
+  // IDEA: maybe we can support animations when we make the notes appear on the fretboard
+
   view! {
     <div
       on:click=on_click
