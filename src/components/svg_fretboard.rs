@@ -11,6 +11,7 @@ pub fn SvgFretboard() -> impl IntoView {
   let num_frets = 17;
   let string_spacing = svg_height / (num_strings as f64 + 1.0);
   let fret_positions = calculate_fret_positions(svg_width, num_frets);
+  let fret_margin = 20.0; // vertical margin for frets
 
   view! {
       <svg
@@ -18,32 +19,31 @@ pub fn SvgFretboard() -> impl IntoView {
           height=svg_height
           viewBox=format!("0 0 {} {}", svg_width, svg_height)
           class="fretboard-svg"
-          style="background: linear-gradient(90deg, #deb887 0%, #f5deb3 100%); border-radius: 8px; box-shadow: 0 2px 8px #0002;"
+          style="background: linear-gradient(90deg, #deb887 0%, #f5deb3 100%); border-radius: 8px; box-shadow: 0 2px 8px #0002; border: 1px solid #c00;"
       >
-          // Saddle (nut)
+          // Saddle (nut) - visually distinct and as tall as fret area
           <rect
               x="0"
-              y="0"
-              width="8"
-              height=svg_height
-              fill="#eee"
-              stroke="#bbb"
-              stroke-width="2"
-              rx="2"
+              y=fret_margin
+              width="14"
+              height=svg_height - 2.0 * fret_margin
+              fill="#f8f8f8"
+              stroke="#222"
+              stroke-width="5"
+              rx="3"
           />
 
-          // Frets
+          // Frets (with vertical margin, no filter, debug color)
           { (1..=num_frets).map(|fret_no| {
               let x_pos = fret_positions[fret_no as usize];
               view! {
                   <line
                       x1=x_pos
-                      y1="0"
+                      y1=fret_margin
                       x2=x_pos
-                      y2=svg_height
-                      stroke="#b0b0b0"
-                      stroke-width="3"
-                      filter="url(#metallic)"
+                      y2=svg_height - fret_margin
+                      stroke="#444"
+                      stroke-width="5"
                   />
               }
           }).collect_view() }
@@ -86,16 +86,6 @@ pub fn SvgFretboard() -> impl IntoView {
                   }
               }
           }).collect_view() }
-
-          // Optional: SVG filter for metallic look (not all browsers support)
-          <defs>
-              <filter id="metallic">
-                  <feSpecularLighting result="specOut" specularExponent="20" lighting-color="#fff">
-                      <fePointLight x="-5000" y="-10000" z="20000"/>
-                  </feSpecularLighting>
-                  <feComposite in="SourceGraphic" in2="specOut" operator="arithmetic" k1="0" k2="1" k3="1" k4="0"/>
-              </filter>
-          </defs>
       </svg>
   }
 }
