@@ -3,5 +3,5 @@ use leptos::*;
 
 #[component]
 pub fn SvgFretboardPage() -> impl IntoView {
-  view! { <SvgFretboard /> }
+  view! { <SvgFretboard  /> }
 }
