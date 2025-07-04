@@ -73,7 +73,7 @@ pub fn SvgFretboard(num_frets: Signal<usize>, fretboard_fill_ratio: Signal<f64>)
                 // Strings
                 let strings = (0..num_strings).map(|i| {
                     let y_pos = (i as f64 + 1.0) * string_spacing;
-                    let string_thickness = 1.0 + (i as f64 * 0.3);
+                    let string_thickness = 1.0 + (i as f64);
                     view! {
                         <line
                             x1="0"
