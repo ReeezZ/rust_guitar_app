@@ -11,14 +11,22 @@ RUN apt-get update && apt-get install -y \
     npm \
     && apt-get clean
 
+# Update Rust to latest stable version
+RUN rustup update stable && rustup default stable
+
 # Install Rust WASM target
 RUN rustup target add wasm32-unknown-unknown
 
-# Install Trunk (WASM bundler) and Leptosfmt (for formatting Leptos macros)
-RUN cargo install trunk leptosfmt
+# Install Trunk (WASM bundler), Leptosfmt (for formatting Leptos macros), and wasm-bindgen-cli
+RUN cargo install trunk leptosfmt wasm-bindgen-cli
 
 # Install Tailwind CSS IntelliSense (optional, for VS Code support)
 RUN npm install -g tailwindcss
+
+# Fix cargo registry permissions for the vscode user
+# Clear any existing cache first, then set proper ownership
+RUN rm -rf /usr/local/cargo/registry/cache/* && \
+    chown -R vscode:vscode /usr/local/cargo
 
 # Set the working directory
 WORKDIR /workspaces/leptos_stuff
