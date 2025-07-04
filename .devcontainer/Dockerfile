@@ -23,6 +23,10 @@ RUN cargo install trunk leptosfmt wasm-bindgen-cli
 # Install Tailwind CSS IntelliSense (optional, for VS Code support)
 RUN npm install -g tailwindcss
 
+# Install Gemini CLI for AI assistance during development
+# NOTE: This is a dev container only - production builds use separate processes
+RUN npm install -g @google/gemini-cli
+
 # Fix cargo registry permissions for the vscode user
 # Clear any existing cache first, then set proper ownership
 RUN rm -rf /usr/local/cargo/registry/cache/* && \
