@@ -4,7 +4,7 @@ use leptos_use::{use_window_size, UseWindowSizeReturn};
 
 /// A responsive SVG fretboard that adjusts to the window size.
 #[component]
-pub fn SvgFretboard(num_frets: Signal<usize>) -> impl IntoView {
+pub fn SvgFretboard(num_frets: Signal<usize>, fretboard_fill_ratio: Signal<f64>) -> impl IntoView {
     // Constants for SVG dimensions and scaling
     const SVG_WIDTH_RATIO: f64 = 0.9; // 90% of window width
     const SVG_ASPECT_RATIO: f64 = 3.0; // width / height
@@ -35,8 +35,10 @@ pub fn SvgFretboard(num_frets: Signal<usize>) -> impl IntoView {
                 let current_fret_margin = fret_margin.get();
                 let string_spacing = current_svg_height / (num_strings as f64 + 1.0);
 
-                let num_frets = num_frets.get();
-                let fret_positions = calculate_fret_positions(current_svg_width, num_frets as u8);
+                let num_frets_val = num_frets.get();
+
+                let playable_width = (current_svg_width - NUT_WIDTH) * fretboard_fill_ratio.get();
+                let fret_positions = calculate_fret_positions(playable_width, num_frets_val as u8);
 
                 // Saddle (nut) - visually distinct and as tall as fret area
                 let nut = view! {
@@ -53,8 +55,9 @@ pub fn SvgFretboard(num_frets: Signal<usize>) -> impl IntoView {
                 };
 
                 // Frets
-                let frets = (1..=num_frets).map(|fret_no| {
-                    let x_pos = fret_positions[fret_no as usize];
+                let frets = (1..=num_frets_val).map(|fret_no| {
+                    let x_pos_relative_to_nut = fret_positions[fret_no as usize];
+                    let x_pos = x_pos_relative_to_nut + NUT_WIDTH;
                     view! {
                         <line
                             x1=x_pos
@@ -84,8 +87,11 @@ pub fn SvgFretboard(num_frets: Signal<usize>) -> impl IntoView {
                 }).collect_view();
 
                 // Fret marker dots
-                let markers = (1..=num_frets).filter(|&fret| [3,5,7,9,12,15,17,19,21,24].contains(&fret)).map(|fret| {
-                    let x = (fret_positions[(fret-1) as usize] + fret_positions[fret as usize]) / 2.0;
+                let markers = (1..=num_frets_val).filter(|&fret| [3,5,7,9,12,15,17,19,21,24].contains(&fret)).map(|fret| {
+                    let x_prev_fret_relative = fret_positions[(fret-1) as usize];
+                    let x_curr_fret_relative = fret_positions[fret as usize];
+                    let x_relative = (x_prev_fret_relative + x_curr_fret_relative) / 2.0;
+                    let x = x_relative + NUT_WIDTH; // Offset by NUT_WIDTH
                     let y = current_svg_height / 2.0;
                     let r = if fret == 12 || fret == 24 { 8.0 } else { 6.0 };
                     let y_offset = 28.0;
@@ -109,8 +115,8 @@ pub fn SvgFretboard(num_frets: Signal<usize>) -> impl IntoView {
 
                 // Simple visual cue for guitar body
                 let body = {
-                    let last_fret_x = fret_positions[num_frets as usize];
-                    let body_x = last_fret_x + 16.0;
+                    let last_fret_x = fret_positions[num_frets_val as usize] + NUT_WIDTH;
+                    let body_x = last_fret_x;
                     let body_width = current_svg_width - body_x;
                     view! {
                         <rect
