@@ -15,6 +15,7 @@ fn event_target_value(ev: &ev::Event) -> String {
 #[component]
 pub fn SvgFretboardPage() -> impl IntoView {
     let num_frets = RwSignal::new(17_usize);
+    let fret_stretch_factor = RwSignal::new(1.5_f64);
 
     view! {
         <div style="margin-bottom: 1em;">
@@ -35,6 +36,25 @@ pub fn SvgFretboardPage() -> impl IntoView {
                 }
             />
         </div>
-        <SvgFretboard num_frets=num_frets.read_only().into() />
+        <div style="margin-bottom: 1em;">
+            <label for="stretch-slider">
+                "Fret Stretch: " {move || format!("{:.2}", fret_stretch_factor.get())}
+            </label>
+            <input
+                id="stretch-slider"
+                type="range"
+                min="1.0"
+                max="2.0"
+                step="0.01"
+                prop:value=move || fret_stretch_factor.get()
+                on:input=move |ev| {
+                    let val = event_target_value(&ev);
+                    if let Ok(val) = val.parse::<f64>() {
+                        fret_stretch_factor.set(val);
+                    }
+                }
+            />
+        </div>
+        <SvgFretboard num_frets=num_frets.read_only().into() fret_stretch_factor=fret_stretch_factor.read_only().into() />
     }
 }

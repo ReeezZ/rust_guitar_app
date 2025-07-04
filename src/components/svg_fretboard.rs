@@ -4,7 +4,7 @@ use leptos_use::{use_window_size, UseWindowSizeReturn};
 
 /// A responsive SVG fretboard that adjusts to the window size.
 #[component]
-pub fn SvgFretboard(num_frets: Signal<usize>) -> impl IntoView {
+pub fn SvgFretboard(num_frets: Signal<usize>, fret_stretch_factor: Signal<f64>) -> impl IntoView {
     // Constants for SVG dimensions and scaling
     const SVG_WIDTH_RATIO: f64 = 0.9; // 90% of window width
     const SVG_ASPECT_RATIO: f64 = 3.0; // width / height
@@ -36,7 +36,20 @@ pub fn SvgFretboard(num_frets: Signal<usize>) -> impl IntoView {
                 let string_spacing = current_svg_height / (num_strings as f64 + 1.0);
 
                 let num_frets = num_frets.get();
-                let fret_positions = calculate_fret_positions(current_svg_width, num_frets as u8);
+                let playable_width = current_svg_width - NUT_WIDTH;
+
+                // 1. Calculate base fret positions for the actual playable_width
+                let base_fret_positions = calculate_fret_positions(playable_width, num_frets as u8);
+
+                // 2. Apply the non-linear stretch transformation
+                let fret_positions: Vec<f64> = base_fret_positions.into_iter().map(|pos| {
+                    // Normalize position to a 0-1 range
+                    let normalized_pos = pos / playable_width;
+                    // Apply the power function for stretching/compressing
+                    let transformed_normalized_pos = normalized_pos.powf(1.0 / fret_stretch_factor.get());
+                    // Scale back to playable_width
+                    transformed_normalized_pos * playable_width
+                }).collect();
 
                 // Saddle (nut) - visually distinct and as tall as fret area
                 let nut = view! {
@@ -54,7 +67,8 @@ pub fn SvgFretboard(num_frets: Signal<usize>) -> impl IntoView {
 
                 // Frets
                 let frets = (1..=num_frets).map(|fret_no| {
-                    let x_pos = fret_positions[fret_no as usize];
+                    let x_pos_relative_to_nut = fret_positions[fret_no as usize];
+                    let x_pos = x_pos_relative_to_nut + NUT_WIDTH;
                     view! {
                         <line
                             x1=x_pos
@@ -85,7 +99,10 @@ pub fn SvgFretboard(num_frets: Signal<usize>) -> impl IntoView {
 
                 // Fret marker dots
                 let markers = (1..=num_frets).filter(|&fret| [3,5,7,9,12,15,17,19,21,24].contains(&fret)).map(|fret| {
-                    let x = (fret_positions[(fret-1) as usize] + fret_positions[fret as usize]) / 2.0;
+                    let x_prev_fret_relative = fret_positions[(fret-1) as usize];
+                    let x_curr_fret_relative = fret_positions[fret as usize];
+                    let x_relative = (x_prev_fret_relative + x_curr_fret_relative) / 2.0;
+                    let x = x_relative + NUT_WIDTH; // Offset by NUT_WIDTH
                     let y = current_svg_height / 2.0;
                     let r = if fret == 12 || fret == 24 { 8.0 } else { 6.0 };
                     let y_offset = 28.0;
@@ -107,30 +124,11 @@ pub fn SvgFretboard(num_frets: Signal<usize>) -> impl IntoView {
                     }
                 }).collect_view();
 
-                // Simple visual cue for guitar body
-                let body = {
-                    let last_fret_x = fret_positions[num_frets as usize];
-                    let body_x = last_fret_x + 16.0;
-                    let body_width = current_svg_width - body_x;
-                    view! {
-                        <rect
-                            x=body_x
-                            y=current_fret_margin
-                            width=body_width
-                            height=current_svg_height - 2.0 * current_fret_margin
-                            fill="#a67c52"
-                            opacity="0.25"
-                            rx="18"
-                        />
-                    }
-                };
-
                 view! {
                     {nut}
                     {frets}
                     {strings}
                     {markers}
-                    {body}
                 }
             }}
         </svg>
