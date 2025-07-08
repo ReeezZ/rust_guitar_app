@@ -14,47 +14,47 @@ fn event_target_value(ev: &ev::Event) -> String {
 /// See: https://leptos.dev/docs/reference/signals/
 #[component]
 pub fn SvgFretboardPage() -> impl IntoView {
-    let num_frets = RwSignal::new(17_usize);
-    let fretboard_fill_ratio = RwSignal::new(1.0_f64);
+    const MAX_FRETS: usize = 22;
+    let start_fret = RwSignal::new(0_usize);
+    let end_fret = RwSignal::new(5_usize);
 
     view! {
-        <div style="margin-bottom: 1em;">
-            <label for="fret-slider">
-                "Number of frets: " {move || num_frets.get()}
-            </label>
-            <input
-                id="fret-slider"
-                type="range"
-                min="5"
-                max="22"
-                prop:value=move || num_frets.get()
-                on:input=move |ev| {
-                    let val = event_target_value(&ev);
-                    if let Ok(val) = val.parse::<usize>() {
-                        num_frets.set(val);
-                    }
-                }
-            />
-        </div>
-        <div style="margin-bottom: 1em;">
-            <label for="fill-ratio-slider">
-                "Fretboard Fill Ratio: " {move || format!("{:.2}", fretboard_fill_ratio.get())}
-            </label>
-            <input
-                id="fill-ratio-slider"
-                type="range"
-                min="0.5"
-                max="1.4"
-                step="0.01"
-                prop:value=move || fretboard_fill_ratio.get()
-                on:input=move |ev| {
-                    let val = event_target_value(&ev);
-                    if let Ok(val) = val.parse::<f64>() {
-                        fretboard_fill_ratio.set(val);
-                    }
-                }
-            />
-        </div>
-        <SvgFretboard num_frets=num_frets.read_only().into() fretboard_fill_ratio=fretboard_fill_ratio.read_only().into() />
+      <div style="margin-bottom: 1em;">
+        <label for="start-fret-slider">"Start Fret: " {move || start_fret.get()}</label>
+        <input
+          id="start-fret-slider"
+          type="range"
+          min="0"
+          max=move || end_fret.get().saturating_sub(1)
+          prop:value=move || start_fret.get()
+          on:input=move |ev| {
+            let val = event_target_value(&ev);
+            if let Ok(val) = val.parse::<usize>() {
+              if val < end_fret.get() {
+                start_fret.set(val);
+              }
+            }
+          }
+        />
+      </div>
+      <div style="margin-bottom: 1em;">
+        <label for="end-fret-slider">"End Fret: " {move || end_fret.get()}</label>
+        <input
+          id="end-fret-slider"
+          type="range"
+          min=move || start_fret.get().saturating_add(1)
+          max=MAX_FRETS
+          prop:value=move || end_fret.get()
+          on:input=move |ev| {
+            let val = event_target_value(&ev);
+            if let Ok(val) = val.parse::<usize>() {
+              if val > start_fret.get() && val <= MAX_FRETS {
+                end_fret.set(val);
+              }
+            }
+          }
+        />
+      </div>
+      <SvgFretboard start_fret=start_fret.read_only().into() end_fret=end_fret.read_only().into() />
     }
 }
