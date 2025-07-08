@@ -27,9 +27,15 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"rust-lang.rust-analyzer", // Rust support
-				"dbaeumer.vscode-eslint", // Optional: Linting for JS/TS
-				"bradlc.vscode-tailwindcss" // Tailwind CSS IntelliSense
+				"rust-lang.rust-analyzer",
+				"dbaeumer.vscode-eslint",
+				"bradlc.vscode-tailwindcss",
+				"eamodio.gitlens",
+				"GitHub.copilot",
+				"GitHub.copilot-chat",
+				"tamasfe.even-better-toml",
+				"mhutchie.git-graph",
+				"donjayamanne.githistory"
 			]
 		}
 	},
