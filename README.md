@@ -10,16 +10,7 @@ There are many guitar practice apps, but so far I know of none that are truly fr
 
 ## Current Status: Early Phase
 
-This project is in an early phase and is a bit chaotic currently.
-
-### Current Problems / TODOs
-
-- The git branches are a bit chaotic:
-  - Doing multiple different things on different feature branches.
-  - I will realign all this rather soon, hopefully.
-- Dead code warnings:
-  - I wanted to overengineer a music library, and not everything is used yet.
-  - The warnings hurt me too, trust me.
+This project is in an early phase and is a bit chaotic currently. Currently this is more a tech demo to myself to try various approaches.
 
 ---
 
@@ -153,11 +144,11 @@ Drawing this with CSS is probably very tricky. Using a SVG would be probably goo
 [fretmap](https://fretmap.app/)
 
 [Fretboard with css tutorial](https://www.youtube.com/watch?v=C6VLedW5Dwk&list=PLXAhCH9FJ8zViqdqhsSP7iyCrVDoUGb3P&index=2)
+[Fretonomy](https://www.fretonomy.com/)
 
 ## Tech Stack Ideas
 
 https://github.com/new-data-services/tailwindcss-animated
-
 
 
 ---
@@ -170,4 +161,7 @@ Contributions are welcome! Feel free to open issues or submit pull requests.
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under GNU General Public License v3.0
+
+[LICENSE file](./LICENSE)
+
