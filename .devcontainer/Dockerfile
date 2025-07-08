@@ -14,6 +14,9 @@ RUN apt-get update && apt-get install -y \
 # Update Rust to latest stable version
 RUN rustup update stable && rustup default stable
 
+# Install rustfmt for code formatting
+RUN rustup component add rustfmt
+
 # Install Rust WASM target
 RUN rustup target add wasm32-unknown-unknown
 
