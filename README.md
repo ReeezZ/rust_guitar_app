@@ -45,7 +45,7 @@ cd leptos_stuff
 - Select "Dev Containers: Rebuild and Reopen in Container".
 - Wait for the container to build and start.
 
-7. **Verify the Setup:**
+7. **(Optional) Verify the Setup:**
 
 - Open a terminal in VS Code (`Ctrl+ or Cmd+ on macOS).
 - Run the following commands to verify the setup:
@@ -55,6 +55,13 @@ rustc --version
 cargo --version
 trunk --version
 ```
+
+
+8. **Run the Project**:
+
+- Use Trunk to serve the project:
+  - `RUSTFLAGS='--cfg getrandom_backend="wasm_js"' trunk serve --open`
+
 
 ### For Non-VS Code Users
 
