@@ -1,3 +1,6 @@
+---
+applyTo: '**'
+---
 # LLM Assistant Instructions for Rust Guitar App
 
 ## General AI Assistant Behavior
@@ -76,3 +79,4 @@ This is a guitar learning app, so consider:
 - Guitar-specific terminology (frets, strings, fretboard)
 - Learning progression and educational UX patterns
 - Audio/visual feedback for musical interaction
+

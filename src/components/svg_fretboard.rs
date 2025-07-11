@@ -43,7 +43,7 @@ pub fn SvgFretboard(start_fret: Signal<usize>, end_fret: Signal<usize>) -> impl 
         let total_frets = num_frets;
         let start = start_fret.get();
         let end = end_fret.get();
-        let playable_width = (svg_width.get() - NUT_WIDTH) * 1.5;
+        let playable_width = svg_width.get() - NUT_WIDTH;
         let fret_positions = calculate_fret_positions(playable_width, total_frets as u8);
         let min_fret = if start as f64 > EXTRA_FRETS {
           (start as f64 - EXTRA_FRETS).floor() as usize
@@ -67,7 +67,7 @@ pub fn SvgFretboard(start_fret: Signal<usize>, end_fret: Signal<usize>) -> impl 
         let total_frets = num_frets;
         let start = start_fret.get();
         let end = end_fret.get();
-        let playable_width = (current_svg_width - NUT_WIDTH) * 1.5;
+        let playable_width = (current_svg_width - NUT_WIDTH);
         let fret_positions = calculate_fret_positions(playable_width, total_frets as u8);
         let min_fret = if start as f64 > EXTRA_FRETS {
           (start as f64 - EXTRA_FRETS).floor() as usize
@@ -95,7 +95,6 @@ pub fn SvgFretboard(start_fret: Signal<usize>, end_fret: Signal<usize>) -> impl 
         } else {
           None
         };
-        // Draw frets: visually distinguish between playable (selected) and non-playable frets
         let frets = (min_fret..=max_fret)
           .map(|fret_no| {
             let x_pos_relative_to_nut = fret_positions[fret_no as usize];
@@ -103,6 +102,7 @@ pub fn SvgFretboard(start_fret: Signal<usize>, end_fret: Signal<usize>) -> impl 
             let is_playable = fret_no >= start && fret_no <= end;
             let color = if is_playable { "#444" } else { "#bbb" };
             let width = if is_playable { "5" } else { "3" };
+            // Draw frets: visually distinguish between playable (selected) and non-playable frets
             view! {
               <line
                 x1=x_pos
@@ -159,11 +159,11 @@ pub fn SvgFretboard(start_fret: Signal<usize>, end_fret: Signal<usize>) -> impl 
             }
           })
           .collect_view();
-        // Always draw the left overlay if min_fret > 0 (covers everything before the visible range, including the nut)
         let overlay_left = if min_fret > 0 {
           let x = 0.0;
           let width = fret_positions[min_fret] + NUT_WIDTH;
           Some(
+            // Always draw the left overlay if min_fret > 0 (covers everything before the visible range, including the nut)
             view! {
               <rect
                 x=x
@@ -171,7 +171,8 @@ pub fn SvgFretboard(start_fret: Signal<usize>, end_fret: Signal<usize>) -> impl 
                 width=width
                 height=current_svg_height - 2.0 * current_fret_margin
                 fill="#888"
-                opacity="0.45" // Stronger opacity for clearer distinction
+                // Stronger opacity for clearer distinction
+                opacity="0.45"
                 style="pointer-events:none;"
                 stroke="#444"
                 stroke-dasharray="8,4"
@@ -181,12 +182,12 @@ pub fn SvgFretboard(start_fret: Signal<usize>, end_fret: Signal<usize>) -> impl 
         } else {
           None
         };
-        // Overlay for non-playable (non-selected) frets on the left
         let playable_x_start = fret_positions[start] + NUT_WIDTH;
         let overlay_left_playable = if start > min_fret {
           let x = fret_positions[min_fret] + NUT_WIDTH;
           let width = playable_x_start - x;
           Some(
+            // Overlay for non-playable (non-selected) frets on the left
             view! {
               <rect
                 x=x
@@ -202,12 +203,12 @@ pub fn SvgFretboard(start_fret: Signal<usize>, end_fret: Signal<usize>) -> impl 
         } else {
           None
         };
-        // Overlay for non-playable frets on the right
         let playable_x_end = fret_positions[end] + NUT_WIDTH;
         let overlay_right_playable = if max_fret > end {
           let x = playable_x_end;
           let width = fret_positions[max_fret] + NUT_WIDTH - x;
           Some(
+            // Overlay for non-playable frets on the right
             view! {
               <rect
                 x=x
@@ -223,12 +224,13 @@ pub fn SvgFretboard(start_fret: Signal<usize>, end_fret: Signal<usize>) -> impl 
         } else {
           None
         };
-        // Overlay for non-playable frets on the right (grey box after the white box)
         let overlay_right_grey = if max_fret > end {
-          let x = fret_positions[end] + NUT_WIDTH + (fret_positions[max_fret] + NUT_WIDTH - (fret_positions[end] + NUT_WIDTH));
+          let x = fret_positions[end] + NUT_WIDTH
+            + (fret_positions[max_fret] + NUT_WIDTH - (fret_positions[end] + NUT_WIDTH));
           let width = current_svg_width - x;
           if width > 0.0 {
             Some(
+              // Overlay for non-playable frets on the right (grey box after the white box)
               view! {
                 <rect
                   x=x
