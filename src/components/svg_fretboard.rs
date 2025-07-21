@@ -68,18 +68,19 @@ pub fn SvgFretboard(start_fret: Signal<usize>, end_fret: Signal<usize>) -> impl 
   };
 
   view! {
-    <svg
-      width=move || svg_width.get()
-      height=move || svg_height.get()
-      viewBox=move || {
-        let current_svg_width = svg_width.get();
-        let current_svg_height = svg_height.get();
-        // Always use the full SVG width for maximum zoom effect
-        format!("0 0 {} {}", current_svg_width, current_svg_height)
-      }
-      class="fretboard-svg"
-      style="background: linear-gradient(90deg, #deb887 0%, #f5deb3 100%); border-radius: 8px; box-shadow: 0 2px 8px #0002; border: 1px solid #c00;"
-    >
+    <div class="flex justify-center items-center w-full">
+      <svg
+        width=move || svg_width.get()
+        height=move || svg_height.get()
+        viewBox=move || {
+          let current_svg_width = svg_width.get();
+          let current_svg_height = svg_height.get();
+          // Always use the full SVG width for maximum zoom effect
+          format!("0 0 {} {}", current_svg_width, current_svg_height)
+        }
+        class="fretboard-svg"
+        style="background: linear-gradient(90deg, #deb887 0%, #f5deb3 100%); border-radius: 8px; box-shadow: 0 2px 8px #0002; border: 1px solid #c00;"
+      >
       {move || {
         let current_svg_height = svg_height.get();
         let current_fret_margin = fret_margin.get();
@@ -225,5 +226,6 @@ pub fn SvgFretboard(start_fret: Signal<usize>, end_fret: Signal<usize>) -> impl 
         }
       }}
     </svg>
+    </div>
   }
 }
