@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
 RUN rustup update stable && rustup default stable
 
 # Install rustfmt for code formatting
-RUN rustup component add rustfmt
+RUN rustup component add rustfmt rust-src
 
 # Install Rust WASM target
 RUN rustup target add wasm32-unknown-unknown
