@@ -1,5 +1,5 @@
 use crate::fretboard_view_helper::calculate_fret_positions;
-use leptos::{logging, prelude::*};
+use leptos::prelude::*;
 use leptos_use::{use_window_size, UseWindowSizeReturn};
 
 #[component]
@@ -35,24 +35,36 @@ pub fn SvgFretboard(start_fret: Signal<usize>, end_fret: Signal<usize>) -> impl 
     ((end_fret.get() as f64 + EXTRA_FRETS).ceil() as usize).min(num_frets)
   );
 
-  // KEY FIX: Calculate viewBox parameters
-  let viewbox_params = Memo::new(move |_| {
+  // KEY FIX: Calculate scaling parameters for zoom effect
+  let zoom_params = Memo::new(move |_| {
     let positions = full_fret_positions.get();
     let min_f = min_fret.get();
     let max_f = max_fret.get();
+    let current_svg_width = svg_width.get();
     
-    // ViewBox coordinates: start at the leftmost visible position
-    let viewbox_x_min = if min_f == 0 { 0.0 } else { positions[min_f] };
-    let viewbox_x_max = positions[max_f];
-    let viewbox_width = viewbox_x_max - viewbox_x_min;
+    // Physical range we want to display
+    let range_start = if min_f == 0 { 0.0 } else { positions[min_f] };
+    let range_end = positions[max_f];
+    let range_width = range_end - range_start;
     
-    (viewbox_x_min, viewbox_width)
+    // Available width for fret content (accounting for nut if visible)
+    let available_width = if min_f == 0 {
+      current_svg_width - NUT_WIDTH
+    } else {
+      current_svg_width
+    };
+    
+    // Scale factor to make the selected range fill the available width
+    let scale_factor = available_width / range_width;
+    
+    (range_start, scale_factor, min_f == 0)
   });
 
-  // Transform absolute coordinates to viewBox coordinates
+  // Transform absolute coordinates to scaled viewBox coordinates
   let to_viewbox_x = move |absolute_x: f64| -> f64 {
-    let (viewbox_x_min, _) = viewbox_params.get();
-    absolute_x - viewbox_x_min
+    let (range_start, scale_factor, has_nut) = zoom_params.get();
+    let offset = if has_nut { NUT_WIDTH } else { 0.0 };
+    offset + (absolute_x - range_start) * scale_factor
   };
 
   view! {
@@ -60,8 +72,10 @@ pub fn SvgFretboard(start_fret: Signal<usize>, end_fret: Signal<usize>) -> impl 
       width=move || svg_width.get()
       height=move || svg_height.get()
       viewBox=move || {
-        let (viewbox_x_min, viewbox_width) = viewbox_params.get();
-        format!("0 0 {} {}", viewbox_width, svg_height.get())
+        let current_svg_width = svg_width.get();
+        let current_svg_height = svg_height.get();
+        // Always use the full SVG width for maximum zoom effect
+        format!("0 0 {} {}", current_svg_width, current_svg_height)
       }
       class="fretboard-svg"
       style="background: linear-gradient(90deg, #deb887 0%, #f5deb3 100%); border-radius: 8px; box-shadow: 0 2px 8px #0002; border: 1px solid #c00;"
@@ -75,7 +89,8 @@ pub fn SvgFretboard(start_fret: Signal<usize>, end_fret: Signal<usize>) -> impl 
         let max_f = max_fret.get();
         let start = start_fret.get();
         let end = end_fret.get();
-        let (_, viewbox_width) = viewbox_params.get();
+        let current_svg_width = svg_width.get();
+        let (_, viewbox_width) = (0.0, current_svg_width);
 
         // Nut (only when fret 0 is visible)
         let nut = if min_f == 0 {
