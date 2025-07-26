@@ -1,6 +1,210 @@
 use crate::fretboard_view_helper::calculate_fret_positions;
 use leptos::prelude::*;
 
+/// Renders the nut (zero fret) when visible
+#[component]
+fn FretboardNut(
+    /// Width of the nut in SVG units
+    nut_width: f64,
+    /// Top margin for the nut
+    fret_margin: f64,
+    /// Total SVG height
+    svg_height: f64,
+) -> impl IntoView {
+    view! {
+        <rect
+            x="0"
+            y=fret_margin
+            width=nut_width
+            height=svg_height - 2.0 * fret_margin
+            fill="#f8f8f8"
+            stroke="#222"
+            stroke-width="5"
+            rx="3"
+        />
+    }
+}
+
+/// Renders all fret lines with different styles for playable vs non-playable
+#[component]
+fn FretboardFrets(
+    /// Minimum visible fret number
+    min_fret: usize,
+    /// Maximum visible fret number  
+    max_fret: usize,
+    /// Start of playable range
+    start_fret: usize,
+    /// End of playable range
+    end_fret: usize,
+    /// Absolute fret positions array
+    positions: Vec<f64>,
+    /// Function to transform absolute x to viewbox x
+    to_viewbox_x: impl Fn(f64) -> f64 + Copy + 'static,
+    /// Top margin for frets
+    fret_margin: f64,
+    /// Total SVG height
+    svg_height: f64,
+) -> impl IntoView {
+    (min_fret..=max_fret)
+        .map(|fret_no| {
+            let absolute_x = positions[fret_no];
+            let x_pos = to_viewbox_x(absolute_x);
+            let is_playable = fret_no >= start_fret && fret_no <= end_fret;
+            let color = if is_playable { "#444" } else { "#bbb" };
+            let width = if is_playable { "5" } else { "3" };
+
+            view! {
+                <line
+                    x1=x_pos
+                    y1=fret_margin
+                    x2=x_pos
+                    y2=svg_height - fret_margin
+                    stroke=color
+                    stroke-width=width
+                    opacity=if is_playable { "1.0" } else { "0.6" }
+                />
+            }
+        })
+        .collect_view()
+}
+
+/// Renders horizontal string lines
+#[component]
+fn FretboardStrings(
+    /// Number of strings on the instrument
+    num_strings: u8,
+    /// Spacing between strings
+    string_spacing: f64,
+    /// Total viewbox width
+    viewbox_width: f64,
+) -> impl IntoView {
+    (0..num_strings)
+        .map(|i| {
+            let y_pos = (i as f64 + 1.0) * string_spacing;
+            let string_thickness = 1.0 + (i as f64);
+
+            view! {
+                <line
+                    x1="0"
+                    y1=y_pos
+                    x2=viewbox_width
+                    y2=y_pos
+                    stroke="#888"
+                    stroke-width=string_thickness
+                />
+            }
+        })
+        .collect_view()
+}
+
+/// Renders fret position markers (dots)
+#[component]
+fn FretboardMarkers(
+    /// Minimum visible fret number
+    min_fret: usize,
+    /// Maximum visible fret number
+    max_fret: usize,
+    /// Fret positions where markers should appear
+    marker_positions: Vec<u8>,
+    /// Absolute fret positions array
+    positions: Vec<f64>,
+    /// Function to transform absolute x to viewbox x
+    to_viewbox_x: impl Fn(f64) -> f64 + Copy + 'static,
+    /// Total SVG height
+    svg_height: f64,
+) -> impl IntoView {
+    (min_fret..=max_fret)
+        .filter(|&fret| marker_positions.contains(&(fret as u8)))
+        .map(|fret| {
+            let x_prev = positions[(fret - 1).max(0)];
+            let x_curr = positions[fret];
+            let x_center = (x_prev + x_curr) / 2.0;
+            let x = to_viewbox_x(x_center);
+            let y = svg_height / 2.0;
+            let r = if fret == 12 || fret == 24 { 8.0 } else { 6.0 };
+            let y_offset = 28.0;
+            let (cy1, cy2, op2) = if fret == 12 || fret == 24 {
+                (y - y_offset, y + y_offset, 0.25)
+            } else {
+                (y, y + y_offset, 0.0)
+            };
+
+            view! {
+                <g>
+                    <circle cx=x cy=cy1 r=r fill="#444" opacity="0.25" />
+                    <circle cx=x cy=cy2 r=r fill="#444" opacity=op2 />
+                </g>
+            }
+        })
+        .collect_view()
+}
+
+/// Renders semi-transparent overlays for non-playable regions
+#[component]
+fn FretboardOverlays(
+    /// Minimum visible fret number
+    min_fret: usize,
+    /// Maximum visible fret number
+    max_fret: usize,
+    /// Start of playable range
+    start_fret: usize,
+    /// End of playable range
+    end_fret: usize,
+    /// Absolute fret positions array
+    positions: Vec<f64>,
+    /// Function to transform absolute x to viewbox x
+    to_viewbox_x: impl Fn(f64) -> f64 + Copy + 'static,
+    /// Width of nut (0 if not visible)
+    nut_width: f64,
+    /// Top margin for overlays
+    fret_margin: f64,
+    /// Total SVG height
+    svg_height: f64,
+    /// Total SVG width
+    svg_width: f64,
+) -> impl IntoView {
+    let overlay_left = if start_fret > min_fret {
+        let start_x = to_viewbox_x(positions[start_fret]);
+        let width = start_x - nut_width;
+        Some(view! {
+            <rect
+                x=nut_width
+                y=fret_margin
+                width=width
+                height=svg_height - 2.0 * fret_margin
+                fill="#fff"
+                opacity="0.35"
+                style="pointer-events:none;"
+            />
+        })
+    } else {
+        None
+    };
+
+    let overlay_right = if end_fret < max_fret {
+        let end_x = to_viewbox_x(positions[end_fret]);
+        let width = svg_width - end_x;
+        Some(view! {
+            <rect
+                x=end_x
+                y=fret_margin
+                width=width
+                height=svg_height - 2.0 * fret_margin
+                fill="#fff"
+                opacity="0.35"
+                style="pointer-events:none;"
+            />
+        })
+    } else {
+        None
+    };
+
+    view! {
+        {overlay_left}
+        {overlay_right}
+    }
+}
+
 /// Interactive SVG fretboard component that displays a zoomable guitar fretboard
 /// 
 /// # Props
@@ -174,144 +378,65 @@ pub fn SvgFretboard(
           let start = start_fret.get();
           let end = end_fret.get();
           let current_svg_width = svg_width.get();
-          let (_, viewbox_width) = (0.0, current_svg_width);
-          let nut = if min_f == 0 {
-            Some(
-
-              // Nut (only when fret 0 is visible)
-              view! {
-                <rect
-                  x="0"
-                  y=current_fret_margin
-                  width=nut_width.get()
-                  height=current_svg_height - 2.0 * current_fret_margin
-                  fill="#f8f8f8"
-                  stroke="#222"
-                  stroke-width="5"
-                  rx="3"
-                />
-              },
-            )
-          } else {
-            None
-          };
-          let frets = (min_f..=max_f)
-            .map(|fret_no| {
-              let absolute_x = positions[fret_no];
-              let x_pos = to_viewbox_x(absolute_x);
-              let is_playable = fret_no >= start && fret_no <= end;
-              let color = if is_playable { "#444" } else { "#bbb" };
-              let width = if is_playable { "5" } else { "3" };
-
-              // Frets
-
-              view! {
-                <line
-                  x1=x_pos
-                  y1=current_fret_margin
-                  x2=x_pos
-                  y2=current_svg_height - current_fret_margin
-                  stroke=color
-                  stroke-width=width
-                  opacity=if is_playable { "1.0" } else { "0.6" }
-                />
-              }
-            })
-            .collect_view();
-          let strings = (0..num_strings.get())
-            .map(|i| {
-              let y_pos = (i as f64 + 1.0) * string_spacing;
-              let string_thickness = 1.0 + (i as f64);
-
-              // Strings - span the full viewBox width
-
-              view! {
-                <line
-                  x1="0"
-                  y1=y_pos
-                  x2=viewbox_width
-                  y2=y_pos
-                  stroke="#888"
-                  stroke-width=string_thickness
-                />
-              }
-            })
-            .collect_view();
-          let markers = (min_f..=max_f)
-            .filter(|&fret| marker_positions.get().contains(&(fret as u8)))
-            .map(|fret| {
-              let x_prev = positions[(fret - 1).max(0)];
-              let x_curr = positions[fret];
-              let x_center = (x_prev + x_curr) / 2.0;
-              let x = to_viewbox_x(x_center);
-              let y = current_svg_height / 2.0;
-              let r = if fret == 12 || fret == 24 { 8.0 } else { 6.0 };
-              let y_offset = 28.0;
-              let (cy1, cy2, op2) = if fret == 12 || fret == 24 {
-                (y - y_offset, y + y_offset, 0.25)
-              } else {
-                (y, y + y_offset, 0.0)
-              };
-
-              // Markers
-
-              view! {
-                <g>
-                  <circle cx=x cy=cy1 r=r fill="#444" opacity="0.25" />
-                  <circle cx=x cy=cy2 r=r fill="#444" opacity=op2 />
-                </g>
-              }
-            })
-            .collect_view();
-          let overlay_left = if start > min_f {
-            let start_x = to_viewbox_x(positions[start]);
-            let width = start_x - (if min_f == 0 { nut_width.get() } else { 0.0 });
-            Some(
-
-              // Overlays for non-playable regions
-              view! {
-                <rect
-                  x=if min_f == 0 { nut_width.get() } else { 0.0 }
-                  y=current_fret_margin
-                  width=width
-                  height=current_svg_height - 2.0 * current_fret_margin
-                  fill="#fff"
-                  opacity="0.35"
-                  style="pointer-events:none;"
-                />
-              },
-            )
-          } else {
-            None
-          };
-          let overlay_right = if end < max_f {
-            let end_x = to_viewbox_x(positions[end]);
-            let width = current_svg_width - end_x;
-            Some(
-
-              view! {
-                <rect
-                  x=end_x
-                  y=current_fret_margin
-                  width=width
-                  height=current_svg_height - 2.0 * current_fret_margin
-                  fill="#fff"
-                  opacity="0.35"
-                  style="pointer-events:none;"
-                />
-              },
-            )
-          } else {
-            None
-          };
+          let viewbox_width = current_svg_width;
+          let current_nut_width = nut_width.get();
 
           view! {
-            {nut}
-            {frets}
-            {strings}
-            {markers}
-            {overlay_left}
-            {overlay_right}
+            // Conditionally render nut when fret 0 is visible
+            {if min_f == 0 {
+              Some(view! {
+                <FretboardNut 
+                  nut_width=current_nut_width
+                  fret_margin=current_fret_margin
+                  svg_height=current_svg_height
+                />
+              })
+            } else {
+              None
+            }}
+
+            // Render all fret lines
+            <FretboardFrets 
+              min_fret=min_f
+              max_fret=max_f
+              start_fret=start
+              end_fret=end
+              positions=positions.clone()
+              to_viewbox_x=to_viewbox_x
+              fret_margin=current_fret_margin
+              svg_height=current_svg_height
+            />
+
+            // Render string lines
+            <FretboardStrings 
+              num_strings=num_strings.get()
+              string_spacing=string_spacing
+              viewbox_width=viewbox_width
+            />
+
+            // Render fret markers
+            <FretboardMarkers 
+              min_fret=min_f
+              max_fret=max_f
+              marker_positions=marker_positions.get()
+              positions=positions.clone()
+              to_viewbox_x=to_viewbox_x
+              svg_height=current_svg_height
+            />
+
+            // Render overlays for non-playable regions  
+            <FretboardOverlays 
+              min_fret=min_f
+              max_fret=max_f
+              start_fret=start
+              end_fret=end
+              positions=positions
+              to_viewbox_x=to_viewbox_x
+              nut_width=if min_f == 0 { current_nut_width } else { 0.0 }
+              fret_margin=current_fret_margin
+              svg_height=current_svg_height
+              svg_width=current_svg_width
+            />
           }
         }}
       </svg>
