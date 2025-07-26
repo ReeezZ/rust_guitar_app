@@ -13,17 +13,10 @@ applyTo: '**'
 - If fundamental problems are found, recommend taking a step back and reconsidering the approach.
 - Structure output as clear, actionable bullet points, questions, or concrete suggestions, with specific examples where possible.
 - Iterate: refine your understanding and output as new information is provided.
-- Always keep the README.md in context for project overview and feature status.
 
 ## Project Context Reference
 
-**IMPORTANT**: Always reference the `README.md` file for:
-- Project overview and goals
-- Current status and known issues  
-- Feature ideas and roadmap
-- Setup instructions
-- Tech stack information
-- File structure details
+**IMPORTANT**: Always reference the `README.md` file for a project overview and goals
 
 ## Technology-Specific Guidance
 
