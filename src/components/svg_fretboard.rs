@@ -1,39 +1,6 @@
 use crate::fretboard_view_helper::calculate_fret_positions;
 use leptos::prelude::*;
 
-/// Configuration for fretboard visual appearance and behavior
-#[derive(Clone, Debug, PartialEq)]
-pub struct FretboardConfig {
-    /// Number of guitar strings (typically 6 for standard guitar, 4 for bass, 7 for extended range)
-    pub num_strings: u8,
-    /// Maximum number of frets to display (typically 22-24 for electric guitars)
-    pub max_frets: usize,
-    /// Width-to-height aspect ratio of the fretboard (default 3.0 = 3:1 landscape)
-    pub svg_aspect_ratio: f64,
-    /// Percentage of SVG height used as margin above/below frets (default 0.05 = 5%)
-    pub fret_margin_percentage: f64,
-    /// Width of the nut in SVG units (the zero fret at the head of the guitar)
-    pub nut_width: f64,
-    /// Number of extra frets to show beyond the active range for context
-    pub extra_frets: usize,
-    /// Fret positions where visual markers (dots) should be displayed
-    pub marker_positions: Vec<u8>,
-}
-
-impl Default for FretboardConfig {
-    fn default() -> Self {
-        Self {
-            num_strings: 6,
-            max_frets: 22,
-            svg_aspect_ratio: 3.0,
-            fret_margin_percentage: 0.05,
-            nut_width: 14.0,
-            extra_frets: 1,
-            marker_positions: vec![3, 5, 7, 9, 12, 15, 17, 19, 21, 24],
-        }
-    }
-}
-
 /// Interactive SVG fretboard component that displays a zoomable guitar fretboard
 /// 
 /// # Props
@@ -52,18 +19,47 @@ impl Default for FretboardConfig {
 /// 
 /// # Example
 /// 
-/// ```rust
-/// use leptos::prelude::*;
+/// Basic usage with default configuration:
 /// 
+/// ```rust
+/// # use leptos::prelude::*;
+/// # use rust_guitar_app::components::svg_fretboard::SvgFretboard;
+/// 
+/// // This would be inside a component
+/// # fn example_usage() -> impl IntoView {
 /// let start = RwSignal::new(3);
 /// let end = RwSignal::new(7);
 /// 
+/// // The component usage (this is what users copy)
 /// view! {
-///   <SvgFretboard 
-///     start_fret=start.into() 
-///     end_fret=end.into()
-///   />
+///     <SvgFretboard 
+///         start_fret=start.into() 
+///         end_fret=end.into()
+///     />
 /// }
+/// # }
+/// ```
+/// 
+/// With custom configuration:
+/// 
+/// ```rust
+/// # use leptos::prelude::*;
+/// # use rust_guitar_app::components::svg_fretboard::SvgFretboard;
+/// 
+/// # fn custom_config_example() -> impl IntoView {
+/// let start = RwSignal::new(0);
+/// let end = RwSignal::new(12);
+/// let strings = RwSignal::new(4_u8); // Bass guitar
+/// 
+/// view! {
+///     <SvgFretboard 
+///         start_fret=start.into() 
+///         end_fret=end.into()
+///         num_strings=strings.read_only()
+///         svg_aspect_ratio=Signal::derive(move || 4.0)
+///     />
+/// }
+/// # }
 /// ```
 #[component]
 pub fn SvgFretboard(
@@ -92,20 +88,15 @@ pub fn SvgFretboard(
     /// Fret positions where markers should be displayed
     #[prop(optional, into)]
     marker_positions: Option<Signal<Vec<u8>>>,
-    /// Optional static configuration (backward compatibility)
-    #[prop(optional)]
-    config: Option<FretboardConfig>,
 ) -> impl IntoView {
-  // Use signals if provided, otherwise fall back to config or defaults
-  let defaults = config.unwrap_or_default();
-  
-  let num_strings = num_strings.unwrap_or_else(|| Signal::derive(move || defaults.num_strings));
-  let max_frets = max_frets.unwrap_or_else(|| Signal::derive(move || defaults.max_frets));
-  let svg_aspect_ratio = svg_aspect_ratio.unwrap_or_else(|| Signal::derive(move || defaults.svg_aspect_ratio));
-  let fret_margin_percentage = fret_margin_percentage.unwrap_or_else(|| Signal::derive(move || defaults.fret_margin_percentage));
-  let nut_width = nut_width.unwrap_or_else(|| Signal::derive(move || defaults.nut_width));
-  let extra_frets = extra_frets.unwrap_or_else(|| Signal::derive(move || defaults.extra_frets));
-  let marker_positions = marker_positions.unwrap_or_else(|| Signal::derive(move || defaults.marker_positions.clone()));
+  // Use signals if provided, otherwise use default values
+  let num_strings = num_strings.unwrap_or_else(|| Signal::derive(move || 6_u8));
+  let max_frets = max_frets.unwrap_or_else(|| Signal::derive(move || 22_usize));
+  let svg_aspect_ratio = svg_aspect_ratio.unwrap_or_else(|| Signal::derive(move || 3.0_f64));
+  let fret_margin_percentage = fret_margin_percentage.unwrap_or_else(|| Signal::derive(move || 0.05_f64));
+  let nut_width = nut_width.unwrap_or_else(|| Signal::derive(move || 14.0_f64));
+  let extra_frets = extra_frets.unwrap_or_else(|| Signal::derive(move || 1_usize));
+  let marker_positions = marker_positions.unwrap_or_else(|| Signal::derive(move || vec![3_u8, 5, 7, 9, 12, 15, 17, 19, 21, 24]));
 
   let num_frets = Memo::new(move |_| end_fret.get().max(max_frets.get()));
 
