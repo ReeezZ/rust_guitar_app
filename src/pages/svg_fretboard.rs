@@ -1,4 +1,6 @@
-use crate::components::{fretboard_config_examples::FretboardConfigExamples, svg_fretboard::SvgFretboard};
+use crate::components::{
+  fretboard_config_examples::FretboardConfigExamples, svg_fretboard::SvgFretboard,
+};
 use leptos::{ev, prelude::*};
 
 /// Extracts the value from an input event.
@@ -55,7 +57,9 @@ pub fn SvgFretboardPage() -> impl IntoView {
         }
       />
     </div>
-    <SvgFretboard start_fret=start_fret.read_only().into() end_fret=end_fret.read_only().into() />
+    <div style="margin: 5em;">
+      <SvgFretboard start_fret=start_fret.read_only().into() end_fret=end_fret.read_only().into() />
+    </div>
     <FretboardConfigExamples />
   }
 }

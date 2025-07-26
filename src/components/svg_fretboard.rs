@@ -1,6 +1,5 @@
 use crate::fretboard_view_helper::calculate_fret_positions;
 use leptos::prelude::*;
-use leptos_use::{use_window_size, UseWindowSizeReturn};
 
 /// Configuration for fretboard visual appearance and behavior
 #[derive(Clone, Debug, PartialEq)]
@@ -9,8 +8,6 @@ pub struct FretboardConfig {
     pub num_strings: u8,
     /// Maximum number of frets to display (typically 22-24 for electric guitars)
     pub max_frets: usize,
-    /// Ratio of SVG width to window width (0.0-1.0, default 0.9 = 90% of window width)
-    pub svg_width_ratio: f64,
     /// Width-to-height aspect ratio of the fretboard (default 3.0 = 3:1 landscape)
     pub svg_aspect_ratio: f64,
     /// Percentage of SVG height used as margin above/below frets (default 0.05 = 5%)
@@ -28,7 +25,6 @@ impl Default for FretboardConfig {
         Self {
             num_strings: 6,
             max_frets: 22,
-            svg_width_ratio: 0.9,
             svg_aspect_ratio: 3.0,
             fret_margin_percentage: 0.05,
             nut_width: 14.0,
@@ -81,9 +77,6 @@ pub fn SvgFretboard(
     /// Maximum number of frets to display (default: 22)
     #[prop(optional, into)]
     max_frets: Option<Signal<usize>>,
-    /// Ratio of SVG width to window width (default: 0.9)
-    #[prop(optional, into)]
-    svg_width_ratio: Option<Signal<f64>>,
     /// Width-to-height aspect ratio (default: 3.0)
     #[prop(optional, into)]
     svg_aspect_ratio: Option<Signal<f64>>,
@@ -108,7 +101,6 @@ pub fn SvgFretboard(
   
   let num_strings = num_strings.unwrap_or_else(|| Signal::derive(move || defaults.num_strings));
   let max_frets = max_frets.unwrap_or_else(|| Signal::derive(move || defaults.max_frets));
-  let svg_width_ratio = svg_width_ratio.unwrap_or_else(|| Signal::derive(move || defaults.svg_width_ratio));
   let svg_aspect_ratio = svg_aspect_ratio.unwrap_or_else(|| Signal::derive(move || defaults.svg_aspect_ratio));
   let fret_margin_percentage = fret_margin_percentage.unwrap_or_else(|| Signal::derive(move || defaults.fret_margin_percentage));
   let nut_width = nut_width.unwrap_or_else(|| Signal::derive(move || defaults.nut_width));
@@ -117,12 +109,9 @@ pub fn SvgFretboard(
 
   let num_frets = Memo::new(move |_| end_fret.get().max(max_frets.get()));
 
-  let UseWindowSizeReturn {
-    width: window_width,
-    height: _,
-  } = use_window_size();
-
-  let svg_width = Memo::new(move |_| window_width.get() * svg_width_ratio.get());
+  // Use a fixed base width for calculations, SVG will be scaled by CSS
+  let base_svg_width = 800.0; // Fixed base width for consistent calculations
+  let svg_width = Signal::derive(move || base_svg_width);
   let svg_height = Memo::new(move |_| svg_width.get() / svg_aspect_ratio.get());
   let fret_margin = Memo::new(move |_| svg_height.get() * fret_margin_percentage.get());
 
@@ -176,14 +165,12 @@ pub fn SvgFretboard(
   view! {
     <div class="flex justify-center items-center w-full">
       <svg
-        width=move || svg_width.get()
-        height=move || svg_height.get()
         viewBox=move || {
           let current_svg_width = svg_width.get();
           let current_svg_height = svg_height.get();
           format!("0 0 {} {}", current_svg_width, current_svg_height)
         }
-        class="fretboard-svg"
+        class="fretboard-svg w-full h-auto max-w-full"
         style="background: linear-gradient(90deg, #deb887 0%, #f5deb3 100%); border-radius: 8px; box-shadow: 0 2px 8px #0002; border: 1px solid #c00;"
       >
         {move || {

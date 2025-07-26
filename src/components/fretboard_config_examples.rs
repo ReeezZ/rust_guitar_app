@@ -16,34 +16,110 @@ pub fn FretboardConfigExamples() -> impl IntoView {
     // Configuration controls
     let num_strings = RwSignal::new(6_u8);
     let max_frets = RwSignal::new(22_usize);
-    let svg_width_ratio = RwSignal::new(0.9_f64);
     let svg_aspect_ratio = RwSignal::new(3.0_f64);
     let fret_margin_percentage = RwSignal::new(0.05_f64);
     let nut_width = RwSignal::new(14.0_f64);
     let extra_frets = RwSignal::new(1_usize);
     let marker_preset = RwSignal::new("standard".to_string());
 
+    // Convert marker preset to actual marker positions
+    let marker_positions = Memo::new(move |_| {
+        match marker_preset.get().as_str() {
+            "standard" => vec![3_u8, 5, 7, 9, 12, 15, 17, 19, 21, 24],
+            "octaves" => vec![12_u8, 24],
+            "pentatonic" => vec![3_u8, 5, 7, 12, 15, 17, 24],
+            "none" => vec![],
+            _ => vec![3_u8, 5, 7, 9, 12, 15, 17, 19, 21, 24],
+        }
+    });
+
     view! {
         <div class="space-y-6">
             <h2 class="text-2xl font-bold">"Interactive Fretboard Configuration"</h2>
-            
-            // Main fretboard display
-            <div class="border-2 border-blue-200 p-4 rounded-lg bg-blue-50">
-                <SvgFretboard 
-                    start_fret=start_fret.read_only().into() 
-                    end_fret=end_fret.read_only().into()
-                    num_strings=num_strings.read_only()
-                    max_frets=max_frets.read_only()
-                    svg_width_ratio=svg_width_ratio.read_only()
-                    svg_aspect_ratio=svg_aspect_ratio.read_only()
-                    fret_margin_percentage=fret_margin_percentage.read_only()
-                    nut_width=nut_width.read_only()
-                    extra_frets=extra_frets.read_only()
-                />
-            </div>
 
-            // Configuration controls organized in sections
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+             // Quick presets
+            <div class="border p-4 rounded-lg bg-green-50">
+                <h3 class="text-lg font-semibold mb-4">"⚡ Quick Presets"</h3>
+                <div class="flex flex-wrap gap-2">
+                    <button 
+                        class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                        on:click=move |_| {
+                            num_strings.set(6);
+                            svg_aspect_ratio.set(3.0);
+                            max_frets.set(22);
+                            marker_preset.set("standard".to_string());
+                        }
+                    >
+                        "🎸 Standard Guitar"
+                    </button>
+                    <button 
+                        class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                        on:click=move |_| {
+                            num_strings.set(4);
+                            svg_aspect_ratio.set(4.0);
+                            max_frets.set(20);
+                            marker_preset.set("standard".to_string());
+                        }
+                    >
+                        "🎵 Bass Guitar"
+                    </button>
+                    <button 
+                        class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                        on:click=move |_| {
+                            num_strings.set(7);
+                            svg_aspect_ratio.set(2.8);
+                            max_frets.set(24);
+                            extra_frets.set(2);
+                            marker_preset.set("standard".to_string());
+                        }
+                    >
+                        "🎸 7-String"
+                    </button>
+                    <button 
+                        class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                        on:click=move |_| {
+                            svg_aspect_ratio.set(2.2);
+                            fret_margin_percentage.set(0.02);
+                            nut_width.set(10.0);
+                        }
+                    >
+                        "� Compact"
+                    </button>
+                    <button 
+                        class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                        on:click=move |_| {
+                            svg_aspect_ratio.set(5.0);
+                            extra_frets.set(3);
+                            fret_margin_percentage.set(0.08);
+                            marker_preset.set("standard".to_string());
+                        }
+                    >
+                        "📺 Ultra-wide"
+                    </button>
+                </div>
+            </div>
+            
+            // Main layout: fretboard and controls side by side on large screens
+            <div class="flex flex-col xl:flex-row gap-6">
+                // Main fretboard display
+                <div class="xl:flex-1 border-2 border-blue-200 p-4 rounded-lg bg-blue-50">
+                    <SvgFretboard 
+                        start_fret=start_fret.read_only().into() 
+                        end_fret=end_fret.read_only().into()
+                        num_strings=num_strings.read_only()
+                        max_frets=max_frets.read_only()
+                        svg_aspect_ratio=svg_aspect_ratio.read_only()
+                        fret_margin_percentage=fret_margin_percentage.read_only()
+                        nut_width=nut_width.read_only()
+                        extra_frets=extra_frets.read_only()
+                        marker_positions=Signal::derive(move || marker_positions.get())
+                    />
+                </div>
+
+                // Configuration controls panel - shows beside fretboard on XL screens
+                <div class="xl:w-96 xl:flex-shrink-0">
+                    // Configuration controls organized in sections
+                    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-1 gap-4">
                 
                 // Fret Range Controls
                 <div class="border p-4 rounded-lg">
@@ -146,24 +222,6 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium mb-1">
-                                "Width Ratio: " <span class="font-bold">{move || format!("{:.1}%", svg_width_ratio.get() * 100.0)}</span>
-                            </label>
-                            <input 
-                                type="range" 
-                                min="0.3" 
-                                max="1.0"
-                                step="0.05"
-                                class="w-full"
-                                prop:value=move || svg_width_ratio.get()
-                                on:input=move |ev| {
-                                    if let Ok(val) = event_target_value(&ev).parse::<f64>() {
-                                        svg_width_ratio.set(val);
-                                    }
-                                }
-                            />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">
                                 "Aspect Ratio: " <span class="font-bold">{move || format!("{:.1}:1", svg_aspect_ratio.get())}</span>
                             </label>
                             <input 
@@ -248,113 +306,50 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                     </div>
                 </div>
 
-                // Markers
-                <div class="border p-4 rounded-lg lg:col-span-2">
-                    <h3 class="text-lg font-semibold mb-4">"🎯 Fret Markers"</h3>
-                    <div class="flex flex-wrap gap-2">
-                        <button 
-                            class=move || format!("px-3 py-1 rounded text-sm {}",
-                                if marker_preset.get() == "standard" { "bg-blue-500 text-white" } 
-                                else { "bg-gray-200 hover:bg-gray-300" })
-                            on:click=move |_| marker_preset.set("standard".to_string())
-                        >
-                            "Standard (3,5,7,9,12...)"
-                        </button>
-                        <button 
-                            class=move || format!("px-3 py-1 rounded text-sm {}",
-                                if marker_preset.get() == "octaves" { "bg-blue-500 text-white" } 
-                                else { "bg-gray-200 hover:bg-gray-300" })
-                            on:click=move |_| marker_preset.set("octaves".to_string())
-                        >
-                            "Octaves Only (12,24)"
-                        </button>
-                        <button 
-                            class=move || format!("px-3 py-1 rounded text-sm {}",
-                                if marker_preset.get() == "pentatonic" { "bg-blue-500 text-white" } 
-                                else { "bg-gray-200 hover:bg-gray-300" })
-                            on:click=move |_| marker_preset.set("pentatonic".to_string())
-                        >
-                            "Pentatonic (3,5,7,12,15,17,24)"
-                        </button>
-                        <button 
-                            class=move || format!("px-3 py-1 rounded text-sm {}",
-                                if marker_preset.get() == "none" { "bg-blue-500 text-white" } 
-                                else { "bg-gray-200 hover:bg-gray-300" })
-                            on:click=move |_| marker_preset.set("none".to_string())
-                        >
-                            "No Markers"
-                        </button>
+                        // Markers
+                        <div class="border p-4 rounded-lg">
+                            <h3 class="text-lg font-semibold mb-4">"🎯 Fret Markers"</h3>
+                            <div class="flex flex-wrap gap-2">
+                                <button 
+                                    class=move || format!("px-3 py-1 rounded text-sm {}",
+                                        if marker_preset.get() == "standard" { "bg-blue-500 text-white" } 
+                                        else { "bg-gray-200 hover:bg-gray-300" })
+                                    on:click=move |_| marker_preset.set("standard".to_string())
+                                >
+                                    "Standard"
+                                </button>
+                                <button 
+                                    class=move || format!("px-3 py-1 rounded text-sm {}",
+                                        if marker_preset.get() == "octaves" { "bg-blue-500 text-white" } 
+                                        else { "bg-gray-200 hover:bg-gray-300" })
+                                    on:click=move |_| marker_preset.set("octaves".to_string())
+                                >
+                                    "Octaves"
+                                </button>
+                                <button 
+                                    class=move || format!("px-3 py-1 rounded text-sm {}",
+                                        if marker_preset.get() == "pentatonic" { "bg-blue-500 text-white" } 
+                                        else { "bg-gray-200 hover:bg-gray-300" })
+                                    on:click=move |_| marker_preset.set("pentatonic".to_string())
+                                >
+                                    "Pentatonic"
+                                </button>
+                                <button 
+                                    class=move || format!("px-3 py-1 rounded text-sm {}",
+                                        if marker_preset.get() == "none" { "bg-blue-500 text-white" } 
+                                        else { "bg-gray-200 hover:bg-gray-300" })
+                                    on:click=move |_| marker_preset.set("none".to_string())
+                                >
+                                    "None"
+                                </button>
+                            </div>
+                            <div class="text-xs text-gray-600 mt-2">"Fret marker positions"</div>
+                        </div>
                     </div>
-                    <div class="text-xs text-gray-600 mt-2">"Click to change fret marker positions"</div>
                 </div>
             </div>
 
-            // Quick presets
-            <div class="border p-4 rounded-lg bg-green-50">
-                <h3 class="text-lg font-semibold mb-4">"⚡ Quick Presets"</h3>
-                <div class="flex flex-wrap gap-2">
-                    <button 
-                        class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                        on:click=move |_| {
-                            num_strings.set(6);
-                            svg_aspect_ratio.set(3.0);
-                            svg_width_ratio.set(0.9);
-                            max_frets.set(22);
-                            marker_preset.set("standard".to_string());
-                        }
-                    >
-                        "🎸 Standard Guitar"
-                    </button>
-                    <button 
-                        class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                        on:click=move |_| {
-                            num_strings.set(4);
-                            svg_aspect_ratio.set(4.0);
-                            svg_width_ratio.set(0.85);
-                            max_frets.set(20);
-                            marker_preset.set("standard".to_string());
-                        }
-                    >
-                        "🎵 Bass Guitar"
-                    </button>
-                    <button 
-                        class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                        on:click=move |_| {
-                            num_strings.set(7);
-                            svg_aspect_ratio.set(2.8);
-                            svg_width_ratio.set(0.95);
-                            max_frets.set(24);
-                            extra_frets.set(2);
-                            marker_preset.set("standard".to_string());
-                        }
-                    >
-                        "🎸 7-String"
-                    </button>
-                    <button 
-                        class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                        on:click=move |_| {
-                            svg_width_ratio.set(0.6);
-                            svg_aspect_ratio.set(2.2);
-                            fret_margin_percentage.set(0.02);
-                            nut_width.set(10.0);
-                        }
-                    >
-                        "� Compact"
-                    </button>
-                    <button 
-                        class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                        on:click=move |_| {
-                            svg_width_ratio.set(0.95);
-                            svg_aspect_ratio.set(5.0);
-                            extra_frets.set(3);
-                            fret_margin_percentage.set(0.08);
-                            marker_preset.set("standard".to_string());
-                        }
-                    >
-                        "📺 Ultra-wide"
-                    </button>
-                </div>
-            </div>
+           
         </div>
     }
 }
