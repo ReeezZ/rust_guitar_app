@@ -3,7 +3,7 @@ use leptos::prelude::*;
 use leptos_use::{use_window_size, UseWindowSizeReturn};
 
 /// Configuration for fretboard visual appearance and behavior
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct FretboardConfig {
     /// Number of guitar strings (typically 6 for standard guitar, 4 for bass, 7 for extended range)
     pub num_strings: u8,
@@ -44,7 +44,7 @@ impl Default for FretboardConfig {
 /// 
 /// * `start_fret` - Signal indicating the first fret in the active/playable range
 /// * `end_fret` - Signal indicating the last fret in the active/playable range  
-/// * `config` - Optional configuration for visual appearance and behavior
+/// * Configuration props - Optional individual configuration values
 /// 
 /// # Features
 /// 
@@ -75,36 +75,71 @@ pub fn SvgFretboard(
     start_fret: Signal<usize>, 
     /// Last fret in the active/playable range
     end_fret: Signal<usize>,
-    /// Optional visual and behavioral configuration (uses sensible defaults)
+    /// Number of guitar strings (default: 6)
+    #[prop(optional, into)]
+    num_strings: Option<Signal<u8>>,
+    /// Maximum number of frets to display (default: 22)
+    #[prop(optional, into)]
+    max_frets: Option<Signal<usize>>,
+    /// Ratio of SVG width to window width (default: 0.9)
+    #[prop(optional, into)]
+    svg_width_ratio: Option<Signal<f64>>,
+    /// Width-to-height aspect ratio (default: 3.0)
+    #[prop(optional, into)]
+    svg_aspect_ratio: Option<Signal<f64>>,
+    /// Percentage of SVG height used as margin (default: 0.05)
+    #[prop(optional, into)]
+    fret_margin_percentage: Option<Signal<f64>>,
+    /// Width of the nut in SVG units (default: 14.0)
+    #[prop(optional, into)]
+    nut_width: Option<Signal<f64>>,
+    /// Number of extra frets to show for context (default: 1)
+    #[prop(optional, into)]
+    extra_frets: Option<Signal<usize>>,
+    /// Fret positions where markers should be displayed
+    #[prop(optional, into)]
+    marker_positions: Option<Signal<Vec<u8>>>,
+    /// Optional static configuration (backward compatibility)
     #[prop(optional)]
     config: Option<FretboardConfig>,
 ) -> impl IntoView {
-  let config = config.unwrap_or_default();
-  let num_frets = end_fret.get().max(config.max_frets);
+  // Use signals if provided, otherwise fall back to config or defaults
+  let defaults = config.unwrap_or_default();
+  
+  let num_strings = num_strings.unwrap_or_else(|| Signal::derive(move || defaults.num_strings));
+  let max_frets = max_frets.unwrap_or_else(|| Signal::derive(move || defaults.max_frets));
+  let svg_width_ratio = svg_width_ratio.unwrap_or_else(|| Signal::derive(move || defaults.svg_width_ratio));
+  let svg_aspect_ratio = svg_aspect_ratio.unwrap_or_else(|| Signal::derive(move || defaults.svg_aspect_ratio));
+  let fret_margin_percentage = fret_margin_percentage.unwrap_or_else(|| Signal::derive(move || defaults.fret_margin_percentage));
+  let nut_width = nut_width.unwrap_or_else(|| Signal::derive(move || defaults.nut_width));
+  let extra_frets = extra_frets.unwrap_or_else(|| Signal::derive(move || defaults.extra_frets));
+  let marker_positions = marker_positions.unwrap_or_else(|| Signal::derive(move || defaults.marker_positions.clone()));
+
+  let num_frets = Memo::new(move |_| end_fret.get().max(max_frets.get()));
 
   let UseWindowSizeReturn {
     width: window_width,
     height: _,
   } = use_window_size();
 
-  let svg_width = Memo::new(move |_| window_width.get() * config.svg_width_ratio);
-  let svg_height = Memo::new(move |_| svg_width.get() / config.svg_aspect_ratio);
-  let fret_margin = Memo::new(move |_| svg_height.get() * config.fret_margin_percentage);
+  let svg_width = Memo::new(move |_| window_width.get() * svg_width_ratio.get());
+  let svg_height = Memo::new(move |_| svg_width.get() / svg_aspect_ratio.get());
+  let fret_margin = Memo::new(move |_| svg_height.get() * fret_margin_percentage.get());
 
   // Calculate fret positions for the FULL fretboard
   let full_fret_positions =
-    Memo::new(move |_| calculate_fret_positions(svg_width.get(), num_frets as u8));
+    Memo::new(move |_| calculate_fret_positions(svg_width.get(), num_frets.get() as u8));
 
   // Calculate visible range
   let min_fret = Memo::new(move |_| {
-    if start_fret.get() > config.extra_frets {
-      start_fret.get() - config.extra_frets
+    if start_fret.get() > extra_frets.get() {
+      start_fret.get() - extra_frets.get()
     } else {
       0
     }
   });
 
-  let max_fret = Memo::new(move |_| (end_fret.get() + config.extra_frets).min(num_frets));
+  let max_fret = Memo::new(move |_| (end_fret.get() + extra_frets.get()).min(num_frets.get()));
 
   // KEY FIX: Calculate scaling parameters for zoom effect
   let zoom_params = Memo::new(move |_| {
@@ -120,7 +155,7 @@ pub fn SvgFretboard(
 
     // Available width for fret content (accounting for nut if visible)
     let available_width = if min_f == 0 {
-      current_svg_width - config.nut_width
+      current_svg_width - nut_width.get()
     } else {
       current_svg_width
     };
@@ -134,7 +169,7 @@ pub fn SvgFretboard(
   // Transform absolute coordinates to scaled viewBox coordinates
   let to_viewbox_x = move |absolute_x: f64| -> f64 {
     let (range_start, scale_factor, has_nut) = zoom_params.get();
-    let offset = if has_nut { config.nut_width } else { 0.0 };
+    let offset = if has_nut { nut_width.get() } else { 0.0 };
     offset + (absolute_x - range_start) * scale_factor
   };
 
@@ -154,7 +189,7 @@ pub fn SvgFretboard(
         {move || {
           let current_svg_height = svg_height.get();
           let current_fret_margin = fret_margin.get();
-          let string_spacing = current_svg_height / (config.num_strings as f64 + 1.0);
+          let string_spacing = current_svg_height / (num_strings.get() as f64 + 1.0);
           let positions = full_fret_positions.get();
           let min_f = min_fret.get();
           let max_f = max_fret.get();
@@ -170,7 +205,7 @@ pub fn SvgFretboard(
                 <rect
                   x="0"
                   y=current_fret_margin
-                  width=config.nut_width
+                  width=nut_width.get()
                   height=current_svg_height - 2.0 * current_fret_margin
                   fill="#f8f8f8"
                   stroke="#222"
@@ -205,7 +240,7 @@ pub fn SvgFretboard(
               }
             })
             .collect_view();
-          let strings = (0..config.num_strings)
+          let strings = (0..num_strings.get())
             .map(|i| {
               let y_pos = (i as f64 + 1.0) * string_spacing;
               let string_thickness = 1.0 + (i as f64);
@@ -225,7 +260,7 @@ pub fn SvgFretboard(
             })
             .collect_view();
           let markers = (min_f..=max_f)
-            .filter(|&fret| config.marker_positions.contains(&(fret as u8)))
+            .filter(|&fret| marker_positions.get().contains(&(fret as u8)))
             .map(|fret| {
               let x_prev = positions[(fret - 1).max(0)];
               let x_curr = positions[fret];
@@ -252,13 +287,13 @@ pub fn SvgFretboard(
             .collect_view();
           let overlay_left = if start > min_f {
             let start_x = to_viewbox_x(positions[start]);
-            let width = start_x - (if min_f == 0 { config.nut_width } else { 0.0 });
+            let width = start_x - (if min_f == 0 { nut_width.get() } else { 0.0 });
             Some(
 
               // Overlays for non-playable regions
               view! {
                 <rect
-                  x=if min_f == 0 { config.nut_width } else { 0.0 }
+                  x=if min_f == 0 { nut_width.get() } else { 0.0 }
                   y=current_fret_margin
                   width=width
                   height=current_svg_height - 2.0 * current_fret_margin
@@ -273,7 +308,7 @@ pub fn SvgFretboard(
           };
           let overlay_right = if end < max_f {
             let end_x = to_viewbox_x(positions[end]);
-            let width = viewbox_width - end_x;
+            let width = current_svg_width - end_x;
             Some(
 
               view! {

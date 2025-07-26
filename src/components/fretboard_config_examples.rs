@@ -1,363 +1,358 @@
-/// Examples showing how to use the new FretboardConfig system
+/// Interactive fretboard configuration playground
 /// 
-/// This demonstrates the magic number elimination in SvgFretboard component.
-/// All hardcoded constants have been moved to a configurable struct with
-/// sensible defaults and comprehensive documentation.
+/// This component provides a single fretboard with all configuration parameters
+/// exposed as interactive controls, allowing users to experiment with different
+/// settings in real-time and understand their effects.
 
-use crate::components::svg_fretboard::{FretboardConfig, SvgFretboard};
+use crate::components::svg_fretboard::SvgFretboard;
 use leptos::prelude::*;
 
 #[component]
 pub fn FretboardConfigExamples() -> impl IntoView {
-    // Individual signals for each example
-    let (start_1, end_1) = (RwSignal::new(3), RwSignal::new(7));
-    let (start_2, end_2) = (RwSignal::new(3), RwSignal::new(7));
-    let (start_3, end_3) = (RwSignal::new(3), RwSignal::new(7));
-    let (start_4, end_4) = (RwSignal::new(3), RwSignal::new(7));
-    let (start_5, end_5) = (RwSignal::new(3), RwSignal::new(7));
-    let (start_6, end_6) = (RwSignal::new(3), RwSignal::new(7));
+    // Fret range controls
+    let start_fret = RwSignal::new(3_usize);
+    let end_fret = RwSignal::new(7_usize);
+    
+    // Configuration controls
+    let num_strings = RwSignal::new(6_u8);
+    let max_frets = RwSignal::new(22_usize);
+    let svg_width_ratio = RwSignal::new(0.9_f64);
+    let svg_aspect_ratio = RwSignal::new(3.0_f64);
+    let fret_margin_percentage = RwSignal::new(0.05_f64);
+    let nut_width = RwSignal::new(14.0_f64);
+    let extra_frets = RwSignal::new(1_usize);
+    let marker_preset = RwSignal::new("standard".to_string());
 
     view! {
-        <div class="space-y-8">
-            <h2 class="text-2xl font-bold">"Fretboard Configuration Examples"</h2>
+        <div class="space-y-6">
+            <h2 class="text-2xl font-bold">"Interactive Fretboard Configuration"</h2>
             
-            // Example 1: Default configuration (6-string guitar)
-            <div class="border p-4 rounded">
-                <h3 class="text-lg font-semibold mb-4">"Default Configuration (6-string guitar)"</h3>
-                
-                // Controls for Example 1
-                <div class="flex gap-4 mb-4 p-2 bg-gray-50 rounded">
-                    <div>
-                        <label class="block text-sm">"Start: " {move || start_1.get()}</label>
-                        <input 
-                            type="range" 
-                            min="0" 
-                            max="20"
-                            class="w-24"
-                            prop:value=move || start_1.get()
-                            on:input=move |ev| {
-                                if let Ok(val) = event_target_value(&ev).parse::<usize>() {
-                                    if val < end_1.get() {
-                                        start_1.set(val);
-                                    }
-                                }
-                            }
-                        />
-                    </div>
-                    <div>
-                        <label class="block text-sm">"End: " {move || end_1.get()}</label>
-                        <input 
-                            type="range" 
-                            min="1" 
-                            max="24"
-                            class="w-24"
-                            prop:value=move || end_1.get()
-                            on:input=move |ev| {
-                                if let Ok(val) = event_target_value(&ev).parse::<usize>() {
-                                    if val > start_1.get() {
-                                        end_1.set(val);
-                                    }
-                                }
-                            }
-                        />
-                    </div>
-                </div>
-                
+            // Main fretboard display
+            <div class="border-2 border-blue-200 p-4 rounded-lg bg-blue-50">
                 <SvgFretboard 
-                    start_fret=start_1.read_only().into() 
-                    end_fret=end_1.read_only().into()
+                    start_fret=start_fret.read_only().into() 
+                    end_fret=end_fret.read_only().into()
+                    num_strings=num_strings.read_only()
+                    max_frets=max_frets.read_only()
+                    svg_width_ratio=svg_width_ratio.read_only()
+                    svg_aspect_ratio=svg_aspect_ratio.read_only()
+                    fret_margin_percentage=fret_margin_percentage.read_only()
+                    nut_width=nut_width.read_only()
+                    extra_frets=extra_frets.read_only()
                 />
             </div>
 
-            // Example 2: Bass guitar configuration (4 strings, wider aspect ratio)
-            <div class="border p-4 rounded">
-                <h3 class="text-lg font-semibold mb-4">"Bass Guitar (4 strings, wider)"</h3>
+            // Configuration controls organized in sections
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 
-                // Controls for Example 2
-                <div class="flex gap-4 mb-4 p-2 bg-gray-50 rounded">
-                    <div>
-                        <label class="block text-sm">"Start: " {move || start_2.get()}</label>
-                        <input 
-                            type="range" 
-                            min="0" 
-                            max="20"
-                            class="w-24"
-                            prop:value=move || start_2.get()
-                            on:input=move |ev| {
-                                if let Ok(val) = event_target_value(&ev).parse::<usize>() {
-                                    if val < end_2.get() {
-                                        start_2.set(val);
+                // Fret Range Controls
+                <div class="border p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">"🎯 Fret Range"</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">
+                                "Start Fret: " <span class="font-bold">{move || start_fret.get()}</span>
+                            </label>
+                            <input 
+                                type="range" 
+                                min="0" 
+                                max="20"
+                                class="w-full"
+                                prop:value=move || start_fret.get()
+                                on:input=move |ev| {
+                                    if let Ok(val) = event_target_value(&ev).parse::<usize>() {
+                                        if val < end_fret.get() {
+                                            start_fret.set(val);
+                                        }
                                     }
                                 }
-                            }
-                        />
-                    </div>
-                    <div>
-                        <label class="block text-sm">"End: " {move || end_2.get()}</label>
-                        <input 
-                            type="range" 
-                            min="1" 
-                            max="24"
-                            class="w-24"
-                            prop:value=move || end_2.get()
-                            on:input=move |ev| {
-                                if let Ok(val) = event_target_value(&ev).parse::<usize>() {
-                                    if val > start_2.get() {
-                                        end_2.set(val);
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">
+                                "End Fret: " <span class="font-bold">{move || end_fret.get()}</span>
+                            </label>
+                            <input 
+                                type="range" 
+                                min="1" 
+                                max="24"
+                                class="w-full"
+                                prop:value=move || end_fret.get()
+                                on:input=move |ev| {
+                                    if let Ok(val) = event_target_value(&ev).parse::<usize>() {
+                                        if val > start_fret.get() {
+                                            end_fret.set(val);
+                                        }
                                     }
                                 }
-                            }
-                        />
+                            />
+                        </div>
                     </div>
                 </div>
-                
-                <SvgFretboard 
-                    start_fret=start_2.read_only().into() 
-                    end_fret=end_2.read_only().into()
-                    config=FretboardConfig {
-                        num_strings: 4,
-                        svg_aspect_ratio: 4.0, // Wider aspect ratio for bass
-                        max_frets: 20, // Typically fewer frets than guitar
-                        ..Default::default()
-                    }
-                />
-            </div>
 
-            // Example 3: 7-string extended range guitar
-            <div class="border p-4 rounded">
-                <h3 class="text-lg font-semibold mb-4">"7-String Extended Range Guitar"</h3>
-                
-                // Controls for Example 3
-                <div class="flex gap-4 mb-4 p-2 bg-gray-50 rounded">
-                    <div>
-                        <label class="block text-sm">"Start: " {move || start_3.get()}</label>
-                        <input 
-                            type="range" 
-                            min="0" 
-                            max="20"
-                            class="w-24"
-                            prop:value=move || start_3.get()
-                            on:input=move |ev| {
-                                if let Ok(val) = event_target_value(&ev).parse::<usize>() {
-                                    if val < end_3.get() {
-                                        start_3.set(val);
+                // Instrument Configuration
+                <div class="border p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">"🎸 Instrument"</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">
+                                "Number of Strings: " <span class="font-bold">{move || num_strings.get()}</span>
+                            </label>
+                            <input 
+                                type="range" 
+                                min="4" 
+                                max="8"
+                                class="w-full"
+                                prop:value=move || num_strings.get()
+                                on:input=move |ev| {
+                                    if let Ok(val) = event_target_value(&ev).parse::<u8>() {
+                                        num_strings.set(val);
                                     }
                                 }
-                            }
-                        />
-                    </div>
-                    <div>
-                        <label class="block text-sm">"End: " {move || end_3.get()}</label>
-                        <input 
-                            type="range" 
-                            min="1" 
-                            max="24"
-                            class="w-24"
-                            prop:value=move || end_3.get()
-                            on:input=move |ev| {
-                                if let Ok(val) = event_target_value(&ev).parse::<usize>() {
-                                    if val > start_3.get() {
-                                        end_3.set(val);
+                            />
+                            <div class="text-xs text-gray-600 mt-1">
+                                {move || match num_strings.get() {
+                                    4 => "Bass Guitar",
+                                    6 => "Standard Guitar", 
+                                    7 => "7-String Guitar",
+                                    8 => "8-String Guitar",
+                                    _ => "Custom"
+                                }}
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">
+                                "Max Frets: " <span class="font-bold">{move || max_frets.get()}</span>
+                            </label>
+                            <input 
+                                type="range" 
+                                min="12" 
+                                max="27"
+                                class="w-full"
+                                prop:value=move || max_frets.get()
+                                on:input=move |ev| {
+                                    if let Ok(val) = event_target_value(&ev).parse::<usize>() {
+                                        max_frets.set(val);
                                     }
                                 }
-                            }
-                        />
+                            />
+                        </div>
                     </div>
                 </div>
-                
-                <SvgFretboard 
-                    start_fret=start_3.read_only().into() 
-                    end_fret=end_3.read_only().into()
-                    config=FretboardConfig {
-                        num_strings: 7,
-                        max_frets: 24, // Extended range often has more frets
-                        extra_frets: 2, // Show more context frets
-                        ..Default::default()
-                    }
-                />
-            </div>
 
-            // Example 4: Compact view (smaller, tighter margins)
-            <div class="border p-4 rounded">
-                <h3 class="text-lg font-semibold mb-4">"Compact View"</h3>
-                
-                // Controls for Example 4
-                <div class="flex gap-4 mb-4 p-2 bg-gray-50 rounded">
-                    <div>
-                        <label class="block text-sm">"Start: " {move || start_4.get()}</label>
-                        <input 
-                            type="range" 
-                            min="0" 
-                            max="20"
-                            class="w-24"
-                            prop:value=move || start_4.get()
-                            on:input=move |ev| {
-                                if let Ok(val) = event_target_value(&ev).parse::<usize>() {
-                                    if val < end_4.get() {
-                                        start_4.set(val);
+                // Visual Layout
+                <div class="border p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">"📐 Layout"</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">
+                                "Width Ratio: " <span class="font-bold">{move || format!("{:.1}%", svg_width_ratio.get() * 100.0)}</span>
+                            </label>
+                            <input 
+                                type="range" 
+                                min="0.3" 
+                                max="1.0"
+                                step="0.05"
+                                class="w-full"
+                                prop:value=move || svg_width_ratio.get()
+                                on:input=move |ev| {
+                                    if let Ok(val) = event_target_value(&ev).parse::<f64>() {
+                                        svg_width_ratio.set(val);
                                     }
                                 }
-                            }
-                        />
-                    </div>
-                    <div>
-                        <label class="block text-sm">"End: " {move || end_4.get()}</label>
-                        <input 
-                            type="range" 
-                            min="1" 
-                            max="24"
-                            class="w-24"
-                            prop:value=move || end_4.get()
-                            on:input=move |ev| {
-                                if let Ok(val) = event_target_value(&ev).parse::<usize>() {
-                                    if val > start_4.get() {
-                                        end_4.set(val);
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">
+                                "Aspect Ratio: " <span class="font-bold">{move || format!("{:.1}:1", svg_aspect_ratio.get())}</span>
+                            </label>
+                            <input 
+                                type="range" 
+                                min="1.5" 
+                                max="6.0"
+                                step="0.1"
+                                class="w-full"
+                                prop:value=move || svg_aspect_ratio.get()
+                                on:input=move |ev| {
+                                    if let Ok(val) = event_target_value(&ev).parse::<f64>() {
+                                        svg_aspect_ratio.set(val);
                                     }
                                 }
-                            }
-                        />
+                            />
+                            <div class="text-xs text-gray-600 mt-1">
+                                {move || if svg_aspect_ratio.get() < 2.5 { "Compact" } 
+                                        else if svg_aspect_ratio.get() > 4.0 { "Ultra-wide" }
+                                        else { "Standard" }}
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
-                <SvgFretboard 
-                    start_fret=start_4.read_only().into() 
-                    end_fret=end_4.read_only().into()
-                    config=FretboardConfig {
-                        svg_width_ratio: 0.6, // Smaller width
-                        svg_aspect_ratio: 2.5, // Taller/more compact
-                        fret_margin_percentage: 0.02, // Tighter margins
-                        nut_width: 10.0, // Thinner nut
-                        ..Default::default()
-                    }
-                />
-            </div>
 
-            // Example 5: Custom marker positions (pedagogical - only show octaves)
-            <div class="border p-4 rounded">
-                <h3 class="text-lg font-semibold mb-4">"Educational - Octave Markers Only"</h3>
-                
-                // Controls for Example 5
-                <div class="flex gap-4 mb-4 p-2 bg-gray-50 rounded">
-                    <div>
-                        <label class="block text-sm">"Start: " {move || start_5.get()}</label>
-                        <input 
-                            type="range" 
-                            min="0" 
-                            max="20"
-                            class="w-24"
-                            prop:value=move || start_5.get()
-                            on:input=move |ev| {
-                                if let Ok(val) = event_target_value(&ev).parse::<usize>() {
-                                    if val < end_5.get() {
-                                        start_5.set(val);
+                // Fine Tuning
+                <div class="border p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">"🔧 Fine Tuning"</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">
+                                "Margin: " <span class="font-bold">{move || format!("{:.1}%", fret_margin_percentage.get() * 100.0)}</span>
+                            </label>
+                            <input 
+                                type="range" 
+                                min="0.01" 
+                                max="0.15"
+                                step="0.01"
+                                class="w-full"
+                                prop:value=move || fret_margin_percentage.get()
+                                on:input=move |ev| {
+                                    if let Ok(val) = event_target_value(&ev).parse::<f64>() {
+                                        fret_margin_percentage.set(val);
                                     }
                                 }
-                            }
-                        />
-                    </div>
-                    <div>
-                        <label class="block text-sm">"End: " {move || end_5.get()}</label>
-                        <input 
-                            type="range" 
-                            min="1" 
-                            max="24"
-                            class="w-24"
-                            prop:value=move || end_5.get()
-                            on:input=move |ev| {
-                                if let Ok(val) = event_target_value(&ev).parse::<usize>() {
-                                    if val > start_5.get() {
-                                        end_5.set(val);
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">
+                                "Nut Width: " <span class="font-bold">{move || format!("{:.0}px", nut_width.get())}</span>
+                            </label>
+                            <input 
+                                type="range" 
+                                min="8" 
+                                max="25"
+                                class="w-full"
+                                prop:value=move || nut_width.get()
+                                on:input=move |ev| {
+                                    if let Ok(val) = event_target_value(&ev).parse::<f64>() {
+                                        nut_width.set(val);
                                     }
                                 }
-                            }
-                        />
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">
+                                "Extra Frets: " <span class="font-bold">{move || extra_frets.get()}</span>
+                            </label>
+                            <input 
+                                type="range" 
+                                min="0" 
+                                max="5"
+                                class="w-full"
+                                prop:value=move || extra_frets.get()
+                                on:input=move |ev| {
+                                    if let Ok(val) = event_target_value(&ev).parse::<usize>() {
+                                        extra_frets.set(val);
+                                    }
+                                }
+                            />
+                            <div class="text-xs text-gray-600 mt-1">"Context frets shown beyond active range"</div>
+                        </div>
                     </div>
                 </div>
-                
-                <SvgFretboard 
-                    start_fret=start_5.read_only().into() 
-                    end_fret=end_5.read_only().into()
-                    config=FretboardConfig {
-                        marker_positions: vec![12, 24], // Only octave markers
-                        ..Default::default()
-                    }
-                />
-            </div>
 
-            // Example 6: Ultra-wide view for detailed analysis
-            <div class="border p-4 rounded">
-                <h3 class="text-lg font-semibold mb-4">"Ultra-wide Analysis View"</h3>
-                
-                // Controls for Example 6
-                <div class="flex gap-4 mb-4 p-2 bg-gray-50 rounded">
-                    <div>
-                        <label class="block text-sm">"Start: " {move || start_6.get()}</label>
-                        <input 
-                            type="range" 
-                            min="0" 
-                            max="20"
-                            class="w-24"
-                            prop:value=move || start_6.get()
-                            on:input=move |ev| {
-                                if let Ok(val) = event_target_value(&ev).parse::<usize>() {
-                                    if val < end_6.get() {
-                                        start_6.set(val);
-                                    }
-                                }
-                            }
-                        />
+                // Markers
+                <div class="border p-4 rounded-lg lg:col-span-2">
+                    <h3 class="text-lg font-semibold mb-4">"🎯 Fret Markers"</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <button 
+                            class=move || format!("px-3 py-1 rounded text-sm {}",
+                                if marker_preset.get() == "standard" { "bg-blue-500 text-white" } 
+                                else { "bg-gray-200 hover:bg-gray-300" })
+                            on:click=move |_| marker_preset.set("standard".to_string())
+                        >
+                            "Standard (3,5,7,9,12...)"
+                        </button>
+                        <button 
+                            class=move || format!("px-3 py-1 rounded text-sm {}",
+                                if marker_preset.get() == "octaves" { "bg-blue-500 text-white" } 
+                                else { "bg-gray-200 hover:bg-gray-300" })
+                            on:click=move |_| marker_preset.set("octaves".to_string())
+                        >
+                            "Octaves Only (12,24)"
+                        </button>
+                        <button 
+                            class=move || format!("px-3 py-1 rounded text-sm {}",
+                                if marker_preset.get() == "pentatonic" { "bg-blue-500 text-white" } 
+                                else { "bg-gray-200 hover:bg-gray-300" })
+                            on:click=move |_| marker_preset.set("pentatonic".to_string())
+                        >
+                            "Pentatonic (3,5,7,12,15,17,24)"
+                        </button>
+                        <button 
+                            class=move || format!("px-3 py-1 rounded text-sm {}",
+                                if marker_preset.get() == "none" { "bg-blue-500 text-white" } 
+                                else { "bg-gray-200 hover:bg-gray-300" })
+                            on:click=move |_| marker_preset.set("none".to_string())
+                        >
+                            "No Markers"
+                        </button>
                     </div>
-                    <div>
-                        <label class="block text-sm">"End: " {move || end_6.get()}</label>
-                        <input 
-                            type="range" 
-                            min="1" 
-                            max="24"
-                            class="w-24"
-                            prop:value=move || end_6.get()
-                            on:input=move |ev| {
-                                if let Ok(val) = event_target_value(&ev).parse::<usize>() {
-                                    if val > start_6.get() {
-                                        end_6.set(val);
-                                    }
-                                }
-                            }
-                        />
-                    </div>
+                    <div class="text-xs text-gray-600 mt-2">"Click to change fret marker positions"</div>
                 </div>
-                
-                <SvgFretboard 
-                    start_fret=start_6.read_only().into() 
-                    end_fret=end_6.read_only().into()
-                    config=FretboardConfig {
-                        svg_width_ratio: 0.95, // Use almost full width
-                        svg_aspect_ratio: 5.0, // Very wide
-                        extra_frets: 3, // Show lots of context
-                        fret_margin_percentage: 0.08, // More margin for labels
-                        ..Default::default()
-                    }
-                />
             </div>
 
-            // Quick comparison section
-            <div class="border p-4 rounded bg-blue-50">
-                <h3 class="text-lg font-semibold mb-2">"💡 Configuration Tips"</h3>
-                <div class="text-sm text-gray-700">
-                    <div style="margin-bottom: 0.5rem;">
-                        "• " <strong>"num_strings:"</strong> " 4 (bass), 6 (standard), 7+ (extended range)"
-                    </div>
-                    <div style="margin-bottom: 0.5rem;">
-                        "• " <strong>"svg_aspect_ratio:"</strong> " Higher = wider/more horizontal"
-                    </div>
-                    <div style="margin-bottom: 0.5rem;">
-                        "• " <strong>"svg_width_ratio:"</strong> " 0.0-1.0, controls overall size"
-                    </div>
-                    <div style="margin-bottom: 0.5rem;">
-                        "• " <strong>"extra_frets:"</strong> " Shows context beyond active range"
-                    </div>
-                    <div style="margin-bottom: 0.5rem;">
-                        "• " <strong>"marker_positions:"</strong> " Customize fret dots for different teaching styles"
-                    </div>
+            // Quick presets
+            <div class="border p-4 rounded-lg bg-green-50">
+                <h3 class="text-lg font-semibold mb-4">"⚡ Quick Presets"</h3>
+                <div class="flex flex-wrap gap-2">
+                    <button 
+                        class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                        on:click=move |_| {
+                            num_strings.set(6);
+                            svg_aspect_ratio.set(3.0);
+                            svg_width_ratio.set(0.9);
+                            max_frets.set(22);
+                            marker_preset.set("standard".to_string());
+                        }
+                    >
+                        "🎸 Standard Guitar"
+                    </button>
+                    <button 
+                        class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                        on:click=move |_| {
+                            num_strings.set(4);
+                            svg_aspect_ratio.set(4.0);
+                            svg_width_ratio.set(0.85);
+                            max_frets.set(20);
+                            marker_preset.set("standard".to_string());
+                        }
+                    >
+                        "🎵 Bass Guitar"
+                    </button>
+                    <button 
+                        class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                        on:click=move |_| {
+                            num_strings.set(7);
+                            svg_aspect_ratio.set(2.8);
+                            svg_width_ratio.set(0.95);
+                            max_frets.set(24);
+                            extra_frets.set(2);
+                            marker_preset.set("standard".to_string());
+                        }
+                    >
+                        "🎸 7-String"
+                    </button>
+                    <button 
+                        class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                        on:click=move |_| {
+                            svg_width_ratio.set(0.6);
+                            svg_aspect_ratio.set(2.2);
+                            fret_margin_percentage.set(0.02);
+                            nut_width.set(10.0);
+                        }
+                    >
+                        "� Compact"
+                    </button>
+                    <button 
+                        class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                        on:click=move |_| {
+                            svg_width_ratio.set(0.95);
+                            svg_aspect_ratio.set(5.0);
+                            extra_frets.set(3);
+                            fret_margin_percentage.set(0.08);
+                            marker_preset.set("standard".to_string());
+                        }
+                    >
+                        "📺 Ultra-wide"
+                    </button>
                 </div>
             </div>
         </div>
