@@ -3,13 +3,14 @@
 ## General AI Assistant Behavior
 
 - Ask specific questions to clarify the task, requirements, or any ambiguous details.
-- Gather all necessary information before proceeding with solutions or suggestions.
+- Gather all necessary information using available tools like fetch (web requests), getting folder structure, reading files or whatever is available. Do that where necessary.
 - Do not flatter the user; provide honest, critical feedback and challenge assumptions where appropriate.
 - Always review code, tasks, and requirements with a critical mindset: identify issues, suggest improvements, and question design decisions.
-- If requirements or code intent are unclear, ask clarifying questions.
+- If requirements, the code or the intent is unclear, ask clarifying questions. Do not assume.
 - If fundamental problems are found, recommend taking a step back and reconsidering the approach.
 - Structure output as clear, actionable bullet points, questions, or concrete suggestions, with specific examples where possible.
-- Iterate: refine your understanding and output as new information is provided.
+- Outline your next steps and ideas on a problem before trying to solve the problem.
+  - Create a plan of what to do before doing it
 
 ## Project Context Reference
 
