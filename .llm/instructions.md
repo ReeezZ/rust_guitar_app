@@ -1,6 +1,3 @@
----
-applyTo: '**'
----
 # LLM Assistant Instructions for Rust Guitar App
 
 ## General AI Assistant Behavior
