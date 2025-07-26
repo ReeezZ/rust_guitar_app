@@ -34,13 +34,13 @@ pub fn FretboardConfigExamples() -> impl IntoView {
     });
 
     view! {
-        <div class="space-y-6">
+        <div class="space-y-3">
             <h2 class="text-2xl font-bold">"Interactive Fretboard Configuration"</h2>
 
              // Quick presets
-            <div class="border p-4 rounded-lg bg-green-50">
+            <div class="border p-2 rounded-lg bg-green-50">
                 <h3 class="text-lg font-semibold mb-4">"⚡ Quick Presets"</h3>
-                <div class="flex flex-wrap gap-2">
+                <div class="flex flex-wrap gap-2 items-center justify-center">
                     <button 
                         class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
                         on:click=move |_| {
@@ -101,8 +101,8 @@ pub fn FretboardConfigExamples() -> impl IntoView {
             
             // Main layout: fretboard and controls side by side on large screens
             <div class="flex flex-col xl:flex-row gap-6">
-                // Main fretboard display
-                <div class="xl:flex-1 border-2 border-blue-200 p-4 rounded-lg bg-blue-50">
+                // Main fretboard display - responsive sizing, not too constrained
+                <div class="xl:flex-[2] xl:min-w-0 border-2 border-blue-200 p-4 rounded-lg bg-blue-50">
                     <SvgFretboard 
                         start_fret=start_fret.read_only().into() 
                         end_fret=end_fret.read_only().into()
@@ -116,18 +116,18 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                     />
                 </div>
 
-                // Configuration controls panel - shows beside fretboard on XL screens
-                <div class="xl:w-96 xl:flex-shrink-0">
-                    // Configuration controls organized in sections
-                    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-1 gap-4">
-                
-                // Fret Range Controls
-                <div class="border p-4 rounded-lg">
-                    <h3 class="text-lg font-semibold mb-4">"🎯 Fret Range"</h3>
+                // Configuration controls panel - compact and efficient use of space
+                <div class="xl:flex-1 xl:max-w-lg">
+                    // Configuration controls organized in compact sections
                     <div class="space-y-4">
+                
+                // Fret Range Controls - compact horizontal layout
+                <div class="border p-1 rounded-lg">
+                    <h3 class="text-base font-semibold mb-3">"🎯 Fret Range"</h3>
+                    <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-sm font-medium mb-1">
-                                "Start Fret: " <span class="font-bold">{move || start_fret.get()}</span>
+                            <label class="block text-xs font-medium mb-1">
+                                "Start: " <span class="font-bold">{move || start_fret.get()}</span>
                             </label>
                             <input 
                                 type="range" 
@@ -145,8 +145,8 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                             />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-1">
-                                "End Fret: " <span class="font-bold">{move || end_fret.get()}</span>
+                            <label class="block text-xs font-medium mb-1">
+                                "End: " <span class="font-bold">{move || end_fret.get()}</span>
                             </label>
                             <input 
                                 type="range" 
@@ -166,13 +166,13 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                     </div>
                 </div>
 
-                // Instrument Configuration
-                <div class="border p-4 rounded-lg">
-                    <h3 class="text-lg font-semibold mb-4">"🎸 Instrument"</h3>
-                    <div class="space-y-4">
+                // Instrument Configuration - compact horizontal layout
+                <div class="border p-1 rounded-lg">
+                    <h3 class="text-base font-semibold mb-3">"🎸 Instrument"</h3>
+                    <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-sm font-medium mb-1">
-                                "Number of Strings: " <span class="font-bold">{move || num_strings.get()}</span>
+                            <label class="block text-xs font-medium mb-1">
+                                "Strings: " <span class="font-bold">{move || num_strings.get()}</span>
                             </label>
                             <input 
                                 type="range" 
@@ -188,16 +188,16 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                             />
                             <div class="text-xs text-gray-600 mt-1">
                                 {move || match num_strings.get() {
-                                    4 => "Bass Guitar",
-                                    6 => "Standard Guitar", 
-                                    7 => "7-String Guitar",
-                                    8 => "8-String Guitar",
+                                    4 => "Bass",
+                                    6 => "Guitar", 
+                                    7 => "7-String",
+                                    8 => "8-String",
                                     _ => "Custom"
                                 }}
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-1">
+                            <label class="block text-xs font-medium mb-1">
                                 "Max Frets: " <span class="font-bold">{move || max_frets.get()}</span>
                             </label>
                             <input 
@@ -216,13 +216,13 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                     </div>
                 </div>
 
-                // Visual Layout
-                <div class="border p-4 rounded-lg">
-                    <h3 class="text-lg font-semibold mb-4">"📐 Layout"</h3>
-                    <div class="space-y-4">
+                // Visual Layout & Fine Tuning - combined compact layout
+                <div class="border p-1 rounded-lg">
+                    <h3 class="text-base font-semibold mb-3">"📐 Layout & Tuning"</h3>
+                    <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-sm font-medium mb-1">
-                                "Aspect Ratio: " <span class="font-bold">{move || format!("{:.1}:1", svg_aspect_ratio.get())}</span>
+                            <label class="block text-xs font-medium mb-1">
+                                "Aspect: " <span class="font-bold">{move || format!("{:.1}:1", svg_aspect_ratio.get())}</span>
                             </label>
                             <input 
                                 type="range" 
@@ -243,15 +243,8 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                                         else { "Standard" }}
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                // Fine Tuning
-                <div class="border p-4 rounded-lg">
-                    <h3 class="text-lg font-semibold mb-4">"🔧 Fine Tuning"</h3>
-                    <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium mb-1">
+                            <label class="block text-xs font-medium mb-1">
                                 "Margin: " <span class="font-bold">{move || format!("{:.1}%", fret_margin_percentage.get() * 100.0)}</span>
                             </label>
                             <input 
@@ -268,8 +261,10 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                                 }
                             />
                         </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 mt-3">
                         <div>
-                            <label class="block text-sm font-medium mb-1">
+                            <label class="block text-xs font-medium mb-1">
                                 "Nut Width: " <span class="font-bold">{move || format!("{:.0}px", nut_width.get())}</span>
                             </label>
                             <input 
@@ -286,7 +281,7 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                             />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-1">
+                            <label class="block text-xs font-medium mb-1">
                                 "Extra Frets: " <span class="font-bold">{move || extra_frets.get()}</span>
                             </label>
                             <input 
@@ -301,17 +296,16 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                                     }
                                 }
                             />
-                            <div class="text-xs text-gray-600 mt-1">"Context frets shown beyond active range"</div>
                         </div>
                     </div>
                 </div>
 
-                        // Markers
-                        <div class="border p-4 rounded-lg">
-                            <h3 class="text-lg font-semibold mb-4">"🎯 Fret Markers"</h3>
-                            <div class="flex flex-wrap gap-2">
+                        // Markers - compact layout
+                        <div class="border p-1 rounded-lg">
+                            <h3 class="text-base font-semibold mb-3">"🎯 Fret Markers"</h3>
+                            <div class="flex items-center justify-center gap-2">
                                 <button 
-                                    class=move || format!("px-3 py-1 rounded text-sm {}",
+                                    class=move || format!("inline-block px-2 py-1 rounded text-xs m-1 {}",
                                         if marker_preset.get() == "standard" { "bg-blue-500 text-white" } 
                                         else { "bg-gray-200 hover:bg-gray-300" })
                                     on:click=move |_| marker_preset.set("standard".to_string())
@@ -319,7 +313,7 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                                     "Standard"
                                 </button>
                                 <button 
-                                    class=move || format!("px-3 py-1 rounded text-sm {}",
+                                    class=move || format!("inline-block px-2 py-1 rounded text-xs m-1 {}",
                                         if marker_preset.get() == "octaves" { "bg-blue-500 text-white" } 
                                         else { "bg-gray-200 hover:bg-gray-300" })
                                     on:click=move |_| marker_preset.set("octaves".to_string())
@@ -327,7 +321,7 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                                     "Octaves"
                                 </button>
                                 <button 
-                                    class=move || format!("px-3 py-1 rounded text-sm {}",
+                                    class=move || format!("inline-block px-2 py-1 rounded text-xs m-1 {}",
                                         if marker_preset.get() == "pentatonic" { "bg-blue-500 text-white" } 
                                         else { "bg-gray-200 hover:bg-gray-300" })
                                     on:click=move |_| marker_preset.set("pentatonic".to_string())
@@ -335,7 +329,7 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                                     "Pentatonic"
                                 </button>
                                 <button 
-                                    class=move || format!("px-3 py-1 rounded text-sm {}",
+                                    class=move || format!("inline-block px-2 py-1 rounded text-xs m-1 {}",
                                         if marker_preset.get() == "none" { "bg-blue-500 text-white" } 
                                         else { "bg-gray-200 hover:bg-gray-300" })
                                     on:click=move |_| marker_preset.set("none".to_string())
@@ -343,7 +337,6 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                                     "None"
                                 </button>
                             </div>
-                            <div class="text-xs text-gray-600 mt-2">"Fret marker positions"</div>
                         </div>
                     </div>
                 </div>
