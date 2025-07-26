@@ -1,7 +1,8 @@
 use crate::components::{
-  fretboard_config_examples::FretboardConfigExamples, svg_fretboard::SvgFretboard,
+  fretboard_config_examples::FretboardConfigExamples,
+  svg_fretboard::{SvgFretClickEvent, SvgFretboard},
 };
-use leptos::{ev, prelude::*};
+use leptos::{ev, logging::log, prelude::*};
 
 /// Extracts the value from an input event.
 /// See: https://leptos.dev/docs/reference/events/
@@ -19,6 +20,18 @@ pub fn SvgFretboardPage() -> impl IntoView {
   const MAX_FRETS: usize = 22;
   let start_fret = RwSignal::new(0_usize);
   let end_fret = RwSignal::new(5_usize);
+
+  // Track clicked fret for testing interactivity
+  let (clicked_fret, set_clicked_fret) = signal::<Option<SvgFretClickEvent>>(None);
+
+  let on_fret_clicked = Callback::new(move |event: SvgFretClickEvent| {
+    log!(
+      "Fret clicked: String {}, Fret {}",
+      event.coord.string_idx,
+      event.coord.fret_idx
+    );
+    set_clicked_fret.set(Some(event));
+  });
 
   view! {
     <div style="margin-bottom: 1em;">
@@ -57,8 +70,22 @@ pub fn SvgFretboardPage() -> impl IntoView {
         }
       />
     </div>
+
+    // Display clicked fret info for testing
+    <div style="margin-bottom: 1em; padding: 1em; background: #f0f0f0; border-radius: 5px;">
+      <strong>"Click Test: "</strong>
+      {move || match clicked_fret.get() {
+        Some(event) => format!("String {} - Fret {}", event.coord.string_idx + 1, event.coord.fret_idx),
+        None => "Click on a fret to test interactivity".to_string(),
+      }}
+    </div>
+
     <div style="margin: 5em;">
-      <SvgFretboard start_fret=start_fret.read_only().into() end_fret=end_fret.read_only().into() />
+      <SvgFretboard
+        start_fret=start_fret.read_only().into()
+        end_fret=end_fret.read_only().into()
+        on_fret_clicked=on_fret_clicked
+      />
     </div>
     <FretboardConfigExamples />
   }
