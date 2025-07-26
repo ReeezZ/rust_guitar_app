@@ -1,6 +1,78 @@
 use crate::fretboard_view_helper::calculate_fret_positions;
 use leptos::prelude::*;
 
+/// Calculate string spacing for the given number of strings and SVG height
+fn calculate_string_spacing(num_strings: u8, svg_height: f64) -> f64 {
+    svg_height / (num_strings as f64 + 1.0)
+}
+
+/// Calculate the visible fret range including extra context frets
+fn calculate_visible_range(start_fret: usize, end_fret: usize, extra_frets: usize, max_frets: usize) -> (usize, usize) {
+    let min_fret = if start_fret > extra_frets {
+        start_fret - extra_frets
+    } else {
+        0
+    };
+    let max_fret = (end_fret + extra_frets).min(max_frets);
+    (min_fret, max_fret)
+}
+
+/// Parameters for coordinate transformation and zoom scaling
+#[derive(Debug, Clone, PartialEq)]
+struct ZoomTransform {
+    /// Starting position of the visible range in absolute coordinates
+    range_start: f64,
+    /// Scale factor to apply to coordinates
+    scale_factor: f64,
+    /// Whether the nut is visible (fret 0 is in range)
+    has_nut: bool,
+}
+
+impl ZoomTransform {
+    /// Create a new zoom transform for the given fret range and dimensions
+    fn new(
+        positions: &[f64],
+        min_fret: usize,
+        max_fret: usize,
+        svg_width: f64,
+        nut_width: f64,
+    ) -> Self {
+        let has_nut = min_fret == 0;
+        
+        // Physical range we want to display
+        let range_start = if has_nut { 0.0 } else { positions[min_fret] };
+        let range_end = positions[max_fret];
+        let range_width = range_end - range_start;
+
+        // Available width for fret content (accounting for nut if visible)
+        let available_width = if has_nut {
+            svg_width - nut_width
+        } else {
+            svg_width
+        };
+
+        // Scale factor to make the selected range fill the available width
+        let scale_factor = available_width / range_width;
+
+        Self {
+            range_start,
+            scale_factor,
+            has_nut,
+        }
+    }
+
+    /// Transform absolute fretboard coordinates to scaled viewbox coordinates
+    fn to_viewbox_x(&self, absolute_x: f64, nut_width: f64) -> f64 {
+        let offset = if self.has_nut { nut_width } else { 0.0 };
+        offset + (absolute_x - self.range_start) * self.scale_factor
+    }
+
+    /// Get nut width to use in calculations (0 if nut not visible)
+    fn effective_nut_width(&self, nut_width: f64) -> f64 {
+        if self.has_nut { nut_width } else { 0.0 }
+    }
+}
+
 /// Renders the nut (zero fret) when visible
 #[component]
 fn FretboardNut(
@@ -314,47 +386,34 @@ pub fn SvgFretboard(
   let full_fret_positions =
     Memo::new(move |_| calculate_fret_positions(svg_width.get(), num_frets.get() as u8));
 
-  // Calculate visible range
-  let min_fret = Memo::new(move |_| {
-    if start_fret.get() > extra_frets.get() {
-      start_fret.get() - extra_frets.get()
-    } else {
-      0
-    }
+  // Calculate visible range - logic extracted to pure function
+  let visible_range = Memo::new(move |_| {
+    calculate_visible_range(
+      start_fret.get(),
+      end_fret.get(),
+      extra_frets.get(),
+      num_frets.get(),
+    )
   });
 
-  let max_fret = Memo::new(move |_| (end_fret.get() + extra_frets.get()).min(num_frets.get()));
+  let min_fret = Memo::new(move |_| visible_range.get().0);
+  let max_fret = Memo::new(move |_| visible_range.get().1);
 
-  // KEY FIX: Calculate scaling parameters for zoom effect
-  let zoom_params = Memo::new(move |_| {
-    let positions = full_fret_positions.get();
-    let min_f = min_fret.get();
-    let max_f = max_fret.get();
-    let current_svg_width = svg_width.get();
-
-    // Physical range we want to display
-    let range_start = if min_f == 0 { 0.0 } else { positions[min_f] };
-    let range_end = positions[max_f];
-    let range_width = range_end - range_start;
-
-    // Available width for fret content (accounting for nut if visible)
-    let available_width = if min_f == 0 {
-      current_svg_width - nut_width.get()
-    } else {
-      current_svg_width
-    };
-
-    // Scale factor to make the selected range fill the available width
-    let scale_factor = available_width / range_width;
-
-    (range_start, scale_factor, min_f == 0)
+  // Clean zoom transformation - calculation logic extracted to ZoomTransform::new
+  let zoom_transform = Memo::new(move |_| {
+    ZoomTransform::new(
+      &full_fret_positions.get(),
+      min_fret.get(),
+      max_fret.get(),
+      svg_width.get(),
+      nut_width.get(),
+    )
   });
 
-  // Transform absolute coordinates to scaled viewBox coordinates
+  // Clean coordinate transformation function
   let to_viewbox_x = move |absolute_x: f64| -> f64 {
-    let (range_start, scale_factor, has_nut) = zoom_params.get();
-    let offset = if has_nut { nut_width.get() } else { 0.0 };
-    offset + (absolute_x - range_start) * scale_factor
+    let transform = zoom_transform.get();
+    transform.to_viewbox_x(absolute_x, nut_width.get())
   };
 
   view! {
@@ -371,7 +430,7 @@ pub fn SvgFretboard(
         {move || {
           let current_svg_height = svg_height.get();
           let current_fret_margin = fret_margin.get();
-          let string_spacing = current_svg_height / (num_strings.get() as f64 + 1.0);
+          let string_spacing = calculate_string_spacing(num_strings.get(), current_svg_height);
           let positions = full_fret_positions.get();
           let min_f = min_fret.get();
           let max_f = max_fret.get();
@@ -383,7 +442,7 @@ pub fn SvgFretboard(
 
           view! {
             // Conditionally render nut when fret 0 is visible
-            {if min_f == 0 {
+            {if zoom_transform.get().has_nut {
               Some(view! {
                 <FretboardNut 
                   nut_width=current_nut_width
@@ -432,7 +491,7 @@ pub fn SvgFretboard(
               end_fret=end
               positions=positions
               to_viewbox_x=to_viewbox_x
-              nut_width=if min_f == 0 { current_nut_width } else { 0.0 }
+              nut_width=zoom_transform.get().effective_nut_width(current_nut_width)
               fret_margin=current_fret_margin
               svg_height=current_svg_height
               svg_width=current_svg_width
