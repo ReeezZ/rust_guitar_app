@@ -3,7 +3,9 @@
 /// This component provides a single fretboard with all configuration parameters
 /// exposed as interactive controls, allowing users to experiment with different
 /// settings in real-time and understand their effects.
-use crate::components::svg_fretboard::{SvgFretClickEvent, SvgFretboard};
+use crate::components::{
+  fretboard::FretClickEvent, svg_fretboard_with_notes::SvgFretboardWithNotes,
+};
 use leptos::{logging::log, prelude::*};
 
 #[component]
@@ -100,7 +102,7 @@ pub fn FretboardConfigExamples() -> impl IntoView {
       <div class="flex flex-col gap-6 xl:flex-row">
         // Main fretboard display - responsive sizing, not too constrained
         <div class="p-4 bg-blue-50 rounded-lg border-2 border-blue-200 xl:min-w-0 xl:flex-[2]">
-          <SvgFretboard
+          <SvgFretboardWithNotes
             start_fret=start_fret.read_only().into()
             end_fret=end_fret.read_only().into()
             num_strings=num_strings.read_only()
@@ -110,9 +112,9 @@ pub fn FretboardConfigExamples() -> impl IntoView {
             nut_width=nut_width.read_only()
             extra_frets=extra_frets.read_only()
             marker_positions=Signal::derive(move || marker_positions.get())
-            on_fret_clicked=Callback::new(|event: SvgFretClickEvent| {
+            on_note_clicked=Callback::new(|event: FretClickEvent| {
               log!(
-                "Fret clicked: String {}, Fret {}", event.coord.string_idx, event.coord.fret_idx
+                "Fret clicked: String {}, Fret {}, Note {}", event.coord.string_idx, event.coord.fret_idx, event.note
               );
             })
           />
