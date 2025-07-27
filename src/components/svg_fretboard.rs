@@ -465,23 +465,44 @@ pub fn SvgFretboard(
   /// Last fret in the active/playable range
   end_fret: Signal<usize>,
   /// Visual configuration for fretboard display properties
-  #[prop(optional)]
-  config: Option<FretboardVisualConfig>,
+  #[prop(optional, into)]
+  config: Option<Signal<FretboardVisualConfig>>,
   /// Optional callback for fret click events
   #[prop(optional)]
   on_fret_clicked: Option<Callback<SvgFretClickEvent>>,
 ) -> impl IntoView {
-  // Use provided config or default
-  let visual_config = config.unwrap_or_default();
+  // Use provided config signal or create one with default
+  let config_signal = config.unwrap_or_else(|| Signal::derive(|| FretboardVisualConfig::default()));
   
-  // Create reactive signals from config values
-  let num_strings = Signal::derive(move || visual_config.num_strings);
-  let max_frets = Signal::derive(move || visual_config.max_frets);
-  let svg_aspect_ratio = Signal::derive(move || visual_config.svg_aspect_ratio);
-  let fret_margin_percentage = Signal::derive(move || visual_config.fret_margin_percentage);
-  let nut_width = Signal::derive(move || visual_config.nut_width);
-  let extra_frets = Signal::derive(move || visual_config.extra_frets);
-  let marker_positions = Signal::derive(move || visual_config.marker_positions.clone());
+  // Create reactive signals from config values - using clone since Signal is Copy
+  let num_strings = Signal::derive({
+    let config_signal = config_signal;
+    move || config_signal.get().num_strings
+  });
+  let max_frets = Signal::derive({
+    let config_signal = config_signal;
+    move || config_signal.get().max_frets
+  });
+  let svg_aspect_ratio = Signal::derive({
+    let config_signal = config_signal;
+    move || config_signal.get().svg_aspect_ratio
+  });
+  let fret_margin_percentage = Signal::derive({
+    let config_signal = config_signal;
+    move || config_signal.get().fret_margin_percentage
+  });
+  let nut_width = Signal::derive({
+    let config_signal = config_signal;
+    move || config_signal.get().nut_width
+  });
+  let extra_frets = Signal::derive({
+    let config_signal = config_signal;
+    move || config_signal.get().extra_frets
+  });
+  let marker_positions = Signal::derive({
+    let config_signal = config_signal;
+    move || config_signal.get().marker_positions.clone()
+  });
 
   let num_frets = Memo::new(move |_| end_fret.get().max(max_frets.get()));
 

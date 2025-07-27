@@ -118,7 +118,7 @@ pub fn FretboardConfigExamples() -> impl IntoView {
           <SvgFretboardWithNotes
             start_fret=start_fret.read_only().into()
             end_fret=end_fret.read_only().into()
-            config=visual_config.get()
+            config=Signal::from(visual_config)
             on_note_clicked=Callback::new(|event: FretClickEvent| {
               log!(
                 "Fret clicked: String {}, Fret {}, Note {}", event.coord.string_idx, event.coord.fret_idx, event.note

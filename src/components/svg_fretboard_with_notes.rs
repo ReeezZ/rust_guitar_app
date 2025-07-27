@@ -79,8 +79,8 @@ pub fn SvgFretboardWithNotes(
 
   // Visual configuration
   /// Visual configuration for fretboard display properties
-  #[prop(optional)]
-  config: Option<FretboardVisualConfig>,
+  #[prop(optional, into)]
+  config: Option<Signal<FretboardVisualConfig>>,
 ) -> impl IntoView {
   // Use default tuning if not provided (standard guitar tuning)
   let tuning = tuning.unwrap_or_else(|| Signal::derive(move || FretboardModel::standard_tuning()));
@@ -115,7 +115,7 @@ pub fn SvgFretboardWithNotes(
     <SvgFretboard
       start_fret=start_fret
       end_fret=end_fret
-      config=config.unwrap_or_default()
+      config=config.unwrap_or_else(|| Signal::derive(|| FretboardVisualConfig::default()))
       on_fret_clicked=on_svg_fret_clicked
     />
   }
