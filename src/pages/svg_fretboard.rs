@@ -1,6 +1,6 @@
 use crate::components::{
   fretboard::FretClickEvent, fretboard_config_examples::FretboardConfigExamples,
-  svg_fretboard::SvgFretClickEvent, svg_fretboard_with_notes::SvgFretboardWithNotes,
+  svg_fretboard_with_notes::SvgFretboardWithNotes,
 };
 use leptos::{ev, logging::log, prelude::*};
 
@@ -20,9 +20,6 @@ pub fn SvgFretboardPage() -> impl IntoView {
   const MAX_FRETS: usize = 22;
   let start_fret = RwSignal::new(0_usize);
   let end_fret = RwSignal::new(5_usize);
-
-  // Track clicked fret for testing interactivity (coordinate-only)
-  let (clicked_coord_event, set_clicked_coord_event) = signal::<Option<SvgFretClickEvent>>(None);
 
   // Track clicked note for testing note-aware interactivity
   let (clicked_note_event, set_clicked_note_event) = signal::<Option<FretClickEvent>>(None);
@@ -74,17 +71,6 @@ pub fn SvgFretboardPage() -> impl IntoView {
           }
         }
       />
-    </div>
-
-    // Display clicked fret info for testing - both coordinate and note versions
-    <div style="margin-bottom: 1em; padding: 1em; background: #f0f0f0; border-radius: 5px;">
-      <strong>"SVG Fretboard (coordinates only): "</strong>
-      {move || match clicked_coord_event.get() {
-        Some(event) => {
-          format!("String {} - Fret {}", event.coord.string_idx + 1, event.coord.fret_idx)
-        }
-        None => "Click on the first fretboard to test coordinate-only interaction".to_string(),
-      }}
     </div>
 
     <div style="margin-bottom: 1em; padding: 1em; background: #e8f4fd; border-radius: 5px;">
