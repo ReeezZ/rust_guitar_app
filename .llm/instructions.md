@@ -18,6 +18,15 @@
 
 ## Technology-Specific Guidance
 
+### Git
+
+- ALWAYS read in the current status and diff before writing a commit message
+
+#### Commit messages
+
+- Do NOT do "over the top" commit messages, keep it brief. Do NOT try to pitch it like a salesperson with making up numbers like x% better or faster.
+- Keep it simple, brief, it should be easy to understand what has changed.
+
 ### Rust and Leptos
 
 - Write idiomatic Rust and follow Leptos best practices for components, signals, and reactivity.
@@ -52,6 +61,12 @@ cargo fmt
 - Write clear, descriptive doc comments for public APIs
 - Leverage Rust's type system for safety and clarity
 - Follow Leptos patterns for component composition and state management
+
+## Comments in code
+
+- Try to avoid comments in code
+- comments should never describe something that is obvious from the code itself
+- code should be written in a self descriptive manner to avoid comments
 
 ### Important Files to Consider
 

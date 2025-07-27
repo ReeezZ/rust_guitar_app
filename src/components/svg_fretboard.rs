@@ -1,5 +1,13 @@
+use crate::components::fretboard_visual_config::FretboardVisualConfig;
 use crate::fretboard_view_helper::calculate_fret_positions;
+use crate::models::fretboard_model::FretCoord;
 use leptos::prelude::*;
+
+/// Event emitted when a fret position is clicked on the SVG fretboard
+#[derive(Clone, Copy, Debug)]
+pub struct SvgFretClickEvent {
+  pub coord: FretCoord,
+}
 
 /// Calculate string spacing for the given number of strings and SVG height
 fn calculate_string_spacing(num_strings: u8, svg_height: f64) -> f64 {
@@ -293,6 +301,103 @@ fn FretboardOverlays(
   }
 }
 
+/// Renders invisible clickable areas over each fret position
+#[component]
+fn FretboardClickableAreas(
+  /// Minimum visible fret number
+  min_fret: usize,
+  /// Maximum visible fret number
+  max_fret: usize,
+  /// Number of strings
+  num_strings: u8,
+  /// String spacing in SVG units
+  string_spacing: f64,
+  /// Absolute fret positions array
+  positions: Vec<f64>,
+  /// Function to transform absolute x to viewbox x
+  to_viewbox_x: impl Fn(f64) -> f64 + Copy + 'static,
+  /// Whether the nut is visible
+  has_nut: bool,
+  /// Width of the nut (only used if has_nut is true)
+  nut_width: f64,
+  /// Callback for fret clicks
+  on_fret_clicked: Callback<SvgFretClickEvent>,
+) -> impl IntoView {
+  view! {
+    <>
+      // Clickable areas for each fret position
+      {(0..num_strings).map(|string_idx| {
+        let string_y = (string_idx as f64 + 1.0) * string_spacing;
+
+        view! {
+          <>
+            // Nut clickable area (fret 0) if visible
+            {if has_nut {
+              let on_click = move |_| {
+                on_fret_clicked.run(SvgFretClickEvent {
+                  coord: FretCoord {
+                    string_idx,
+                    fret_idx: 0,
+                  },
+                });
+              };
+
+              Some(view! {
+                <rect
+                  x="0"
+                  y=string_y - string_spacing * 0.4
+                  width=nut_width
+                  height=string_spacing * 0.8
+                  fill="transparent"
+                  stroke="red"
+                  stroke-width="1"
+                  stroke-opacity="0.3"
+                  on:click=on_click
+                  style="cursor: pointer;"
+                />
+              })
+            } else {
+              None
+            }}
+
+            // Clickable areas for fretted positions
+            {(min_fret.max(1)..=max_fret).map(|fret_idx| {
+              let x_prev = if fret_idx == 0 { 0.0 } else { positions[(fret_idx - 1).max(0)] };
+              let x_curr = positions[fret_idx];
+              let x_start = to_viewbox_x((x_prev + x_curr) / 2.0 - (x_curr - x_prev) / 4.0);
+              let x_width = to_viewbox_x((x_prev + x_curr) / 2.0 + (x_curr - x_prev) / 4.0) - x_start;
+
+              let on_click = move |_| {
+                on_fret_clicked.run(SvgFretClickEvent {
+                  coord: FretCoord {
+                    string_idx,
+                    fret_idx: fret_idx as u8,
+                  },
+                });
+              };
+
+              view! {
+                <rect
+                  x=x_start
+                  y=string_y - string_spacing * 0.4
+                  width=x_width
+                  height=string_spacing * 0.8
+                  fill="transparent"
+                  stroke="red"
+                  stroke-width="1"
+                  stroke-opacity="0.3"
+                  on:click=on_click
+                  style="cursor: pointer;"
+                />
+              }
+            }).collect_view()}
+          </>
+        }
+      }).collect_view()}
+    </>
+  }
+}
+
 /// Interactive SVG fretboard component that displays a zoomable guitar fretboard
 ///
 /// # Props
@@ -359,38 +464,45 @@ pub fn SvgFretboard(
   start_fret: Signal<usize>,
   /// Last fret in the active/playable range
   end_fret: Signal<usize>,
-  /// Number of guitar strings (default: 6)
+  /// Visual configuration for fretboard display properties
   #[prop(optional, into)]
-  num_strings: Option<Signal<u8>>,
-  /// Maximum number of frets to display (default: 22)
-  #[prop(optional, into)]
-  max_frets: Option<Signal<usize>>,
-  /// Width-to-height aspect ratio (default: 3.0)
-  #[prop(optional, into)]
-  svg_aspect_ratio: Option<Signal<f64>>,
-  /// Percentage of SVG height used as margin (default: 0.05)
-  #[prop(optional, into)]
-  fret_margin_percentage: Option<Signal<f64>>,
-  /// Width of the nut in SVG units (default: 14.0)
-  #[prop(optional, into)]
-  nut_width: Option<Signal<f64>>,
-  /// Number of extra frets to show for context (default: 1)
-  #[prop(optional, into)]
-  extra_frets: Option<Signal<usize>>,
-  /// Fret positions where markers should be displayed
-  #[prop(optional, into)]
-  marker_positions: Option<Signal<Vec<u8>>>,
+  config: Option<Signal<FretboardVisualConfig>>,
+  /// Optional callback for fret click events
+  #[prop(optional)]
+  on_fret_clicked: Option<Callback<SvgFretClickEvent>>,
 ) -> impl IntoView {
-  // Use signals if provided, otherwise use default values
-  let num_strings = num_strings.unwrap_or_else(|| Signal::derive(move || 6_u8));
-  let max_frets = max_frets.unwrap_or_else(|| Signal::derive(move || 22_usize));
-  let svg_aspect_ratio = svg_aspect_ratio.unwrap_or_else(|| Signal::derive(move || 3.0_f64));
-  let fret_margin_percentage =
-    fret_margin_percentage.unwrap_or_else(|| Signal::derive(move || 0.05_f64));
-  let nut_width = nut_width.unwrap_or_else(|| Signal::derive(move || 14.0_f64));
-  let extra_frets = extra_frets.unwrap_or_else(|| Signal::derive(move || 1_usize));
-  let marker_positions = marker_positions
-    .unwrap_or_else(|| Signal::derive(move || vec![3_u8, 5, 7, 9, 12, 15, 17, 19, 21, 24]));
+  // Use provided config signal or create one with default
+  let config_signal = config.unwrap_or_else(|| Signal::derive(|| FretboardVisualConfig::default()));
+  
+  // Create reactive signals from config values - using clone since Signal is Copy
+  let num_strings = Signal::derive({
+    let config_signal = config_signal;
+    move || config_signal.get().num_strings
+  });
+  let max_frets = Signal::derive({
+    let config_signal = config_signal;
+    move || config_signal.get().max_frets
+  });
+  let svg_aspect_ratio = Signal::derive({
+    let config_signal = config_signal;
+    move || config_signal.get().svg_aspect_ratio
+  });
+  let fret_margin_percentage = Signal::derive({
+    let config_signal = config_signal;
+    move || config_signal.get().fret_margin_percentage
+  });
+  let nut_width = Signal::derive({
+    let config_signal = config_signal;
+    move || config_signal.get().nut_width
+  });
+  let extra_frets = Signal::derive({
+    let config_signal = config_signal;
+    move || config_signal.get().extra_frets
+  });
+  let marker_positions = Signal::derive({
+    let config_signal = config_signal;
+    move || config_signal.get().marker_positions.clone()
+  });
 
   let num_frets = Memo::new(move |_| end_fret.get().max(max_frets.get()));
 
@@ -430,8 +542,8 @@ pub fn SvgFretboard(
 
   // Clean coordinate transformation function
   let to_viewbox_x = move |absolute_x: f64| -> f64 {
-    let transform = zoom_transform.get();
-    transform.to_viewbox_x(absolute_x, nut_width.get())
+    let transform = zoom_transform.get_untracked();
+    transform.to_viewbox_x(absolute_x, nut_width.get_untracked())
   };
 
   view! {
@@ -448,7 +560,8 @@ pub fn SvgFretboard(
         {move || {
           let current_svg_height = svg_height.get();
           let current_fret_margin = fret_margin.get();
-          let string_spacing = calculate_string_spacing(num_strings.get(), current_svg_height);
+          let current_num_strings = num_strings.get();
+          let string_spacing = calculate_string_spacing(current_num_strings, current_svg_height);
           let positions = full_fret_positions.get();
           let min_f = min_fret.get();
           let max_f = max_fret.get();
@@ -457,10 +570,12 @@ pub fn SvgFretboard(
           let current_svg_width = svg_width.get();
           let viewbox_width = current_svg_width;
           let current_nut_width = nut_width.get();
+          let current_marker_positions = marker_positions.get();
+          let current_zoom_transform = zoom_transform.get();
 
           view! {
             // Conditionally render nut when fret 0 is visible
-            {if zoom_transform.get().has_nut {
+            {if current_zoom_transform.has_nut {
               Some(
                 view! {
                   <FretboardNut
@@ -488,7 +603,7 @@ pub fn SvgFretboard(
 
             // Render string lines
             <FretboardStrings
-              num_strings=num_strings.get()
+              num_strings=current_num_strings
               string_spacing=string_spacing
               viewbox_width=viewbox_width
             />
@@ -497,7 +612,7 @@ pub fn SvgFretboard(
             <FretboardMarkers
               min_fret=min_f
               max_fret=max_f
-              marker_positions=marker_positions.get()
+              marker_positions=current_marker_positions
               positions=positions.clone()
               to_viewbox_x=to_viewbox_x
               svg_height=current_svg_height
@@ -509,13 +624,32 @@ pub fn SvgFretboard(
               max_fret=max_f
               start_fret=start
               end_fret=end
-              positions=positions
+              positions=positions.clone()
               to_viewbox_x=to_viewbox_x
-              nut_width=zoom_transform.get().effective_nut_width(current_nut_width)
+              nut_width=current_zoom_transform.effective_nut_width(current_nut_width)
               fret_margin=current_fret_margin
               svg_height=current_svg_height
               svg_width=current_svg_width
             />
+
+            // Render clickable areas if callback is provided
+            {if let Some(callback) = on_fret_clicked {
+              Some(view! {
+                <FretboardClickableAreas
+                  min_fret=min_f
+                  max_fret=max_f
+                  num_strings=current_num_strings
+                  string_spacing=string_spacing
+                  positions=positions
+                  to_viewbox_x=to_viewbox_x
+                  has_nut=current_zoom_transform.has_nut
+                  nut_width=current_nut_width
+                  on_fret_clicked=callback
+                />
+              })
+            } else {
+              None
+            }}
           }
         }}
       </svg>
