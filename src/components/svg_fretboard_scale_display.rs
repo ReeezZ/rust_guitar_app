@@ -77,6 +77,9 @@ pub fn SvgFretboardScaleDisplay(
   // Use provided config or create default
   let fretboard_config = config.unwrap_or_default();
   
+  // Extract visual config before moving the full config
+  let visual_config = fretboard_config.visual.clone();
+  
   // Convert config to signals for the underlying components
   let config_signals = MusicalFretboardConfigSignals::from(fretboard_config);
 
@@ -91,13 +94,7 @@ pub fn SvgFretboardScaleDisplay(
         end_fret=end_fret
         tuning=config_signals.tuning
         on_note_clicked=on_note_clicked.unwrap_or_else(|| Callback::new(|_| {}))
-        num_strings=config_signals.num_strings
-        max_frets=config_signals.max_frets
-        svg_aspect_ratio=config_signals.svg_aspect_ratio
-        fret_margin_percentage=config_signals.fret_margin_percentage
-        nut_width=config_signals.nut_width
-        extra_frets=config_signals.extra_frets
-        marker_positions=config_signals.marker_positions
+        config=visual_config
       />
 
       // Scale note overlays

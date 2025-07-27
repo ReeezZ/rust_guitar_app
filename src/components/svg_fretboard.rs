@@ -1,4 +1,4 @@
-use crate::components::fretboard_visual_config::{FretboardVisualConfig, FretboardVisualConfigSignals};
+use crate::components::fretboard_visual_config::FretboardVisualConfig;
 use crate::fretboard_view_helper::calculate_fret_positions;
 use crate::models::fretboard_model::FretCoord;
 use leptos::prelude::*;
@@ -464,56 +464,32 @@ pub fn SvgFretboard(
   start_fret: Signal<usize>,
   /// Last fret in the active/playable range
   end_fret: Signal<usize>,
-  /// Visual configuration (optional, alternative to individual props)
+  /// Visual configuration for fretboard display properties
   #[prop(optional)]
   config: Option<FretboardVisualConfig>,
-  /// Number of guitar strings (default: 6) - DEPRECATED: use config instead
-  #[prop(optional, into)]
-  num_strings: Option<Signal<u8>>,
-  /// Maximum number of frets to display (default: 22) - DEPRECATED: use config instead
-  #[prop(optional, into)]
-  max_frets: Option<Signal<usize>>,
-  /// Width-to-height aspect ratio (default: 3.0) - DEPRECATED: use config instead
-  #[prop(optional, into)]
-  svg_aspect_ratio: Option<Signal<f64>>,
-  /// Percentage of SVG height used as margin (default: 0.05) - DEPRECATED: use config instead
-  #[prop(optional, into)]
-  fret_margin_percentage: Option<Signal<f64>>,
-  /// Width of the nut in SVG units (default: 14.0) - DEPRECATED: use config instead
-  #[prop(optional, into)]
-  nut_width: Option<Signal<f64>>,
-  /// Number of extra frets to show for context (default: 1) - DEPRECATED: use config instead
-  #[prop(optional, into)]
-  extra_frets: Option<Signal<usize>>,
-  /// Fret positions where markers should be displayed - DEPRECATED: use config instead
-  #[prop(optional, into)]
-  marker_positions: Option<Signal<Vec<u8>>>,
   /// Optional callback for fret click events
   #[prop(optional)]
   on_fret_clicked: Option<Callback<SvgFretClickEvent>>,
 ) -> impl IntoView {
-  // Merge config with individual props (individual props take precedence for backward compatibility)
+  // Use provided config or default
   let visual_config = config.unwrap_or_default();
   
-  // Convert config to signals, allowing individual props to override
-  let config_signals = FretboardVisualConfigSignals::from(visual_config);
-  
-  // Use individual props if provided, otherwise fall back to config
-  let resolved_num_strings = num_strings.unwrap_or(config_signals.num_strings);
-  let resolved_max_frets = max_frets.unwrap_or(config_signals.max_frets);
-  let resolved_svg_aspect_ratio = svg_aspect_ratio.unwrap_or(config_signals.svg_aspect_ratio);
-  let resolved_fret_margin_percentage = fret_margin_percentage.unwrap_or(config_signals.fret_margin_percentage);
-  let resolved_nut_width = nut_width.unwrap_or(config_signals.nut_width);
-  let resolved_extra_frets = extra_frets.unwrap_or(config_signals.extra_frets);
-  let resolved_marker_positions = marker_positions.unwrap_or(config_signals.marker_positions);
+  // Create reactive signals from config values
+  let num_strings = Signal::derive(move || visual_config.num_strings);
+  let max_frets = Signal::derive(move || visual_config.max_frets);
+  let svg_aspect_ratio = Signal::derive(move || visual_config.svg_aspect_ratio);
+  let fret_margin_percentage = Signal::derive(move || visual_config.fret_margin_percentage);
+  let nut_width = Signal::derive(move || visual_config.nut_width);
+  let extra_frets = Signal::derive(move || visual_config.extra_frets);
+  let marker_positions = Signal::derive(move || visual_config.marker_positions.clone());
 
-  let num_frets = Memo::new(move |_| end_fret.get().max(resolved_max_frets.get()));
+  let num_frets = Memo::new(move |_| end_fret.get().max(max_frets.get()));
 
   // Use a fixed base width for calculations, SVG will be scaled by CSS
   let base_svg_width = 800.0; // Fixed base width for consistent calculations
   let svg_width = Signal::derive(move || base_svg_width);
-  let svg_height = Memo::new(move |_| svg_width.get() / resolved_svg_aspect_ratio.get());
-  let fret_margin = Memo::new(move |_| svg_height.get() * resolved_fret_margin_percentage.get());
+  let svg_height = Memo::new(move |_| svg_width.get() / svg_aspect_ratio.get());
+  let fret_margin = Memo::new(move |_| svg_height.get() * fret_margin_percentage.get());
 
   // Calculate fret positions for the FULL fretboard
   let full_fret_positions =
@@ -524,7 +500,7 @@ pub fn SvgFretboard(
     VisibleRange::new(
       start_fret.get(),
       end_fret.get(),
-      resolved_extra_frets.get(),
+      extra_frets.get(),
       num_frets.get(),
     )
   });
@@ -539,14 +515,14 @@ pub fn SvgFretboard(
       min_fret.get(),
       max_fret.get(),
       svg_width.get(),
-      resolved_nut_width.get(),
+      nut_width.get(),
     )
   });
 
   // Clean coordinate transformation function
   let to_viewbox_x = move |absolute_x: f64| -> f64 {
     let transform = zoom_transform.get_untracked();
-    transform.to_viewbox_x(absolute_x, resolved_nut_width.get_untracked())
+    transform.to_viewbox_x(absolute_x, nut_width.get_untracked())
   };
 
   view! {
@@ -563,7 +539,7 @@ pub fn SvgFretboard(
         {move || {
           let current_svg_height = svg_height.get();
           let current_fret_margin = fret_margin.get();
-          let current_num_strings = resolved_num_strings.get();
+          let current_num_strings = num_strings.get();
           let string_spacing = calculate_string_spacing(current_num_strings, current_svg_height);
           let positions = full_fret_positions.get();
           let min_f = min_fret.get();
@@ -572,8 +548,8 @@ pub fn SvgFretboard(
           let end = end_fret.get();
           let current_svg_width = svg_width.get();
           let viewbox_width = current_svg_width;
-          let current_nut_width = resolved_nut_width.get();
-          let current_marker_positions = resolved_marker_positions.get();
+          let current_nut_width = nut_width.get();
+          let current_marker_positions = marker_positions.get();
           let current_zoom_transform = zoom_transform.get();
 
           view! {

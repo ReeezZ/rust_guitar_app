@@ -105,6 +105,12 @@ Note: You may need to manually configure caching for Rust dependencies and build
 
 ## Feature Ideas and Status
 
+### General ideas
+
+Consider extending documentation with diagrams for better clarity. The [simple-mermaid](https://docs.rs/simple-mermaid/latest/simple_mermaid/) crate provides an easy way to add [Mermaid](https://mermaid-js.github.io/mermaid/#/) diagrams to Rust docs and markdown.
+
+That could be interesting to give high level overviews. For example for how the SvgFretboard components are layered. 
+
 ### Fretboard map
 
 Feature that is currently being worked on.
@@ -113,6 +119,9 @@ Ideas for execrises / features:
 
 - Find notes on the fretboard
 - find interval of note
+- Find scales
+- Find chord shapes
+  - Relative to a given note
 - Show scales
   - Triads
   - Modes

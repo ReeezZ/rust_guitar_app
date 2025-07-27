@@ -10,7 +10,7 @@ use leptos::prelude::*;
 /// This component wraps the visual-only `SvgFretboard` and enriches click events
 /// with musical note information by calculating notes from fret coordinates and tuning.
 ///
-/// # Example
+/// # Example - Basic Usage
 ///
 /// ```rust
 /// # use leptos::prelude::*;
@@ -35,6 +35,33 @@ use leptos::prelude::*;
 /// }
 /// # }
 /// ```
+///
+/// # Example - With Custom Visual Configuration
+///
+/// ```rust
+/// # use leptos::prelude::*;
+/// # use rust_guitar_app::components::svg_fretboard_with_notes::SvgFretboardWithNotes;
+/// # use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
+/// # use rust_guitar_app::components::fretboard::FretClickEvent;
+///
+/// # fn example() -> impl IntoView {
+/// let start = RwSignal::new(0);
+/// let end = RwSignal::new(12);
+///
+/// // Bass guitar with wider aspect ratio for better visibility
+/// let bass_config = FretboardVisualConfig::bass_guitar()
+///   .with_aspect_ratio(4.0)
+///   .with_max_frets(24);
+///
+/// view! {
+///   <SvgFretboardWithNotes
+///     start_fret=start.into()
+///     end_fret=end.into()
+///     config=bass_config
+///   />
+/// }
+/// # }
+/// ```
 #[component]
 pub fn SvgFretboardWithNotes(
   /// First fret in the active/playable range
@@ -50,33 +77,10 @@ pub fn SvgFretboardWithNotes(
   #[prop(optional)]
   on_note_clicked: Option<Callback<FretClickEvent>>,
 
-  // Visual configuration - NEW preferred way
-  /// Visual configuration (optional, alternative to individual props)
+  // Visual configuration
+  /// Visual configuration for fretboard display properties
   #[prop(optional)]
   config: Option<FretboardVisualConfig>,
-  
-  // Individual visual props - DEPRECATED but kept for backward compatibility
-  /// Number of guitar strings (default: 6) - DEPRECATED: use config instead
-  #[prop(optional, into)]
-  num_strings: Option<Signal<u8>>,
-  /// Maximum number of frets to display (default: 22) - DEPRECATED: use config instead
-  #[prop(optional, into)]
-  max_frets: Option<Signal<usize>>,
-  /// Width-to-height aspect ratio (default: 3.0) - DEPRECATED: use config instead
-  #[prop(optional, into)]
-  svg_aspect_ratio: Option<Signal<f64>>,
-  /// Percentage of SVG height used as margin (default: 0.05) - DEPRECATED: use config instead
-  #[prop(optional, into)]
-  fret_margin_percentage: Option<Signal<f64>>,
-  /// Width of the nut in SVG units (default: 14.0) - DEPRECATED: use config instead
-  #[prop(optional, into)]
-  nut_width: Option<Signal<f64>>,
-  /// Number of extra frets to show for context (default: 1) - DEPRECATED: use config instead
-  #[prop(optional, into)]
-  extra_frets: Option<Signal<usize>>,
-  /// Fret positions where markers should be displayed - DEPRECATED: use config instead
-  #[prop(optional, into)]
-  marker_positions: Option<Signal<Vec<u8>>>,
 ) -> impl IntoView {
   // Use default tuning if not provided (standard guitar tuning)
   let tuning = tuning.unwrap_or_else(|| Signal::derive(move || FretboardModel::standard_tuning()));
@@ -107,26 +111,11 @@ pub fn SvgFretboardWithNotes(
     }
   });
 
-  // Create a reactive merged config that combines provided config with individual props
-  // Individual props take precedence for backward compatibility
-  let base_config = config.unwrap_or_default();
-  let effective_config = Memo::new(move |_| {
-    FretboardVisualConfig {
-      num_strings: num_strings.as_ref().map(|s| s.get()).unwrap_or(base_config.num_strings),
-      max_frets: max_frets.as_ref().map(|s| s.get()).unwrap_or(base_config.max_frets),
-      svg_aspect_ratio: svg_aspect_ratio.as_ref().map(|s| s.get()).unwrap_or(base_config.svg_aspect_ratio),
-      fret_margin_percentage: fret_margin_percentage.as_ref().map(|s| s.get()).unwrap_or(base_config.fret_margin_percentage),
-      nut_width: nut_width.as_ref().map(|s| s.get()).unwrap_or(base_config.nut_width),
-      extra_frets: extra_frets.as_ref().map(|s| s.get()).unwrap_or(base_config.extra_frets),
-      marker_positions: marker_positions.as_ref().map(|s| s.get()).unwrap_or_else(|| base_config.marker_positions.clone()),
-    }
-  });
-
   view! {
     <SvgFretboard
       start_fret=start_fret
       end_fret=end_fret
-      config=effective_config.get()
+      config=config.unwrap_or_default()
       on_fret_clicked=on_svg_fret_clicked
     />
   }

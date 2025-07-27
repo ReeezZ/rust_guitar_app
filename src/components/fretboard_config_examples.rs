@@ -5,6 +5,7 @@
 /// settings in real-time and understand their effects.
 use crate::components::{
   fretboard::FretClickEvent, svg_fretboard_with_notes::SvgFretboardWithNotes,
+  fretboard_visual_config::FretboardVisualConfig,
 };
 use leptos::{logging::log, prelude::*};
 
@@ -30,6 +31,18 @@ pub fn FretboardConfigExamples() -> impl IntoView {
     "pentatonic" => vec![3_u8, 5, 7, 12, 15, 17, 24],
     "none" => vec![],
     _ => vec![3_u8, 5, 7, 9, 12, 15, 17, 19, 21, 24],
+  });
+
+  // Create a derived config that updates when any control changes
+  let visual_config = Memo::new(move |_| {
+    FretboardVisualConfig::default()
+      .with_num_strings(num_strings.get())
+      .with_max_frets(max_frets.get())
+      .with_aspect_ratio(svg_aspect_ratio.get())
+      .with_fret_margin(fret_margin_percentage.get())
+      .with_nut_width(nut_width.get())
+      .with_extra_frets(extra_frets.get())
+      .with_marker_positions(marker_positions.get())
   });
 
   view! {
@@ -105,13 +118,7 @@ pub fn FretboardConfigExamples() -> impl IntoView {
           <SvgFretboardWithNotes
             start_fret=start_fret.read_only().into()
             end_fret=end_fret.read_only().into()
-            num_strings=num_strings.read_only()
-            max_frets=max_frets.read_only()
-            svg_aspect_ratio=svg_aspect_ratio.read_only()
-            fret_margin_percentage=fret_margin_percentage.read_only()
-            nut_width=nut_width.read_only()
-            extra_frets=extra_frets.read_only()
-            marker_positions=Signal::derive(move || marker_positions.get())
+            config=visual_config.get()
             on_note_clicked=Callback::new(|event: FretClickEvent| {
               log!(
                 "Fret clicked: String {}, Fret {}, Note {}", event.coord.string_idx, event.coord.fret_idx, event.note
