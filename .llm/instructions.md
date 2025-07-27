@@ -62,6 +62,12 @@ cargo fmt
 - Leverage Rust's type system for safety and clarity
 - Follow Leptos patterns for component composition and state management
 
+## Comments in code
+
+- Try to avoid comments in code
+- comments should never describe something that is obvious from the code itself
+- code should be written in a self descriptive manner to avoid comments
+
 ### Important Files to Consider
 
 - `src/main.rs`: Application entry point
