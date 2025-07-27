@@ -1,7 +1,7 @@
 use crate::music::{intervals::Interval, notes::Note};
 
 use super::fretboard_model::{FretCoord, FretboardModel};
-use leptos::prelude::{Get, GetUntracked};
+use leptos::prelude::GetUntracked;
 use rand::{seq::IteratorRandom, Rng};
 use strum::IntoEnumIterator;
 
@@ -54,7 +54,6 @@ pub fn get_random_interval() -> Interval {
 // tests
 #[cfg(test)]
 mod tests {
-  use super::*;
 
   #[test]
   fn test_fretboard_trainer_trait() {}
