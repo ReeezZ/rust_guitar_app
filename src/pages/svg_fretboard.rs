@@ -50,7 +50,7 @@ pub fn SvgFretboardPage() -> impl IntoView {
         on:input=move |ev| {
           let val = event_target_value(&ev);
           if let Ok(val) = val.parse::<usize>() {
-            if val < end_fret.get() {
+            if val < end_fret.get_untracked() {
               start_fret.set(val);
             }
           }
@@ -68,7 +68,7 @@ pub fn SvgFretboardPage() -> impl IntoView {
         on:input=move |ev| {
           let val = event_target_value(&ev);
           if let Ok(val) = val.parse::<usize>() {
-            if val > start_fret.get() && val <= MAX_FRETS {
+            if val > start_fret.get_untracked() && val <= MAX_FRETS {
               end_fret.set(val);
             }
           }

@@ -537,8 +537,8 @@ pub fn SvgFretboard(
 
   // Clean coordinate transformation function
   let to_viewbox_x = move |absolute_x: f64| -> f64 {
-    let transform = zoom_transform.get();
-    transform.to_viewbox_x(absolute_x, nut_width.get())
+    let transform = zoom_transform.get_untracked();
+    transform.to_viewbox_x(absolute_x, nut_width.get_untracked())
   };
 
   view! {
@@ -555,7 +555,8 @@ pub fn SvgFretboard(
         {move || {
           let current_svg_height = svg_height.get();
           let current_fret_margin = fret_margin.get();
-          let string_spacing = calculate_string_spacing(num_strings.get(), current_svg_height);
+          let current_num_strings = num_strings.get();
+          let string_spacing = calculate_string_spacing(current_num_strings, current_svg_height);
           let positions = full_fret_positions.get();
           let min_f = min_fret.get();
           let max_f = max_fret.get();
@@ -564,10 +565,12 @@ pub fn SvgFretboard(
           let current_svg_width = svg_width.get();
           let viewbox_width = current_svg_width;
           let current_nut_width = nut_width.get();
+          let current_marker_positions = marker_positions.get();
+          let current_zoom_transform = zoom_transform.get();
 
           view! {
             // Conditionally render nut when fret 0 is visible
-            {if zoom_transform.get().has_nut {
+            {if current_zoom_transform.has_nut {
               Some(
                 view! {
                   <FretboardNut
@@ -595,7 +598,7 @@ pub fn SvgFretboard(
 
             // Render string lines
             <FretboardStrings
-              num_strings=num_strings.get()
+              num_strings=current_num_strings
               string_spacing=string_spacing
               viewbox_width=viewbox_width
             />
@@ -604,7 +607,7 @@ pub fn SvgFretboard(
             <FretboardMarkers
               min_fret=min_f
               max_fret=max_f
-              marker_positions=marker_positions.get()
+              marker_positions=current_marker_positions
               positions=positions.clone()
               to_viewbox_x=to_viewbox_x
               svg_height=current_svg_height
@@ -618,7 +621,7 @@ pub fn SvgFretboard(
               end_fret=end
               positions=positions.clone()
               to_viewbox_x=to_viewbox_x
-              nut_width=zoom_transform.get().effective_nut_width(current_nut_width)
+              nut_width=current_zoom_transform.effective_nut_width(current_nut_width)
               fret_margin=current_fret_margin
               svg_height=current_svg_height
               svg_width=current_svg_width
@@ -630,11 +633,11 @@ pub fn SvgFretboard(
                 <FretboardClickableAreas
                   min_fret=min_f
                   max_fret=max_f
-                  num_strings=num_strings.get()
+                  num_strings=current_num_strings
                   string_spacing=string_spacing
                   positions=positions
                   to_viewbox_x=to_viewbox_x
-                  has_nut=zoom_transform.get().has_nut
+                  has_nut=current_zoom_transform.has_nut
                   nut_width=current_nut_width
                   on_fret_clicked=callback
                 />
