@@ -12,7 +12,7 @@ use leptos::prelude::*;
 ///   .with_num_strings(4) // Bass guitar
 ///   .with_aspect_ratio(4.0); // Wider aspect ratio
 /// ```
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct FretboardVisualConfig {
   /// Number of guitar strings (default: 6)
   pub num_strings: u8,

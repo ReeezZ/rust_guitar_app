@@ -107,18 +107,26 @@ pub fn SvgFretboardWithNotes(
     }
   });
 
+  // Create a reactive merged config that combines provided config with individual props
+  // Individual props take precedence for backward compatibility
+  let base_config = config.unwrap_or_default();
+  let effective_config = Memo::new(move |_| {
+    FretboardVisualConfig {
+      num_strings: num_strings.as_ref().map(|s| s.get()).unwrap_or(base_config.num_strings),
+      max_frets: max_frets.as_ref().map(|s| s.get()).unwrap_or(base_config.max_frets),
+      svg_aspect_ratio: svg_aspect_ratio.as_ref().map(|s| s.get()).unwrap_or(base_config.svg_aspect_ratio),
+      fret_margin_percentage: fret_margin_percentage.as_ref().map(|s| s.get()).unwrap_or(base_config.fret_margin_percentage),
+      nut_width: nut_width.as_ref().map(|s| s.get()).unwrap_or(base_config.nut_width),
+      extra_frets: extra_frets.as_ref().map(|s| s.get()).unwrap_or(base_config.extra_frets),
+      marker_positions: marker_positions.as_ref().map(|s| s.get()).unwrap_or_else(|| base_config.marker_positions.clone()),
+    }
+  });
+
   view! {
     <SvgFretboard
       start_fret=start_fret
       end_fret=end_fret
-      config=config
-      num_strings=num_strings
-      max_frets=max_frets
-      svg_aspect_ratio=svg_aspect_ratio
-      fret_margin_percentage=fret_margin_percentage
-      nut_width=nut_width
-      extra_frets=extra_frets
-      marker_positions=marker_positions
+      config=effective_config.get()
       on_fret_clicked=on_svg_fret_clicked
     />
   }
