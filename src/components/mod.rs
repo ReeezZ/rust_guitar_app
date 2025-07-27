@@ -1,4 +1,5 @@
 pub mod fretboard;
+pub mod musical_fretboard_config;
 pub mod fretboard_config_examples;
 pub mod fretboard_scale_display;
 pub mod music_selectors;

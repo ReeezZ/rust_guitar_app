@@ -18,6 +18,15 @@
 
 ## Technology-Specific Guidance
 
+### Git
+
+- ALWAYS read in the current status and diff before writing a commit message
+
+#### Commit messages
+
+- Do NOT do "over the top" commit messages, keep it brief. Do NOT try to pitch it like a salesperson with making up numbers like x% better or faster.
+- Keep it simple, brief, it should be easy to understand what has changed.
+
 ### Rust and Leptos
 
 - Write idiomatic Rust and follow Leptos best practices for components, signals, and reactivity.

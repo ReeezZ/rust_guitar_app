@@ -1,7 +1,7 @@
 use crate::components::fretboard::FretClickEvent;
+use crate::components::musical_fretboard_config::{MusicalFretboardConfig, MusicalFretboardConfigSignals};
 use crate::components::svg_fretboard_with_notes::SvgFretboardWithNotes;
 use crate::fretboard_view_helper::calculate_fret_positions;
-use crate::models::fretboard_model::FretboardModel;
 use crate::music::notes::Note;
 use crate::music::scales::{Scale, ScaleTrait, ScaleType};
 use leptos::prelude::*;
@@ -11,20 +11,30 @@ use leptos::prelude::*;
 /// This component wraps `SvgFretboardWithNotes` and adds visual highlighting of scale notes
 /// with different colors for root notes vs other scale notes.
 ///
+/// The component now uses a simplified API with a `MusicalFretboardConfig` struct instead of
+/// many individual props, making it easier to use and maintain.
+///
 /// # Example
 ///
 /// ```rust
 /// # use leptos::prelude::*;
 /// # use rust_guitar_app::components::svg_fretboard_scale_display::SvgFretboardScaleDisplay;
+/// # use rust_guitar_app::components::musical_fretboard_config::MusicalFretboardConfig;
 /// # use rust_guitar_app::components::fretboard::FretClickEvent;
 /// # use rust_guitar_app::music::notes::Note;
 /// # use rust_guitar_app::music::scales::ScaleType;
+/// # use rust_guitar_app::music::heptatonic_scales::HeptaScaleType;
 ///
 /// # fn example() -> impl IntoView {
 /// let start = RwSignal::new(3);
 /// let end = RwSignal::new(7);
 /// let root_note = RwSignal::new(Note::C);
 /// let scale_type = RwSignal::new(ScaleType::Hepatonic(HeptaScaleType::Major));
+///
+/// // Optional: customize fretboard appearance
+/// let config = MusicalFretboardConfig::default()
+///   .with_aspect_ratio(2.5)
+///   .with_num_strings(7);
 ///
 /// let on_note_clicked = Callback::new(move |event: FretClickEvent| {
 ///   leptos::logging::log!("Clicked note: {} at fret {}, string {}",
@@ -37,6 +47,7 @@ use leptos::prelude::*;
 ///     end_fret=end.into()
 ///     root_note=root_note.into()
 ///     scale_type=scale_type.into()
+///     config=config
 ///     on_note_clicked=on_note_clicked
 ///   />
 /// }
@@ -55,51 +66,19 @@ pub fn SvgFretboardScaleDisplay(
   /// Type of scale to display
   scale_type: Signal<ScaleType>,
 
-  // Musical properties (passed through to SvgFretboardWithNotes)
-  /// Guitar tuning (defaults to standard: E-A-D-G-H-E from lowest to highest string)
-  #[prop(optional, into)]
-  tuning: Option<Signal<Vec<Note>>>,
+  // Configuration and interaction
+  /// Fretboard visual configuration (optional, uses defaults if not provided)
+  #[prop(optional)]
+  config: Option<MusicalFretboardConfig>,
   /// Callback for note click events (enriched with note information)
   #[prop(optional)]
   on_note_clicked: Option<Callback<FretClickEvent>>,
-
-  // All SvgFretboard visual props passed through
-  /// Number of guitar strings (default: 6)
-  #[prop(optional, into)]
-  num_strings: Option<Signal<u8>>,
-  /// Maximum number of frets to display (default: 22)
-  #[prop(optional, into)]
-  max_frets: Option<Signal<usize>>,
-  /// Width-to-height aspect ratio (default: 3.0)
-  #[prop(optional, into)]
-  svg_aspect_ratio: Option<Signal<f64>>,
-  /// Percentage of SVG height used as margin (default: 0.05)
-  #[prop(optional, into)]
-  fret_margin_percentage: Option<Signal<f64>>,
-  /// Width of the nut in SVG units (default: 14.0)
-  #[prop(optional, into)]
-  nut_width: Option<Signal<f64>>,
-  /// Number of extra frets to show for context (default: 1)
-  #[prop(optional, into)]
-  extra_frets: Option<Signal<usize>>,
-  /// Fret positions where markers should be displayed
-  #[prop(optional, into)]
-  marker_positions: Option<Signal<Vec<u8>>>,
 ) -> impl IntoView {
-  // Use default tuning if not provided (standard guitar tuning)
-  let tuning = tuning.unwrap_or_else(|| Signal::derive(move || FretboardModel::standard_tuning()));
-
-  // Use signals if provided, otherwise use default values (same as SvgFretboard defaults)
-  let resolved_num_strings = num_strings.unwrap_or_else(|| Signal::derive(move || 6_u8));
-  let resolved_max_frets = max_frets.unwrap_or_else(|| Signal::derive(move || 22_usize));
-  let resolved_svg_aspect_ratio =
-    svg_aspect_ratio.unwrap_or_else(|| Signal::derive(move || 3.0_f64));
-  let resolved_fret_margin_percentage =
-    fret_margin_percentage.unwrap_or_else(|| Signal::derive(move || 0.05_f64));
-  let resolved_nut_width = nut_width.unwrap_or_else(|| Signal::derive(move || 14.0_f64));
-  let resolved_extra_frets = extra_frets.unwrap_or_else(|| Signal::derive(move || 1_usize));
-  let resolved_marker_positions = marker_positions
-    .unwrap_or_else(|| Signal::derive(move || vec![3_u8, 5, 7, 9, 12, 15, 17, 19, 21, 24]));
+  // Use provided config or create default
+  let fretboard_config = config.unwrap_or_default();
+  
+  // Convert config to signals for the underlying components
+  let config_signals = MusicalFretboardConfigSignals::from(fretboard_config);
 
   // Create the scale from root note and scale type
   let scale = Memo::new(move |_| Scale::new(root_note.get(), scale_type.get()));
@@ -110,28 +89,28 @@ pub fn SvgFretboardScaleDisplay(
       <SvgFretboardWithNotes
         start_fret=start_fret
         end_fret=end_fret
-        tuning=tuning
+        tuning=config_signals.tuning
         on_note_clicked=on_note_clicked.unwrap_or_else(|| Callback::new(|_| {}))
-        num_strings=resolved_num_strings
-        max_frets=resolved_max_frets
-        svg_aspect_ratio=resolved_svg_aspect_ratio
-        fret_margin_percentage=resolved_fret_margin_percentage
-        nut_width=resolved_nut_width
-        extra_frets=resolved_extra_frets
-        marker_positions=resolved_marker_positions
+        num_strings=config_signals.num_strings
+        max_frets=config_signals.max_frets
+        svg_aspect_ratio=config_signals.svg_aspect_ratio
+        fret_margin_percentage=config_signals.fret_margin_percentage
+        nut_width=config_signals.nut_width
+        extra_frets=config_signals.extra_frets
+        marker_positions=config_signals.marker_positions
       />
 
-      // Simple scale note overlays
+      // Scale note overlays
       <ScaleNoteOverlays
         scale=scale
-        tuning=tuning
+        tuning=config_signals.tuning
         start_fret=start_fret
         end_fret=end_fret
-        extra_frets=resolved_extra_frets
-        num_strings=resolved_num_strings
-        svg_aspect_ratio=resolved_svg_aspect_ratio
-        fret_margin_percentage=resolved_fret_margin_percentage
-        nut_width=resolved_nut_width
+        extra_frets=config_signals.extra_frets
+        num_strings=config_signals.num_strings
+        svg_aspect_ratio=config_signals.svg_aspect_ratio
+        _fret_margin_percentage=config_signals.fret_margin_percentage
+        nut_width=config_signals.nut_width
       />
     </div>
   }
@@ -150,7 +129,7 @@ fn ScaleNoteOverlays(
   extra_frets: Signal<usize>,
   num_strings: Signal<u8>,
   svg_aspect_ratio: Signal<f64>,
-  fret_margin_percentage: Signal<f64>,
+  _fret_margin_percentage: Signal<f64>,
   nut_width: Signal<f64>,
 ) -> impl IntoView {
   // The key insight: we need to use the SAME coordinate system as the underlying SVG fretboard
