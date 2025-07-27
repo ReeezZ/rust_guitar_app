@@ -3,4 +3,5 @@ pub mod fretboard_config_examples;
 pub mod fretboard_scale_display;
 pub mod navbar;
 pub mod svg_fretboard;
+pub mod svg_fretboard_scale_display;
 pub mod svg_fretboard_with_notes;

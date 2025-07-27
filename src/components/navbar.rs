@@ -83,6 +83,16 @@ pub fn NavbarLinks() -> impl IntoView {
       </li>
       <li>
         <a
+          href="/svg_fretboard_scale"
+          class=move || {
+            if pathname() == "/svg_fretboard_scale" { "nav-link active" } else { "nav-link" }
+          }
+        >
+          <span>SVG Scale Display</span>
+        </a>
+      </li>
+      <li>
+        <a
           href="/about"
           class=move || { if pathname() == "/about" { "nav-link active" } else { "nav-link" } }
         >
