@@ -1,29 +1,12 @@
 use crate::components::{
-  fretboard::FretClickEvent, svg_fretboard_scale_display::SvgFretboardScaleDisplay,
+  fretboard::FretClickEvent, 
+  music_selectors::{NoteSelector, NumericRangeSelector, ScaleTypeSelector},
+  svg_fretboard_scale_display::SvgFretboardScaleDisplay,
 };
 use crate::music::heptatonic_scales::HeptaScaleType;
 use crate::music::notes::Note;
 use crate::music::scales::ScaleType;
-use leptos::{ev, logging::log, prelude::*};
-
-/// Extracts the value from an input or select event.
-fn event_target_value(ev: &ev::Event) -> String {
-  use leptos::wasm_bindgen::JsCast;
-  let target = ev.target().unwrap();
-  
-  // Try as HtmlSelectElement first (for <select> elements)
-  if let Ok(select) = target.clone().dyn_into::<web_sys::HtmlSelectElement>() {
-    return select.value();
-  }
-  
-  // Fall back to HtmlInputElement (for <input> elements)
-  if let Ok(input) = target.dyn_into::<web_sys::HtmlInputElement>() {
-    return input.value();
-  }
-  
-  // If neither works, return empty string instead of panicking
-  String::new()
-}
+use leptos::{logging::log, prelude::*};
 
 /// Page demonstrating the SVG fretboard with scale display functionality
 #[component]
@@ -56,96 +39,32 @@ pub fn SvgFretboardScalePage() -> impl IntoView {
 
       // Scale configuration controls
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        // Root note selector
-        <div class="space-y-2">
-          <label class="block text-sm font-medium">"Root Note"</label>
-          <select
-            class="w-full p-2 border rounded-md"
-            on:change=move |ev| {
-              let value = event_target_value(&ev);
-              if let Ok(note) = value.parse::<Note>() {
-                root_note.set(note);
-              }
-            }
-          >
-            <option value="C" selected=move || root_note.get() == Note::C>"C"</option>
-            <option value="C♯/D♭" selected=move || root_note.get() == Note::CisOrDes>"C#/Db"</option>
-            <option value="D" selected=move || root_note.get() == Note::D>"D"</option>
-            <option value="D♯/E♭" selected=move || root_note.get() == Note::DisOrEs>"D#/Eb"</option>
-            <option value="E" selected=move || root_note.get() == Note::E>"E"</option>
-            <option value="F" selected=move || root_note.get() == Note::F>"F"</option>
-            <option value="F♯/G♭" selected=move || root_note.get() == Note::FisOrGes>"F#/Gb"</option>
-            <option value="G" selected=move || root_note.get() == Note::G>"G"</option>
-            <option value="G♯/A♭" selected=move || root_note.get() == Note::GisOrAs>"G#/Ab"</option>
-            <option value="A" selected=move || root_note.get() == Note::A>"A"</option>
-            <option value="A♯/B♭" selected=move || root_note.get() == Note::AisOrB>"A#/Bb"</option>
-            <option value="H" selected=move || root_note.get() == Note::H>"B"</option>
-          </select>
-        </div>
+        // Root note selector - now using reusable component
+        <NoteSelector 
+          value=root_note
+          label="Root Note"
+        />
 
-        // Scale type selector
-        <div class="space-y-2">
-          <label class="block text-sm font-medium">"Scale Type"</label>
-          <select
-            class="w-full p-2 border rounded-md"
-            on:change=move |ev| {
-              let value = event_target_value(&ev);
-              match value.as_str() {
-                "Major" => scale_type.set(ScaleType::Hepatonic(HeptaScaleType::Major)),
-                "Minor" => scale_type.set(ScaleType::Hepatonic(HeptaScaleType::Minor)),
-                "Chromatic" => scale_type.set(ScaleType::Chromatic),
-                _ => {}
-              }
-            }
-          >
-            <option value="Major" selected=move || matches!(scale_type.get(), ScaleType::Hepatonic(HeptaScaleType::Major))>"Major"</option>
-            <option value="Minor" selected=move || matches!(scale_type.get(), ScaleType::Hepatonic(HeptaScaleType::Minor))>"Natural Minor"</option>
-            <option value="Chromatic" selected=move || matches!(scale_type.get(), ScaleType::Chromatic)>"Chromatic"</option>
-          </select>
-        </div>
+        // Scale type selector - now using reusable component  
+        <ScaleTypeSelector
+          value=scale_type
+          label="Scale Type"
+        />
 
-        // Fret range controls
-        <div class="space-y-2">
-          <label class="block text-sm font-medium">
-            "Start Fret: " {move || start_fret.get()}
-          </label>
-          <input
-            type="range"
-            min="0"
-            max=move || end_fret.get().saturating_sub(1)
-            prop:value=move || start_fret.get()
-            class="w-full"
-            on:input=move |ev| {
-              let val = event_target_value(&ev);
-              if let Ok(val) = val.parse::<usize>() {
-                if val < end_fret.get_untracked() {
-                  start_fret.set(val);
-                }
-              }
-            }
-          />
-        </div>
+        // Fret range controls - now using reusable components
+        <NumericRangeSelector
+          value=start_fret
+          label="Start Fret"
+          min=Signal::derive(move || 0)
+          max=Signal::derive(move || end_fret.get().saturating_sub(1))
+        />
 
-        <div class="space-y-2">
-          <label class="block text-sm font-medium">
-            "End Fret: " {move || end_fret.get()}
-          </label>
-          <input
-            type="range"
-            min=move || start_fret.get().saturating_add(1)
-            max="22"
-            prop:value=move || end_fret.get()
-            class="w-full"
-            on:input=move |ev| {
-              let val = event_target_value(&ev);
-              if let Ok(val) = val.parse::<usize>() {
-                if val > start_fret.get_untracked() && val <= 22 {
-                  end_fret.set(val);
-                }
-              }
-            }
-          />
-        </div>
+        <NumericRangeSelector
+          value=end_fret
+          label="End Fret"
+          min=Signal::derive(move || start_fret.get().saturating_add(1))
+          max=Signal::derive(move || 22)
+        />
       </div>
 
       // Current scale info display

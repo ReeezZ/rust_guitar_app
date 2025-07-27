@@ -1,6 +1,7 @@
 pub mod fretboard;
 pub mod fretboard_config_examples;
 pub mod fretboard_scale_display;
+pub mod music_selectors;
 pub mod navbar;
 pub mod svg_fretboard;
 pub mod svg_fretboard_scale_display;
