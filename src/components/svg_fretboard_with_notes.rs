@@ -1,4 +1,5 @@
 use crate::components::fretboard::FretClickEvent;
+use crate::components::fretboard_visual_config::FretboardVisualConfig;
 use crate::components::svg_fretboard::{SvgFretClickEvent, SvgFretboard};
 use crate::models::fretboard_model::{FretState, FretboardModel};
 use crate::music::notes::Note;
@@ -49,43 +50,36 @@ pub fn SvgFretboardWithNotes(
   #[prop(optional)]
   on_note_clicked: Option<Callback<FretClickEvent>>,
 
-  // All SvgFretboard visual props passed through
-  /// Number of guitar strings (default: 6)
+  // Visual configuration - NEW preferred way
+  /// Visual configuration (optional, alternative to individual props)
+  #[prop(optional)]
+  config: Option<FretboardVisualConfig>,
+  
+  // Individual visual props - DEPRECATED but kept for backward compatibility
+  /// Number of guitar strings (default: 6) - DEPRECATED: use config instead
   #[prop(optional, into)]
   num_strings: Option<Signal<u8>>,
-  /// Maximum number of frets to display (default: 22)
+  /// Maximum number of frets to display (default: 22) - DEPRECATED: use config instead
   #[prop(optional, into)]
   max_frets: Option<Signal<usize>>,
-  /// Width-to-height aspect ratio (default: 3.0)
+  /// Width-to-height aspect ratio (default: 3.0) - DEPRECATED: use config instead
   #[prop(optional, into)]
   svg_aspect_ratio: Option<Signal<f64>>,
-  /// Percentage of SVG height used as margin (default: 0.05)
+  /// Percentage of SVG height used as margin (default: 0.05) - DEPRECATED: use config instead
   #[prop(optional, into)]
   fret_margin_percentage: Option<Signal<f64>>,
-  /// Width of the nut in SVG units (default: 14.0)
+  /// Width of the nut in SVG units (default: 14.0) - DEPRECATED: use config instead
   #[prop(optional, into)]
   nut_width: Option<Signal<f64>>,
-  /// Number of extra frets to show for context (default: 1)
+  /// Number of extra frets to show for context (default: 1) - DEPRECATED: use config instead
   #[prop(optional, into)]
   extra_frets: Option<Signal<usize>>,
-  /// Fret positions where markers should be displayed
+  /// Fret positions where markers should be displayed - DEPRECATED: use config instead
   #[prop(optional, into)]
   marker_positions: Option<Signal<Vec<u8>>>,
 ) -> impl IntoView {
   // Use default tuning if not provided (standard guitar tuning)
   let tuning = tuning.unwrap_or_else(|| Signal::derive(move || FretboardModel::standard_tuning()));
-
-  // Use signals if provided, otherwise use default values (same as SvgFretboard defaults)
-  let resolved_num_strings = num_strings.unwrap_or_else(|| Signal::derive(move || 6_u8));
-  let resolved_max_frets = max_frets.unwrap_or_else(|| Signal::derive(move || 22_usize));
-  let resolved_svg_aspect_ratio =
-    svg_aspect_ratio.unwrap_or_else(|| Signal::derive(move || 3.0_f64));
-  let resolved_fret_margin_percentage =
-    fret_margin_percentage.unwrap_or_else(|| Signal::derive(move || 0.05_f64));
-  let resolved_nut_width = nut_width.unwrap_or_else(|| Signal::derive(move || 14.0_f64));
-  let resolved_extra_frets = extra_frets.unwrap_or_else(|| Signal::derive(move || 1_usize));
-  let resolved_marker_positions = marker_positions
-    .unwrap_or_else(|| Signal::derive(move || vec![3_u8, 5, 7, 9, 12, 15, 17, 19, 21, 24]));
 
   // Handle coordinate-to-note conversion
   let on_svg_fret_clicked = Callback::new(move |svg_event: SvgFretClickEvent| {
@@ -117,13 +111,14 @@ pub fn SvgFretboardWithNotes(
     <SvgFretboard
       start_fret=start_fret
       end_fret=end_fret
-      num_strings=resolved_num_strings
-      max_frets=resolved_max_frets
-      svg_aspect_ratio=resolved_svg_aspect_ratio
-      fret_margin_percentage=resolved_fret_margin_percentage
-      nut_width=resolved_nut_width
-      extra_frets=resolved_extra_frets
-      marker_positions=resolved_marker_positions
+      config=config
+      num_strings=num_strings
+      max_frets=max_frets
+      svg_aspect_ratio=svg_aspect_ratio
+      fret_margin_percentage=fret_margin_percentage
+      nut_width=nut_width
+      extra_frets=extra_frets
+      marker_positions=marker_positions
       on_fret_clicked=on_svg_fret_clicked
     />
   }
