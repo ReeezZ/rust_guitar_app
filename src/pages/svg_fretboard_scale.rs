@@ -6,12 +6,23 @@ use crate::music::notes::Note;
 use crate::music::scales::ScaleType;
 use leptos::{ev, logging::log, prelude::*};
 
-/// Extracts the value from an input event.
+/// Extracts the value from an input or select event.
 fn event_target_value(ev: &ev::Event) -> String {
   use leptos::wasm_bindgen::JsCast;
   let target = ev.target().unwrap();
-  let input: web_sys::HtmlInputElement = target.dyn_into().unwrap();
-  input.value()
+  
+  // Try as HtmlSelectElement first (for <select> elements)
+  if let Ok(select) = target.clone().dyn_into::<web_sys::HtmlSelectElement>() {
+    return select.value();
+  }
+  
+  // Fall back to HtmlInputElement (for <input> elements)
+  if let Ok(input) = target.dyn_into::<web_sys::HtmlInputElement>() {
+    return input.value();
+  }
+  
+  // If neither works, return empty string instead of panicking
+  String::new()
 }
 
 /// Page demonstrating the SVG fretboard with scale display functionality
