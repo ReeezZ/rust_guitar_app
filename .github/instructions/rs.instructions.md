@@ -13,3 +13,14 @@ applyTo: '**/*.rs'
 - Add doc comments to public functions and components, including links to relevant Leptos docs where helpful.
 - Ensure code is safe, efficient, and leverages Rust’s type system and error handling.
 - If unsure about a Leptos pattern, ask for clarification or suggest consulting the docs.
+
+## leptosfmt the formatter for leptos
+
+This is the formatter that is being used for code within the `view!` macro. It has the following contraint:
+
+> A note on non-doc comments
+> Currently this formatter does not support non-doc comments in code blocks. It uses a fork of prettyplease for formatting rust code, and prettyplease does not support this. I would like to not diverge this fork too much (so I can easily keep in sync with upstream), therefore I didn't add non-doc comment support in my prettyplease fork for now. This means that you can use non-doc comments throughout your view macro, as long as they don't reside within code blocks.
+> 
+> A bit more context: prettyplease uses syn to parse rust syntax. According to https://doc.rust-lang.org/reference/comments.html#non-doc-comments non-doc comments are interpreted as a form of whitespace by the parser; syn basically ignores/skips these comments and does not include them in the syntax tree.
+
+This means you should not use non-doc comments in the `view!` macro, but you can use them outside of it. Avoid comments within the `view!` macro, structure your code to be self documenting instead of using comments. If there is absolutely no other way to add context, you can use doc comments (///) instead.
