@@ -188,7 +188,7 @@ fn ScaleNoteOverlays(
             // Convert SVG string index to tuning array index (reverse order)
             let tuning_index = (current_tuning.len() - 1) - (string_idx as usize);
             if let Some(base_note) = current_tuning.get(tuning_index) {
-              for fret_idx in min_visible..=max_visible {
+              for fret_idx in current_start_fret..=current_end_fret {
                 let note = base_note.add_steps(fret_idx);
 
                 if current_scale.contains_note(note) {
