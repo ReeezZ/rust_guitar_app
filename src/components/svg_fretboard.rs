@@ -260,7 +260,12 @@ fn FretboardOverlays(
   svg_width: f64,
 ) -> impl IntoView {
   let overlay_left = if start_fret > min_fret {
-    let start_x = to_viewbox_x(positions[start_fret]);
+    // Calculate the playable area for start_fret (the space where you press the string)
+    let x_prev = if start_fret == 0 { 0.0 } else { positions[(start_fret - 1).max(0)] };
+    let x_curr = positions[start_fret];
+    // End overlay at the beginning of the playable area, not at the fret line
+    let playable_area_start = (x_prev + x_curr) / 2.0 - (x_curr - x_prev) / 4.0;
+    let start_x = to_viewbox_x(playable_area_start);
     let width = start_x - nut_width;
     Some(view! {
       <rect

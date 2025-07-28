@@ -237,12 +237,12 @@ fn ScaleNoteOverlays(
                     // Nut position: center of nut width
                     current_nut_width / 2.0
                   } else {
-                    // Fret position: place in the MIDDLE of the fret space (where you finger the note)
+                    // Fret position: place in the middle of the playable area between fret lines
                     // This matches the clickable area positioning: (x_prev + x_curr) / 2.0
                     let x_prev = if fret_idx == 0 { 0.0 } else { full_fret_positions[(fret_idx - 1).max(0)] };
                     let x_curr = full_fret_positions[fret_idx];
-                    let finger_position = (x_prev + x_curr) / 2.0;
-                    to_viewbox_x(finger_position)
+                    let playable_position = (x_prev + x_curr) / 2.0;
+                    to_viewbox_x(playable_position)
                   };
 
                   let (fill_color, stroke_color, radius) = if is_root {
