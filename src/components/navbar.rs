@@ -35,34 +35,6 @@ pub fn NavbarLinks() -> impl IntoView {
       </li>
       <li>
         <a
-          href="/guitar_v1"
-          class=move || { if pathname() == "/guitar_v1" { "nav-link active" } else { "nav-link" } }
-        >
-          <span>Guitar V1</span>
-        </a>
-      </li>
-      <li>
-        <a
-          href="/fretboard_viewer"
-          class=move || {
-            if pathname() == "/fretboard_viewer" { "nav-link active" } else { "nav-link" }
-          }
-        >
-          <span>Fretboard viewer</span>
-        </a>
-      </li>
-      <li>
-        <a
-          href="/fretboard_playground"
-          class=move || {
-            if pathname() == "/fretboard_playground" { "nav-link active" } else { "nav-link" }
-          }
-        >
-          <span>Fretboard Playground</span>
-        </a>
-      </li>
-      <li>
-        <a
           href="/fretboard_trainer"
           class=move || {
             if pathname() == "/fretboard_trainer" { "nav-link active" } else { "nav-link" }
