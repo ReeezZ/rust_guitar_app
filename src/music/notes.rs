@@ -48,7 +48,7 @@ impl Note {
       (Note::GisOrAs, "G♯/A♭"),
       (Note::A, "A"),
       (Note::AisOrB, "A♯/B♭"),
-      (Note::H, "H"),
+      (Note::H, "B"),
     ];
     &MAPPING
   }
