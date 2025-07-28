@@ -3,6 +3,7 @@ pub mod fretboard_visual_config;
 pub mod musical_fretboard_config;
 pub mod fretboard_config_examples;
 pub mod fretboard_scale_display;
+pub mod fret_range_selector;
 pub mod music_selectors;
 pub mod navbar;
 pub mod svg_fretboard;

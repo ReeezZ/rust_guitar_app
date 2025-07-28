@@ -1,20 +1,23 @@
 use crate::components::{
   fretboard::FretClickEvent,
-  music_selectors::{NoteSelector, NumericRangeSelector, ScaleTypeSelector},
+  fret_range_selector::FretRangeSelector,
+  music_selectors::{NoteSelector, ScaleTypeSelector},
   musical_fretboard_config::MusicalFretboardConfig,
   svg_fretboard_scale_display::SvgFretboardScaleDisplay,
 };
 use crate::music::heptatonic_scales::HeptaScaleType;
 use crate::music::notes::Note;
 use crate::music::scales::ScaleType;
-use leptos::{logging::log, prelude::*};
+use leptos::{logging::log, prelude::*, wasm_bindgen::JsCast};
 
 /// Page demonstrating the SVG fretboard with scale display functionality
 #[component]
 pub fn SvgFretboardScalePage() -> impl IntoView {
-  // Fret range controls
-  let start_fret = RwSignal::new(0_usize);
-  let end_fret = RwSignal::new(7_usize);
+  // Single fret range control (replaces start_fret and end_fret)
+  let fret_range = RwSignal::new(0..=7_usize);
+  
+  // Extra frets for visual context
+  let extra_frets = RwSignal::new(2_usize);
 
   // Scale configuration
   let root_note = RwSignal::new(Note::C);
@@ -53,9 +56,7 @@ pub fn SvgFretboardScalePage() -> impl IntoView {
           <p>
             <strong>"Range:"</strong>
             " Frets "
-            {move || start_fret.get()}
-            " - "
-            {move || end_fret.get()}
+            {move || format!("{}-{}", fret_range.get().start(), fret_range.get().end())}
           </p>
         </div>
       </div>
@@ -85,8 +86,7 @@ pub fn SvgFretboardScalePage() -> impl IntoView {
             on:click=move |_| {
               root_note.set(Note::G);
               scale_type.set(ScaleType::Hepatonic(HeptaScaleType::Major));
-              start_fret.set(3);
-              end_fret.set(7);
+              fret_range.set(3..=7);
             }
           >
             "G Major (3-7)"
@@ -96,8 +96,7 @@ pub fn SvgFretboardScalePage() -> impl IntoView {
             on:click=move |_| {
               root_note.set(Note::A);
               scale_type.set(ScaleType::Hepatonic(HeptaScaleType::Minor));
-              start_fret.set(5);
-              end_fret.set(8);
+              fret_range.set(5..=8);
             }
           >
             "A Minor (5-8)"
@@ -107,8 +106,7 @@ pub fn SvgFretboardScalePage() -> impl IntoView {
             on:click=move |_| {
               root_note.set(Note::E);
               scale_type.set(ScaleType::Hepatonic(HeptaScaleType::Minor));
-              start_fret.set(0);
-              end_fret.set(5);
+              fret_range.set(0..=5);
             }
           >
             "E Minor (0-5)"
@@ -118,11 +116,30 @@ pub fn SvgFretboardScalePage() -> impl IntoView {
             on:click=move |_| {
               root_note.set(Note::C);
               scale_type.set(ScaleType::Hepatonic(HeptaScaleType::Major));
-              start_fret.set(7);
-              end_fret.set(10);
+              fret_range.set(7..=10);
             }
           >
             "C Major (7-10)"
+          </button>
+          <button
+            class="py-2 px-4 text-white bg-green-500 rounded hover:bg-green-600"
+            on:click=move |_| {
+              root_note.set(Note::A);
+              scale_type.set(ScaleType::Hepatonic(HeptaScaleType::Minor));
+              fret_range.set(1..=4);
+            }
+          >
+            "A Minor (1-4, no opens)"
+          </button>
+          <button
+            class="py-2 px-4 text-white bg-purple-500 rounded hover:bg-purple-600"
+            on:click=move |_| {
+              root_note.set(Note::E);
+              scale_type.set(ScaleType::Hepatonic(HeptaScaleType::Major));
+              fret_range.set(0..=0);
+            }
+          >
+            "Open strings only"
           </button>
         </div>
       </div>
@@ -130,38 +147,50 @@ pub fn SvgFretboardScalePage() -> impl IntoView {
       // Main fretboard display
       <div class="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
         <SvgFretboardScaleDisplay
-          start_fret=start_fret.read_only().into()
-          end_fret=end_fret.read_only().into()
+          fret_range=fret_range.read_only().into()
           root_note=root_note.read_only().into()
           scale_type=scale_type.read_only().into()
+          extra_frets=extra_frets.read_only()
           on_note_clicked=on_note_clicked
-          config=MusicalFretboardConfig::default().with_extra_frets(2)
+          config=MusicalFretboardConfig::default()
         />
       // Show 2 extra frets beyond the end fret
       </div>
 
       // Scale configuration controls
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        // Root note selector - now using reusable component
+        // Root note selector
         <NoteSelector value=root_note label="Root Note" />
 
-        // Scale type selector - now using reusable component
+        // Scale type selector
         <ScaleTypeSelector value=scale_type label="Scale Type" />
 
-        // Fret range controls - now using reusable components
-        <NumericRangeSelector
-          value=start_fret
-          label="Start Fret"
-          min=Signal::derive(move || 0)
-          max=Signal::derive(move || end_fret.get().saturating_sub(1))
-        />
+        // Fret range control with dual sliders
+        <FretRangeSelector value=fret_range label="Playable Range" />
 
-        <NumericRangeSelector
-          value=end_fret
-          label="End Fret"
-          min=Signal::derive(move || start_fret.get().saturating_add(1))
-          max=Signal::derive(move || 22)
-        />
+        // Extra frets control
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">"Extra Frets"</label>
+          <div class="text-sm text-gray-600">
+            "Context: " {move || extra_frets.get()} " frets"
+            <br />
+            <span class="text-xs text-gray-500">"(Visual context beyond playable range)"</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="5"
+            prop:value=move || extra_frets.get()
+            on:input=move |ev| {
+              let target = ev.target().unwrap();
+              let input: web_sys::HtmlInputElement = target.dyn_into().unwrap();
+              if let Ok(val) = input.value().parse::<usize>() {
+                extra_frets.set(val);
+              }
+            }
+            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+          />
+        </div>
       </div>
 
       // Legend
