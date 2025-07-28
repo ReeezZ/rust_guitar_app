@@ -2,6 +2,6 @@ pub mod app;
 
 pub mod components;
 mod fretboard_view_helper;
-mod models;
-mod music;
+pub mod models;
+pub mod music;
 mod pages;

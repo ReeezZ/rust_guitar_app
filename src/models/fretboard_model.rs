@@ -135,7 +135,7 @@ impl FretboardModel {
     // String 3: D (4th string)
     // String 4: A (5th string)
     // String 5 (bottom): Low E (6th string)
-    vec![Note::E, Note::H, Note::G, Note::D, Note::A, Note::E]
+    vec![Note::E, Note::B, Note::G, Note::D, Note::A, Note::E]
   }
 
   pub fn get_frets_of_string(&self, string_no: u8) -> FretStringSignals {

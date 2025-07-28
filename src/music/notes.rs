@@ -3,34 +3,34 @@ use std::{fmt, str::FromStr};
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Note {
   C,
-  CisOrDes,
+  CSharpOrDFlat,
   D,
-  DisOrEs,
+  DSharpOrEFlat,
   E,
   F,
-  FisOrGes,
+  FSharpOrGFlat,
   G,
-  GisOrAs,
+  GSharpOrAFlat,
   A,
-  AisOrB,
-  H,
+  ASharpOrBFlat,
+  B,
 }
 
 impl Note {
   pub const fn all_notes() -> &'static [Note; 12] {
     static ALL_NOTES: [Note; 12] = [
       Note::C,
-      Note::CisOrDes,
+      Note::CSharpOrDFlat,
       Note::D,
-      Note::DisOrEs,
+      Note::DSharpOrEFlat,
       Note::E,
       Note::F,
-      Note::FisOrGes,
+      Note::FSharpOrGFlat,
       Note::G,
-      Note::GisOrAs,
+      Note::GSharpOrAFlat,
       Note::A,
-      Note::AisOrB,
-      Note::H,
+      Note::ASharpOrBFlat,
+      Note::B,
     ];
     &ALL_NOTES
   }
@@ -38,17 +38,17 @@ impl Note {
   pub const fn mapping() -> &'static [(Note, &'static str)] {
     static MAPPING: [(Note, &'static str); 12] = [
       (Note::C, "C"),
-      (Note::CisOrDes, "C♯/D♭"),
+      (Note::CSharpOrDFlat, "C♯/D♭"),
       (Note::D, "D"),
-      (Note::DisOrEs, "D♯/E♭"),
+      (Note::DSharpOrEFlat, "D♯/E♭"),
       (Note::E, "E"),
       (Note::F, "F"),
-      (Note::FisOrGes, "F♯/G♭"),
+      (Note::FSharpOrGFlat, "F♯/G♭"),
       (Note::G, "G"),
-      (Note::GisOrAs, "G♯/A♭"),
+      (Note::GSharpOrAFlat, "G♯/A♭"),
       (Note::A, "A"),
-      (Note::AisOrB, "A♯/B♭"),
-      (Note::H, "B"),
+      (Note::ASharpOrBFlat, "A♯/B♭"),
+      (Note::B, "B"),
     ];
     &MAPPING
   }
@@ -92,17 +92,17 @@ mod tests {
   #[test]
   fn test_add_steps_of_c() {
     assert_eq!(Note::C.add_steps(0), Note::C);
-    assert_eq!(Note::C.add_steps(1), Note::CisOrDes);
+    assert_eq!(Note::C.add_steps(1), Note::CSharpOrDFlat);
     assert_eq!(Note::C.add_steps(2), Note::D);
-    assert_eq!(Note::C.add_steps(3), Note::DisOrEs);
+    assert_eq!(Note::C.add_steps(3), Note::DSharpOrEFlat);
     assert_eq!(Note::C.add_steps(4), Note::E);
     assert_eq!(Note::C.add_steps(5), Note::F);
-    assert_eq!(Note::C.add_steps(6), Note::FisOrGes);
+    assert_eq!(Note::C.add_steps(6), Note::FSharpOrGFlat);
     assert_eq!(Note::C.add_steps(7), Note::G);
-    assert_eq!(Note::C.add_steps(8), Note::GisOrAs);
+    assert_eq!(Note::C.add_steps(8), Note::GSharpOrAFlat);
     assert_eq!(Note::C.add_steps(9), Note::A);
-    assert_eq!(Note::C.add_steps(10), Note::AisOrB);
-    assert_eq!(Note::C.add_steps(11), Note::H);
+    assert_eq!(Note::C.add_steps(10), Note::ASharpOrBFlat);
+    assert_eq!(Note::C.add_steps(11), Note::B);
     assert_eq!(Note::C.add_steps(12), Note::C);
   }
 }

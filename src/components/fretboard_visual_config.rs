@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 
 /// Configuration struct for visual fretboard properties shared across all fretboard components.
-/// 
+///
 /// This consolidates the common visual configuration that controls the appearance
 /// and layout of fretboard components. It handles display properties like dimensions,
 /// spacing, and visual markers, but not musical properties like tuning or scales.
@@ -9,36 +9,40 @@ use leptos::prelude::*;
 /// # Basic Usage
 /// ```rust
 /// use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
-/// 
+///
 /// // Use defaults (6-string guitar, 22 frets, 3:1 aspect ratio)
 /// let config = FretboardVisualConfig::default();
-/// 
+///
 /// // Or customize with builder pattern
 /// let custom_config = FretboardVisualConfig::default()
 ///   .with_num_strings(7)  // 7-string guitar
 ///   .with_max_frets(24)   // 24 frets
 ///   .with_aspect_ratio(4.0); // Wider display
 /// ```
-/// 
+///
 /// # Preset Configurations
 /// ```rust
+/// use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
+///
 /// // Bass guitar (4 strings)
 /// let bass_config = FretboardVisualConfig::bass_guitar();
-/// 
+///
 /// // 7-string guitar
 /// let seven_string_config = FretboardVisualConfig::seven_string();
-/// 
+///
 /// // Wide aspect ratio for larger displays
 /// let wide_config = FretboardVisualConfig::wide_aspect();
-/// 
+///
 /// // Chain presets with customizations
 /// let custom_bass = FretboardVisualConfig::bass_guitar()
 ///   .with_max_frets(20)
 ///   .with_fret_margin(0.08);
 /// ```
-/// 
+///
 /// # Advanced Customization
 /// ```rust
+/// use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
+///
 /// let advanced_config = FretboardVisualConfig::default()
 ///   .with_marker_positions(vec![3, 5, 7, 9, 12, 15, 17]) // Custom fret markers
 ///   .with_nut_width(16.0)    // Wider nut
@@ -83,12 +87,14 @@ impl FretboardVisualConfig {
   }
 
   /// Builder method to set the number of strings
-  /// 
+  ///
   /// # Arguments
   /// * `num_strings` - Number of guitar strings (typically 4-8)
-  /// 
+  ///
   /// # Examples
   /// ```rust
+  /// use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
+  ///
   /// let bass = FretboardVisualConfig::default().with_num_strings(4);
   /// let seven_string = FretboardVisualConfig::default().with_num_strings(7);
   /// ```
@@ -98,15 +104,17 @@ impl FretboardVisualConfig {
   }
 
   /// Builder method to set the maximum number of frets
-  /// 
+  ///
   /// Controls how many frets are available for display, regardless of the
   /// current view range (start_fret to end_fret).
-  /// 
+  ///
   /// # Arguments
   /// * `max_frets` - Maximum frets (typically 12-24)
-  /// 
+  ///
   /// # Examples
   /// ```rust
+  /// use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
+  ///
   /// let acoustic = FretboardVisualConfig::default().with_max_frets(14);
   /// let electric = FretboardVisualConfig::default().with_max_frets(24);
   /// ```
@@ -116,15 +124,17 @@ impl FretboardVisualConfig {
   }
 
   /// Builder method to set the aspect ratio
-  /// 
+  ///
   /// Controls the width-to-height ratio of the SVG display.
   /// Higher values create wider, shorter fretboards.
-  /// 
+  ///
   /// # Arguments
   /// * `ratio` - Width/height ratio (typically 2.0-5.0)
-  /// 
+  ///
   /// # Examples
   /// ```rust
+  /// use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
+  ///
   /// let compact = FretboardVisualConfig::default().with_aspect_ratio(2.5);
   /// let wide = FretboardVisualConfig::default().with_aspect_ratio(4.5);
   /// ```
@@ -134,14 +144,16 @@ impl FretboardVisualConfig {
   }
 
   /// Builder method to set the fret margin percentage
-  /// 
+  ///
   /// Controls the spacing around the fretboard as a percentage of total height.
-  /// 
+  ///
   /// # Arguments
   /// * `margin` - Margin as decimal percentage (e.g., 0.05 = 5%)
-  /// 
+  ///
   /// # Examples
   /// ```rust
+  /// use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
+  ///
   /// let tight = FretboardVisualConfig::default().with_fret_margin(0.02);
   /// let spacious = FretboardVisualConfig::default().with_fret_margin(0.1);
   /// ```
@@ -151,9 +163,9 @@ impl FretboardVisualConfig {
   }
 
   /// Builder method to set the nut width
-  /// 
+  ///
   /// Controls the visual width of the nut (zero fret) in SVG units.
-  /// 
+  ///
   /// # Arguments
   /// * `width` - Nut width in SVG units (typically 10.0-20.0)
   pub fn with_nut_width(mut self, width: f64) -> Self {
@@ -162,9 +174,9 @@ impl FretboardVisualConfig {
   }
 
   /// Builder method to set the extra frets
-  /// 
+  ///
   /// Controls how many frets beyond the visible range to show for context.
-  /// 
+  ///
   /// # Arguments
   /// * `extra` - Number of extra frets (typically 0-3)
   pub fn with_extra_frets(mut self, extra: usize) -> Self {
@@ -173,18 +185,20 @@ impl FretboardVisualConfig {
   }
 
   /// Builder method to set marker positions
-  /// 
+  ///
   /// Sets which fret positions should display visual markers (dots).
-  /// 
+  ///
   /// # Arguments
   /// * `positions` - Vector of fret numbers to mark
-  /// 
+  ///
   /// # Examples
   /// ```rust
+  /// use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
+  ///
   /// // Standard guitar markers
   /// let standard = FretboardVisualConfig::default()
   ///   .with_marker_positions(vec![3, 5, 7, 9, 12, 15, 17, 19, 21]);
-  /// 
+  ///
   /// // Minimal markers
   /// let minimal = FretboardVisualConfig::default()
   ///   .with_marker_positions(vec![3, 12]);
@@ -195,20 +209,22 @@ impl FretboardVisualConfig {
   }
 
   /// Preset configuration for bass guitar (4 strings)
-  /// 
+  ///
   /// Creates a configuration optimized for bass guitar display with fewer strings
   /// and adjusted proportions.
-  /// 
+  ///
   /// Features:
   /// - 4 strings instead of standard 6
   /// - Same fret range as standard guitar
   /// - Default aspect ratio works well for bass proportions
-  /// 
+  ///
   /// # Returns
   /// A `FretboardVisualConfig` configured for 4-string bass guitar
-  /// 
+  ///
   /// # Examples
   /// ```rust
+  /// use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
+  ///
   /// let bass_config = FretboardVisualConfig::bass_guitar();
   /// // Further customize if needed
   /// let custom_bass = bass_config.with_max_frets(20);
@@ -218,20 +234,22 @@ impl FretboardVisualConfig {
   }
 
   /// Preset configuration for 7-string guitar
-  /// 
+  ///
   /// Creates a configuration for 7-string guitars commonly used in metal
   /// and extended range playing.
-  /// 
+  ///
   /// Features:
   /// - 7 strings instead of standard 6
   /// - Standard fret range (same as 6-string)
   /// - Same aspect ratio (7th string doesn't significantly change proportions)
-  /// 
+  ///
   /// # Returns
   /// A `FretboardVisualConfig` configured for 7-string guitar
-  /// 
+  ///
   /// # Examples
   /// ```rust
+  /// use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
+  ///
   /// let seven_string = FretboardVisualConfig::seven_string();
   /// // Add extended fret range if desired
   /// let extended_seven = seven_string.with_max_frets(24);
@@ -241,25 +259,19 @@ impl FretboardVisualConfig {
   }
 
   /// Preset configuration for wide aspect ratio display
-  /// 
+  ///
   /// Creates a configuration with a wider aspect ratio, useful for:
   /// - Horizontal layouts where height is constrained
   /// - Desktop displays with wide screens
   /// - Embedded views in wider containers
-  /// 
+  ///
   /// Features:
   /// - 4.0 aspect ratio (vs default 3.0)
   /// - Creates a more stretched, horizontal appearance
   /// - Same string and fret configuration as default
-  /// 
+  ///
   /// # Returns
   /// A `FretboardVisualConfig` with wide aspect ratio
-  /// 
-  /// # Examples
-  /// ```rust
-  /// let wide = FretboardVisualConfig::wide_aspect();
-  /// // Combine with other customizations
-  /// let wide_bass = wide.with_num_strings(4);
   /// ```
   pub fn wide_aspect() -> Self {
     Self::default().with_aspect_ratio(4.0)
@@ -267,24 +279,10 @@ impl FretboardVisualConfig {
 }
 
 /// Signal utilities for FretboardVisualConfig
-/// 
+///
 /// Provides individual reactive signals for each configuration property.
-/// This is used internally by components that need reactive access to 
+/// This is used internally by components that need reactive access to
 /// individual config properties.
-/// 
-/// # Usage
-/// 
-/// This struct is typically created from a `FretboardVisualConfig` and then
-/// used internally by components to access individual reactive properties.
-/// 
-/// # Examples
-/// ```rust
-/// let config = FretboardVisualConfig::bass_guitar();
-/// let signals = FretboardVisualConfigSignals::from(config);
-/// 
-/// // Individual signals can be accessed
-/// let num_strings_signal = signals.num_strings;
-/// ```
 #[derive(Clone)]
 pub struct FretboardVisualConfigSignals {
   /// Reactive signal for number of strings
@@ -305,28 +303,9 @@ pub struct FretboardVisualConfigSignals {
 
 impl From<FretboardVisualConfig> for FretboardVisualConfigSignals {
   /// Convert a FretboardVisualConfig into individual reactive signals
-  /// 
+  ///
   /// This conversion creates derived signals for each configuration property,
   /// allowing components to access individual reactive config properties.
-  /// 
-  /// # Arguments
-  /// * `config` - The FretboardVisualConfig to convert
-  /// 
-  /// # Returns
-  /// A FretboardVisualConfigSignals with individual signals for each property
-  /// 
-  /// # Examples
-  /// ```rust
-  /// let config = FretboardVisualConfig::seven_string()
-  ///   .with_aspect_ratio(4.0)
-  ///   .with_max_frets(24);
-  /// 
-  /// let signals = FretboardVisualConfigSignals::from(config);
-  /// 
-  /// // Now you can use individual signals
-  /// assert_eq!(signals.num_strings.get(), 7);
-  /// assert_eq!(signals.max_frets.get(), 24);
-  /// ```
   fn from(config: FretboardVisualConfig) -> Self {
     Self {
       num_strings: Signal::derive(move || config.num_strings),

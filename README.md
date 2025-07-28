@@ -67,8 +67,12 @@ RUSTFLAGS='--cfg getrandom_backend="wasm_js"' trunk serve --open
 - Interactive configuration  
 - Range-based fret selection (`0..=5` syntax)
 
-### In Progress
-- Migrating interval trainer from legacy components to SVG system
+
+
+#### (Short term) tasks
+
+- Switch between german and english note system
+
 
 ### Future Ideas
 

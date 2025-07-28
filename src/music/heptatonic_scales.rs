@@ -155,7 +155,7 @@ mod tests {
     assert_eq!(c_major[HeptaScaleDegree::Fourth], Note::F);
     assert_eq!(c_major[HeptaScaleDegree::Fifth], Note::G);
     assert_eq!(c_major[HeptaScaleDegree::Sixth], Note::A);
-    assert_eq!(c_major[HeptaScaleDegree::Seventh], Note::H);
+    assert_eq!(c_major[HeptaScaleDegree::Seventh], Note::B);
   }
 
   #[test]
@@ -169,11 +169,11 @@ mod tests {
   fn test_a_major_scale() {
     let a_minor = HeptaScaleImpl::new(Note::A, HeptaScaleType::Major);
     assert_eq!(a_minor[HeptaScaleDegree::First], Note::A);
-    assert_eq!(a_minor[HeptaScaleDegree::Second], Note::H);
-    assert_eq!(a_minor[HeptaScaleDegree::Third], Note::CisOrDes);
+    assert_eq!(a_minor[HeptaScaleDegree::Second], Note::B);
+    assert_eq!(a_minor[HeptaScaleDegree::Third], Note::CSharpOrDFlat);
     assert_eq!(a_minor[HeptaScaleDegree::Fourth], Note::D);
     assert_eq!(a_minor[HeptaScaleDegree::Fifth], Note::E);
-    assert_eq!(a_minor[HeptaScaleDegree::Sixth], Note::FisOrGes);
-    assert_eq!(a_minor[HeptaScaleDegree::Seventh], Note::GisOrAs);
+    assert_eq!(a_minor[HeptaScaleDegree::Sixth], Note::FSharpOrGFlat);
+    assert_eq!(a_minor[HeptaScaleDegree::Seventh], Note::GSharpOrAFlat);
   }
 }
