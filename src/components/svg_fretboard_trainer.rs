@@ -86,16 +86,6 @@ pub fn SvgFretboardTrainer(
     }
   });
 
-  // Create fret positions for overlay calculations
-  let fret_positions = Signal::derive({
-    let config = visual_config;
-    move || {
-      let cfg = config.get();
-      let svg_width = 1000.0; // Default SVG width
-      calculate_fret_positions(svg_width - cfg.nut_width, cfg.max_frets as u8)
-    }
-  });
-
   // Calculate start and end frets from range
   let start_fret = Signal::derive({
     let range = final_fret_range;
@@ -105,6 +95,45 @@ pub fn SvgFretboardTrainer(
   let end_fret = Signal::derive({
     let range = final_fret_range;
     move || *range.get().end()
+  });
+
+  // Calculate positions and transforms like the main component does
+  let position_data = Signal::derive({
+    let config = visual_config;
+    let start = start_fret;
+    let end = end_fret;
+    
+    move || {
+      let cfg = config.get();
+      let start_f = start.get();
+      let end_f = end.get();
+      
+      // SVG dimensions (matching the main component)
+      let svg_width = 1000.0;
+      let svg_height = 300.0;
+      
+      // Calculate fret positions
+      let scale_length = svg_width - cfg.nut_width;
+      let positions = calculate_fret_positions(scale_length, cfg.max_frets as u8);
+      
+      // Calculate visible range with extra context
+      let min_fret = if start_f > cfg.extra_frets { start_f - cfg.extra_frets } else { 0 };
+      let max_fret = (end_f + cfg.extra_frets).min(cfg.max_frets);
+      
+      // Calculate zoom transform
+      let has_nut = min_fret == 0;
+      let range_start = if has_nut { 0.0 } else { positions[min_fret] };
+      let range_end = positions[max_fret];
+      let range_width = range_end - range_start;
+      
+      let available_width = if has_nut { svg_width - cfg.nut_width } else { svg_width };
+      let scale_factor = available_width / range_width;
+      
+      // String spacing
+      let string_spacing = svg_height / (cfg.num_strings as f64 + 1.0);
+      
+      (positions, min_fret, max_fret, has_nut, range_start, scale_factor, cfg.nut_width, string_spacing, svg_width, svg_height)
+    }
   });
 
   view! {
@@ -139,16 +168,24 @@ pub fn SvgFretboardTrainer(
         // Reference note highlight (green)
         {move || {
           reference_note.get().map(|coord| {
-            let positions = fret_positions.get();
-            let config = visual_config.get();
-            let string_spacing = 300.0 / (config.num_strings as f64 + 1.0);
+            let (positions, _min_fret, _max_fret, has_nut, range_start, scale_factor, nut_width, string_spacing, _svg_width, _svg_height) = position_data.get();
             
-            // Calculate position
+            // Calculate position using the same logic as the main component
             let x = if coord.fret_idx == 0 {
-              config.nut_width / 2.0
+              // Nut position
+              nut_width / 2.0
             } else {
-              config.nut_width + positions[coord.fret_idx as usize] - (positions[1] - positions[0]) / 2.0
+              // Fretted position - use midpoint between frets
+              let fret_idx = coord.fret_idx as usize;
+              let x_prev = if fret_idx == 0 { 0.0 } else { positions[(fret_idx - 1).max(0)] };
+              let x_curr = positions[fret_idx];
+              let x_center = (x_prev + x_curr) / 2.0;
+              
+              // Apply zoom transform
+              let offset = if has_nut { nut_width } else { 0.0 };
+              offset + (x_center - range_start) * scale_factor
             };
+            
             let y = string_spacing * (coord.string_idx as f64 + 1.0);
             
             view! {
@@ -167,16 +204,24 @@ pub fn SvgFretboardTrainer(
         // Error note highlights (red)
         {move || {
           error_notes.get().into_iter().map(|coord| {
-            let positions = fret_positions.get();
-            let config = visual_config.get();
-            let string_spacing = 300.0 / (config.num_strings as f64 + 1.0);
+            let (positions, _min_fret, _max_fret, has_nut, range_start, scale_factor, nut_width, string_spacing, _svg_width, _svg_height) = position_data.get();
             
-            // Calculate position
+            // Calculate position using the same logic as the main component
             let x = if coord.fret_idx == 0 {
-              config.nut_width / 2.0
+              // Nut position
+              nut_width / 2.0
             } else {
-              config.nut_width + positions[coord.fret_idx as usize] - (positions[1] - positions[0]) / 2.0
+              // Fretted position - use midpoint between frets
+              let fret_idx = coord.fret_idx as usize;
+              let x_prev = if fret_idx == 0 { 0.0 } else { positions[(fret_idx - 1).max(0)] };
+              let x_curr = positions[fret_idx];
+              let x_center = (x_prev + x_curr) / 2.0;
+              
+              // Apply zoom transform
+              let offset = if has_nut { nut_width } else { 0.0 };
+              offset + (x_center - range_start) * scale_factor
             };
+            
             let y = string_spacing * (coord.string_idx as f64 + 1.0);
             
             view! {
