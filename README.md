@@ -1,183 +1,110 @@
 # Rust Guitar App
 
-This project is currently mostly for learning Rust and Leptos.
+A guitar learning companion app built with Rust and Leptos. This project aims to create a free and open-source guitar practice tool with interactive SVG-based fretboard visualizations.
 
-The idea is to create a guitar learning companion app for learning and practicing on the guitar.
+## Current Status
 
-There are many guitar practice apps, but so far I know of none that are truly free and open source. So I want to build something like that.
+The project has working SVG fretboard components and scale visualization. Currently migrating from legacy components to the new SVG system.
 
----
+### Features
 
-## Current Status: Early Phase
+- **SVG Fretboard System** - Scalable and interactive fretboard display
+- **Scale Visualization** - Display scales with different note highlighting  
+- **Configurable** - Support for different instruments and fret ranges
 
-This project is in an early phase and is a bit chaotic currently. Currently this is more a tech demo to myself to try various approaches.
+### SVG FretboardArchitecture
 
----
+The SVG fretboard system is built in layers:
 
-## Prerequisites
-
-### For VS Code Users
-
-1. **Install VS Code**:
-- Download and install [Visual Studio Code](https://code.visualstudio.com/).
-
-2. **Install the Dev Containers Extension**:
-- Open VS Code.
-- Go to the Extensions view (`Ctrl+Shift+X` or `Cmd+Shift+X` on macOS).
-- Search for "Dev Containers" and install the extension.
-
-3. **Install Docker**:
-- Download and install [Docker Desktop](https://www.docker.com/products/docker-desktop/).
-- Ensure Docker is running.
-
-4. **Clone the Repository**:
-```sh
-git clone https://github.com/your-username/leptos_stuff.git
-cd leptos_stuff
+```mermaid
+graph TB
+    A["SvgFretboardScaleDisplay<br/>(Musical Scale visualization)"] --> B["SvgFretboardWithNotes<br/>(Note-aware fretboard)"]
+    B --> C["SvgFretboard<br/>(Base visual component)"]
+    
+    style A fill:#e1f5fe
+    style B fill:#f3e5f5  
+    style C fill:#fff3e0
 ```
 
-5. **Open the Project in VS Code:**
-- Open the project folder in VS Code.
+Each layer adds functionality while maintaining the same visual output.
 
-6. **Reopen in Devcontainer:**
+> **Documentation Note:** Consider using the [simple-mermaid](https://docs.rs/simple-mermaid/latest/simple_mermaid/) crate for adding [Mermaid](https://mermaid-js.github.io/mermaid/#/) diagrams to Rust docs for better architectural overviews.
 
-- Press Ctrl+Shift+P (or Cmd+Shift+P on macOS) to open the Command Palette.
-- Select "Dev Containers: Rebuild and Reopen in Container".
-- Wait for the container to build and start.
+## Getting Started
 
-7. **(Optional) Verify the Setup:**
+### VS Code Dev Container (Recommended)
 
-- Open a terminal in VS Code (`Ctrl+ or Cmd+ on macOS).
-- Run the following commands to verify the setup:
+1. **Prerequisites:** VS Code, Docker, Dev Containers extension
+2. **Setup:** 
+   ```bash
+   git clone https://github.com/your-username/leptos_stuff.git
+   cd leptos_stuff
+   code .
+   ```
+3. **Launch:** `Ctrl+Shift+P` → "Dev Containers: Rebuild and Reopen in Container"
+4. **Run:** `RUSTFLAGS='--cfg getrandom_backend="wasm_js"' trunk serve --open`
 
-```sh
-rustc --version
-cargo --version
-trunk --version
+### Manual Setup
+
+```bash
+# Install Rust and tools
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+rustup target add wasm32-unknown-unknown
+cargo install trunk leptosfmt
+
+# Install Node.js and Tailwind
+npm install -g tailwindcss
+
+# Run the app
+RUSTFLAGS='--cfg getrandom_backend="wasm_js"' trunk serve --open
 ```
 
+## Current Status
 
-8. **Run the Project**:
+### Working Features
+- SVG fretboard visualization
+- Scale display with note highlighting
+- Interactive configuration  
+- Range-based fret selection (`0..=5` syntax)
 
-- Use Trunk to serve the project:
-  - `RUSTFLAGS='--cfg getrandom_backend="wasm_js"' trunk serve --open`
-
-
-### For Non-VS Code Users
-
-This project is designed to work with VS Code's devcontainer setup. If you're not using VS Code, you can still set up the environment manually:
-
-1. **Install Rust**:
-    
-- Install Rust using [rustup](vscode-file://vscode-app/c:/Users/mario/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/code/electron-sandbox/workbench/workbench.html).
-- Add the WebAssembly target:
-  
-  rustup target add wasm32-unknown-unknown
-        
-2. **Install Trunk**:
-
-- Install Trunk, the WASM bundler:  
-  - `cargo install trunk`
-        
-3. **Install Leptosfmt**:
-- Install Leptosfmt for formatting Leptos macros:
-  - `cargo install leptosfmt`
-        
-4. **Install Node.js**:
-   
-- Install Node.js (LTS version) from [nodejs.org](vscode-file://vscode-app/c:/Users/mario/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/code/electron-sandbox/workbench/workbench.html).
-
-
-5. **Install Tailwind CSS**:
-
-- Install Tailwind CSS globally:
-  - `npm install -g tailwindcss`
-    
-2. **Run the Project**:
-
-- Use Trunk to serve the project:
-  - `RUSTFLAGS='--cfg getrandom_backend="wasm_js"' trunk serve --open`
-        
-
-Note: You may need to manually configure caching for Rust dependencies and build artifacts.
-
----
-
-## Feature Ideas and Status
-
-### General ideas
-
-Consider extending documentation with diagrams for better clarity. The [simple-mermaid](https://docs.rs/simple-mermaid/latest/simple_mermaid/) crate provides an easy way to add [Mermaid](https://mermaid-js.github.io/mermaid/#/) diagrams to Rust docs and markdown.
-
-That could be interesting to give high level overviews. For example for how the SvgFretboard components are layered. 
-
-### Fretboard map
-
-Feature that is currently being worked on.
-
-Ideas for execrises / features:
-
-- Find notes on the fretboard
-- find interval of note
-- Find scales
-- Find chord shapes
-  - Relative to a given note
-- Show scales
-  - Triads
-  - Modes
-
-### Circle of Fifths
-
-
-Display the circle of fifths. 
-The first real learning exercise would be to have to fill an empty circle of fifths.
-Being given scales and having to drag them in the right spot on the circle of fifths.
-Increasing difficulty could be that the CoF has to be filled out in a given order.
-
-Drawing this with CSS is probably very tricky. Using a SVG would be probably good.
+### In Progress
+- Migrating interval trainer from legacy components to SVG system
 
 ### Future Ideas
 
-- Tuner 
-  - Audio input?
-- Metronome
-  - Timing issues?
-  - Being able to configure a simple drum beat
-- Ear training
-  - Have to look into playing audio
-- Chord book
-  - indication on how well the chord is known
-- Chords in a key
-- MIDI / Keyboard input for playing notes
-  - Like when a scale is selected using keys 1 to 7 to play scale degress
+#### Fretboard Training Exercises
+- Find notes on the fretboard
+- Find interval of note
+- Find scales
+- Find chord shapes (relative to a given note)
+- Show scales (triads, modes)
 
-(*cough* scope creep)
+#### Circle of Fifths
+Interactive circle of fifths with drag & drop exercises:
+- Fill empty circle of fifths
+- Place scales in correct positions
+- Increasing difficulty with specific ordering requirements
 
-## Comparisons / Possible inspirations
+#### Advanced Features
+- **Tuner** - Audio input for tuning assistance
+- **Metronome** - Configurable drum beats and timing
+- **Ear training** - Audio-based exercises
+- **Chord book** - Progress tracking for chord knowledge
+- **Chords in a key** - Key-based chord relationships
+- **MIDI/Keyboard input** - Use keys 1-7 to play scale degrees
 
-[Code pen fretboard example](https://codepen.io/DreySkee/pen/bddpqM)
-[JS fretboard](https://github.com/metaescape/js-fretboard)
-[fretmap](https://fretmap.app/)
+## References
 
-[Fretboard with css tutorial](https://www.youtube.com/watch?v=C6VLedW5Dwk&list=PLXAhCH9FJ8zViqdqhsSP7iyCrVDoUGb3P&index=2)
-[Fretonomy](https://www.fretonomy.com/)
+Inspiration and comparisons:
+- [CodePen fretboard example](https://codepen.io/DreySkee/pen/bddpqM)
+- [JS fretboard](https://github.com/metaescape/js-fretboard) 
+- [fretmap.app](https://fretmap.app/)
+- [Fretboard CSS tutorial](https://www.youtube.com/watch?v=C6VLedW5Dwk&list=PLXAhCH9FJ8zViqdqhsSP7iyCrVDoUGb3P&index=2)
+- [Fretonomy](https://www.fretonomy.com/)
 
-## Tech Stack Ideas
-
-https://github.com/new-data-services/tailwindcss-animated
-
-
----
-
-## Contributing
-
-Contributions are welcome! Feel free to open issues or submit pull requests.
-
----
+Tech stack ideas:
+- [tailwindcss-animated](https://github.com/new-data-services/tailwindcss-animated) - for enhanced animations
 
 ## License
 
-This project is licensed under GNU General Public License v3.0
-
-[LICENSE file](./LICENSE)
-
+GNU General Public License v3.0 - see [LICENSE](./LICENSE)
