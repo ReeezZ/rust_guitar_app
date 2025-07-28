@@ -11,10 +11,13 @@
 - Structure output as clear, actionable bullet points, questions, or concrete suggestions, with specific examples where possible.
 - Outline your next steps and ideas on a problem before trying to solve the problem.
   - Create a plan of what to do before doing it
+- Do not go "over the top" when writing text for code comments or docs for example. Stay grounded.
 
 ## Project Context Reference
 
 **IMPORTANT**: Always reference the `README.md` file for a project overview and goals
+
+This is a simple project for a single person for building a small tool and learning.
 
 ## Technology-Specific Guidance
 
