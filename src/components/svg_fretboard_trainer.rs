@@ -4,6 +4,7 @@ use crate::components::musical_fretboard_config::{MusicalFretboardConfig, Musica
 use crate::components::svg_fretboard_with_notes::SvgFretboardWithNotes;
 use crate::fretboard_view_helper::calculate_fret_positions;
 use crate::models::fretboard_model::FretCoord;
+use crate::music::notes::Note;
 use leptos::prelude::*;
 
 /// SVG fretboard component for interval training exercises.
@@ -20,10 +21,13 @@ use leptos::prelude::*;
 /// # use rust_guitar_app::components::svg_fretboard_trainer::SvgFretboardTrainer;
 /// # use rust_guitar_app::components::fretboard::FretClickEvent;
 /// # use rust_guitar_app::models::fretboard_model::FretCoord;
+/// # use rust_guitar_app::music::notes::Note;
 ///
 /// # fn example() -> impl IntoView {
 /// let reference_coord = RwSignal::new(Some(FretCoord { fret_idx: 2, string_idx: 1 }));
+/// let reference_note = RwSignal::new(Some(Note::D));
 /// let error_coords = RwSignal::new(vec![]);
+/// let error_notes = RwSignal::new(vec![]);
 ///
 /// let on_fret_clicked = Callback::new(move |event: FretClickEvent| {
 ///   leptos::logging::log!("Clicked note: {} at {:?}", event.note, event.coord);
@@ -32,7 +36,9 @@ use leptos::prelude::*;
 /// view! {
 ///   <SvgFretboardTrainer
 ///     reference_note=reference_coord.into()
+///     reference_note_name=reference_note.into()
 ///     error_notes=error_coords.into()
+///     error_note_names=error_notes.into()
 ///     on_fret_clicked=on_fret_clicked
 ///   />
 /// }
@@ -42,8 +48,12 @@ use leptos::prelude::*;
 pub fn SvgFretboardTrainer(
   /// The reference note coordinate to highlight in green (None = no highlight)
   reference_note: Signal<Option<FretCoord>>,
+  /// The note at the reference coordinate (for display)
+  reference_note_name: Signal<Option<Note>>,
   /// Coordinates of incorrect guesses to highlight in red
   error_notes: Signal<Vec<FretCoord>>,
+  /// Notes at the error coordinates (for display) 
+  error_note_names: Signal<Vec<Note>>,
   
   // Configuration and interaction  
   /// Fretboard visual configuration (optional, uses defaults if not provided)
@@ -189,21 +199,39 @@ pub fn SvgFretboardTrainer(
             let y = string_spacing * (coord.string_idx as f64 + 1.0);
             
             view! {
-              <circle
-                cx=x
-                cy=y
-                r="12"
-                fill="rgba(34, 197, 94, 0.7)"
-                stroke="rgb(34, 197, 94)"
-                stroke-width="2"
-              />
+              <g>
+                <circle
+                  cx=x
+                  cy=y
+                  r="12"
+                  fill="rgba(34, 197, 94, 0.7)"
+                  stroke="rgb(34, 197, 94)"
+                  stroke-width="2"
+                />
+                <text
+                  x=x
+                  y=y
+                  text-anchor="middle"
+                  dominant-baseline="central"
+                  font-size="10"
+                  font-weight="bold"
+                  fill="white"
+                >
+                  {move || {
+                    reference_note_name.get().map(|note| note.to_string()).unwrap_or_else(|| "?".to_string())
+                  }}
+                </text>
+              </g>
             }
           })
         }}
         
         // Error note highlights (red)
         {move || {
-          error_notes.get().into_iter().map(|coord| {
+          let coords = error_notes.get();
+          let names = error_note_names.get();
+          
+          coords.into_iter().enumerate().map(|(idx, coord)| {
             let (positions, _min_fret, _max_fret, has_nut, range_start, scale_factor, nut_width, string_spacing, _svg_width, _svg_height) = position_data.get();
             
             // Calculate position using the same logic as the main component
@@ -223,16 +251,30 @@ pub fn SvgFretboardTrainer(
             };
             
             let y = string_spacing * (coord.string_idx as f64 + 1.0);
+            let note_name = names.get(idx).map(|n| n.to_string()).unwrap_or_else(|| "?".to_string());
             
             view! {
-              <circle
-                cx=x
-                cy=y
-                r="12"
-                fill="rgba(239, 68, 68, 0.7)"
-                stroke="rgb(239, 68, 68)"
-                stroke-width="2"
-              />
+              <g>
+                <circle
+                  cx=x
+                  cy=y
+                  r="12"
+                  fill="rgba(239, 68, 68, 0.7)"
+                  stroke="rgb(239, 68, 68)"
+                  stroke-width="2"
+                />
+                <text
+                  x=x
+                  y=y
+                  text-anchor="middle"
+                  dominant-baseline="central"
+                  font-size="10"
+                  font-weight="bold"
+                  fill="white"
+                >
+                  {note_name}
+                </text>
+              </g>
             }
           }).collect_view()
         }}

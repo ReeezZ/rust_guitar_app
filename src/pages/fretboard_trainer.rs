@@ -36,14 +36,18 @@ pub fn FretboardTrainer() -> impl IntoView {
 
   // Visual state for SVG overlays
   let (reference_note_coord, set_reference_note_coord) = signal(None::<FretCoord>);
+  let (reference_note_name, set_reference_note_name) = signal(None::<Note>);
   let (error_coords, set_error_coords) = signal(Vec::<FretCoord>::new());
+  let (error_note_names, set_error_note_names) = signal(Vec::<Note>::new());
 
   // Initialize with first question
   Effect::new(move |_| {
     fretboard_model.with(|model| {
       let random_fret = model.get_random_fret();
-      set_current_note.set(model.note_from_fret(random_fret));
+      let note = model.note_from_fret(random_fret);
+      set_current_note.set(note);
       set_reference_note_coord.set(Some(random_fret));
+      set_reference_note_name.set(Some(note));
     });
   });
 
@@ -61,9 +65,12 @@ pub fn FretboardTrainer() -> impl IntoView {
         
         // Clear error highlights and set new reference note
         set_error_coords.set(vec![]);
+        set_error_note_names.set(vec![]);
         let new_fret = model.get_random_fret();
-        set_current_note.set(model.note_from_fret(new_fret));
+        let new_note = model.note_from_fret(new_fret);
+        set_current_note.set(new_note);
         set_reference_note_coord.set(Some(new_fret));
+        set_reference_note_name.set(Some(new_note));
       } else {
         // Incorrect answer
         if error_text.get().is_empty() {
@@ -75,6 +82,13 @@ pub fn FretboardTrainer() -> impl IntoView {
         set_error_coords.update(|coords| {
           if !coords.contains(&evt.coord) {
             coords.push(evt.coord);
+          }
+        });
+        set_error_note_names.update(|names| {
+          // Only add the note name if we added a new coordinate
+          let coords = error_coords.get_untracked();
+          if coords.len() > names.len() {
+            names.push(clicked_note);
           }
         });
       }
@@ -104,7 +118,9 @@ pub fn FretboardTrainer() -> impl IntoView {
       
       <SvgFretboardTrainer
         reference_note=reference_note_coord.into()
+        reference_note_name=reference_note_name.into()
         error_notes=error_coords.into()
+        error_note_names=error_note_names.into()
         on_fret_clicked=on_fret_clicked
       />
       
