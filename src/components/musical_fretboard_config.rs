@@ -10,8 +10,10 @@ use leptos::prelude::*;
 ///
 /// # Example
 /// ```rust
+/// use rust_guitar_app::components::musical_fretboard_config::MusicalFretboardConfig;
+/// use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
+/// 
 /// let config = MusicalFretboardConfig::default()
-///   .with_tuning_preset(TuningPreset::DropD)
 ///   .with_visual(FretboardVisualConfig::seven_string());
 /// ```
 #[derive(Clone, Debug)]
@@ -31,7 +33,7 @@ impl Default for MusicalFretboardConfig {
         Note::A,  // 5th string
         Note::D,  // 4th string
         Note::G,  // 3rd string
-        Note::H,  // 2nd string (B in standard notation)
+        Note::B,  // 2nd string (B in standard notation)
         Note::E,  // 1st string (highest)
       ],
     }
@@ -103,12 +105,12 @@ impl MusicalFretboardConfig {
     Self::default()
       .with_visual(FretboardVisualConfig::seven_string())
       .with_tuning(vec![
-        Note::H,  // 7th string (low B)
+        Note::B,  // 7th string (low B)
         Note::E,  // 6th string
         Note::A,  // 5th string
         Note::D,  // 4th string
         Note::G,  // 3rd string
-        Note::H,  // 2nd string
+        Note::B,  // 2nd string
         Note::E,  // 1st string
       ])
   }
@@ -133,7 +135,7 @@ impl MusicalFretboardConfig {
         Note::A,  // 5th string
         Note::D,  // 4th string
         Note::G,  // 3rd string
-        Note::H,  // 2nd string
+        Note::B,  // 2nd string
         Note::E,  // 1st string
       ])
   }

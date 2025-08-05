@@ -442,27 +442,7 @@ fn FretboardClickableAreas(
 /// # }
 /// ```
 ///
-/// With custom configuration:
-///
-/// ```rust
-/// # use leptos::prelude::*;
-/// # use rust_guitar_app::components::svg_fretboard::SvgFretboard;
-///
-/// # fn custom_config_example() -> impl IntoView {
-/// let start = RwSignal::new(0);
-/// let end = RwSignal::new(12);
-/// let strings = RwSignal::new(4_u8); // Bass guitar
-///
-/// view! {
-///     <SvgFretboard
-///         start_fret=start.into()
-///         end_fret=end.into()
-///         num_strings=strings.read_only()
-///         svg_aspect_ratio=Signal::derive(move || 4.0)
-///     />
-/// }
-/// # }
-/// ```
+/// With custom configuration, pass a FretboardVisualConfig through the config prop.
 #[component]
 pub fn SvgFretboard(
   /// First fret in the active/playable range

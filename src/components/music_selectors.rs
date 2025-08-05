@@ -3,42 +3,30 @@ use crate::music::notes::Note;
 use crate::music::scales::ScaleType;
 use leptos::prelude::*;
 
-/// Extracts the value from an input or select event.
+/// Extracts the value from an HTML input or select event.
 /// This is a helper function used by all selector components.
 fn event_target_value(ev: &leptos::ev::Event) -> String {
   use leptos::wasm_bindgen::JsCast;
   let target = ev.target().unwrap();
-  
+
   // Try as HtmlSelectElement first (for <select> elements)
   if let Ok(select) = target.clone().dyn_into::<web_sys::HtmlSelectElement>() {
     return select.value();
   }
-  
+
   // Fall back to HtmlInputElement (for <input> elements)
   if let Ok(input) = target.dyn_into::<web_sys::HtmlInputElement>() {
     return input.value();
   }
-  
+
   // If neither works, return empty string instead of panicking
   String::new()
 }
 
 /// A reusable note selector dropdown component.
-/// 
+///
 /// Automatically generates all 12 chromatic notes from the Note enum,
 /// eliminating code duplication and reactive performance issues.
-///
-/// # Example
-/// ```rust
-/// let root_note = RwSignal::new(Note::C);
-/// 
-/// view! {
-///   <NoteSelector 
-///     value=root_note
-///     label="Root Note"
-///   />
-/// }
-/// ```
 #[component]
 pub fn NoteSelector(
   /// The reactive signal containing the selected note
@@ -52,7 +40,7 @@ pub fn NoteSelector(
 ) -> impl IntoView {
   let label_text = label.unwrap_or("Note");
   let css_class = class.unwrap_or_else(|| "w-full p-2 border rounded-md".to_string());
-  
+
   view! {
     <div class="space-y-2">
       <label class="block text-sm font-medium">{label_text}</label>
@@ -65,46 +53,29 @@ pub fn NoteSelector(
           }
         }
       >
-        {
-          // Generate options dynamically from Note::mapping()
-          Note::mapping()
-            .iter()
-            .map(|(note, display_str)| {
-              let current_note = *note;
-              let display_text = *display_str;
-              
-              view! {
-                <option 
-                  value=display_text
-                  selected=move || value.get() == current_note
-                >
-                  {display_text}
-                </option>
-              }
-            })
-            .collect_view()
-        }
+        // Generate options dynamically from Note::mapping()
+        {Note::mapping()
+          .iter()
+          .map(|(note, display_str)| {
+            let current_note = *note;
+            let display_text = *display_str;
+
+            view! {
+              <option value=display_text selected=move || value.get() == current_note>
+                {display_text}
+              </option>
+            }
+          })
+          .collect_view()}
       </select>
     </div>
   }
 }
 
 /// A reusable scale type selector dropdown component.
-/// 
+///
 /// Currently supports Major, Minor, and Chromatic scales.
 /// Can be easily extended to support more scale types.
-///
-/// # Example
-/// ```rust
-/// let scale_type = RwSignal::new(ScaleType::Hepatonic(HeptaScaleType::Major));
-/// 
-/// view! {
-///   <ScaleTypeSelector 
-///     value=scale_type
-///     label="Scale Type"
-///   />
-/// }
-/// ```
 #[component]
 pub fn ScaleTypeSelector(
   /// The reactive signal containing the selected scale type
@@ -118,15 +89,23 @@ pub fn ScaleTypeSelector(
 ) -> impl IntoView {
   let label_text = label.unwrap_or("Scale Type");
   let css_class = class.unwrap_or_else(|| "w-full p-2 border rounded-md".to_string());
-  
+
   // Define available scale types
   // TODO: This could be made more dynamic in the future
   let scale_options = [
-    ("Major", "Major", ScaleType::Hepatonic(HeptaScaleType::Major)),
-    ("Minor", "Natural Minor", ScaleType::Hepatonic(HeptaScaleType::Minor)),
+    (
+      "Major",
+      "Major",
+      ScaleType::Hepatonic(HeptaScaleType::Major),
+    ),
+    (
+      "Minor",
+      "Natural Minor",
+      ScaleType::Hepatonic(HeptaScaleType::Minor),
+    ),
     ("Chromatic", "Chromatic", ScaleType::Chromatic),
   ];
-  
+
   view! {
     <div class="space-y-2">
       <label class="block text-sm font-medium">{label_text}</label>
@@ -138,60 +117,49 @@ pub fn ScaleTypeSelector(
             "Major" => value.set(ScaleType::Hepatonic(HeptaScaleType::Major)),
             "Minor" => value.set(ScaleType::Hepatonic(HeptaScaleType::Minor)),
             "Chromatic" => value.set(ScaleType::Chromatic),
-            _ => {} // Ignore unknown values
+            _ => {}
           }
         }
       >
-        {
-          scale_options
-            .iter()
-            .map(|(option_value, display_text, scale_type)| {
-              let current_scale_type = *scale_type;
-              let option_val = *option_value;
-              let display_txt = *display_text;
-              
-              view! {
-                <option 
-                  value=option_val
-                  selected=move || {
-                    match (value.get(), current_scale_type) {
-                      (ScaleType::Hepatonic(HeptaScaleType::Major), ScaleType::Hepatonic(HeptaScaleType::Major)) => true,
-                      (ScaleType::Hepatonic(HeptaScaleType::Minor), ScaleType::Hepatonic(HeptaScaleType::Minor)) => true,
-                      (ScaleType::Chromatic, ScaleType::Chromatic) => true,
-                      _ => false,
-                    }
+        {scale_options
+          .iter()
+          .map(|(option_value, display_text, scale_type)| {
+            let current_scale_type = *scale_type;
+            let option_val = *option_value;
+            let display_txt = *display_text;
+
+            view! {
+              <option
+                value=option_val
+                selected=move || {
+                  match (value.get(), current_scale_type) {
+                    (
+                      ScaleType::Hepatonic(HeptaScaleType::Major),
+                      ScaleType::Hepatonic(HeptaScaleType::Major),
+                    ) => true,
+                    (
+                      ScaleType::Hepatonic(HeptaScaleType::Minor),
+                      ScaleType::Hepatonic(HeptaScaleType::Minor),
+                    ) => true,
+                    (ScaleType::Chromatic, ScaleType::Chromatic) => true,
+                    _ => false,
                   }
-                >
-                  {display_txt}
-                </option>
-              }
-            })
-            .collect_view()
-        }
+                }
+              >
+                {display_txt}
+              </option>
+            }
+          })
+          .collect_view()}
       </select>
     </div>
   }
 }
 
 /// A reusable numeric range selector component.
-/// 
+///
 /// Provides a labeled range input with dynamic min/max values.
 /// Commonly used for fret range selection.
-///
-/// # Example
-/// ```rust
-/// let start_fret = RwSignal::new(0_usize);
-/// let end_fret = RwSignal::new(7_usize);
-/// 
-/// view! {
-///   <NumericRangeSelector
-///     value=start_fret
-///     label="Start Fret"
-///     min=0.into()
-///     max=Signal::derive(move || end_fret.get().saturating_sub(1))
-///   />
-/// }
-/// ```
 #[component]
 pub fn NumericRangeSelector(
   /// The reactive signal containing the selected value
@@ -209,12 +177,10 @@ pub fn NumericRangeSelector(
   class: Option<String>,
 ) -> impl IntoView {
   let css_class = class.unwrap_or_else(|| "w-full".to_string());
-  
+
   view! {
     <div class="space-y-2">
-      <label class="block text-sm font-medium">
-        {label} ": " {move || value.get()}
-      </label>
+      <label class="block text-sm font-medium">{label} ": " {move || value.get()}</label>
       <input
         type="range"
         min=move || min.get()
@@ -224,7 +190,6 @@ pub fn NumericRangeSelector(
         on:input=move |ev| {
           let val = event_target_value(&ev);
           if let Ok(val) = val.parse::<usize>() {
-            // Add bounds checking
             let min_val = min.get();
             let max_val = max.get();
             if val >= min_val && val <= max_val {
