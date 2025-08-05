@@ -1,23 +1,24 @@
-use leptos::either::{Either, EitherOf3};
+use leptos::either::EitherOf3;
 use leptos::prelude::*;
 
 use crate::music::notes::Note;
-use crate::music::scales::{Scale, ScaleCreator, ScaleTrait, ScaleType};
 
-// #[component]
-// pub fn FretNoteButton(#[prop()] _note: Note) -> impl IntoView {}
+use crate::models::fretboard_model::{
+  FretCoord, FretState, FretStateColor, FretStringSignals, FretboardModel,
+};
 
-// We can change the return type of the Function to a struct that contains more info like is_blue_note, is_root_note, etc.
+#[derive(Clone, Copy, Debug)]
+pub struct FretClickEvent {
+  pub note: Note,
+  pub coord: FretCoord,
+  pub fret_state: FretState,
+}
 
 #[component]
 pub fn Fretboard(
-  #[prop(default = 6)] num_strings: u8,
-  #[prop(default = 15)] num_frets: u8,
-  root_note: ReadSignal<Note>,
-  scale_type: ReadSignal<ScaleType>,
+  #[prop()] fretboard: RwSignal<FretboardModel>,
+  on_fret_clicked: Callback<FretClickEvent>,
 ) -> impl IntoView {
-  let scale = Memo::new(move |_| Scale::new(root_note.get(), scale_type.get()));
-
   view! {
     <div class="relative py-16 px-14 bg-primary-shades trans">
       <div class="flex justify-center items-center trapezoid-shadow">
@@ -27,31 +28,24 @@ pub fn Fretboard(
         </div>
         <div class="relative flex-col trapezoid grow bg-[#917140] bg-fretboard">
           {move || {
+            let num_strings = fretboard.with(|fb| fb.get_num_strings());
             (0..num_strings)
               .rev()
               .map(|string_no| {
-                let string_note = match string_no {
-                  0 => Note::E,
-                  1 => Note::A,
-                  2 => Note::D,
-                  3 => Note::G,
-                  4 => Note::H,
-                  5 => Note::E,
-                  _ => Note::E,
-                };
-
+                let string_note = fretboard.with(|fb| fb.get_tuning()[string_no as usize]);
                 view! {
                   <FretboardString
                     string_no=string_no
-                    num_frets=num_frets
                     string_note=string_note
-                    scale=scale
+                    on_fret_clicked=on_fret_clicked
+                    fret_state_signals=fretboard.get().get_frets_of_string(string_no)
+                    num_frets=fretboard.with(|fb| fb.get_num_frets())
                   />
                 }
               })
               .collect_view()
-          }} // Fret markers row (positioned below the frets)
-          <FretboardDetails num_frets=num_frets />
+          }}
+          {move || view! { <FretboardDetails num_frets=fretboard.with(|fb| fb.get_num_frets()) /> }}
         </div>
       </div>
     </div>
@@ -61,30 +55,49 @@ pub fn Fretboard(
 #[component]
 fn FretboardString(
   #[prop()] string_no: u8,
-  #[prop()] num_frets: u8,
-  #[prop()] string_note: Note, // TODO change to Note trait, keep the depency clean
-  scale: Memo<Scale>,
+  #[prop()] string_note: Note,
+  #[prop()] fret_state_signals: FretStringSignals,
+  #[prop(into)] num_frets: ReadSignal<u8>,
+  on_fret_clicked: Callback<FretClickEvent>,
 ) -> impl IntoView {
   let string_strength = 2.0 + 0.5 * string_no as f64;
 
   view! {
     <div class="flex relative justify-start items-center w-full tilt">
-      <div class="relative z-30 justify-center items-center w-8 h-6 border-r-8 border-transparent">
-        <FretboardNote note=string_note scale />
+      <div class="flex relative z-30 justify-center items-center w-8 h-9 border-r-8 border-transparent">
+        <FretboardNote
+          note=string_note
+          coord=FretCoord {
+            string_idx: string_no,
+            fret_idx: 0,
+          }
+          fret_state_signal=Signal::derive(move || fret_state_signals.get()[0].get())
+          on_fret_clicked=on_fret_clicked
+        />
       </div>
 
       <div class="flex relative grow">
         <div
-          class="absolute right-0 -left-60 top-1/2 z-20 -translate-y-1/2 drop-shadow-[0_2px_2px_rgba(0,0,0,0.6)] bg-[repeating-linear-gradient(45deg,_#dddddd,_#555555_2px,_#333333_2px)]"
+          class="absolute right-0 -left-60 top-1/2 z-20 -translate-y-1/2 pointer-events-none drop-shadow-[0_2px_2px_rgba(0,0,0,0.6)] bg-[repeating-linear-gradient(45deg,_#dddddd,_#555555_2px,_#333333_2px)]"
           style:height=move || format!("{}px", string_strength)
         ></div>
 
         {move || {
-          (1..=num_frets)
+          let max_idx = std::cmp::min(num_frets.get() as usize, fret_state_signals.get().len() - 1);
+          (1..=max_idx)
             .map(|fret_no| {
+
               view! {
-                <div class="flex relative justify-center items-center w-full h-12 text-center bg-transparent grow fretbar-container">
-                  <FretboardNote note=string_note.add_steps(fret_no as usize) scale />
+                <div class="flex relative justify-center items-center mx-3 w-8 h-12 text-center bg-transparent grow fretbar-container">
+                  <FretboardNote
+                    note=string_note.add_steps(fret_no as usize)
+                    coord=FretCoord {
+                      string_idx: string_no,
+                      fret_idx: fret_no as u8,
+                    }
+                    fret_state_signal=fret_state_signals.get()[fret_no]
+                    on_fret_clicked=on_fret_clicked
+                  />
                 </div>
               }
             })
@@ -96,38 +109,75 @@ fn FretboardString(
 }
 
 #[component]
-fn FretboardNote(#[prop()] note: Note, #[prop()] scale: Memo<Scale>) -> impl IntoView {
-  move || {
-    if scale.get().contains_note(note) {
-      Either::Left(view! {
-        <span class="relative z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
-          {move || {
-            if scale.get().root_note() == note {
+fn FretboardNote(
+  #[prop()] note: Note,
+  #[prop()] coord: FretCoord,
+  #[prop(into)] fret_state_signal: Signal<FretState>,
+  on_fret_clicked: Callback<FretClickEvent>,
+) -> impl IntoView {
+  // Toggle function to demonstrate interaction
+  let on_click = move |_| {
+    on_fret_clicked.run(FretClickEvent {
+      note,
+      coord,
+      fret_state: fret_state_signal.get(),
+    });
+  };
+
+  // IDEA: maybe we can support animations when we make the notes appear on the fretboard
+
+  view! {
+    <div
+      on:click=on_click
+      class="flex flex-grow justify-center items-center h-3/4 text-center rounded-md cursor-pointer hover:border-2 hover:border-slate-400"
+    >
+      {move || {
+        match fret_state_signal.get() {
+          FretState::Colored(color) => {
+            let bg_css_str = match color {
+              FretStateColor::Green => "bg-green-500",
+              FretStateColor::Red => "bg-red-500",
+              FretStateColor::Blue => "bg-blue-500",
+            };
+            EitherOf3::A(
               view! {
-                <span class="absolute inset-0 z-10 w-full h-full bg-red-500 rounded-full opacity-50"></span>
-              }
-            } else {
+                <span class="relative z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
+                  <span class=move || {
+                    format!(
+                      "absolute inset-0 z-10 w-full h-full rounded-full opacity-50 {}",
+                      bg_css_str,
+                    )
+                  }></span>
+                  <span class="relative z-20">{note.to_string()}</span>
+                </span>
+              },
+            )
+          }
+          FretState::Normal => {
+            EitherOf3::B(
               view! {
-                <span class="absolute inset-0 z-10 w-full h-full rounded-full opacity-20 bg-slate-400"></span>
-              }
-            }
-          }} <span class="relative z-20">{note.to_string()}</span>
-        </span>
-      })
-    } else {
-      Either::Right(view! { <span></span> })
-    }
+                <span class="relative z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
+                  <span class="absolute inset-0 z-10 w-full h-full rounded-full opacity-20 bg-slate-400"></span>
+                  <span class="relative z-20">{note.to_string()}</span>
+                </span>
+              },
+            )
+          }
+          _ => EitherOf3::C(view! { <span></span> }),
+        }
+      }}
+    </div>
   }
 }
 
 #[component]
-pub fn FretboardDetails(#[prop()] num_frets: u8) -> impl IntoView {
+pub fn FretboardDetails(#[prop()] num_frets: ReadSignal<u8>) -> impl IntoView {
   view! {
     <div class="flex absolute justify-start w-full top-[48%] -z-10">
       // First fret/String guide details
       <div class="flex relative -top-32 w-8 h-80 -z-10 bg-[linear-gradient(90deg,_#000_20%,_#333333_100%,_#a8a499)] border-r-[8px] [border-image:linear-gradient(0.25turn,#aaaaaa,#ffffff,#aaaaaa)_1_100%]"></div>
       {move || {
-        (1..=num_frets)
+        (1..=num_frets.get())
           .map(|fret_no| {
             let has_marker = [3, 5, 7, 9, 15, 17, 19, 21].contains(&(fret_no % 12));
             let is_double = fret_no % 12 == 0;

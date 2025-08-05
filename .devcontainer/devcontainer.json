@@ -1,0 +1,45 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/rust
+{
+	"name": "Rust + Leptos Devcontainer",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"context": "."
+	},
+	"features": {
+		"ghcr.io/devcontainers/features/node:1": {
+			"version": "lts"
+		}
+	},
+
+	// Use 'mounts' to make the cargo cache persistent in a Docker Volume.
+	"mounts": [
+		// Cache for Cargo dependencies
+		"source=devcontainer-cargo-cache,target=/usr/local/cargo,type=volume",
+		// Cache for Rust build artifacts
+		"source=devcontainer-rust-target,target=/workspaces/leptos_stuff/target,type=volume"
+	],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "rustc --version && cargo --version && trunk --version",
+
+	// Configure tool-specific properties.
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"rust-lang.rust-analyzer",
+				"dbaeumer.vscode-eslint",
+				"bradlc.vscode-tailwindcss",
+				"eamodio.gitlens",
+				"GitHub.copilot",
+				"GitHub.copilot-chat",
+				"tamasfe.even-better-toml",
+				"mhutchie.git-graph",
+				"donjayamanne.githistory"
+			]
+		}
+	},
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	"remoteUser": "vscode"
+}

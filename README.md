@@ -1,96 +1,114 @@
-# Rust guitar app
+# Rust Guitar App
 
-This project is currently mostly for learning rust and leptos.
+A guitar learning companion app built with Rust and Leptos. This project aims to create a free and open-source guitar practice tool with interactive SVG-based fretboard visualizations.
 
-The idea is to create a guitar learning companion app. For learning and exercising on the guitar.
+## Current Status
 
-There are many guitar practice apps, but so far I know of none that are truly free and open source. So i want to build something like that.
+The project has working SVG fretboard components and scale visualization. Currently migrating from legacy components to the new SVG system.
 
+### Features
 
-## Current status: Early phase
+- **SVG Fretboard System** - Scalable and interactive fretboard display
+- **Scale Visualization** - Display scales with different note highlighting  
+- **Configurable** - Support for different instruments and fret ranges
 
-This project is in an early phase and is a bit chaotic currently.
+### SVG FretboardArchitecture
 
-### Current Problems / TODOs
+The SVG fretboard system is built in layers:
 
-- The git branches are a bit chaotic
-  - doing multiple different things on different feature branches
-  - gitlab issues do not map to branches clearly
-  - I will realign all this rather soon hopefully
-- Dead code warnings
-  - I wanted to overengineer a music library and not everything is used yet 
-  - The warnings hurt me too, trust me
-
-
-
-## Prerequisites
-
-```sh
-rustup target add wasm32-unknown-unknown
-
-# Trunk is a WASM web application bundler for Rust
-cargo install trunk
-# For formatting the leptos view! macro
-cargo install leptosfmt
+```mermaid
+graph TB
+    A["SvgFretboardScaleDisplay<br/>(Musical Scale visualization)"] --> B["SvgFretboardWithNotes<br/>(Note-aware fretboard)"]
+    B --> C["SvgFretboard<br/>(Base visual component)"]
+    
+    style A fill:#e1f5fe
+    style B fill:#f3e5f5  
+    style C fill:#fff3e0
 ```
 
-Tailwind CSS IntelliSense VS Code plugin problem: You might have to downgrade to v0.10.5. See: https://github.com/tailwindlabs/tailwindcss-intellisense/issues/988
+Each layer adds functionality while maintaining the same visual output.
 
-## Usage
+> **Documentation Note:** Consider using the [simple-mermaid](https://docs.rs/simple-mermaid/latest/simple_mermaid/) crate for adding [Mermaid](https://mermaid-js.github.io/mermaid/#/) diagrams to Rust docs for better architectural overviews.
 
-`trunk serve --open`
+## Getting Started
+
+### VS Code Dev Container (Recommended)
+
+1. **Prerequisites:** VS Code, Docker, Dev Containers extension
+2. **Setup:** 
+   ```bash
+   git clone https://github.com/your-username/leptos_stuff.git
+   cd leptos_stuff
+   code .
+   ```
+3. **Launch:** `Ctrl+Shift+P` → "Dev Containers: Rebuild and Reopen in Container"
+4. **Run:** `RUSTFLAGS='--cfg getrandom_backend="wasm_js"' trunk serve --open`
+
+### Manual Setup
+
+```bash
+# Install Rust and tools
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+rustup target add wasm32-unknown-unknown
+cargo install trunk leptosfmt
+
+# Install Node.js and Tailwind
+npm install -g tailwindcss
+
+# Run the app
+RUSTFLAGS='--cfg getrandom_backend="wasm_js"' trunk serve --open
+```
+
+## Current Status
+
+### Working Features
+- SVG fretboard visualization
+- Scale display with note highlighting
+- Interactive configuration  
+- Range-based fret selection (`0..=5` syntax)
 
 
-## Feature Ideas and Status
 
-### Fretboard map
+#### (Short term) tasks
 
-Feature that is currently being worked on.
+- Switch between german and english note system
 
-Ideas for execrises / features:
-
-- Find notes on the fretboard
-- find interval of note
-- Show scales
-  - Triads
-  - Modes
-
-### Circle of Fifths
-
-
-Display the circle of fifths. 
-The first real learning exercise would be to have to fill an empty circle of fifths.
-Being given scales and having to drag them in the right spot on the circle of fifths.
-Increasing difficulty could be that the CoF has to be filled out in a given order.
-
-Drawing this with CSS is probably very tricky. Using a SVG would be probably good.
 
 ### Future Ideas
 
-- Tuner 
-  - Audio input?
-- Metronome
-  - Timing issues?
-  - Being able to configure a simple drum beat
-- Ear training
-  - Have to look into playing audio
-- Chord book
-  - indication on how well the chord is known
-- Chords in a key
-- MIDI / Keyboard input for playing notes
-  - Like when a scale is selected using keys 1 to 7 to play scale degress
+#### Fretboard Training Exercises
+- Find notes on the fretboard
+- Find interval of note
+- Find scales
+- Find chord shapes (relative to a given note)
+- Show scales (triads, modes)
 
-(*cough* scope creep)
+#### Circle of Fifths
+Interactive circle of fifths with drag & drop exercises:
+- Fill empty circle of fifths
+- Place scales in correct positions
+- Increasing difficulty with specific ordering requirements
 
-## Comparisons / Possible inspirations
+#### Advanced Features
+- **Tuner** - Audio input for tuning assistance
+- **Metronome** - Configurable drum beats and timing
+- **Ear training** - Audio-based exercises
+- **Chord book** - Progress tracking for chord knowledge
+- **Chords in a key** - Key-based chord relationships
+- **MIDI/Keyboard input** - Use keys 1-7 to play scale degrees
 
-[Code pen fretboard example](https://codepen.io/DreySkee/pen/bddpqM)
-[JS fretboard](https://github.com/metaescape/js-fretboard)
-[fretmap](https://fretmap.app/)
+## References
 
-[Fretboard with css tutorial](https://www.youtube.com/watch?v=C6VLedW5Dwk&list=PLXAhCH9FJ8zViqdqhsSP7iyCrVDoUGb3P&index=2)
+Inspiration and comparisons:
+- [CodePen fretboard example](https://codepen.io/DreySkee/pen/bddpqM)
+- [JS fretboard](https://github.com/metaescape/js-fretboard) 
+- [fretmap.app](https://fretmap.app/)
+- [Fretboard CSS tutorial](https://www.youtube.com/watch?v=C6VLedW5Dwk&list=PLXAhCH9FJ8zViqdqhsSP7iyCrVDoUGb3P&index=2)
+- [Fretonomy](https://www.fretonomy.com/)
 
-## Tech Stack Ideas
+Tech stack ideas:
+- [tailwindcss-animated](https://github.com/new-data-services/tailwindcss-animated) - for enhanced animations
 
-https://github.com/new-data-services/tailwindcss-animated
+## License
 
+GNU General Public License v3.0 - see [LICENSE](./LICENSE)

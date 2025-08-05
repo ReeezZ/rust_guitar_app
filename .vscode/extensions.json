@@ -2,7 +2,8 @@
   "recommendations": [
     "bradlc.vscode-tailwindcss",
     "rust-lang.rust-analyzer",
-    "dustypomerleau.rust-syntax",
-    "tamasfe.even-better-toml"
+    "tamasfe.even-better-toml",
+    "bierner.markdown-mermaid",
+    "bpruitt-goddard.mermaid-markdown-syntax-highlighting"
   ]
 }
