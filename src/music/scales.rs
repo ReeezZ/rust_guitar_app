@@ -37,7 +37,7 @@ impl ScaleType {
   }
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum Scale {
   Heptatonic(HeptaScaleImpl),
   Chromatic,
@@ -46,26 +46,19 @@ pub enum Scale {
   // blues (8 notes)
 }
 
-pub trait ScaleCreator {
+pub trait ScaleTrait: ToString {
+  fn contains_note(&self, note: Note) -> bool;
+  fn root_note(&self) -> Option<Note>;
   fn new(root_note: Note, scale_type: ScaleType) -> Scale;
 }
 
-impl ScaleCreator for Scale {
-  fn new(root_note: Note, scale_type: ScaleType) -> Scale {
-    match scale_type {
-      ScaleType::Hepatonic(hepta_scale_type) => {
-        let scale = HeptaScaleImpl::new(root_note, hepta_scale_type);
-        Scale::Heptatonic(scale)
-      }
-      ScaleType::Chromatic => Scale::Chromatic,
+impl ToString for Scale {
+  fn to_string(&self) -> String {
+    match self {
+      Scale::Heptatonic(scale) => scale.to_string(),
+      Scale::Chromatic => "Chromatic".to_string(),
     }
   }
-}
-
-pub trait ScaleTrait {
-  fn contains_note(&self, note: Note) -> bool;
-  fn root_note(&self) -> Note;
-  fn to_string(&self) -> String;
 }
 
 impl ScaleTrait for Scale {
@@ -76,18 +69,21 @@ impl ScaleTrait for Scale {
     }
   }
 
-  fn root_note(&self) -> Note {
+  fn root_note(&self) -> Option<Note> {
     match self {
-      Scale::Heptatonic(scale) => scale.root_note(),
+      Scale::Heptatonic(scale) => Some(scale.root_note()),
       // chromatic does not really have a root note, so we just return C
-      Scale::Chromatic => Note::C,
+      Scale::Chromatic => None,
     }
   }
 
-  fn to_string(&self) -> String {
-    match self {
-      Scale::Heptatonic(scale) => scale.to_string(),
-      Scale::Chromatic => "Chromatic".to_string(),
+  fn new(root_note: Note, scale_type: ScaleType) -> Scale {
+    match scale_type {
+      ScaleType::Hepatonic(hepta_scale_type) => {
+        let scale = HeptaScaleImpl::new(root_note, hepta_scale_type);
+        Scale::Heptatonic(scale)
+      }
+      ScaleType::Chromatic => Scale::Chromatic,
     }
   }
 }

@@ -35,22 +35,32 @@ pub fn NavbarLinks() -> impl IntoView {
       </li>
       <li>
         <a
-          href="/guitar_v1"
+          href="/fretboard_trainer"
           class=move || {
-            if pathname() == "/guitar_v1" { "nav-link active" } else { "nav-link" }
+            if pathname() == "/fretboard_trainer" { "nav-link active" } else { "nav-link" }
           }
         >
-          <span>Guitar V1</span>
+          <span>Fretboard Trainer</span>
         </a>
       </li>
       <li>
         <a
-          href="/guitar_v2"
+          href="/svg_fretboard"
           class=move || {
-            if pathname() == "/guitar_v2" { "nav-link active" } else { "nav-link" }
+            if pathname() == "/svg_fretboard" { "nav-link active" } else { "nav-link" }
           }
         >
-          <span>Guitar V2</span>
+          <span>SVG Fretboard</span>
+        </a>
+      </li>
+      <li>
+        <a
+          href="/svg_fretboard_scale"
+          class=move || {
+            if pathname() == "/svg_fretboard_scale" { "nav-link active" } else { "nav-link" }
+          }
+        >
+          <span>SVG Scale Display</span>
         </a>
       </li>
       <li>
