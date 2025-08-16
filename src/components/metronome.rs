@@ -2,11 +2,18 @@ use leptos::prelude::*;
 use leptos_use::use_interval_fn;
 use wasm_bindgen::prelude::*;
 use web_sys::{AudioContext, OscillatorType};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum MetronomeState {
   Stopped,
   Running,
+}
+
+// Thread-local AudioContext for the metronome
+thread_local! {
+  static AUDIO_CONTEXT: RefCell<Option<Rc<AudioContext>>> = const { RefCell::new(None) };
 }
 
 #[component]
@@ -33,13 +40,21 @@ pub fn Metronome(
   // Metronome tick function
   let tick = move || {
     if metronome_state.get() == MetronomeState::Running {
-      // Update beat counter (1-4 for 4/4 time) FIRST
-      set_current_beat.update(|beat| {
-        *beat = if *beat >= 4 { 1 } else { *beat + 1 };
-      });
+      // Compute next beat (1-4 for 4/4 time)
+      let next_beat = {
+        let beat = current_beat.get();
+        if beat >= 4 {
+          1
+        } else {
+          beat + 1
+        }
+      };
 
-      // Then play sound for the NEW beat
-      play_click(current_beat.get() == 1);
+      // Play sound for the NEW beat
+      play_click(next_beat == 1);
+
+      // Update beat counter
+      set_current_beat.set(next_beat);
     }
   };
 
@@ -163,19 +178,27 @@ pub fn Metronome(
   }
 }
 
-/// Play a click sound using Web Audio API
+/// Play a click sound using Web Audio API with shared AudioContext
 fn play_click(is_accent: bool) {
-  let _ = (|| -> Result<(), JsValue> {
-    // Create fresh audio context for each click to avoid storing it
-    let ctx = AudioContext::new()?;
+  let _ = AUDIO_CONTEXT.with(|ctx| -> Result<(), JsValue> {
+    // Get or create the AudioContext without any cloning
+    let mut ctx_ref = ctx.borrow_mut();
+    let audio_ctx = match ctx_ref.as_ref() {
+      Some(context) => context.as_ref(),
+      None => {
+        let new_context = Rc::new(AudioContext::new()?);
+        *ctx_ref = Some(new_context.clone());
+        ctx_ref.as_ref().unwrap().as_ref()
+      }
+    };
 
     // Create oscillator for the click sound
-    let oscillator = ctx.create_oscillator()?;
-    let gain = ctx.create_gain()?;
+    let oscillator = audio_ctx.create_oscillator()?;
+    let gain = audio_ctx.create_gain()?;
 
     // Connect audio nodes: oscillator -> gain -> destination
     oscillator.connect_with_audio_node(&gain)?;
-    gain.connect_with_audio_node(&ctx.destination())?;
+    gain.connect_with_audio_node(&audio_ctx.destination())?;
 
     // Configure the click sound
     if is_accent {
@@ -191,7 +214,7 @@ fn play_click(is_accent: bool) {
     oscillator.set_type(OscillatorType::Square);
 
     // Start and stop the oscillator for a short click
-    let current_time = ctx.current_time();
+    let current_time = audio_ctx.current_time();
     oscillator.start_with_when(current_time)?;
     oscillator.stop_with_when(current_time + 0.1)?; // 100ms click
 
@@ -201,5 +224,5 @@ fn play_click(is_accent: bool) {
       .exponential_ramp_to_value_at_time(0.01, current_time + 0.1)?;
 
     Ok(())
-  })();
+  });
 }
