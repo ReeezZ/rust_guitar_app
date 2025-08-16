@@ -3,7 +3,7 @@ use crate::music::notes::Note;
 use leptos::prelude::*;
 
 /// Configuration struct for musical fretboard visualization components.
-/// 
+///
 /// This consolidates visual and musical properties for fretboard components
 /// that display notes, scales, chords, or other musical information.
 /// It's specifically designed for components like SvgFretboardScaleDisplay.
@@ -12,7 +12,7 @@ use leptos::prelude::*;
 /// ```rust
 /// use rust_guitar_app::components::musical_fretboard_config::MusicalFretboardConfig;
 /// use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
-/// 
+///
 /// let config = MusicalFretboardConfig::default()
 ///   .with_visual(FretboardVisualConfig::seven_string());
 /// ```
@@ -29,12 +29,12 @@ impl Default for MusicalFretboardConfig {
     Self {
       visual: FretboardVisualConfig::default(),
       tuning: vec![
-        Note::E,  // 6th string (lowest)
-        Note::A,  // 5th string
-        Note::D,  // 4th string
-        Note::G,  // 3rd string
-        Note::B,  // 2nd string (B in standard notation)
-        Note::E,  // 1st string (highest)
+        Note::E, // 6th string (lowest)
+        Note::A, // 5th string
+        Note::D, // 4th string
+        Note::G, // 3rd string
+        Note::B, // 2nd string (B in standard notation)
+        Note::E, // 1st string (highest)
       ],
     }
   }
@@ -105,13 +105,13 @@ impl MusicalFretboardConfig {
     Self::default()
       .with_visual(FretboardVisualConfig::seven_string())
       .with_tuning(vec![
-        Note::B,  // 7th string (low B)
-        Note::E,  // 6th string
-        Note::A,  // 5th string
-        Note::D,  // 4th string
-        Note::G,  // 3rd string
-        Note::B,  // 2nd string
-        Note::E,  // 1st string
+        Note::B, // 7th string (low B)
+        Note::E, // 6th string
+        Note::A, // 5th string
+        Note::D, // 4th string
+        Note::G, // 3rd string
+        Note::B, // 2nd string
+        Note::E, // 1st string
       ])
   }
 
@@ -120,24 +120,23 @@ impl MusicalFretboardConfig {
     Self::default()
       .with_visual(FretboardVisualConfig::bass_guitar())
       .with_tuning(vec![
-        Note::E,  // 4th string (low E)
-        Note::A,  // 3rd string
-        Note::D,  // 2nd string
-        Note::G,  // 1st string
+        Note::E, // 4th string (low E)
+        Note::A, // 3rd string
+        Note::D, // 2nd string
+        Note::G, // 1st string
       ])
   }
 
   /// Preset for drop D tuning
   pub fn drop_d_tuning() -> Self {
-    Self::default()
-      .with_tuning(vec![
-        Note::D,  // 6th string (dropped to D)
-        Note::A,  // 5th string
-        Note::D,  // 4th string
-        Note::G,  // 3rd string
-        Note::B,  // 2nd string
-        Note::E,  // 1st string
-      ])
+    Self::default().with_tuning(vec![
+      Note::D, // 6th string (dropped to D)
+      Note::A, // 5th string
+      Note::D, // 4th string
+      Note::G, // 3rd string
+      Note::B, // 2nd string
+      Note::E, // 1st string
+    ])
   }
 }
 

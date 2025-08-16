@@ -5,9 +5,9 @@ use leptos_router::{components::*, path};
 use crate::{
   components::navbar::Navbar,
   pages::{
+    exercise_detail::ExerciseDetailPage, exercises::ExercisesPage,
     fretboard_trainer::FretboardTrainer, home::Home, not_found::NotFound,
     svg_fretboard::SvgFretboardPage, svg_fretboard_scale::SvgFretboardScalePage,
-    exercises::ExercisesPage, exercise_detail::ExerciseDetailPage,
   },
 };
 #[component]

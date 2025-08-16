@@ -130,7 +130,7 @@ impl FretboardModel {
   pub fn standard_tuning() -> Vec<Note> {
     // Standard guitar tuning from thinnest to thickest string (top to bottom on fretboard display)
     // String 0 (top): High E (1st string)
-    // String 1: B (2nd string)  
+    // String 1: B (2nd string)
     // String 2: G (3rd string)
     // String 3: D (4th string)
     // String 4: A (5th string)

@@ -18,7 +18,7 @@ fn random_interval() -> Interval {
 }
 
 /// Fretboard trainer page for interval training using SVG components.
-/// 
+///
 /// This trainer helps users learn intervals by showing a reference note and asking
 /// them to find the specified interval. Uses the modern SVG overlay approach for
 /// clean separation between game logic and visual presentation.
@@ -56,13 +56,13 @@ pub fn FretboardTrainer() -> impl IntoView {
     fretboard_model.with(|model| {
       let clicked_note = model.note_from_fret(evt.coord);
       let target_note = current_interval.get().of(current_note.get());
-      
+
       if clicked_note == target_note {
         // Correct answer!
         set_num_correct.update(|n| *n += 1);
         set_current_interval.set(random_interval());
         set_error_text.set("".to_string());
-        
+
         // Clear error highlights and set new reference note
         set_error_coords.set(vec![]);
         set_error_note_names.set(vec![]);
@@ -77,7 +77,7 @@ pub fn FretboardTrainer() -> impl IntoView {
           set_error_text.set("Incorrect!".to_string());
         }
         set_num_incorrect.update(|n| *n += 1);
-        
+
         // Add to error highlights
         set_error_coords.update(|coords| {
           if !coords.contains(&evt.coord) {
@@ -115,7 +115,7 @@ pub fn FretboardTrainer() -> impl IntoView {
         <h1 class="text-2xl font-bold">"Fretboard Trainer"</h1>
         <p>"Train intervals of notes"</p>
       </div>
-      
+
       <SvgFretboardTrainer
         reference_note=reference_note_coord.into()
         reference_note_name=reference_note_name.into()
@@ -123,14 +123,14 @@ pub fn FretboardTrainer() -> impl IntoView {
         error_note_names=error_note_names.into()
         on_fret_clicked=on_fret_clicked
       />
-      
+
       <div class="text-center">
         <p class="text-lg">
           "Looking for " <b>{move || format!("{} ", interval_str())}</b>
           "of " <b>{move || format!("{} ", note_str())}</b>
         </p>
       </div>
-      
+
       <div class="flex flex-col items-center space-y-2">
         <div class="grid grid-cols-2 gap-4 text-center">
           <div>
@@ -140,16 +140,16 @@ pub fn FretboardTrainer() -> impl IntoView {
             <p class="text-red-600 font-semibold">{move || format!("Incorrect: {}", num_incorrect.get())}</p>
           </div>
         </div>
-        
+
         <p class="text-sm text-gray-600">
           {move || format!("Total answers: {}", num_correct.get() + num_incorrect.get())}
         </p>
-        
+
         <p class="font-semibold">
           {move || format!("Success rate: {}%", success_rate())}
         </p>
       </div>
-      
+
       <div class="overflow-hidden min-h-[2rem] flex justify-center">
         {move || {
           if !error_text.get().is_empty() {

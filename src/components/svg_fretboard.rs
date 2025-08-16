@@ -261,7 +261,11 @@ fn FretboardOverlays(
 ) -> impl IntoView {
   let overlay_left = if start_fret > min_fret {
     // Calculate the playable area for start_fret (the space where you press the string)
-    let x_prev = if start_fret == 0 { 0.0 } else { positions[(start_fret - 1).max(0)] };
+    let x_prev = if start_fret == 0 {
+      0.0
+    } else {
+      positions[(start_fret - 1).max(0)]
+    };
     let x_curr = positions[start_fret];
     // End overlay at the beginning of the playable area, not at the fret line
     let playable_area_start = (x_prev + x_curr) / 2.0 - (x_curr - x_prev) / 4.0;
@@ -458,7 +462,7 @@ pub fn SvgFretboard(
 ) -> impl IntoView {
   // Use provided config signal or create one with default
   let config_signal = config.unwrap_or_else(|| Signal::derive(|| FretboardVisualConfig::default()));
-  
+
   // Create reactive signals from config values - using clone since Signal is Copy
   let num_strings = Signal::derive({
     let config_signal = config_signal;
