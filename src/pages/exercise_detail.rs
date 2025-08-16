@@ -1,5 +1,5 @@
 use crate::components::exercises::{ExerciseForm, FormMode};
-use crate::components::practice_timer::PracticeTimer;
+use crate::components::practice_session::PracticeSession;
 use crate::models::exercise::Exercise;
 use crate::models::repository::{get_exercise_repository, ExerciseRepository};
 use leptos::prelude::*;
@@ -186,10 +186,10 @@ pub fn ExerciseDetail() -> impl IntoView {
                                   })}
                               </div>
 
-                              // Practice Timer Section
+                              // Practice Session Section
                               <div class="bg-gray-50 p-6 rounded-lg">
-                                  <h2 class="text-xl font-semibold mb-4">Practice Timer</h2>
-                                  <PracticeTimer target_time={std::time::Duration::from_secs(15 * 60)} />
+                                  <h2 class="text-xl font-semibold mb-4">"Practice Session"</h2>
+                                  <PracticeSession target_time={std::time::Duration::from_secs(15 * 60)} />
                               </div>
                           </div>
                       }.into_any()

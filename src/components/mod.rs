@@ -1,12 +1,14 @@
-pub mod exercise_manager;
 pub mod exercises;
+pub mod exercise_manager;
 pub mod fret_range_selector;
 pub mod fretboard;
 pub mod fretboard_config_examples;
 pub mod fretboard_visual_config;
+pub mod metronome;
 pub mod music_selectors;
 pub mod musical_fretboard_config;
 pub mod navbar;
+pub mod practice_session;
 pub mod practice_timer;
 pub mod svg_fretboard;
 pub mod svg_fretboard_scale_display;
