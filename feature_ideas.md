@@ -47,30 +47,6 @@ Build a **personal guitar practice tracker** that makes it easy to log practice 
   - Local storage persistence
   - Simple session history list
 
-#### Data Models
-```rust
-enum ExerciseType {
-    Scale { key: Option<Note>, position: Option<FretRange> },
-    Triad { key: Option<Note>, position: Option<FretRange> },
-    Technique { description: String },
-    Song { key: Option<Note>, name: String },
-}
-
-struct Exercise {
-    id: Uuid,
-    name: String,
-    exercise_type: ExerciseType,
-    target_duration: Option<Duration>,
-}
-
-struct PracticeSession {
-    id: Uuid,
-    exercise_id: Uuid,
-    start_time: DateTime<Utc>,
-    duration: Duration,
-    metronome_bpm: Option<u32>,
-}
-```
 
 #### UI Components
 - Exercise list/selector
@@ -80,35 +56,34 @@ struct PracticeSession {
 
 ---
 
-### Phase 2: Enhanced UX & Fretboard Integration
-**Goal:** Improve usability and integrate with existing fretboard visualization
+### Phase 2A: Metronome Polish
+**Goal:** Improve metronome functionality and user experience
 
-#### Enhanced Features
-- **Improved Metronome**
-  - Multiple sound options
-  - Accent on beat 1
-  - Mid-session BPM adjustment with tracking
-  
-- **Fretboard Integration**
-  - Show relevant fretboard visualization during practice
-  - Solve layout challenges (compact fretboard view?)
-  - Scale/triad visualization for relevant exercises
-  
-- **Better Exercise Management**
-  - Exercise templates/presets
-  - Quick exercise creation
-  - Exercise categories and filtering
-  
-- **Improved Timer**
-  - Multiple timing modes
-  - Break reminders
-  - Session quality rating (1-5 stars)
+#### Enhanced Metronome Features
+- **Multiple sound options** - Different click/beep sounds
+- **Accent on beat 1** - Stronger first beat in 4/4 time
+- **Mid-session BPM adjustment** - Change tempo during practice with tracking
+- **Visual improvements** - Better beat indicator visualization
 
-#### UX Improvements
-- Better responsive design
-- Keyboard shortcuts
-- Practice flow optimizations
-- Visual polish
+---
+
+### Phase 2B: Fretboard Integration  
+**Goal:** Integrate existing fretboard system with practice sessions
+
+#### Fretboard Features
+- **Compact fretboard view** - Solve current layout space issues
+- **Exercise-specific visualization** - Show relevant scales/triads during practice
+- **Position integration** - Display selected fret ranges clearly
+
+---
+
+### Phase 2C: Exercise Management Polish
+**Goal:** Improve exercise creation and organization
+
+#### Exercise Management Features
+- **Exercise templates/presets** - Common scales, triads, techniques
+- **Quick exercise creation** - Streamlined creation workflow
+- **Exercise categories** - Basic grouping and filtering
 
 ---
 
@@ -117,10 +92,10 @@ struct PracticeSession {
 
 #### Backend Features
 - **Data Persistence**
-  - Backend API for practice data
-  - User accounts (simple, no social features)
-  - Data migration from local storage
-  - Backup/restore capabilities
+  - Backend API using Axum framework
+  - Simple password-protected access (no public registration)
+  - Self-hosted solution with SQLite or similar simple database
+  - Optional: Friend accounts for sharing on one backend instance instances
   
 - **Basic Analytics**
   - Practice consistency tracking
@@ -130,8 +105,9 @@ struct PracticeSession {
 
 #### Architecture Notes
 - Design local storage abstraction that can be swapped for backend
-- Consider SQLite for backend (simple, reliable)
-- API should support offline-first approach
+- Research simple self-hosting options (Axum + database choice)
+- GDPR considerations for friend accounts (research needed)
+- Data migration likely not needed (minimal local data expected)
 
 ---
 
@@ -189,13 +165,11 @@ struct PracticeSession {
   - Tempo ramping (gradual speed increases)
   - Subdivision options (eighth notes, triplets)
   
+- **Drum Machine** - Configurable drum patterns instead of basic metronome
 - **Audio Recording** - Record practice sessions for review
-- **Click Tracks** - Export metronome tracks for external use
 
 ### Social & Sharing Features
-- **Practice Sharing** - Share routines with others
-- **Progress Sharing** - Social media integration
-- **Teacher Dashboard** - Track student progress (way future)
+- **Practice Sharing** - Share/export routines with others
 
 ### Advanced Analytics
 - **Detailed Metrics**
@@ -229,13 +203,32 @@ struct PracticeSession {
 1. **Exercise Type System** - Use Rust enums for type safety and extensibility
 2. **Storage Abstraction** - Abstract storage layer for easy local→backend migration
 3. **Component Reuse** - Leverage existing SVG fretboard system
-4. **Offline-First** - Work without internet, sync when available
+4. **Offline-First** - Work without internet, sync when available (nice to have)
 
 ### Development Principles
 - **Iterative Development** - Each phase should be fully functional
 - **User-Driven Features** - Only add complexity when proven needed
 - **Performance Focus** - Smooth timer/metronome performance critical
-- **Mobile-Ready** - Design with mobile usage in mind from start
+- **Desktop-First Design** - Primary focus on desktop use, mobile support added later if needed
+
+---
+
+## Technical Challenges & Risks
+
+### Known Technical Risks
+- **Web Audio API Complexity** - Metronome timing precision is notoriously difficult in browsers
+- **Timer Accuracy** - Browser tabs throttle timers when not active, affecting practice session tracking
+- **Fretboard Layout Integration** - Current fretboard "takes too much space" - layout challenges
+- **Storage Abstraction** - Abstracting local→backend migration may be more complex than anticipated
+- **Audio Latency** - Web Audio API latency may affect metronome usability
+- **Browser Compatibility** - Web Audio API support varies across browsers/devices
+
+### Mitigation Strategies
+- Start with simple timer/metronome, iterate based on real usage
+- Test timer behavior extensively in background tabs
+- Design fretboard integration as optional/collapsible
+- Keep storage abstraction simple initially
+- Research Web Audio API best practices early
 
 ---
 
@@ -247,44 +240,32 @@ struct PracticeSession {
 - Data persists across browser sessions
 - Basic history view shows past practice
 
-### Phase 2 Success  
-- Fretboard integration enhances practice experience
-- Improved metronome feels professional
-- Overall UX is smooth and pleasant
+### Phase 2A Success (Metronome Polish)
+- Metronome feels professional and accurate
+- Multiple sound options work well
+- BPM changes during practice are tracked properly
+
+### Phase 2B Success (Fretboard Integration)
+- Fretboard display enhances practice experience
+- Layout issues resolved (compact, usable design)
+- Exercise-specific visualization works smoothly
+
+### Phase 2C Success (Exercise Management)
+- Exercise creation is quick and intuitive
+- Templates speed up common exercise setup
+- Organization features reduce friction
 
 ### Phase 3 Success
-- Backend migration seamless
+- Backend migration is seamless
 - Basic analytics provide motivational insights
 - Data is safe and accessible across devices
+- Self-hosting setup is straightforward
 
 ### Phase 4 Success
 - Routine management solves real workflow problems
 - App becomes primary practice tracking tool
 - UX clearly superior to existing solutions
 
----
-
-## Migration Plan (GitHub Issues/Milestones)
-
-When moving to GitHub, this document will inform:
-
-### Milestones
-- **Phase 1: Foundation** - All core features working locally
-- **Phase 2: Enhanced UX** - Fretboard integration + UX polish  
-- **Phase 3: Backend & Analytics** - Cloud storage + insights
-- **Phase 4: Routines** - Practice workflow management
-
-### Issue Creation Strategy
-- Break each phase into 2-3 week chunks
-- Create detailed user stories for each feature
-- Use labels: `phase-1`, `phase-2`, `enhancement`, `bug`, `future`
-- Template issues for common patterns (new exercise types, UI components)
-
-### Future Idea Management
-- Use GitHub Discussions for rough concepts
-- `future` label for ideas not yet ready for implementation
-- Regular review/promotion of future ideas to active phases
-
----
+----
 
 *This vision captures current thinking as of August 2025. Expected to evolve as development progresses and usage patterns emerge.*
