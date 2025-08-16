@@ -202,20 +202,20 @@ pub fn ExerciseForm(
       }
     };
 
-    console::log_1(&format!("Saving exercise: {:?}", exercise).into());
+    console::log_1(&format!("Saving exercise: {exercise:?}").into());
 
     // Save to storage
     let repo = get_exercise_repository();
     match &mode_for_save {
       FormMode::Create => {
         if let Err(e) = repo.save(&exercise) {
-          set_errors.set(vec![format!("Failed to save exercise: {}", e)]);
+          set_errors.set(vec![format!("Failed to save exercise: {e}")]);
           return;
         }
       }
       FormMode::Edit(_) => {
         if let Err(e) = repo.update(&exercise) {
-          set_errors.set(vec![format!("Failed to update exercise: {}", e)]);
+          set_errors.set(vec![format!("Failed to update exercise: {e}")]);
           return;
         }
       }

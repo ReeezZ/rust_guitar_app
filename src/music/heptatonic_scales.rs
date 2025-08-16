@@ -126,8 +126,8 @@ impl HeptaScaleImpl {
 
   pub fn to_string(&self) -> String {
     match self.scale_type {
-      HeptaScaleType::Major => format!("{} Major", self.root_note()),
-      HeptaScaleType::Minor => format!("{} Minor", self.root_note()),
+      HeptaScaleType::Major => format!("{root} Major", root = self.root_note()),
+      HeptaScaleType::Minor => format!("{root} Minor", root = self.root_note()),
     }
   }
 }
@@ -136,7 +136,7 @@ impl Index<HeptaScaleDegree> for HeptaScaleImpl {
   type Output = Note;
 
   fn index(&self, index: HeptaScaleDegree) -> &Self::Output {
-    &self.get_note_by_degree(index)
+    self.get_note_by_degree(index)
   }
 }
 

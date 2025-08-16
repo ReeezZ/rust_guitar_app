@@ -97,7 +97,7 @@ pub fn ExerciseManager() -> impl IntoView {
               </div>
               <div class="flex items-center space-x-2">
                 <a
-                  href=format!("/exercises/{}", exercise.id)
+                  href=format!("/exercises/{id}", id = exercise.id)
                   class="flex justify-center items-center py-1.5 px-3 text-sm font-medium text-white bg-blue-500 rounded hover:bg-blue-700"
                 >
                   "View"

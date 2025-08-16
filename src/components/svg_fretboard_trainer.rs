@@ -129,11 +129,7 @@ pub fn SvgFretboardTrainer(
       let positions = calculate_fret_positions(scale_length, cfg.max_frets as u8);
 
       // Calculate visible range with extra context
-      let min_fret = if start_f > cfg.extra_frets {
-        start_f - cfg.extra_frets
-      } else {
-        0
-      };
+      let min_fret = start_f.saturating_sub(cfg.extra_frets);
       let max_fret = (end_f + cfg.extra_frets).min(cfg.max_frets);
 
       // Calculate zoom transform

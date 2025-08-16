@@ -90,7 +90,7 @@ pub fn SvgFretboardScaleDisplay(
   let config_signals = MusicalFretboardConfigSignals::from(fretboard_config);
 
   // Use provided extra_frets or fall back to config value
-  let final_extra_frets = extra_frets.unwrap_or_else(|| config_signals.extra_frets);
+  let final_extra_frets = extra_frets.unwrap_or(config_signals.extra_frets);
 
   // Create visual config that updates with extra_frets
   let visual_config = Signal::derive({
@@ -108,7 +108,6 @@ pub fn SvgFretboardScaleDisplay(
       nut_width: nut_width.get(),
       extra_frets: final_extra_frets.get(),
       marker_positions: marker_positions.get(),
-      ..Default::default()
     }
   });
 
@@ -169,7 +168,7 @@ fn ScaleNoteOverlays(
         viewBox=move || {
           let base_width = 800.0;
           let height = base_width / svg_aspect_ratio.get();
-          format!("0 0 {} {}", base_width, height)
+          format!("0 0 {base_width} {height}")
         }
         class="w-full h-full"
       >
@@ -191,11 +190,7 @@ fn ScaleNoteOverlays(
           let string_spacing = height / (current_num_strings as f64 + 1.0);
 
           // Calculate visible range using the same logic as SVG fretboard
-          let min_visible = if current_start_fret > current_extra_frets {
-            current_start_fret - current_extra_frets
-          } else {
-            0
-          };
+          let min_visible = current_start_fret.saturating_sub(current_extra_frets);
           let max_visible = (current_end_fret + current_extra_frets).min(22);
 
           // Calculate full fret positions (same as SVG fretboard)
@@ -227,7 +222,7 @@ fn ScaleNoteOverlays(
                 let note = base_note.add_steps(fret_idx);
 
                 if current_scale.contains_note(note) {
-                  let is_root = current_scale.root_note().map_or(false, |root| root == note);
+                  let is_root = current_scale.root_note() == Some(note);
 
                   // Calculate Y position (same as SVG fretboard string calculation)
                   let y = (string_idx as f64 + 1.0) * string_spacing;

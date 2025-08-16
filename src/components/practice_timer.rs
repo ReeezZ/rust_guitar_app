@@ -34,7 +34,7 @@ pub fn PracticeTimer(#[prop(optional)] target_time: Option<Duration>) -> impl In
     let seconds = elapsed_seconds.get();
     let minutes = seconds / 60;
     let secs = seconds % 60;
-    format!("{:02}:{:02}", minutes, secs)
+    format!("{minutes:02}:{secs:02}")
   };
 
   // Check if target time is reached
@@ -79,9 +79,9 @@ pub fn PracticeTimer(#[prop(optional)] target_time: Option<Duration>) -> impl In
               <div class={move || {
                   let base_classes = "text-6xl font-mono font-bold mb-6";
                   if is_target_reached() {
-                      format!("{} text-green-600", base_classes)
+                      format!("{base_classes} text-green-600")
                   } else {
-                      format!("{} text-gray-800", base_classes)
+                      format!("{base_classes} text-gray-800")
                   }
               }}>
                   {formatted_time}
@@ -94,7 +94,7 @@ pub fn PracticeTimer(#[prop(optional)] target_time: Option<Duration>) -> impl In
                       let target_secs = target.as_secs() % 60;
                       view! {
                           <p class="text-sm text-gray-600 mb-4">
-                              "Target: " {format!("{:02}:{:02}", target_mins, target_secs)}
+                              "Target: " {format!("{target_mins:02}:{target_secs:02}")}
                               {move || if is_target_reached() { " ✓" } else { "" }}
                           </p>
                       }.into_any()

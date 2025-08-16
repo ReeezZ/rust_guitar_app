@@ -32,7 +32,7 @@ impl ScaleType {
     HeptaScaleType::all_scale_types()
       .iter()
       .map(|&hepta_scale_type| ScaleType::Hepatonic(hepta_scale_type))
-      .chain(Some(ScaleType::Chromatic).into_iter())
+      .chain(Some(ScaleType::Chromatic))
       .collect()
   }
 }

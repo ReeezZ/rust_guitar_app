@@ -26,11 +26,7 @@ struct VisibleRange {
 impl VisibleRange {
   /// Calculate the visible fret range including extra context frets
   fn new(start_fret: usize, end_fret: usize, extra_frets: usize, max_frets: usize) -> Self {
-    let min_fret = if start_fret > extra_frets {
-      start_fret - extra_frets
-    } else {
-      0
-    };
+    let min_fret = start_fret.saturating_sub(extra_frets);
     let max_fret = (end_fret + extra_frets).min(max_frets);
 
     Self { min_fret, max_fret }
@@ -461,7 +457,7 @@ pub fn SvgFretboard(
   on_fret_clicked: Option<Callback<SvgFretClickEvent>>,
 ) -> impl IntoView {
   // Use provided config signal or create one with default
-  let config_signal = config.unwrap_or_else(|| Signal::derive(|| FretboardVisualConfig::default()));
+  let config_signal = config.unwrap_or_else(|| Signal::derive(FretboardVisualConfig::default));
 
   // Create reactive signals from config values - using clone since Signal is Copy
   let num_strings = Signal::derive({
@@ -541,7 +537,7 @@ pub fn SvgFretboard(
         viewBox=move || {
           let current_svg_width = svg_width.get();
           let current_svg_height = svg_height.get();
-          format!("0 0 {} {}", current_svg_width, current_svg_height)
+          format!("0 0 {current_svg_width} {current_svg_height}")
         }
         class="w-full max-w-full h-auto fretboard-svg"
         style="background: linear-gradient(90deg, #deb887 0%, #f5deb3 100%); border-radius: 8px; box-shadow: 0 2px 8px #0002; border: 1px solid #c00;"

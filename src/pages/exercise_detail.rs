@@ -172,7 +172,7 @@ pub fn ExerciseDetail() -> impl IntoView {
 
                                       <div class="bg-green-50 p-4 rounded">
                                           <h3 class="font-semibold text-green-800">Details</h3>
-                                          <p class="text-green-600">{format!("{}", ex.exercise_type)}</p>
+                                          <p class="text-green-600">{ex.exercise_type.to_string()}</p>
                                       </div>
                                   </div>
 

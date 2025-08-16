@@ -6,7 +6,7 @@ use web_sys::{window, Storage};
 /// Simple exercise storage - just save and load exercises
 pub fn save_exercise(exercise: &Exercise) {
   let storage = get_storage().expect("Storage not available");
-  let key = format!("exercise_{}", exercise.id);
+  let key = format!("exercise_{id}", id = exercise.id);
   let json = serde_json::to_string(exercise).expect("Failed to serialize exercise");
   storage
     .set_item(&key, &json)
@@ -41,7 +41,7 @@ pub fn load_exercises() -> Vec<Exercise> {
 /// Delete an exercise from localStorage
 pub fn delete_exercise(id: &str) {
   let storage = get_storage().expect("Storage not available");
-  let key = format!("exercise_{}", id);
+  let key = format!("exercise_{id}");
   storage
     .remove_item(&key)
     .expect("Failed to delete exercise");
@@ -50,7 +50,7 @@ pub fn delete_exercise(id: &str) {
 /// Load a specific exercise by ID from localStorage
 pub fn load_exercise_by_id(id: &str) -> Option<Exercise> {
   let storage = get_storage()?;
-  let key = format!("exercise_{}", id);
+  let key = format!("exercise_{id}");
   if let Ok(Some(json)) = storage.get_item(&key) {
     serde_json::from_str::<Exercise>(&json).ok()
   } else {
@@ -61,7 +61,7 @@ pub fn load_exercise_by_id(id: &str) -> Option<Exercise> {
 /// Update an existing exercise in localStorage
 pub fn update_exercise(exercise: &Exercise) -> Result<(), String> {
   let storage = get_storage().ok_or("Storage not available")?;
-  let key = format!("exercise_{}", exercise.id);
+  let key = format!("exercise_{id}", id = exercise.id);
 
   // Check if exercise exists
   if storage.get_item(&key).ok().flatten().is_none() {
@@ -69,7 +69,7 @@ pub fn update_exercise(exercise: &Exercise) -> Result<(), String> {
   }
 
   let json =
-    serde_json::to_string(exercise).map_err(|e| format!("Failed to serialize exercise: {}", e))?;
+    serde_json::to_string(exercise).map_err(|e| format!("Failed to serialize exercise: {e}"))?;
 
   storage
     .set_item(&key, &json)
@@ -83,7 +83,7 @@ pub fn exercise_name_exists(name: &str, exclude_id: Option<&str>) -> bool {
   let exercises = load_exercises();
   exercises
     .iter()
-    .any(|ex| ex.name == name && exclude_id.map_or(true, |id| ex.id != id))
+    .any(|ex| ex.name == name && exclude_id.is_none_or(|id| ex.id != id))
 }
 
 fn get_storage() -> Option<Storage> {

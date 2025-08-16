@@ -7,7 +7,7 @@ use crate::music::{
 fn generate_id() -> String {
   // Use JavaScript's Date.now() which works in WASM
   let timestamp = js_sys::Date::now() as u64;
-  format!("ex_{}", timestamp)
+  format!("ex_{timestamp}")
 }
 
 /// Exercise types with their specific configuration

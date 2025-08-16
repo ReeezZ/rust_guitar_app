@@ -68,7 +68,7 @@ pub fn SvgFretboardScalePage() -> impl IntoView {
           Some(event) => {
             format!(
               "{} - String {} - Fret {}",
-              event.note.to_string(),
+              event.note,
               event.coord.string_idx + 1,
               event.coord.fret_idx,
             )
