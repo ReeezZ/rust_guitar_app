@@ -105,13 +105,15 @@ pub fn ExerciseDetailPage() -> impl IntoView {
                               <h2 class="text-xl font-semibold text-gray-800 mb-3">"Practice Session"</h2>
                               <div class="bg-gray-50 p-6 rounded-lg text-center">
                                   <p class="text-gray-600 mb-4">"Practice timer and metronome will be added here"</p>
-                                  <div class="space-y-2">
-                                      <button
-                                          class="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg disabled:bg-gray-400"
-                                          disabled=true
-                                      >
-                                          "Start Practice Session (Coming Soon)"
-                                      </button>
+                                  <div class="space-y-2 flex flex-col items-center">
+                                      <div class="flex justify-center w-full">
+                                          <button
+                                              class="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg disabled:bg-gray-400"
+                                              disabled=true
+                                          >
+                                              "Start Practice Session (Coming Soon)"
+                                          </button>
+                                      </div>
                                       <p class="text-sm text-gray-500">"Timer, metronome, and session logging will be implemented next"</p>
                                   </div>
                               </div>
@@ -125,7 +127,7 @@ pub fn ExerciseDetailPage() -> impl IntoView {
                                   </button>
                               </div>
                               <div>
-                                  <a href="/exercises" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                                  <a href="/exercises" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                                       "Back to List"
                                   </a>
                               </div>
