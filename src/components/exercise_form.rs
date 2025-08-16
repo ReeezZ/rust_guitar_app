@@ -3,6 +3,7 @@ use crate::models::{
   storage,
 };
 use crate::music::{heptatonic_scales::HeptaScaleType, notes::Note, scales::ScaleType};
+use crate::components::svg_fretboard_scale_display::SvgFretboardScaleDisplay;
 use leptos::prelude::*;
 use web_sys::console;
 
@@ -373,6 +374,63 @@ pub fn ExerciseForm(
                                                   set_max_fret.set(val.min(24));
                                               }
                                           }
+                                      />
+                                  </div>
+                              </div>
+
+                              // Position presets
+                              <div>
+                                  <label class="block text-sm font-medium text-gray-700 mb-2">Position Presets</label>
+                                  <div class="flex gap-2 flex-wrap">
+                                      <button
+                                          type="button"
+                                          class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                          on:click=move |_| { set_min_fret.set(0); set_max_fret.set(4); }
+                                      >
+                                          "R"
+                                      </button>
+                                      <button
+                                          type="button"
+                                          class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                          on:click=move |_| { set_min_fret.set(2); set_max_fret.set(6); }
+                                      >
+                                          "1"
+                                      </button>
+                                      <button
+                                          type="button"
+                                          class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                          on:click=move |_| { set_min_fret.set(4); set_max_fret.set(8); }
+                                      >
+                                          "2"
+                                      </button>
+                                      <button
+                                          type="button"
+                                          class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                          on:click=move |_| { set_min_fret.set(6); set_max_fret.set(10); }
+                                      >
+                                          "3"
+                                      </button>
+                                      <button
+                                          type="button"
+                                          class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                          on:click=move |_| { set_min_fret.set(8); set_max_fret.set(12); }
+                                      >
+                                          "4"
+                                      </button>
+                                  </div>
+                                  <div class="text-xs text-gray-500 mt-1">
+                                      "R: Root (0-4) • 1: First (2-6) • 2: Second (4-8) • 3: Third (6-10) • 4: Fourth (8-12)"
+                                  </div>
+                              </div>
+
+                              // Fretboard preview for scales
+                              <div>
+                                  <label class="block text-sm font-medium text-gray-700 mb-2">Preview</label>
+                                  <div class="bg-gray-50 rounded-lg p-4 max-w-2xl mx-auto">
+                                      <SvgFretboardScaleDisplay
+                                          fret_range={Signal::derive(move || min_fret.get() as usize..=max_fret.get() as usize)}
+                                          root_note={Signal::derive(move || root_note.get())}
+                                          scale_type={Signal::derive(move || scale_type.get())}
                                       />
                                   </div>
                               </div>

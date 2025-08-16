@@ -121,19 +121,7 @@ Build a **personal guitar practice tracker** that makes it easy to log practice 
 
 #### Current Tasks / Improvement ideas
 
-- exercise form:
-  - Have presets for min and max fret in the form of positions
-    - Positions
-      - Root Position: Frets 0 - 4
-      - First Position: Frets 2 - 6
-      - Second Position: Frets: 4 - 10
-      - Third Position: Frets: 6 - 12
-      - Fourth Position: Frets: 8 - 14
-    - Add buttons for those preset
-      - The buttons are just R, 1, 2, 3, 4
-      - Clicking them sets the start and end fret inputs to the corresponding values
-  - Display the fretboard with the corresponding start and end frets and selected scale below the selection of the root note and scale type
-    - basically a small preview
+- exercise form:s
   - Prevent start fret > end fret
   - For scales
 - exercise list
