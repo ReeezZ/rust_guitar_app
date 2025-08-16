@@ -36,12 +36,22 @@ pub fn load_exercises() -> Vec<Exercise> {
   exercises
 }
 
-pub fn delete_exercise(exercise_id: &str) {
-  let storage = get_storage().expect("Storage not available");
-  let key = format!("exercise_{}", exercise_id);
-  storage
-    .remove_item(&key)
-    .expect("Failed to delete exercise");
+/// Delete an exercise from localStorage
+pub fn delete_exercise(id: &str) {
+    let storage = get_storage().expect("Storage not available");
+    let key = format!("exercise_{}", id);
+    storage.remove_item(&key).expect("Failed to delete exercise");
+}
+
+/// Load a specific exercise by ID from localStorage
+pub fn load_exercise_by_id(id: &str) -> Option<Exercise> {
+    let storage = get_storage()?;
+    let key = format!("exercise_{}", id);
+    if let Ok(Some(json)) = storage.get_item(&key) {
+        serde_json::from_str::<Exercise>(&json).ok()
+    } else {
+        None
+    }
 }
 
 fn get_storage() -> Option<Storage> {
