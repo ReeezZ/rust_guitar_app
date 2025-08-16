@@ -5,9 +5,22 @@ use crate::music::{
 
 /// Generate a simple unique ID using browser timestamp
 fn generate_id() -> String {
-  // Use JavaScript's Date.now() which works in WASM
-  let timestamp = js_sys::Date::now() as u64;
-  format!("ex_{timestamp}")
+  // Use JavaScript's Date.now() which works in WASM, fallback for tests
+  #[cfg(target_arch = "wasm32")]
+  {
+    let timestamp = js_sys::Date::now() as u64;
+    format!("ex_{timestamp}")
+  }
+  
+  #[cfg(not(target_arch = "wasm32"))]
+  {
+    use std::time::{SystemTime, UNIX_EPOCH};
+    let timestamp = SystemTime::now()
+      .duration_since(UNIX_EPOCH)
+      .expect("Time went backwards")
+      .as_millis() as u64;
+    format!("ex_{timestamp}")
+  }
 }
 
 /// Exercise types with their specific configuration
