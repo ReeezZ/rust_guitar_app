@@ -118,7 +118,7 @@ pub fn ExerciseManager() -> impl IntoView {
                   let:exercise
               >
                   <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                      <div class="flex justify-between items-start">
+                      <div class="flex justify-between items-center">
                           <div>
                               <h3 class="text-lg font-semibold text-gray-800">{exercise.name.clone()}</h3>
                               <p class="text-sm text-gray-600 mt-1">
@@ -128,15 +128,15 @@ pub fn ExerciseManager() -> impl IntoView {
                                   <p class="text-sm text-gray-500 mt-1">{desc.clone()}</p>
                               })}
                           </div>
-                          <div class="flex space-x-2">
+                          <div class="flex items-center space-x-2">
                               <a
                                   href={format!("/exercises/{}", exercise.id)}
-                                  class="bg-blue-500 hover:bg-blue-700 text-white font-medium text-sm py-1 px-3 rounded"
+                                  class="bg-blue-500 hover:bg-blue-700 text-white font-medium text-sm px-3 py-1.5 rounded flex items-center justify-center"
                               >
                                   "View"
                               </a>
                               <button
-                                  class="text-red-500 hover:text-red-700 font-medium text-sm"
+                                  class="text-red-500 hover:text-red-700 font-medium text-sm px-2 py-1.5"
                                   on:click={
                                       let exercise_id = exercise.id.clone();
                                       move |_| delete_exercise(exercise_id.clone())
