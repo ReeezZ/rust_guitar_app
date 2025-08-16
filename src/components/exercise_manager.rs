@@ -6,10 +6,29 @@ use leptos::prelude::*;
 pub fn ExerciseManager() -> impl IntoView {
   let (exercises, set_exercises) = signal(storage::load_exercises());
   let (show_form, set_show_form) = signal(false);
+  let (show_delete_confirmation, set_show_delete_confirmation) = signal(false);
+  let (pending_delete_exercise, set_pending_delete_exercise) = signal(None::<(String, String)>);
 
-  let delete_exercise = move |exercise_id: String| {
-    storage::delete_exercise(&exercise_id);
-    set_exercises.update(|exercises| exercises.retain(|e| e.id != exercise_id));
+  // Show delete confirmation dialog
+  let show_delete_dialog = move |exercise_id: String, exercise_name: String| {
+    set_pending_delete_exercise.set(Some((exercise_id, exercise_name)));
+    set_show_delete_confirmation.set(true);
+  };
+
+  // Confirm deletion
+  let confirm_delete = move || {
+    if let Some((exercise_id, _)) = pending_delete_exercise.get() {
+      storage::delete_exercise(&exercise_id);
+      set_exercises.update(|exercises| exercises.retain(|e| e.id != exercise_id));
+      set_show_delete_confirmation.set(false);
+      set_pending_delete_exercise.set(None);
+    }
+  };
+
+  // Cancel deletion
+  let cancel_delete = move || {
+    set_show_delete_confirmation.set(false);
+    set_pending_delete_exercise.set(None);
   };
 
   // Handle exercise save from form
@@ -45,12 +64,13 @@ pub fn ExerciseManager() -> impl IntoView {
           view! {
             <div class="mb-6">
               <ExerciseForm
-                mode={FormMode::Create}
-                on_save={handle_exercise_save}
-                on_cancel={handle_form_cancel}
+                mode=FormMode::Create
+                on_save=handle_exercise_save
+                on_cancel=handle_form_cancel
               />
             </div>
-          }.into_any()
+          }
+            .into_any()
         } else {
           view! { <div></div> }.into_any()
         }
@@ -82,7 +102,8 @@ pub fn ExerciseManager() -> impl IntoView {
                   class="py-1.5 px-2 text-sm font-medium text-red-500 hover:text-red-700"
                   on:click={
                     let exercise_id = exercise.id.clone();
-                    move |_| delete_exercise(exercise_id.clone())
+                    let exercise_name = exercise.name.clone();
+                    move |_| show_delete_dialog(exercise_id.clone(), exercise_name.clone())
                   }
                 >
                   "Delete"
@@ -105,6 +126,45 @@ pub fn ExerciseManager() -> impl IntoView {
             })
         }}
       </div>
+
+      // Delete confirmation dialog
+      {move || {
+        if show_delete_confirmation.get() {
+          if let Some((_, exercise_name)) = pending_delete_exercise.get() {
+            view! {
+              <div class="flex fixed inset-0 z-50 justify-center items-center bg-black bg-opacity-50">
+                <div class="p-6 mx-4 max-w-md bg-white rounded-lg">
+                  <h3 class="mb-3 text-lg font-semibold text-gray-800">Delete Exercise</h3>
+                  <p class="mb-4 text-gray-600">
+                    "Are you sure you want to delete '"
+                    <span class="font-semibold">{exercise_name}</span> "'?"
+                  </p>
+                  <p class="mb-6 text-sm text-gray-500">"This action cannot be undone."</p>
+                  <div class="flex justify-end space-x-3">
+                    <button
+                      class="py-2 px-4 text-gray-600 rounded-md border border-gray-300 hover:bg-gray-50"
+                      on:click=move |_| cancel_delete()
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      class="py-2 px-4 text-white bg-red-500 rounded-md hover:bg-red-600"
+                      on:click=move |_| confirm_delete()
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+              .into_any()
+          } else {
+            view! { <div></div> }.into_any()
+          }
+        } else {
+          view! { <div></div> }.into_any()
+        }
+      }}
     </div>
   }
 }
