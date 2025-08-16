@@ -4,6 +4,7 @@
     "rust-lang.rust-analyzer",
     "tamasfe.even-better-toml",
     "bierner.markdown-mermaid",
-    "bpruitt-goddard.mermaid-markdown-syntax-highlighting"
+    "bpruitt-goddard.mermaid-markdown-syntax-highlighting",
+    "github.vscode-pull-request-github"
   ]
 }

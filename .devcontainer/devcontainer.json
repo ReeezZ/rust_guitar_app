@@ -35,7 +35,8 @@
 				"GitHub.copilot-chat",
 				"tamasfe.even-better-toml",
 				"mhutchie.git-graph",
-				"donjayamanne.githistory"
+				"donjayamanne.githistory",
+				"GitHub.vscode-pull-request-github"
 			]
 		}
 	},
