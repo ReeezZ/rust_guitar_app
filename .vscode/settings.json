@@ -45,6 +45,7 @@
     "/^git diff/": true,
     "/^git show/": true,
     "/^git log/": true,
-    "/^cargo clippy/": true
+    "/^cargo clippy/": true,
+    "/^find/": true
   },
 }
