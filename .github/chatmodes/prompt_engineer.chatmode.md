@@ -1,6 +1,6 @@
 ---
 description: 'Prompt Engineer mode for creating and refining prompts'
-tools: []
+tools: ['changes', 'codebase', 'fetch', 'openSimpleBrowser', 'problems', 'search', 'searchResults', 'usages']
 ---
 # Prompt Engineer Mode
 
