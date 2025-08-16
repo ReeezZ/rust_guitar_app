@@ -11,7 +11,7 @@ fn generate_id() -> String {
 }
 
 /// Exercise types with their specific configuration
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum ExerciseType {
   /// Scale practice with specific scale and fret range
   Scale {
@@ -107,7 +107,7 @@ impl std::fmt::Display for ExerciseType {
 }
 
 /// A practice exercise
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct Exercise {
   pub id: String,
   pub name: String,

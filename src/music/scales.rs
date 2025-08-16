@@ -2,7 +2,7 @@ use crate::music::notes::Note;
 
 use super::heptatonic_scales::{HeptaScaleImpl, HeptaScaleType};
 
-#[derive(Clone, PartialEq, Copy, Debug)]
+#[derive(Clone, PartialEq, Copy, Debug, serde::Serialize, serde::Deserialize)]
 pub enum ScaleType {
   Hepatonic(HeptaScaleType),
   Chromatic,

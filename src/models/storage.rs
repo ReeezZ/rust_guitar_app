@@ -1,27 +1,39 @@
 use crate::models::exercise::Exercise;
+use leptos::logging;
+use serde_json;
 use web_sys::{window, Storage};
 
 /// Simple exercise storage - just save and load exercises
 pub fn save_exercise(exercise: &Exercise) {
   let storage = get_storage().expect("Storage not available");
   let key = format!("exercise_{}", exercise.id);
-
-  // Simple JSON - just the basics we need for now
-  let json = format!(
-    r#"{{"id":"{}","name":"{}","type":"{}"}}"#,
-    exercise.id,
-    exercise.name.replace('"', r#"\""#),
-    exercise.exercise_type.type_name()
-  );
-
-  storage
-    .set_item(&key, &json)
-    .expect("Failed to save exercise");
+  let json = serde_json::to_string(exercise).expect("Failed to serialize exercise");
+  storage.set_item(&key, &json).expect("Failed to save exercise");
 }
 
 pub fn load_exercises() -> Vec<Exercise> {
-  // For now, return empty - we'll implement when we need it
-  vec![]
+  let mut exercises = Vec::new();
+  let storage = match get_storage() {
+    Some(s) => s,
+    None => {
+        logging::error!("Local storage is not available");
+        return exercises
+    },
+  };
+  let len = storage.length().unwrap_or(0);
+  logging::log!("Loading exercises from local storage: {}", len);
+  for i in 0..len {
+    if let Some(key) = storage.key(i).ok().flatten() {
+      if key.starts_with("exercise_") {
+        if let Ok(Some(json)) = storage.get_item(&key) {
+          if let Ok(ex) = serde_json::from_str::<Exercise>(&json) {
+            exercises.push(ex);
+          }
+        }
+      }
+    }
+  }
+  exercises
 }
 
 pub fn delete_exercise(exercise_id: &str) {

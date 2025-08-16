@@ -4,7 +4,7 @@ use super::intervals::Interval;
 use super::notes::Note;
 use super::scales::ScaleTrait;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum HeptaScaleDegree {
   First,
   Second,
@@ -15,7 +15,7 @@ pub enum HeptaScaleDegree {
   Seventh,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum HeptaScaleType {
   Major,
   Minor,

@@ -7,7 +7,7 @@ use leptos::prelude::*;
 
 #[component]
 pub fn ExerciseManager() -> impl IntoView {
-  let (exercises, set_exercises) = signal(Vec::<Exercise>::new());
+    let (exercises, set_exercises) = signal(storage::load_exercises());
   let (show_form, set_show_form) = signal(false);
 
   // Form fields
