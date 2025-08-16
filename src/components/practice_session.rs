@@ -28,11 +28,6 @@ pub fn PracticeSession(#[prop(optional)] target_time: Option<Duration>) -> impl 
     1000, // 1 second interval
   );
 
-  // Clone the controls for use in different closures
-  let pause_fn = interval_controls.pause.clone();
-  let resume_fn = interval_controls.resume.clone();
-  let pause_fn2 = interval_controls.pause.clone();
-
   // Format elapsed time as MM:SS
   let formatted_time = move || {
     let seconds = elapsed_seconds.get();
@@ -50,28 +45,35 @@ pub fn PracticeSession(#[prop(optional)] target_time: Option<Duration>) -> impl 
     }
   };
 
-  let start_timer = move |_| {
-    match timer_state.get() {
-      TimerState::Stopped => {
-        set_elapsed_seconds.set(0);
-        set_timer_state.set(TimerState::Running);
-        resume_fn(); // Start the interval
-      }
-      TimerState::Paused => {
-        set_timer_state.set(TimerState::Running);
-        resume_fn(); // Resume the interval
-      }
-      TimerState::Running => {
-        set_timer_state.set(TimerState::Paused);
-        pause_fn(); // Pause the interval
+  let start_timer = {
+    let pause = interval_controls.pause.clone();
+    let resume = interval_controls.resume.clone();
+    move |_| {
+      match timer_state.get() {
+        TimerState::Stopped => {
+          set_elapsed_seconds.set(0);
+          set_timer_state.set(TimerState::Running);
+          resume(); // Start the interval
+        }
+        TimerState::Paused => {
+          set_timer_state.set(TimerState::Running);
+          resume(); // Resume the interval
+        }
+        TimerState::Running => {
+          set_timer_state.set(TimerState::Paused);
+          pause(); // Pause the interval
+        }
       }
     }
   };
 
-  let stop_timer = move |_| {
-    set_timer_state.set(TimerState::Stopped);
-    set_elapsed_seconds.set(0);
-    pause_fn2(); // Stop the interval
+  let stop_timer = {
+    let pause = interval_controls.pause.clone();
+    move |_| {
+      set_timer_state.set(TimerState::Stopped);
+      set_elapsed_seconds.set(0);
+      pause(); // Stop the interval
+    }
   };
 
   // Handle BPM changes from metronome

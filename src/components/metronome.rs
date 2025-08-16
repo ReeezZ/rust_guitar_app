@@ -11,7 +11,8 @@ pub enum MetronomeState {
   Running,
 }
 
-// Thread-local AudioContext for the metronome
+// Thread-local AudioContext singleton - appropriate for WASM single-threaded environment
+// This avoids the overhead of creating multiple AudioContexts
 thread_local! {
   static AUDIO_CONTEXT: RefCell<Option<Rc<AudioContext>>> = const { RefCell::new(None) };
 }
@@ -178,51 +179,85 @@ pub fn Metronome(
   }
 }
 
+/// Get or create the shared AudioContext for the metronome
+fn get_or_create_audio_context() -> Result<Rc<AudioContext>, JsValue> {
+  AUDIO_CONTEXT.with(|ctx| {
+    let mut ctx_ref = ctx.borrow_mut();
+    if let Some(context) = ctx_ref.as_ref() {
+      Ok(context.clone())
+    } else {
+      let new_context = Rc::new(AudioContext::new()?);
+      *ctx_ref = Some(new_context.clone());
+      Ok(new_context)
+    }
+  })
+}
+
 /// Play a click sound using Web Audio API with shared AudioContext
 fn play_click(is_accent: bool) {
-  let _ = AUDIO_CONTEXT.with(|ctx| -> Result<(), JsValue> {
-    // Get or create the AudioContext without any cloning
-    let mut ctx_ref = ctx.borrow_mut();
-    let audio_ctx = match ctx_ref.as_ref() {
-      Some(context) => context.as_ref(),
-      None => {
-        let new_context = Rc::new(AudioContext::new()?);
-        *ctx_ref = Some(new_context.clone());
-        ctx_ref.as_ref().unwrap().as_ref()
-      }
-    };
-
-    // Create oscillator for the click sound
-    let oscillator = audio_ctx.create_oscillator()?;
-    let gain = audio_ctx.create_gain()?;
-
-    // Connect audio nodes: oscillator -> gain -> destination
-    oscillator.connect_with_audio_node(&gain)?;
-    gain.connect_with_audio_node(&audio_ctx.destination())?;
-
-    // Configure the click sound
-    if is_accent {
-      // Accent beat (beat 1) - lower pitch, longer duration
-      oscillator.frequency().set_value(800.0);
-      gain.gain().set_value(0.3);
-    } else {
-      // Regular beats - higher pitch, shorter duration
-      oscillator.frequency().set_value(1200.0);
-      gain.gain().set_value(0.2);
+  let audio_ctx = match get_or_create_audio_context() {
+    Ok(ctx) => ctx,
+    Err(err) => {
+      leptos::logging::warn!("Failed to create AudioContext: {:?}", err);
+      return;
     }
+  };
 
-    oscillator.set_type(OscillatorType::Square);
+  // Create oscillator for the click sound
+  let oscillator = match audio_ctx.create_oscillator() {
+    Ok(o) => o,
+    Err(err) => {
+      leptos::logging::warn!("Failed to create oscillator: {:?}", err);
+      return;
+    }
+  };
+  
+  let gain = match audio_ctx.create_gain() {
+    Ok(g) => g,
+    Err(err) => {
+      leptos::logging::warn!("Failed to create gain node: {:?}", err);
+      return;
+    }
+  };
 
-    // Start and stop the oscillator for a short click
-    let current_time = audio_ctx.current_time();
-    oscillator.start_with_when(current_time)?;
-    oscillator.stop_with_when(current_time + 0.1)?; // 100ms click
+  // Connect audio nodes: oscillator -> gain -> destination
+  if let Err(err) = oscillator.connect_with_audio_node(&gain) {
+    leptos::logging::warn!("Failed to connect oscillator to gain: {:?}", err);
+    return;
+  }
+  
+  if let Err(err) = gain.connect_with_audio_node(&audio_ctx.destination()) {
+    leptos::logging::warn!("Failed to connect gain to destination: {:?}", err);
+    return;
+  }
 
-    // Fade out to avoid clicking
-    gain
-      .gain()
-      .exponential_ramp_to_value_at_time(0.01, current_time + 0.1)?;
+  // Configure the click sound
+  if is_accent {
+    // Accent beat (beat 1) - lower pitch, longer duration
+    oscillator.frequency().set_value(800.0);
+    gain.gain().set_value(0.3);
+  } else {
+    // Regular beats - higher pitch, shorter duration
+    oscillator.frequency().set_value(1200.0);
+    gain.gain().set_value(0.2);
+  }
 
-    Ok(())
-  });
+  oscillator.set_type(OscillatorType::Square);
+
+  // Start and stop the oscillator for a short click
+  let current_time = audio_ctx.current_time();
+  if let Err(err) = oscillator.start_with_when(current_time) {
+    leptos::logging::warn!("Failed to start oscillator: {:?}", err);
+    return;
+  }
+  
+  if let Err(err) = oscillator.stop_with_when(current_time + 0.1) {
+    leptos::logging::warn!("Failed to stop oscillator: {:?}", err);
+    return;
+  }
+
+  // Fade out to avoid clicking
+  if let Err(err) = gain.gain().exponential_ramp_to_value_at_time(0.01, current_time + 0.1) {
+    leptos::logging::warn!("Failed to set gain ramp: {:?}", err);
+  }
 }
