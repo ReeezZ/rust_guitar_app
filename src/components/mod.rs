@@ -1,5 +1,5 @@
-pub mod exercises;
 pub mod exercise_manager;
+pub mod exercises;
 pub mod fret_range_selector;
 pub mod fretboard;
 pub mod fretboard_config_examples;

@@ -294,14 +294,14 @@ pub fn ExerciseForm(
 
               // Type-specific fields - kept as separate component (complex conditional logic)
               <ExerciseTypeSpecificFields
-                  exercise_type={exercise_type_str.into()}
-                  root_note={root_note.into()}
+                  exercise_type={exercise_type_str}
+                  root_note={root_note}
                   on_root_note_change={Callback::new(move |note| set_root_note.set(note))}
-                  scale_type={scale_type.into()}
+                  scale_type={scale_type}
                   on_scale_type_change={Callback::new(move |scale| set_scale_type.set(scale))}
-                  min_fret={min_fret.into()}
+                  min_fret={min_fret}
                   on_min_fret_change={Callback::new(move |fret| set_min_fret.set(fret))}
-                  max_fret={max_fret.into()}
+                  max_fret={max_fret}
                   on_max_fret_change={Callback::new(move |fret| set_max_fret.set(fret))}
               />
           </div>
@@ -324,7 +324,7 @@ pub fn ExerciseForm(
 
           // Type change confirmation dialog - extracted to component
           <ExerciseTypeChangeConfirmation
-              show={show_type_change_warning.into()}
+              show={show_type_change_warning}
               on_confirm={Callback::new(move |_| confirm_type_change())}
               on_cancel={Callback::new(move |_| cancel_type_change())}
           />

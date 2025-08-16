@@ -87,7 +87,7 @@ pub fn PracticeSession(#[prop(optional)] target_time: Option<Duration>) -> impl 
               // Timer Section
               <div class="text-center">
                   <h4 class="text-md font-semibold text-gray-700 mb-3">"Timer"</h4>
-                  
+
                   // Timer display
                   <div class={move || {
                       let base_classes = "text-4xl lg:text-6xl font-mono font-bold mb-4";
@@ -173,7 +173,7 @@ pub fn PracticeSession(#[prop(optional)] target_time: Option<Duration>) -> impl 
                   {move || {
                       if show_metronome.get() {
                           view! {
-                              <Metronome bpm=bpm.into() on_bpm_change />
+                              <Metronome bpm=bpm on_bpm_change />
                           }.into_any()
                       } else {
                           view! {
