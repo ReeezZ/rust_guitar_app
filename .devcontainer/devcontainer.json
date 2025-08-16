@@ -21,7 +21,7 @@
 	],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "rustc --version && cargo --version && trunk --version",
+	"postCreateCommand": "rustc --version && cargo --version && trunk --version && npm install",
 
 	// Configure tool-specific properties.
 	"customizations": {

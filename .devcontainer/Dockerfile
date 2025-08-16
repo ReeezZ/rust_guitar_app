@@ -14,8 +14,8 @@ RUN apt-get update && apt-get install -y \
 # Update Rust to latest stable version
 RUN rustup update stable && rustup default stable
 
-# Install rustfmt for code formatting
-RUN rustup component add rustfmt rust-src
+# Install rustfmt for code formatting and clippy for linting
+RUN rustup component add rustfmt rust-src clippy
 
 # Install Rust WASM target
 RUN rustup target add wasm32-unknown-unknown
@@ -26,9 +26,6 @@ RUN cargo install trunk leptosfmt wasm-bindgen-cli
 # Install Gemini CLI for AI assistance during development
 # NOTE: This is a dev container only - production builds use separate processes
 RUN npm install -g @google/gemini-cli
-
-# For installing the correct tailwind version
-RUN npm install
 
 # Fix cargo registry permissions for the vscode user
 # Clear any existing cache first, then set proper ownership
