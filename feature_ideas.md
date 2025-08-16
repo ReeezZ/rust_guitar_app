@@ -217,6 +217,9 @@ Build a **personal guitar practice tracker** that makes it easy to log practice 
   - Progress over time (duration, frequency)
   - Simple charts and graphs
 
+- **Ideas to consider**
+  - From react i know tan stack query, should we use something similar? or is that too much?
+
 #### Architecture Notes
 - **Project Structure**: Migrate to Rust workspace with multiple crates
   - `shared` crate: Domain models (Exercise, Note, Scale) + DTOs for serialization

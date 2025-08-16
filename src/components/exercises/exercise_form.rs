@@ -1,6 +1,5 @@
 use crate::components::exercises::{
-  ExerciseBasicFields,
-  ExerciseFormActions,
+  constants::*,
   ExerciseTypeChangeConfirmation,
   ExerciseTypeSpecificFields,
 };
@@ -54,7 +53,7 @@ pub fn ExerciseForm(
     original_exercise
       .as_ref()
       .map(|ex| ex.exercise_type.type_name().to_string())
-      .unwrap_or_else(|| "Technique".to_string()),
+      .unwrap_or_else(|| TECHNIQUE_TYPE.to_string()),
   );
 
   // Extract initial values for Scale/Triad types
@@ -86,28 +85,13 @@ pub fn ExerciseForm(
   let (show_type_change_warning, set_show_type_change_warning) = signal(false);
   let (pending_type_change, set_pending_type_change) = signal(None::<String>);
 
-  // Check if changing exercise type would reset type-specific settings
-  let mode_for_type_check = mode_for_validation.clone();
-  let would_lose_data = {
-    move |new_type: &str| -> bool {
-      let current_type = exercise_type_str.get();
-      
-      // Check if we're changing from a type with specific settings (Scale/Triad) 
-      // to a type without them (Technique/Song) or vice versa
-      let current_has_settings = current_type == "Scale" || current_type == "Triad";
-      let new_has_settings = new_type == "Scale" || new_type == "Triad";
-      
-      // Show warning if:
-      // 1. We're in edit mode and the type is different from original, OR
-      // 2. We're changing between types with different data requirements
-      if let FormMode::Edit(ref original) = mode_for_type_check {
-        // In edit mode: show warning if type differs from original
-        current_type != original.exercise_type.type_name()
-      } else {
-        // In create mode: show warning if changing between types with different data requirements
-        // and we currently have settings that would be lost
-        current_has_settings && !new_has_settings && current_type != new_type
-      }
+  // Simple type change detection for edit mode
+  let mode_for_warning = mode_for_validation.clone();
+  let should_warn = move |new_type: &str| {
+    if let FormMode::Edit(ref original) = mode_for_warning {
+      new_type != original.exercise_type.type_name()
+    } else {
+      false // No warning in create mode
     }
   };
 
@@ -135,7 +119,7 @@ pub fn ExerciseForm(
 
       // Validate fret range for Scale/Triad types
       let exercise_type = exercise_type_str.get();
-      if exercise_type == "Scale" || exercise_type == "Triad" {
+      if has_specific_settings(&exercise_type) {
         let min = min_fret.get();
         let max = max_fret.get();
 
@@ -153,7 +137,7 @@ pub fn ExerciseForm(
 
   // Handle exercise type change
   let handle_type_change = move |new_type: String| {
-    if would_lose_data(&new_type) {
+    if should_warn(&new_type) {
       set_pending_type_change.set(Some(new_type));
       set_show_type_change_warning.set(true);
     } else {
@@ -179,17 +163,17 @@ pub fn ExerciseForm(
   // Create exercise type from form data
   let create_exercise_type = move || -> ExerciseType {
     match exercise_type_str.get().as_str() {
-      "Scale" => ExerciseType::Scale {
+      SCALE_TYPE => ExerciseType::Scale {
         root_note: root_note.get(),
         scale_type: scale_type.get(),
         fret_range: (min_fret.get(), max_fret.get()),
       },
-      "Triad" => ExerciseType::Triad {
+      TRIAD_TYPE => ExerciseType::Triad {
         root_note: root_note.get(),
         scale_type: scale_type.get(),
         fret_range: (min_fret.get(), max_fret.get()),
       },
-      "Song" => ExerciseType::Song,
+      SONG_TYPE => ExerciseType::Song,
       _ => ExerciseType::Technique,
     }
   };
@@ -273,17 +257,44 @@ pub fn ExerciseForm(
           }}
 
           <div class="space-y-4">
-              // Basic form fields - extracted to component
-              <ExerciseBasicFields
-                  name={name.into()}
-                  on_name_change={Callback::new(move |value| set_name.set(value))}
-                  description={description.into()}
-                  on_description_change={Callback::new(move |value| set_description.set(value))}
-                  exercise_type={exercise_type_str.into()}
-                  on_type_change={Callback::new(move |new_type| handle_type_change(new_type))}
-              />
+              // Basic form fields - inline (simple enough to not need separate component)
+              <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                  <input
+                      type="text"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      prop:value={move || name.get()}
+                      on:input=move |e| set_name.set(event_target_value(&e))
+                      placeholder="Enter exercise name"
+                  />
+              </div>
 
-              // Type-specific fields - extracted to component  
+              <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <textarea
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      prop:value={move || description.get()}
+                      on:input=move |e| set_description.set(event_target_value(&e))
+                      placeholder="Enter exercise description (optional)"
+                      rows="3"
+                  />
+              </div>
+
+              <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Exercise Type</label>
+                  <select
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      prop:value={move || exercise_type_str.get()}
+                      on:change=move |e| handle_type_change(event_target_value(&e))
+                  >
+                      <option value={TECHNIQUE_TYPE}>Technique</option>
+                      <option value={SCALE_TYPE}>Scale</option>
+                      <option value={TRIAD_TYPE}>Triad</option>
+                      <option value={SONG_TYPE}>Song</option>
+                  </select>
+              </div>
+
+              // Type-specific fields - kept as separate component (complex conditional logic)
               <ExerciseTypeSpecificFields
                   exercise_type={exercise_type_str.into()}
                   root_note={root_note.into()}
@@ -297,12 +308,21 @@ pub fn ExerciseForm(
               />
           </div>
 
-          // Action buttons - extracted to component
-          <ExerciseFormActions
-              mode={mode_for_button}
-              on_save={Callback::new(move |_| handle_save(()))}
-              on_cancel={Callback::new(move |_| handle_cancel(()))}
-          />
+          // Action buttons - inline (just 2 buttons, simpler than separate component)
+          <div class="flex justify-end space-x-3 mt-6">
+              <button
+                  class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+                  on:click=handle_cancel
+              >
+                  Cancel
+              </button>
+              <button
+                  class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                  on:click=handle_save
+              >
+                  {match mode_for_button { FormMode::Create => "Create", FormMode::Edit(_) => "Update" }}
+              </button>
+          </div>
 
           // Type change confirmation dialog - extracted to component
           <ExerciseTypeChangeConfirmation

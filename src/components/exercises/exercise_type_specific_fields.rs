@@ -2,7 +2,7 @@ use leptos::prelude::*;
 use crate::components::{
     svg_fretboard_scale_display::SvgFretboardScaleDisplay,
 };
-use super::PositionPresetButtons;
+use super::{PositionPresetButtons, constants::*};
 use crate::music::{heptatonic_scales::HeptaScaleType, notes::Note, scales::ScaleType};
 
 #[component]
@@ -27,7 +27,7 @@ pub fn ExerciseTypeSpecificFields(
         // Conditional fields for Scale and Triad types
         {move || {
             let ex_type = exercise_type.get();
-            if ex_type == "Scale" || ex_type == "Triad" {
+            if has_specific_settings(&ex_type) {
                 view! {
                     <div class="space-y-4 p-4 bg-gray-50 rounded-md">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
