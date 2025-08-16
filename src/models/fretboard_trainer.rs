@@ -18,8 +18,8 @@ pub trait FretboardTrainerTrait {
 
 impl FretboardTrainerTrait for FretboardModel {
   fn get_random_fret(&self) -> FretCoord {
-    let string_idx = rand::rng().random_range(0..self.get_num_strings() as u8);
-    let fret_idx = rand::rng().random_range(0..self.get_num_frets().get_untracked() as u8);
+    let string_idx = rand::rng().random_range(0..self.get_num_strings());
+    let fret_idx = rand::rng().random_range(0..self.get_num_frets().get_untracked());
 
     FretCoord {
       string_idx,

@@ -36,7 +36,7 @@ pub fn FretRangeSelector(
     let range = value.get();
     let new_start = *range.start();
     let new_end = *range.end();
-    
+
     if start_fret.get_untracked() != new_start {
       start_fret.set(new_start);
     }
@@ -48,10 +48,10 @@ pub fn FretRangeSelector(
   view! {
     <div class="space-y-2">
       <label class="block text-sm font-medium text-gray-700">{label}</label>
-      
+
       // Current range display
       <div class="text-sm text-gray-600">
-        "Range: " 
+        "Range: "
         {move || format!("{}-{}", start_fret.get(), end_fret.get())}
         {move || {
           let range = value.get();
@@ -59,7 +59,7 @@ pub fn FretRangeSelector(
             if *range.start() == 0 {
               " (open strings only)".to_string()
             } else {
-              format!(" (fret {} only)", range.start())
+              format!(" (fret {start} only)", start = range.start())
             }
           } else if *range.start() == 0 {
             " (includes open strings)".to_string()
@@ -91,7 +91,7 @@ pub fn FretRangeSelector(
         />
       </div>
 
-      // End fret slider  
+      // End fret slider
       <div class="space-y-1">
         <label class="text-xs text-gray-500">"End Fret: " {move || end_fret.get()}</label>
         <input
@@ -100,7 +100,7 @@ pub fn FretRangeSelector(
           max=max_fret
           prop:value=move || end_fret.get()
           on:input=move |ev| {
-            let target = ev.target().unwrap();  
+            let target = ev.target().unwrap();
             let input: web_sys::HtmlInputElement = target.dyn_into().unwrap();
             if let Ok(val) = input.value().parse::<usize>() {
               if val >= start_fret.get_untracked() {

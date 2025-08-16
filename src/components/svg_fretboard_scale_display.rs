@@ -1,6 +1,8 @@
 use crate::components::fretboard::FretClickEvent;
 use crate::components::fretboard_visual_config::FretboardVisualConfig;
-use crate::components::musical_fretboard_config::{MusicalFretboardConfig, MusicalFretboardConfigSignals};
+use crate::components::musical_fretboard_config::{
+  MusicalFretboardConfig, MusicalFretboardConfigSignals,
+};
 use crate::components::svg_fretboard_with_notes::SvgFretboardWithNotes;
 use crate::fretboard_view_helper::calculate_fret_positions;
 use crate::music::notes::Note;
@@ -83,12 +85,12 @@ pub fn SvgFretboardScaleDisplay(
 ) -> impl IntoView {
   // Use provided config or create default
   let fretboard_config = config.unwrap_or_default();
-  
+
   // Convert config to signals for the underlying components
   let config_signals = MusicalFretboardConfigSignals::from(fretboard_config);
 
   // Use provided extra_frets or fall back to config value
-  let final_extra_frets = extra_frets.unwrap_or_else(|| config_signals.extra_frets);
+  let final_extra_frets = extra_frets.unwrap_or(config_signals.extra_frets);
 
   // Create visual config that updates with extra_frets
   let visual_config = Signal::derive({
@@ -98,17 +100,14 @@ pub fn SvgFretboardScaleDisplay(
     let fret_margin_percentage = config_signals.fret_margin_percentage;
     let nut_width = config_signals.nut_width;
     let marker_positions = config_signals.marker_positions;
-    move || {
-      FretboardVisualConfig {
-        num_strings: num_strings.get(),
-        max_frets: max_frets.get(),
-        svg_aspect_ratio: svg_aspect_ratio.get(),
-        fret_margin_percentage: fret_margin_percentage.get(),
-        nut_width: nut_width.get(),
-        extra_frets: final_extra_frets.get(),
-        marker_positions: marker_positions.get(),
-        ..Default::default()
-      }
+    move || FretboardVisualConfig {
+      num_strings: num_strings.get(),
+      max_frets: max_frets.get(),
+      svg_aspect_ratio: svg_aspect_ratio.get(),
+      fret_margin_percentage: fret_margin_percentage.get(),
+      nut_width: nut_width.get(),
+      extra_frets: final_extra_frets.get(),
+      marker_positions: marker_positions.get(),
     }
   });
 
@@ -169,7 +168,7 @@ fn ScaleNoteOverlays(
         viewBox=move || {
           let base_width = 800.0;
           let height = base_width / svg_aspect_ratio.get();
-          format!("0 0 {} {}", base_width, height)
+          format!("0 0 {base_width} {height}")
         }
         class="w-full h-full"
       >
@@ -191,11 +190,7 @@ fn ScaleNoteOverlays(
           let string_spacing = height / (current_num_strings as f64 + 1.0);
 
           // Calculate visible range using the same logic as SVG fretboard
-          let min_visible = if current_start_fret > current_extra_frets {
-            current_start_fret - current_extra_frets
-          } else {
-            0
-          };
+          let min_visible = current_start_fret.saturating_sub(current_extra_frets);
           let max_visible = (current_end_fret + current_extra_frets).min(22);
 
           // Calculate full fret positions (same as SVG fretboard)
@@ -227,7 +222,7 @@ fn ScaleNoteOverlays(
                 let note = base_note.add_steps(fret_idx);
 
                 if current_scale.contains_note(note) {
-                  let is_root = current_scale.root_note().map_or(false, |root| root == note);
+                  let is_root = current_scale.root_note() == Some(note);
 
                   // Calculate Y position (same as SVG fretboard string calculation)
                   let y = (string_idx as f64 + 1.0) * string_spacing;

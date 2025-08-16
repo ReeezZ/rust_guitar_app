@@ -72,7 +72,7 @@ RUSTFLAGS='--cfg getrandom_backend="wasm_js"' trunk serve --open
 #### (Short term) tasks
 
 - Switch between german and english note system
-
+- Consider using clippy for linting
 
 ### Future Ideas
 

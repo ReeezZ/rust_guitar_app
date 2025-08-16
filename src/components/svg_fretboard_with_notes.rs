@@ -83,7 +83,7 @@ pub fn SvgFretboardWithNotes(
   config: Option<Signal<FretboardVisualConfig>>,
 ) -> impl IntoView {
   // Use default tuning if not provided (standard guitar tuning)
-  let tuning = tuning.unwrap_or_else(|| Signal::derive(move || FretboardModel::standard_tuning()));
+  let tuning = tuning.unwrap_or_else(|| Signal::derive(FretboardModel::standard_tuning));
 
   // Handle coordinate-to-note conversion
   let on_svg_fret_clicked = Callback::new(move |svg_event: SvgFretClickEvent| {
@@ -115,7 +115,7 @@ pub fn SvgFretboardWithNotes(
     <SvgFretboard
       start_fret=start_fret
       end_fret=end_fret
-      config=config.unwrap_or_else(|| Signal::derive(|| FretboardVisualConfig::default()))
+      config=config.unwrap_or_else(|| Signal::derive(FretboardVisualConfig::default))
       on_fret_clicked=on_svg_fret_clicked
     />
   }

@@ -35,6 +35,16 @@ pub fn NavbarLinks() -> impl IntoView {
       </li>
       <li>
         <a
+          href="/exercises"
+          class=move || {
+            if pathname() == "/exercises" { "nav-link active" } else { "nav-link" }
+          }
+        >
+          <span>Exercises</span>
+        </a>
+      </li>
+      <li>
+        <a
           href="/fretboard_trainer"
           class=move || {
             if pathname() == "/fretboard_trainer" { "nav-link active" } else { "nav-link" }

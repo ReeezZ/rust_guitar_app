@@ -4,8 +4,8 @@
 /// exposed as interactive controls, allowing users to experiment with different
 /// settings in real-time and understand their effects.
 use crate::components::{
-  fretboard::FretClickEvent, svg_fretboard_with_notes::SvgFretboardWithNotes,
-  fretboard_visual_config::FretboardVisualConfig,
+  fretboard::FretClickEvent, fretboard_visual_config::FretboardVisualConfig,
+  svg_fretboard_with_notes::SvgFretboardWithNotes,
 };
 use leptos::{logging::log, prelude::*};
 

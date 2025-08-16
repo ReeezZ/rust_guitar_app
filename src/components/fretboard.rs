@@ -79,7 +79,7 @@ fn FretboardString(
       <div class="flex relative grow">
         <div
           class="absolute right-0 -left-60 top-1/2 z-20 -translate-y-1/2 pointer-events-none drop-shadow-[0_2px_2px_rgba(0,0,0,0.6)] bg-[repeating-linear-gradient(45deg,_#dddddd,_#555555_2px,_#333333_2px)]"
-          style:height=move || format!("{}px", string_strength)
+          style:height=move || format!("{string_strength}px")
         ></div>
 
         {move || {
@@ -90,7 +90,7 @@ fn FretboardString(
               view! {
                 <div class="flex relative justify-center items-center mx-3 w-8 h-12 text-center bg-transparent grow fretbar-container">
                   <FretboardNote
-                    note=string_note.add_steps(fret_no as usize)
+                    note=string_note.add_steps(fret_no)
                     coord=FretCoord {
                       string_idx: string_no,
                       fret_idx: fret_no as u8,
@@ -144,8 +144,7 @@ fn FretboardNote(
                 <span class="relative z-20 font-bold text-center text-white transition-transform cursor-pointer hover:scale-110 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] active:scale-[98%]">
                   <span class=move || {
                     format!(
-                      "absolute inset-0 z-10 w-full h-full rounded-full opacity-50 {}",
-                      bg_css_str,
+                      "absolute inset-0 z-10 w-full h-full rounded-full opacity-50 {bg_css_str}",
                     )
                   }></span>
                   <span class="relative z-20">{note.to_string()}</span>

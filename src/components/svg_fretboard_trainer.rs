@@ -1,6 +1,8 @@
 use crate::components::fretboard::FretClickEvent;
 use crate::components::fretboard_visual_config::FretboardVisualConfig;
-use crate::components::musical_fretboard_config::{MusicalFretboardConfig, MusicalFretboardConfigSignals};
+use crate::components::musical_fretboard_config::{
+  MusicalFretboardConfig, MusicalFretboardConfigSignals,
+};
 use crate::components::svg_fretboard_with_notes::SvgFretboardWithNotes;
 use crate::fretboard_view_helper::calculate_fret_positions;
 use crate::models::fretboard_model::FretCoord;
@@ -52,10 +54,10 @@ pub fn SvgFretboardTrainer(
   reference_note_name: Signal<Option<Note>>,
   /// Coordinates of incorrect guesses to highlight in red
   error_notes: Signal<Vec<FretCoord>>,
-  /// Notes at the error coordinates (for display) 
+  /// Notes at the error coordinates (for display)
   error_note_names: Signal<Vec<Note>>,
-  
-  // Configuration and interaction  
+
+  // Configuration and interaction
   /// Fretboard visual configuration (optional, uses defaults if not provided)
   #[prop(optional)]
   config: Option<MusicalFretboardConfig>,
@@ -68,14 +70,14 @@ pub fn SvgFretboardTrainer(
 ) -> impl IntoView {
   // Use provided config or create default
   let fretboard_config = config.unwrap_or_default();
-  
+
   // Convert config to signals for the underlying components
   let config_signals = MusicalFretboardConfigSignals::from(fretboard_config);
 
   // Use provided fret_range or default to 0..=5
   let final_fret_range = fret_range.unwrap_or_else(|| Signal::derive(|| 0..=5));
 
-  // Create visual config 
+  // Create visual config
   let visual_config = Signal::derive({
     let num_strings = config_signals.num_strings;
     let max_frets = config_signals.max_frets;
@@ -112,37 +114,52 @@ pub fn SvgFretboardTrainer(
     let config = visual_config;
     let start = start_fret;
     let end = end_fret;
-    
+
     move || {
       let cfg = config.get();
       let start_f = start.get();
       let end_f = end.get();
-      
+
       // SVG dimensions (matching the main component)
       let svg_width = 1000.0;
       let svg_height = 300.0;
-      
+
       // Calculate fret positions
       let scale_length = svg_width - cfg.nut_width;
       let positions = calculate_fret_positions(scale_length, cfg.max_frets as u8);
-      
+
       // Calculate visible range with extra context
-      let min_fret = if start_f > cfg.extra_frets { start_f - cfg.extra_frets } else { 0 };
+      let min_fret = start_f.saturating_sub(cfg.extra_frets);
       let max_fret = (end_f + cfg.extra_frets).min(cfg.max_frets);
-      
+
       // Calculate zoom transform
       let has_nut = min_fret == 0;
       let range_start = if has_nut { 0.0 } else { positions[min_fret] };
       let range_end = positions[max_fret];
       let range_width = range_end - range_start;
-      
-      let available_width = if has_nut { svg_width - cfg.nut_width } else { svg_width };
+
+      let available_width = if has_nut {
+        svg_width - cfg.nut_width
+      } else {
+        svg_width
+      };
       let scale_factor = available_width / range_width;
-      
+
       // String spacing
       let string_spacing = svg_height / (cfg.num_strings as f64 + 1.0);
-      
-      (positions, min_fret, max_fret, has_nut, range_start, scale_factor, cfg.nut_width, string_spacing, svg_width, svg_height)
+
+      (
+        positions,
+        min_fret,
+        max_fret,
+        has_nut,
+        range_start,
+        scale_factor,
+        cfg.nut_width,
+        string_spacing,
+        svg_width,
+        svg_height,
+      )
     }
   });
 
@@ -168,9 +185,9 @@ pub fn SvgFretboardTrainer(
           }.into_any()
         }
       }}
-      
+
       // Overlay SVG for reference and error highlights
-      <svg 
+      <svg
         class="absolute top-0 left-0 w-full h-full pointer-events-none"
         viewBox="0 0 1000 300"
         xmlns="http://www.w3.org/2000/svg"
@@ -179,7 +196,7 @@ pub fn SvgFretboardTrainer(
         {move || {
           reference_note.get().map(|coord| {
             let (positions, _min_fret, _max_fret, has_nut, range_start, scale_factor, nut_width, string_spacing, _svg_width, _svg_height) = position_data.get();
-            
+
             // Calculate position using the same logic as the main component
             let x = if coord.fret_idx == 0 {
               // Nut position
@@ -190,14 +207,14 @@ pub fn SvgFretboardTrainer(
               let x_prev = if fret_idx == 0 { 0.0 } else { positions[(fret_idx - 1).max(0)] };
               let x_curr = positions[fret_idx];
               let x_center = (x_prev + x_curr) / 2.0;
-              
+
               // Apply zoom transform
               let offset = if has_nut { nut_width } else { 0.0 };
               offset + (x_center - range_start) * scale_factor
             };
-            
+
             let y = string_spacing * (coord.string_idx as f64 + 1.0);
-            
+
             view! {
               <g>
                 <circle
@@ -225,15 +242,15 @@ pub fn SvgFretboardTrainer(
             }
           })
         }}
-        
+
         // Error note highlights (red)
         {move || {
           let coords = error_notes.get();
           let names = error_note_names.get();
-          
+
           coords.into_iter().enumerate().map(|(idx, coord)| {
             let (positions, _min_fret, _max_fret, has_nut, range_start, scale_factor, nut_width, string_spacing, _svg_width, _svg_height) = position_data.get();
-            
+
             // Calculate position using the same logic as the main component
             let x = if coord.fret_idx == 0 {
               // Nut position
@@ -244,15 +261,15 @@ pub fn SvgFretboardTrainer(
               let x_prev = if fret_idx == 0 { 0.0 } else { positions[(fret_idx - 1).max(0)] };
               let x_curr = positions[fret_idx];
               let x_center = (x_prev + x_curr) / 2.0;
-              
+
               // Apply zoom transform
               let offset = if has_nut { nut_width } else { 0.0 };
               offset + (x_center - range_start) * scale_factor
             };
-            
+
             let y = string_spacing * (coord.string_idx as f64 + 1.0);
             let note_name = names.get(idx).map(|n| n.to_string()).unwrap_or_else(|| "?".to_string());
-            
+
             view! {
               <g>
                 <circle

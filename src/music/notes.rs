@@ -1,6 +1,6 @@
 use std::{fmt, str::FromStr};
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum Note {
   C,
   CSharpOrDFlat,
@@ -36,7 +36,7 @@ impl Note {
   }
 
   pub const fn mapping() -> &'static [(Note, &'static str)] {
-    static MAPPING: [(Note, &'static str); 12] = [
+    static MAPPING: [(Note, &str); 12] = [
       (Note::C, "C"),
       (Note::CSharpOrDFlat, "C♯/D♭"),
       (Note::D, "D"),
@@ -70,7 +70,7 @@ impl fmt::Display for Note {
       .unwrap()
       .to_string();
 
-    write!(f, "{}", note_str)
+    write!(f, "{note_str}")
   }
 }
 

@@ -1,6 +1,6 @@
 use crate::components::{
-  fretboard::FretClickEvent,
   fret_range_selector::FretRangeSelector,
+  fretboard::FretClickEvent,
   music_selectors::{NoteSelector, ScaleTypeSelector},
   musical_fretboard_config::MusicalFretboardConfig,
   svg_fretboard_scale_display::SvgFretboardScaleDisplay,
@@ -15,7 +15,7 @@ use leptos::{logging::log, prelude::*, wasm_bindgen::JsCast};
 pub fn SvgFretboardScalePage() -> impl IntoView {
   // Single fret range control (replaces start_fret and end_fret)
   let fret_range = RwSignal::new(0..=7_usize);
-  
+
   // Extra frets for visual context
   let extra_frets = RwSignal::new(2_usize);
 
@@ -68,7 +68,7 @@ pub fn SvgFretboardScalePage() -> impl IntoView {
           Some(event) => {
             format!(
               "{} - String {} - Fret {}",
-              event.note.to_string(),
+              event.note,
               event.coord.string_idx + 1,
               event.coord.fret_idx,
             )
