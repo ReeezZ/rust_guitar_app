@@ -58,8 +58,8 @@ impl Default for LocalStorageExerciseRepository {
 
 impl ExerciseRepository for LocalStorageExerciseRepository {
   fn save(&self, exercise: &Exercise) -> Result<(), RepositoryError> {
-    crate::models::storage::save_exercise(exercise);
-    Ok(())
+    crate::models::storage::save_exercise(exercise)
+      .map_err(RepositoryError::ValidationError)
   }
   
   fn update(&self, exercise: &Exercise) -> Result<(), RepositoryError> {
@@ -68,8 +68,8 @@ impl ExerciseRepository for LocalStorageExerciseRepository {
   }
   
   fn delete(&self, id: &str) -> Result<(), RepositoryError> {
-    crate::models::storage::delete_exercise(id);
-    Ok(())
+    crate::models::storage::delete_exercise(id)
+      .map_err(RepositoryError::ValidationError)
   }
   
   fn find_by_id(&self, id: &str) -> Result<Option<Exercise>, RepositoryError> {
