@@ -41,6 +41,9 @@
     "/^Remove-Item\\b/i": false,
     "cargo check": true,
     "cargo build": true,
-    "/^cargo test/": true
+    "/^cargo test/": true,
+    "/^git diff/": true,
+    "/^git show/": true,
+    "/^git log/": true
   },
 }
