@@ -132,18 +132,13 @@ pub fn ScaleTypeSelector(
               <option
                 value=option_val
                 selected=move || {
-                  match (value.get(), current_scale_type) {
-                    (
+                  matches!((value.get(), current_scale_type), (
                       ScaleType::Hepatonic(HeptaScaleType::Major),
                       ScaleType::Hepatonic(HeptaScaleType::Major),
-                    ) => true,
-                    (
+                    ) | (
                       ScaleType::Hepatonic(HeptaScaleType::Minor),
                       ScaleType::Hepatonic(HeptaScaleType::Minor),
-                    ) => true,
-                    (ScaleType::Chromatic, ScaleType::Chromatic) => true,
-                    _ => false,
-                  }
+                    ) | (ScaleType::Chromatic, ScaleType::Chromatic))
                 }
               >
                 {display_txt}

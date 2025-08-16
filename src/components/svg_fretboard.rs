@@ -460,34 +460,13 @@ pub fn SvgFretboard(
   let config_signal = config.unwrap_or_else(|| Signal::derive(FretboardVisualConfig::default));
 
   // Create reactive signals from config values - using clone since Signal is Copy
-  let num_strings = Signal::derive({
-    let config_signal = config_signal;
-    move || config_signal.get().num_strings
-  });
-  let max_frets = Signal::derive({
-    let config_signal = config_signal;
-    move || config_signal.get().max_frets
-  });
-  let svg_aspect_ratio = Signal::derive({
-    let config_signal = config_signal;
-    move || config_signal.get().svg_aspect_ratio
-  });
-  let fret_margin_percentage = Signal::derive({
-    let config_signal = config_signal;
-    move || config_signal.get().fret_margin_percentage
-  });
-  let nut_width = Signal::derive({
-    let config_signal = config_signal;
-    move || config_signal.get().nut_width
-  });
-  let extra_frets = Signal::derive({
-    let config_signal = config_signal;
-    move || config_signal.get().extra_frets
-  });
-  let marker_positions = Signal::derive({
-    let config_signal = config_signal;
-    move || config_signal.get().marker_positions.clone()
-  });
+  let num_strings = Signal::derive(move || config_signal.get().num_strings);
+  let max_frets = Signal::derive(move || config_signal.get().max_frets);
+  let svg_aspect_ratio = Signal::derive(move || config_signal.get().svg_aspect_ratio);
+  let fret_margin_percentage = Signal::derive(move || config_signal.get().fret_margin_percentage);
+  let nut_width = Signal::derive(move || config_signal.get().nut_width);
+  let extra_frets = Signal::derive(move || config_signal.get().extra_frets);
+  let marker_positions = Signal::derive(move || config_signal.get().marker_positions.clone());
 
   let num_frets = Memo::new(move |_| end_fret.get().max(max_frets.get()));
 
@@ -618,8 +597,7 @@ pub fn SvgFretboard(
             />
 
             // Render clickable areas if callback is provided
-            {if let Some(callback) = on_fret_clicked {
-              Some(view! {
+            {on_fret_clicked.map(|callback| view! {
                 <FretboardClickableAreas
                   min_fret=min_f
                   max_fret=max_f
@@ -631,10 +609,7 @@ pub fn SvgFretboard(
                   nut_width=current_nut_width
                   on_fret_clicked=callback
                 />
-              })
-            } else {
-              None
-            }}
+               })}
           }
         }}
       </svg>

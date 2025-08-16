@@ -1,4 +1,6 @@
 use crate::music::notes::Note;
+use std::fmt;
+use std::str::FromStr;
 
 use super::heptatonic_scales::{HeptaScaleImpl, HeptaScaleType};
 
@@ -9,23 +11,6 @@ pub enum ScaleType {
 }
 
 impl ScaleType {
-  pub fn from_str(s: &str) -> Option<ScaleType> {
-    // TODO this is not so nice for maintainability
-    match s {
-      "Major" => Some(ScaleType::Hepatonic(HeptaScaleType::Major)),
-      "Minor" => Some(ScaleType::Hepatonic(HeptaScaleType::Minor)),
-      "Chromatic" => Some(ScaleType::Chromatic),
-      _ => None,
-    }
-  }
-
-  pub fn to_string(&self) -> String {
-    match self {
-      ScaleType::Hepatonic(hepta_scale_type) => hepta_scale_type.to_string(),
-      ScaleType::Chromatic => "Chromatic".to_string(),
-    }
-  }
-
   pub fn all_scale_types() -> Vec<ScaleType> {
     // TODO this is not so nice for maintainability
 
@@ -34,6 +19,28 @@ impl ScaleType {
       .map(|&hepta_scale_type| ScaleType::Hepatonic(hepta_scale_type))
       .chain(Some(ScaleType::Chromatic))
       .collect()
+  }
+}
+
+impl FromStr for ScaleType {
+  type Err = String;
+
+  fn from_str(s: &str) -> Result<Self, Self::Err> {
+    match s {
+      "Major" => Ok(ScaleType::Hepatonic(HeptaScaleType::Major)),
+      "Minor" => Ok(ScaleType::Hepatonic(HeptaScaleType::Minor)),
+      "Chromatic" => Ok(ScaleType::Chromatic),
+      _ => Err(format!("Unknown scale type: {s}")),
+    }
+  }
+}
+
+impl fmt::Display for ScaleType {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match self {
+      ScaleType::Hepatonic(hepta_scale_type) => write!(f, "{hepta_scale_type}"),
+      ScaleType::Chromatic => write!(f, "Chromatic"),
+    }
   }
 }
 
@@ -49,14 +56,14 @@ pub enum Scale {
 pub trait ScaleTrait: ToString {
   fn contains_note(&self, note: Note) -> bool;
   fn root_note(&self) -> Option<Note>;
-  fn new(root_note: Note, scale_type: ScaleType) -> Scale;
+  fn new(root_note: Note, scale_type: ScaleType) -> Self;
 }
 
-impl ToString for Scale {
-  fn to_string(&self) -> String {
+impl fmt::Display for Scale {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     match self {
-      Scale::Heptatonic(scale) => scale.to_string(),
-      Scale::Chromatic => "Chromatic".to_string(),
+      Scale::Heptatonic(scale) => write!(f, "{scale}"),
+      Scale::Chromatic => write!(f, "Chromatic"),
     }
   }
 }

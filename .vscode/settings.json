@@ -44,6 +44,7 @@
     "/^cargo test/": true,
     "/^git diff/": true,
     "/^git show/": true,
-    "/^git log/": true
+    "/^git log/": true,
+    "/^cargo clippy/": true
   },
 }

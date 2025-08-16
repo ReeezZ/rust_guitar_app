@@ -1,7 +1,9 @@
 use std::ops::Index;
 
 use super::intervals::Interval;
-use super::notes::Note;
+use std::fmt;
+
+use crate::music::notes::Note;
 use super::scales::ScaleTrait;
 
 #[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -32,15 +34,17 @@ pub enum HeptaScaleType {
 // Use the ToStr trait from the standard library
 
 impl HeptaScaleType {
-  pub fn to_string(&self) -> String {
-    match self {
-      HeptaScaleType::Major => "Major".to_string(),
-      HeptaScaleType::Minor => "Minor".to_string(),
-    }
-  }
-
   pub fn all_scale_types() -> Vec<HeptaScaleType> {
     vec![HeptaScaleType::Major, HeptaScaleType::Minor]
+  }
+}
+
+impl fmt::Display for HeptaScaleType {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match self {
+      HeptaScaleType::Major => write!(f, "Major"),
+      HeptaScaleType::Minor => write!(f, "Minor"),
+    }
   }
 }
 
@@ -123,11 +127,13 @@ impl HeptaScaleImpl {
   pub fn root_note(&self) -> Note {
     self.notes[0]
   }
+}
 
-  pub fn to_string(&self) -> String {
+impl fmt::Display for HeptaScaleImpl {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     match self.scale_type {
-      HeptaScaleType::Major => format!("{root} Major", root = self.root_note()),
-      HeptaScaleType::Minor => format!("{root} Minor", root = self.root_note()),
+      HeptaScaleType::Major => write!(f, "{} Major", self.root_note()),
+      HeptaScaleType::Minor => write!(f, "{} Minor", self.root_note()),
     }
   }
 }

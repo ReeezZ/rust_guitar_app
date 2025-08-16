@@ -94,7 +94,7 @@ impl std::fmt::Display for ExerciseType {
           f,
           "{} {} (frets {}-{})",
           root_note,
-          scale_type.to_string(),
+          scale_type,
           fret_range.0,
           fret_range.1
         )
@@ -108,7 +108,7 @@ impl std::fmt::Display for ExerciseType {
           f,
           "{} {} Triad (frets {}-{})",
           root_note,
-          scale_type.to_string(),
+          scale_type,
           fret_range.0,
           fret_range.1
         )

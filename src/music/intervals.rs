@@ -1,6 +1,6 @@
 use crate::music::notes::Note;
+use std::fmt;
 use strum_macros::EnumIter;
-use ToString;
 
 #[derive(Clone, Copy, PartialEq, EnumIter)]
 pub enum Interval {
@@ -43,22 +43,22 @@ impl Interval {
   }
 }
 
-impl ToString for Interval {
-  fn to_string(&self) -> String {
+impl fmt::Display for Interval {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     match self {
-      Interval::Unison => "Unison".to_string(),
-      Interval::MinorSecond => "Minor Second".to_string(),
-      Interval::MajorSecond => "Major Second".to_string(),
-      Interval::MinorThird => "Minor Third".to_string(),
-      Interval::MajorThird => "Major Third".to_string(),
-      Interval::PerfectFourth => "Perfect Fourth".to_string(),
-      Interval::Tritone => "Tritone".to_string(),
-      Interval::PerfectFifth => "Perfect Fifth".to_string(),
-      Interval::MinorSixth => "Minor Sixth".to_string(),
-      Interval::MajorSixth => "Major Sixth".to_string(),
-      Interval::MinorSeventh => "Minor Seventh".to_string(),
-      Interval::MajorSeventh => "Major Seventh".to_string(),
-      Interval::Octave => "Octave".to_string(),
+      Interval::Unison => write!(f, "Unison"),
+      Interval::MinorSecond => write!(f, "Minor Second"),
+      Interval::MajorSecond => write!(f, "Major Second"),
+      Interval::MinorThird => write!(f, "Minor Third"),
+      Interval::MajorThird => write!(f, "Major Third"),
+      Interval::PerfectFourth => write!(f, "Perfect Fourth"),
+      Interval::Tritone => write!(f, "Tritone"),
+      Interval::PerfectFifth => write!(f, "Perfect Fifth"),
+      Interval::MinorSixth => write!(f, "Minor Sixth"),
+      Interval::MajorSixth => write!(f, "Major Sixth"),
+      Interval::MinorSeventh => write!(f, "Minor Seventh"),
+      Interval::MajorSeventh => write!(f, "Major Seventh"),
+      Interval::Octave => write!(f, "Octave"),
     }
   }
 }
