@@ -1,7 +1,7 @@
 use crate::components::exercise_form::{ExerciseForm, FormMode};
 use crate::components::practice_timer::PracticeTimer;
 use crate::models::exercise::Exercise;
-use crate::models::storage::{load_exercise_by_id, update_exercise};
+use crate::models::repository::{get_exercise_repository, ExerciseRepository};
 use leptos::prelude::*;
 use leptos_router::hooks::use_params_map;
 
@@ -22,7 +22,8 @@ pub fn ExerciseDetail() -> impl IntoView {
   Effect::new(move |_| {
     let id = exercise_id();
     if !id.is_empty() {
-      if let Some(ex) = load_exercise_by_id(&id) {
+      let repo = get_exercise_repository();
+      if let Ok(Some(ex)) = repo.find_by_id(&id) {
         set_exercise.set(Some(ex));
       }
     }
@@ -55,7 +56,8 @@ pub fn ExerciseDetail() -> impl IntoView {
       };
 
       // Update in storage
-      if let Ok(()) = update_exercise(&ex) {
+      let repo = get_exercise_repository();
+      if let Ok(()) = repo.update(&ex) {
         set_exercise.set(Some(ex));
         set_is_editing_description.set(false);
       }

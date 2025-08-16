@@ -1,7 +1,7 @@
 use crate::components::svg_fretboard_scale_display::SvgFretboardScaleDisplay;
 use crate::models::{
   exercise::{Exercise, ExerciseType},
-  storage,
+  repository::{get_exercise_repository, ExerciseRepository},
 };
 use crate::music::{heptatonic_scales::HeptaScaleType, notes::Note, scales::ScaleType};
 use leptos::prelude::*;
@@ -109,7 +109,8 @@ pub fn ExerciseForm(
           None
         };
 
-        if storage::exercise_name_exists(&name_val, exclude_id) {
+        let repo = get_exercise_repository();
+        if repo.name_exists(&name_val, exclude_id).unwrap_or(false) {
           validation_errors.push("An exercise with this name already exists".to_string());
         }
       }
@@ -204,12 +205,16 @@ pub fn ExerciseForm(
     console::log_1(&format!("Saving exercise: {:?}", exercise).into());
 
     // Save to storage
+    let repo = get_exercise_repository();
     match &mode_for_save {
       FormMode::Create => {
-        storage::save_exercise(&exercise);
+        if let Err(e) = repo.save(&exercise) {
+          set_errors.set(vec![format!("Failed to save exercise: {}", e)]);
+          return;
+        }
       }
       FormMode::Edit(_) => {
-        if let Err(e) = storage::update_exercise(&exercise) {
+        if let Err(e) = repo.update(&exercise) {
           set_errors.set(vec![format!("Failed to update exercise: {}", e)]);
           return;
         }

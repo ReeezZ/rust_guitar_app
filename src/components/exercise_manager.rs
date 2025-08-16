@@ -1,10 +1,13 @@
 use crate::components::exercise_form::{ExerciseForm, FormMode};
-use crate::models::{exercise::Exercise, storage};
+use crate::models::{exercise::Exercise, repository::{get_exercise_repository, ExerciseRepository}};
 use leptos::prelude::*;
 
 #[component]
 pub fn ExerciseManager() -> impl IntoView {
-  let (exercises, set_exercises) = signal(storage::load_exercises());
+  let (exercises, set_exercises) = signal({
+    let repo = get_exercise_repository();
+    repo.find_all().unwrap_or_default()
+  });
   let (show_form, set_show_form) = signal(false);
   let (show_delete_confirmation, set_show_delete_confirmation) = signal(false);
   let (pending_delete_exercise, set_pending_delete_exercise) = signal(None::<(String, String)>);
@@ -18,7 +21,8 @@ pub fn ExerciseManager() -> impl IntoView {
   // Confirm deletion
   let confirm_delete = move || {
     if let Some((exercise_id, _)) = pending_delete_exercise.get() {
-      storage::delete_exercise(&exercise_id);
+      let repo = get_exercise_repository();
+      let _ = repo.delete(&exercise_id); // Ignore errors for now
       set_exercises.update(|exercises| exercises.retain(|e| e.id != exercise_id));
       set_show_delete_confirmation.set(false);
       set_pending_delete_exercise.set(None);

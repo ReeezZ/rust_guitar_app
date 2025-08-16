@@ -116,20 +116,7 @@ Build a **personal guitar practice tracker** that makes it easy to log practice 
 #### Missing
 
 - Do another review session of the existing code
-- Think about an interface for storage
-  - currently the functions are used directly
 
-#### Current Tasks / Improvement ideas
-
-- exercise form:s
-  - Prevent start fret > end fret
-  - For scales
-- exercise list
-  - confirmation before delete
-- exercise details
-  - make the description inline editable.
-  - Future idea:
-    - Add notes and then we can display a history of the notes from the previous sessions with a timestamp
 
 #### Ready for Phase 1.5: Session Logging
 - **Basic Metronome** 🔜
