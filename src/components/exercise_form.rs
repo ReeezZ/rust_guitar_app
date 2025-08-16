@@ -1,9 +1,9 @@
+use crate::components::svg_fretboard_scale_display::SvgFretboardScaleDisplay;
 use crate::models::{
   exercise::{Exercise, ExerciseType},
   storage,
 };
 use crate::music::{heptatonic_scales::HeptaScaleType, notes::Note, scales::ScaleType};
-use crate::components::svg_fretboard_scale_display::SvgFretboardScaleDisplay;
 use leptos::prelude::*;
 use web_sys::console;
 
