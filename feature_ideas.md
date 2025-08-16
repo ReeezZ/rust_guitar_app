@@ -139,10 +139,16 @@ Build a **personal guitar practice tracker** that makes it easy to log practice 
   - Simple charts and graphs
 
 #### Architecture Notes
-- Design local storage abstraction that can be swapped for backend
-- Research simple self-hosting options (Axum + database choice)
-- GDPR considerations for friend accounts (research needed)
-- Data migration likely not needed (minimal local data expected)
+- **Project Structure**: Migrate to Rust workspace with multiple crates
+  - `shared` crate: Domain models (Exercise, Note, Scale) + DTOs for serialization
+  - `backend` crate: Axum server, use cases, business logic
+  - `frontend` crate: Current Leptos app (renamed from root)
+  - `infrastructure` crate: Database, external APIs (optional initially)
+- **Clean Architecture**: Separate domain models from serialization concerns using DTOs
+- **Storage Abstraction**: Design local storage that can be swapped for backend API calls
+- **Self-hosting**: Research simple deployment options (Axum + SQLite/PostgreSQL)
+- **Data Migration**: Convert current localStorage to DTO pattern, then to backend
+- **GDPR Considerations**: Friend accounts research needed for multi-user features
 
 ---
 
