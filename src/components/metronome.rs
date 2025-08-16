@@ -9,12 +9,6 @@ pub enum MetronomeState {
   Running,
 }
 
-#[wasm_bindgen]
-extern "C" {
-  #[wasm_bindgen(js_namespace = console)]
-  fn log(s: &str);
-}
-
 #[component]
 pub fn Metronome(
   /// BPM (beats per minute) signal
@@ -194,7 +188,7 @@ fn play_click(is_accent: bool) {
       gain.gain().set_value(0.2);
     }
 
-    oscillator.set_type(OscillatorType::Sine);
+    oscillator.set_type(OscillatorType::Square);
 
     // Start and stop the oscillator for a short click
     let current_time = ctx.current_time();
