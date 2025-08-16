@@ -86,14 +86,27 @@ pub fn ExerciseForm(
   let (show_type_change_warning, set_show_type_change_warning) = signal(false);
   let (pending_type_change, set_pending_type_change) = signal(None::<String>);
 
-  // Check if exercise type has changed (for edit mode warning)
-  let type_changed = {
-    let mode_clone = mode_for_validation.clone();
-    move || {
-      if let FormMode::Edit(ref original) = mode_clone {
-        exercise_type_str.get() != original.exercise_type.type_name()
+  // Check if changing exercise type would reset type-specific settings
+  let mode_for_type_check = mode_for_validation.clone();
+  let would_lose_data = {
+    move |new_type: &str| -> bool {
+      let current_type = exercise_type_str.get();
+      
+      // Check if we're changing from a type with specific settings (Scale/Triad) 
+      // to a type without them (Technique/Song) or vice versa
+      let current_has_settings = current_type == "Scale" || current_type == "Triad";
+      let new_has_settings = new_type == "Scale" || new_type == "Triad";
+      
+      // Show warning if:
+      // 1. We're in edit mode and the type is different from original, OR
+      // 2. We're changing between types with different data requirements
+      if let FormMode::Edit(ref original) = mode_for_type_check {
+        // In edit mode: show warning if type differs from original
+        current_type != original.exercise_type.type_name()
       } else {
-        false
+        // In create mode: show warning if changing between types with different data requirements
+        // and we currently have settings that would be lost
+        current_has_settings && !new_has_settings && current_type != new_type
       }
     }
   };
@@ -140,7 +153,7 @@ pub fn ExerciseForm(
 
   // Handle exercise type change
   let handle_type_change = move |new_type: String| {
-    if type_changed() {
+    if would_lose_data(&new_type) {
       set_pending_type_change.set(Some(new_type));
       set_show_type_change_warning.set(true);
     } else {
