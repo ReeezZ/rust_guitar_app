@@ -10,32 +10,41 @@ Build a **personal guitar practice tracker** that makes it easy to log practice 
 ## User Story
 *As a guitar player, I want to easily select what I'm practicing, start a timer with metronome, and automatically track my progress so that I can stay motivated and see my improvement over time.*
 
-## Current Status - August 2025
+### 🚧 Current Status - August 2025
 
-### ✅ Completed (Phase 0.5)
-- **Exercise Management Foundation**
+#### ✅ Completed (Phase 0.5 + Phase 1)
+- **Exercise Management Foundation** ✅
   - Type-safe Exercise model with Scale, Triad, Technique, Song variants
   - Exercise creation, listing, deletion with localStorage persistence
   - Clean /exercises UI with form and navigation integration
   - WASM-compatible architecture with js-sys timestamps
+  - Individual exercise loading and detail pages with real data
 
-### 🚧 In Progress (Phase 1)
-- **Practice Timer & Session Logging** - Core functionality needed for actual practice tracking
+- **Practice Timer System** ✅
+  - Count-up timer with 15-minute default target
+  - Start/pause/stop functionality with leptos-use intervals
+  - Visual feedback when target time reached
+  - Integrated into exercise detail workflow
+  - Clean layout with exercise info above timer
+
+#### 🔜 Next Up (Phase 1.5: Session Logging)
 - **Basic Metronome** - Essential for rhythm practice
 - **Session History** - Track practice over time
+- **Session Auto-save** - Automatic logging of practice sessions
 
-### 🔮 Planned (Phase 2+)
+#### 🔮 Planned (Phase 2+)
 - **Enhanced UI/UX** - Better exercise management, fretboard integration
 - **Backend & Analytics** - Data persistence and progress tracking  
 - **Advanced Features** - Routines, gamification, mobile support
 
 ## Core Workflow
 1. **Select Exercise** ✅ - Choose what to practice (scales, triads, technique, songs)
-2. **Configure Practice** 🚧 - Set key, position, target time (optional) 
-3. **Start Session** 🚧 - Timer counts up, metronome provides rhythm
-4. **Practice** 🚧 - Focus on playing, minimal app interaction needed
-5. **Finish & Save** 🚧 - Session automatically logged with all details
-6. **Review Progress** 🚧 - View practice history and trends over time
+2. **View Exercise Details** ✅ - See exercise type, description, fret range
+3. **Start Practice Session** ✅ - Timer counts up, visual target feedback
+4. **Practice** ✅ - Focus on playing, minimal app interaction needed
+5. **Stop Session** ✅ - Manual stop when practice complete
+6. **Session Logging** 🔜 - Auto-save session with details (next phase)
+7. **Review Progress** � - View practice history and trends over time
 
 ---
 
@@ -43,51 +52,116 @@ Build a **personal guitar practice tracker** that makes it easy to log practice 
 
 ### Phase 0.5: Exercise Management Foundation ✅ COMPLETE
 **Goal:** Build exercise CRUD system as foundation for practice tracking  
-**Status:** Completed August 2025 - Commit a951287
+**Status:** Complete - August 2025
 
-#### Completed Features ✅
+#### ✅ Completed Features
 - **Exercise Management**
   - Simple exercise types: Scales, Triads, Technique, Songs ✅
-  - Each exercise has: name, type (key/position in data model but not UI yet) ✅
-  - CRUD operations: Create ✅, Read ✅, Delete ✅ (Update pending)
-  - Local storage persistence ✅
+  - Each exercise has: name, type, optional description ✅
+  - CRUD operations: Create ✅, List ✅, Delete ✅, Read ✅
+  - Local storage persistence with serde serialization ✅
+  - Individual exercise lookup by ID ✅
   
-#### UI Components ✅
+#### ✅ UI Components
 - Exercise list/selector ✅
-- Simple exercise creation form ✅
+- Exercise creation form with type selection ✅
 - /exercises route with navigation ✅
+- Exercise detail page with routing and real data loading ✅
 
-#### Technical Implementation ✅
+#### ✅ Technical Implementation
 - Type-safe Exercise domain model with Rust enums ✅
 - WASM-compatible ID generation using js-sys::Date ✅
-- Simple localStorage functions (no complex traits) ✅
-- Leptos 0.7 reactive components ✅
+- Full serde integration across music domain models ✅
+- Leptos 0.7 reactive components with correct API patterns ✅
+- Proper WASM configuration in .cargo/config.toml ✅
+
+#### ✅ Critical Issues Fixed (Aug 16, 2025)
+- **Exercise Detail Loading** - Now loads actual exercise data instead of mock ✅
+- **Storage.load_exercise_by_id()** - Implemented for individual exercise lookup ✅
+- **Timer Configuration** - Set to 5-minute default for realistic practice sessions ✅
+- **Layout Issues** - Clean exercise details above compact timer section ✅
+- **WASM Build Issues** - Proper getrandom configuration for browser compatibility ✅
 
 ---
 
-### Phase 1: Core Practice Tracking 🚧 NEXT
+### Phase 1: Core Practice Tracking ✅ PHASE 1 COMPLETE
 **Goal:** Complete basic timer + session tracking to make app actually useful for practice
 
-#### Remaining Core Features
-- **Practice Timer**
-  - Count-up timer (shows elapsed time)
-  - Optional target time (timer turns green when reached)
-  - Start/pause/stop functionality
-  
-- **Basic Metronome**
+#### ✅ Completed Core Features
+- **Practice Timer** ✅
+  - Count-up timer (shows elapsed time) ✅
+  - 5-minute default target time for realistic practice sessions ✅
+  - Start/pause/stop functionality ✅
+  - Built with leptos-use for reliable intervals ✅
+  - Visual feedback when target time is reached ✅
+
+- **Exercise Detail Integration** ✅
+  - Fixed exercise detail page to load real exercise data ✅
+  - Implemented load_exercise_by_id() function in storage layer ✅
+  - Updated component to use correct Exercise model fields ✅
+  - Clean layout with exercise info above timer ✅
+  - Practice timer integrated into exercise detail workflow ✅
+
+- **Technical Foundation** ✅
+  - WASM configuration properly set up (.cargo/config.toml) ✅
+  - Leptos 0.7 API patterns implemented correctly ✅
+  - Storage layer supports individual exercise lookup ✅
+  - Component architecture ready for session logging ✅
+
+#### Recent Commits (Aug 16, 2025)
+- `5ea3767`: Refactor ExerciseDetail component and update routing
+- `0477bff`: Move WASM rustflags configuration to proper location
+- `7349022`: Add PracticeTimer component to ExerciseDetailPage
+
+#### Ready for Phase 1.5: Session Logging
+- **Basic Metronome** 🔜
   - Adjustable BPM (30-250)
-  - Simple click sound
+  - Simple click sound using Web Audio API
   - 4/4 time signature
   - Visual beat indicator (dots)
   
-- **Session Logging**
+- **Session Logging** 🔜
   - Auto-save practice sessions with: exercise, duration, BPM, timestamp
   - Local storage persistence
   - Simple session history list
 
-#### UI Components Needed
-- Practice screen (timer + metronome controls)
-- Basic session history view
+### Phase 1.5: Session Logging & Metronome 🔜 NEXT
+**Goal:** Add session persistence and basic metronome to complete core practice loop
+
+#### Session Logging Features
+- **Practice Session Model**
+  - Session ID, exercise ID, start/end timestamps
+  - Duration, target time (if set)
+  - Optional BPM setting (when metronome added)
+  
+- **Session Storage**
+  - localStorage persistence alongside exercises
+  - Automatic session creation on timer start
+  - Session completion on timer stop
+  - Session list/history view
+  
+- **Session History UI**
+  - Simple chronological list of past sessions
+  - Show: exercise name, duration, date
+  - Basic filtering (by date, exercise type)
+
+#### Basic Metronome Features
+- **Core Metronome**
+  - Adjustable BPM (30-250 range)
+  - Simple click sound using Web Audio API
+  - 4/4 time signature (quarter note clicks)
+  - Visual beat indicator
+  
+- **Metronome Integration**
+  - Optional metronome toggle in practice timer
+  - BPM setting saved with practice sessions
+  - Independent start/stop from main timer
+
+#### Success Criteria
+- Sessions automatically saved when timer used
+- Session history shows meaningful practice data
+- Metronome provides steady, audible beat
+- Combined timer + metronome creates complete practice environment
 
 ---
 
