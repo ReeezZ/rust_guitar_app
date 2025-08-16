@@ -6,6 +6,7 @@ pub mod fretboard_visual_config;
 pub mod music_selectors;
 pub mod musical_fretboard_config;
 pub mod navbar;
+pub mod practice_timer;
 pub mod svg_fretboard;
 pub mod svg_fretboard_scale_display;
 pub mod svg_fretboard_trainer;

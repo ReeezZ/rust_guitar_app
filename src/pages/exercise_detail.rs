@@ -1,6 +1,8 @@
 use crate::models::exercise::Exercise;
+use crate::components::practice_timer::PracticeTimer;
 use leptos::prelude::*;
 use leptos_router::hooks::use_params_map;
+use std::time::Duration;
 
 #[component]
 pub fn ExerciseDetailPage() -> impl IntoView {
@@ -100,21 +102,25 @@ pub fn ExerciseDetailPage() -> impl IntoView {
                               </div>
                           </div>
 
-                          // Practice Section (placeholder for future timer/metronome)
+                          // Practice Section with Timer
                           <div>
                               <h2 class="text-xl font-semibold text-gray-800 mb-3">"Practice Session"</h2>
-                              <div class="bg-gray-50 p-6 rounded-lg text-center">
-                                  <p class="text-gray-600 mb-4">"Practice timer and metronome will be added here"</p>
+                              
+                              // Practice Timer Component
+                              <PracticeTimer target_time=Duration::from_secs(5) />
+                              
+                              <div class="bg-gray-50 p-6 rounded-lg text-center mt-4">
+                                  <p class="text-gray-600 mb-4">"Metronome will be added here"</p>
                                   <div class="space-y-2 flex flex-col items-center">
                                       <div class="flex justify-center w-full">
                                           <button
-                                              class="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg disabled:bg-gray-400"
-                                              disabled=true
+                                              class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg"
+                                              disabled=false
                                           >
-                                              "Start Practice Session (Coming Soon)"
+                                              "Add Metronome (Coming Soon)"
                                           </button>
                                       </div>
-                                      <p class="text-sm text-gray-500">"Timer, metronome, and session logging will be implemented next"</p>
+                                      <p class="text-sm text-gray-500">"BPM controls and beat indicator will be implemented next"</p>
                                   </div>
                               </div>
                           </div>
