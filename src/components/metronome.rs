@@ -30,15 +30,15 @@ pub fn Metronome(
   let (metronome_state, set_metronome_state) = signal(MetronomeState::Stopped);
   let (current_beat, set_current_beat) = signal(1u8);
 
-  // Calculate interval from BPM (60000ms / BPM = ms per beat)
-  let interval_ms = move || {
+  // Calculate interval from BPM as a reactive signal
+  let interval_signal = Memo::new(move |_| {
     let bpm_val = bpm.get();
     if bpm_val > 0 {
       (60000.0 / bpm_val as f64) as u64
     } else {
       1000 // fallback to 60 BPM
     }
-  };
+  });
 
   // Metronome tick function
   let tick = move || {
@@ -53,8 +53,8 @@ pub fn Metronome(
     }
   };
 
-  // Set up interval for metronome ticking
-  let metronome_interval = use_interval_fn(tick, interval_ms());
+  // Set up reactive interval for metronome ticking that updates with BPM
+  let metronome_interval = use_interval_fn(tick, interval_signal);
 
   // Start/stop metronome
   let toggle_metronome = move |_| {
