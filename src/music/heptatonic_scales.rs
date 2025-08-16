@@ -3,8 +3,8 @@ use std::ops::Index;
 use super::intervals::Interval;
 use std::fmt;
 
-use crate::music::notes::Note;
 use super::scales::ScaleTrait;
+use crate::music::notes::Note;
 
 #[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum HeptaScaleDegree {

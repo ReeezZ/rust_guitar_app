@@ -1,7 +1,5 @@
 use crate::components::exercises::{
-  constants::*,
-  ExerciseTypeChangeConfirmation,
-  ExerciseTypeSpecificFields,
+  constants::*, ExerciseTypeChangeConfirmation, ExerciseTypeSpecificFields,
 };
 use crate::models::{
   exercise::{Exercise, ExerciseType},

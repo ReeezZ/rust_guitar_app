@@ -13,7 +13,7 @@ pub fn ExerciseDetail() -> impl IntoView {
   // Exercise state - using signal to track changes
   let (exercise, set_exercise) = signal(None::<Exercise>);
   let (is_editing, set_is_editing) = signal(false);
-  
+
   // Inline description editing state
   let (is_editing_description, set_is_editing_description) = signal(false);
   let (description_edit_value, set_description_edit_value) = signal(String::new());
@@ -132,7 +132,7 @@ pub fn ExerciseDetail() -> impl IntoView {
                                                   Some(desc) => {
                                                       let desc_for_edit = desc.clone();
                                                       view! {
-                                                          <div 
+                                                          <div
                                                               class="group cursor-pointer p-3 rounded-lg border-2 border-transparent hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 relative"
                                                               on:click=move |_| start_description_edit(desc_for_edit.clone())
                                                               title="Click to edit description"
@@ -148,7 +148,7 @@ pub fn ExerciseDetail() -> impl IntoView {
                                                   }
                                                   None => {
                                                       view! {
-                                                          <div 
+                                                          <div
                                                               class="cursor-pointer p-3 rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
                                                               on:click=move |_| start_description_edit(String::new())
                                                               title="Click to add description"

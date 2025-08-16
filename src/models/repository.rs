@@ -24,19 +24,19 @@ impl std::fmt::Display for RepositoryError {
 pub trait ExerciseRepository {
   /// Save a new exercise
   fn save(&self, exercise: &Exercise) -> Result<(), RepositoryError>;
-  
+
   /// Update an existing exercise
   fn update(&self, exercise: &Exercise) -> Result<(), RepositoryError>;
-  
+
   /// Delete an exercise by ID
   fn delete(&self, id: &str) -> Result<(), RepositoryError>;
-  
+
   /// Find an exercise by ID
   fn find_by_id(&self, id: &str) -> Result<Option<Exercise>, RepositoryError>;
-  
+
   /// Find all exercises
   fn find_all(&self) -> Result<Vec<Exercise>, RepositoryError>;
-  
+
   /// Check if an exercise name exists (excluding a specific ID)
   fn name_exists(&self, name: &str, exclude_id: Option<&str>) -> Result<bool, RepositoryError>;
 }
@@ -58,30 +58,29 @@ impl Default for LocalStorageExerciseRepository {
 
 impl ExerciseRepository for LocalStorageExerciseRepository {
   fn save(&self, exercise: &Exercise) -> Result<(), RepositoryError> {
-    crate::models::storage::save_exercise(exercise)
-      .map_err(RepositoryError::ValidationError)
+    crate::models::storage::save_exercise(exercise).map_err(RepositoryError::ValidationError)
   }
-  
+
   fn update(&self, exercise: &Exercise) -> Result<(), RepositoryError> {
-    crate::models::storage::update_exercise(exercise)
-      .map_err(RepositoryError::ValidationError)
+    crate::models::storage::update_exercise(exercise).map_err(RepositoryError::ValidationError)
   }
-  
+
   fn delete(&self, id: &str) -> Result<(), RepositoryError> {
-    crate::models::storage::delete_exercise(id)
-      .map_err(RepositoryError::ValidationError)
+    crate::models::storage::delete_exercise(id).map_err(RepositoryError::ValidationError)
   }
-  
+
   fn find_by_id(&self, id: &str) -> Result<Option<Exercise>, RepositoryError> {
     Ok(crate::models::storage::load_exercise_by_id(id))
   }
-  
+
   fn find_all(&self) -> Result<Vec<Exercise>, RepositoryError> {
     Ok(crate::models::storage::load_exercises())
   }
-  
+
   fn name_exists(&self, name: &str, exclude_id: Option<&str>) -> Result<bool, RepositoryError> {
-    Ok(crate::models::storage::exercise_name_exists(name, exclude_id))
+    Ok(crate::models::storage::exercise_name_exists(
+      name, exclude_id,
+    ))
   }
 }
 

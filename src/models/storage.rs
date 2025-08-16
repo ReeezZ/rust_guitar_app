@@ -7,8 +7,8 @@ use web_sys::{window, Storage};
 pub fn save_exercise(exercise: &Exercise) -> Result<(), String> {
   let storage = get_storage().ok_or("Storage not available")?;
   let key = format!("exercise_{id}", id = exercise.id);
-  let json = serde_json::to_string(exercise)
-    .map_err(|e| format!("Failed to serialize exercise: {e}"))?;
+  let json =
+    serde_json::to_string(exercise).map_err(|e| format!("Failed to serialize exercise: {e}"))?;
   storage
     .set_item(&key, &json)
     .map_err(|_| "Failed to save exercise".to_string())?;

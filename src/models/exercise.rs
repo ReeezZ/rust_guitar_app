@@ -11,7 +11,7 @@ fn generate_id() -> String {
     let timestamp = js_sys::Date::now() as u64;
     format!("ex_{timestamp}")
   }
-  
+
   #[cfg(not(target_arch = "wasm32"))]
   {
     use std::time::{SystemTime, UNIX_EPOCH};
@@ -93,10 +93,7 @@ impl std::fmt::Display for ExerciseType {
         write!(
           f,
           "{} {} (frets {}-{})",
-          root_note,
-          scale_type,
-          fret_range.0,
-          fret_range.1
+          root_note, scale_type, fret_range.0, fret_range.1
         )
       }
       ExerciseType::Triad {
@@ -107,10 +104,7 @@ impl std::fmt::Display for ExerciseType {
         write!(
           f,
           "{} {} Triad (frets {}-{})",
-          root_note,
-          scale_type,
-          fret_range.0,
-          fret_range.1
+          root_note, scale_type, fret_range.0, fret_range.1
         )
       }
       ExerciseType::Technique => write!(f, "Technique"),

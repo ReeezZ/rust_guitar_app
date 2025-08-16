@@ -1,5 +1,8 @@
 use crate::components::exercises::{ExerciseForm, FormMode};
-use crate::models::{exercise::Exercise, repository::{get_exercise_repository, ExerciseRepository}};
+use crate::models::{
+  exercise::Exercise,
+  repository::{get_exercise_repository, ExerciseRepository},
+};
 use leptos::prelude::*;
 
 #[component]
