@@ -15,10 +15,6 @@ extern "C" {
   fn log(s: &str);
 }
 
-macro_rules! console_log {
-  ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
-}
-
 #[component]
 pub fn Metronome(
   /// BPM (beats per minute) signal
@@ -47,7 +43,7 @@ pub fn Metronome(
       set_current_beat.update(|beat| {
         *beat = if *beat >= 4 { 1 } else { *beat + 1 };
       });
-      
+
       // Then play sound for the NEW beat
       play_click(current_beat.get() == 1);
     }
@@ -81,89 +77,95 @@ pub fn Metronome(
   };
 
   view! {
-      <div class="bg-white p-4 rounded-lg border border-gray-200">
-          <h4 class="text-md font-semibold text-gray-800 mb-3">"Metronome"</h4>
+    <div class="p-4 bg-white rounded-lg border border-gray-200">
+      <h4 class="mb-3 font-semibold text-gray-800 text-md">"Metronome"</h4>
 
-          <div class="text-center mb-4">
-              // BPM Display and Control
-              <div class="flex items-center justify-center space-x-4 mb-4">
-                  <button 
-                      class="w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center text-sm font-bold"
-                      on:click=move |_| {
-                          let new_bpm = (bpm.get().saturating_sub(5)).max(30);
-                          handle_bpm_change(new_bpm);
-                      }
-                  >
-                      "−"
-                  </button>
-                  
-                  <div class="text-center">
-                      <div class="text-2xl font-bold text-gray-800">
-                          {move || bpm.get().to_string()}
-                      </div>
-                      <div class="text-xs text-gray-500">"BPM"</div>
-                  </div>
-                  
-                  <button 
-                      class="w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center text-sm font-bold"
-                      on:click=move |_| {
-                          let new_bpm = (bpm.get() + 5).min(250);
-                          handle_bpm_change(new_bpm);
-                      }
-                  >
-                      "+"
-                  </button>
-              </div>
+      <div class="mb-4 text-center">
+        // BPM Display and Control
+        <div class="flex justify-center items-center mb-4 space-x-4">
+          <button
+            class="flex justify-center items-center w-8 h-8 text-sm font-bold bg-gray-200 rounded-full hover:bg-gray-300"
+            on:click=move |_| {
+              let new_bpm = (bpm.get().saturating_sub(5)).max(30);
+              handle_bpm_change(new_bpm);
+            }
+          >
+            "−"
+          </button>
 
-              // Beat indicator (4 dots for 4/4 time)
-              <div class="flex justify-center space-x-2 mb-4">
-                  {(1..=4).map(|beat_num| {
-                      view! {
-                          <div class={move || {
-                              let base_classes = "w-3 h-3 rounded-full";
-                              if current_beat.get() == beat_num && metronome_state.get() == MetronomeState::Running {
-                                  if beat_num == 1 {
-                                      format!("{base_classes} bg-red-500") // Accent on beat 1
-                                  } else {
-                                      format!("{base_classes} bg-blue-500")
-                                  }
-                              } else {
-                                  format!("{base_classes} bg-gray-300")
-                              }
-                          }}></div>
-                      }
-                  }).collect_view()}
-              </div>
-
-              // Start/Stop button
-              <button
-                  class={move || {
-                      match metronome_state.get() {
-                          MetronomeState::Running => "bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg",
-                          MetronomeState::Stopped => "bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
-                      }
-                  }}
-                  on:click=toggle_metronome
-              >
-                  {move || {
-                      match metronome_state.get() {
-                          MetronomeState::Running => "Stop",
-                          MetronomeState::Stopped => "Start"
-                      }
-                  }}
-              </button>
-
-              // State indicator
-              <p class="text-xs text-gray-500 mt-2">
-                  {move || {
-                      match metronome_state.get() {
-                          MetronomeState::Stopped => "Click start to begin metronome".to_string(),
-                          MetronomeState::Running => format!("Beat {}/4", current_beat.get())
-                      }
-                  }}
-              </p>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-gray-800">{move || bpm.get().to_string()}</div>
+            <div class="text-xs text-gray-500">"BPM"</div>
           </div>
+
+          <button
+            class="flex justify-center items-center w-8 h-8 text-sm font-bold bg-gray-200 rounded-full hover:bg-gray-300"
+            on:click=move |_| {
+              let new_bpm = (bpm.get() + 5).min(250);
+              handle_bpm_change(new_bpm);
+            }
+          >
+            "+"
+          </button>
+        </div>
+
+        // Beat indicator (4 dots for 4/4 time)
+        <div class="flex justify-center mb-4 space-x-2">
+          {(1..=4)
+            .map(|beat_num| {
+              view! {
+                <div class=move || {
+                  let base_classes = "w-3 h-3 rounded-full";
+                  if current_beat.get() == beat_num
+                    && metronome_state.get() == MetronomeState::Running
+                  {
+                    if beat_num == 1 {
+                      format!("{base_classes} bg-red-500")
+                    } else {
+                      format!("{base_classes} bg-blue-500")
+                    }
+                  } else {
+                    format!("{base_classes} bg-gray-300")
+                  }
+                }></div>
+              }
+            })
+            .collect_view()}
+        </div>
+
+        // Start/Stop button
+        <button
+          class=move || {
+            match metronome_state.get() {
+              MetronomeState::Running => {
+                "bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg"
+              }
+              MetronomeState::Stopped => {
+                "bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
+              }
+            }
+          }
+          on:click=toggle_metronome
+        >
+          {move || {
+            match metronome_state.get() {
+              MetronomeState::Running => "Stop",
+              MetronomeState::Stopped => "Start",
+            }
+          }}
+        </button>
+
+        // State indicator
+        <p class="mt-2 text-xs text-gray-500">
+          {move || {
+            match metronome_state.get() {
+              MetronomeState::Stopped => "Click start to begin metronome".to_string(),
+              MetronomeState::Running => format!("Beat {}/4", current_beat.get()),
+            }
+          }}
+        </p>
       </div>
+    </div>
   }
 }
 
@@ -172,7 +174,7 @@ fn play_click(is_accent: bool) {
   let _ = (|| -> Result<(), JsValue> {
     // Create fresh audio context for each click to avoid storing it
     let ctx = AudioContext::new()?;
-    
+
     // Create oscillator for the click sound
     let oscillator = ctx.create_oscillator()?;
     let gain = ctx.create_gain()?;
@@ -192,7 +194,7 @@ fn play_click(is_accent: bool) {
       gain.gain().set_value(0.2);
     }
 
-    oscillator.set_type(OscillatorType::Square);
+    oscillator.set_type(OscillatorType::Sine);
 
     // Start and stop the oscillator for a short click
     let current_time = ctx.current_time();
@@ -200,7 +202,9 @@ fn play_click(is_accent: bool) {
     oscillator.stop_with_when(current_time + 0.1)?; // 100ms click
 
     // Fade out to avoid clicking
-    gain.gain().exponential_ramp_to_value_at_time(0.01, current_time + 0.1)?;
+    gain
+      .gain()
+      .exponential_ramp_to_value_at_time(0.01, current_time + 0.1)?;
 
     Ok(())
   })();
