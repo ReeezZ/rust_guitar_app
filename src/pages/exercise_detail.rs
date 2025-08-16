@@ -1,4 +1,4 @@
-use crate::components::exercise_form::{ExerciseForm, FormMode};
+use crate::components::exercises::{ExerciseForm, FormMode};
 use crate::components::practice_timer::PracticeTimer;
 use crate::models::exercise::Exercise;
 use crate::models::repository::{get_exercise_repository, ExerciseRepository};
