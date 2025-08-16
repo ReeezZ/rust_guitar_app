@@ -8,7 +8,9 @@ pub fn save_exercise(exercise: &Exercise) {
   let storage = get_storage().expect("Storage not available");
   let key = format!("exercise_{}", exercise.id);
   let json = serde_json::to_string(exercise).expect("Failed to serialize exercise");
-  storage.set_item(&key, &json).expect("Failed to save exercise");
+  storage
+    .set_item(&key, &json)
+    .expect("Failed to save exercise");
 }
 
 pub fn load_exercises() -> Vec<Exercise> {
@@ -16,9 +18,9 @@ pub fn load_exercises() -> Vec<Exercise> {
   let storage = match get_storage() {
     Some(s) => s,
     None => {
-        logging::error!("Local storage is not available");
-        return exercises
-    },
+      logging::error!("Local storage is not available");
+      return exercises;
+    }
   };
   let len = storage.length().unwrap_or(0);
   logging::log!("Loading exercises from local storage: {}", len);
@@ -38,20 +40,50 @@ pub fn load_exercises() -> Vec<Exercise> {
 
 /// Delete an exercise from localStorage
 pub fn delete_exercise(id: &str) {
-    let storage = get_storage().expect("Storage not available");
-    let key = format!("exercise_{}", id);
-    storage.remove_item(&key).expect("Failed to delete exercise");
+  let storage = get_storage().expect("Storage not available");
+  let key = format!("exercise_{}", id);
+  storage
+    .remove_item(&key)
+    .expect("Failed to delete exercise");
 }
 
 /// Load a specific exercise by ID from localStorage
 pub fn load_exercise_by_id(id: &str) -> Option<Exercise> {
-    let storage = get_storage()?;
-    let key = format!("exercise_{}", id);
-    if let Ok(Some(json)) = storage.get_item(&key) {
-        serde_json::from_str::<Exercise>(&json).ok()
-    } else {
-        None
-    }
+  let storage = get_storage()?;
+  let key = format!("exercise_{}", id);
+  if let Ok(Some(json)) = storage.get_item(&key) {
+    serde_json::from_str::<Exercise>(&json).ok()
+  } else {
+    None
+  }
+}
+
+/// Update an existing exercise in localStorage
+pub fn update_exercise(exercise: &Exercise) -> Result<(), String> {
+  let storage = get_storage().ok_or("Storage not available")?;
+  let key = format!("exercise_{}", exercise.id);
+
+  // Check if exercise exists
+  if storage.get_item(&key).ok().flatten().is_none() {
+    return Err("Exercise not found".to_string());
+  }
+
+  let json =
+    serde_json::to_string(exercise).map_err(|e| format!("Failed to serialize exercise: {}", e))?;
+
+  storage
+    .set_item(&key, &json)
+    .map_err(|_| "Failed to update exercise".to_string())?;
+
+  Ok(())
+}
+
+/// Check if an exercise name already exists (for validation)
+pub fn exercise_name_exists(name: &str, exclude_id: Option<&str>) -> bool {
+  let exercises = load_exercises();
+  exercises
+    .iter()
+    .any(|ex| ex.name == name && exclude_id.map_or(true, |id| ex.id != id))
 }
 
 fn get_storage() -> Option<Storage> {

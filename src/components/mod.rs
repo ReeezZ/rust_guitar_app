@@ -1,3 +1,4 @@
+pub mod exercise_form;
 pub mod exercise_manager;
 pub mod fret_range_selector;
 pub mod fretboard;

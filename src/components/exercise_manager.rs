@@ -1,8 +1,5 @@
-use crate::models::{
-  exercise::{Exercise, ExerciseType},
-  storage,
-};
-use crate::music::{heptatonic_scales::HeptaScaleType, notes::Note, scales::ScaleType};
+use crate::components::exercise_form::{ExerciseForm, FormMode};
+use crate::models::{exercise::Exercise, storage};
 use leptos::prelude::*;
 
 #[component]
@@ -10,47 +7,25 @@ pub fn ExerciseManager() -> impl IntoView {
   let (exercises, set_exercises) = signal(storage::load_exercises());
   let (show_form, set_show_form) = signal(false);
 
-  // Form fields
-  let (name, set_name) = signal(String::new());
-  let (exercise_type_str, set_exercise_type_str) = signal("Technique".to_string());
-
-  let add_exercise = move |_| {
-    web_sys::console::log_1(&"Add exercise button clicked!".into());
-
-    let exercise_type = match exercise_type_str.get().as_str() {
-      "Scale" => ExerciseType::Scale {
-        root_note: Note::C,
-        scale_type: ScaleType::Hepatonic(HeptaScaleType::Major),
-        fret_range: (0, 12),
-      },
-      "Triad" => ExerciseType::Triad {
-        root_note: Note::C,
-        scale_type: ScaleType::Hepatonic(HeptaScaleType::Major),
-        fret_range: (0, 5),
-      },
-      "Song" => ExerciseType::Song,
-      _ => ExerciseType::Technique,
-    };
-
-    let exercise = Exercise::new(name.get(), exercise_type);
-    web_sys::console::log_1(&format!("Created exercise: {:?}", exercise).into());
-
-    storage::save_exercise(&exercise);
-    web_sys::console::log_1(&"Saved exercise to storage".into());
-
-    // Add to our list
-    set_exercises.update(|exercises| exercises.push(exercise));
-    web_sys::console::log_1(&"Updated exercises list".into());
-
-    // Reset form
-    set_name.set(String::new());
-    set_show_form.set(false);
-  };
-
   let delete_exercise = move |exercise_id: String| {
     storage::delete_exercise(&exercise_id);
     set_exercises.update(|exercises| exercises.retain(|e| e.id != exercise_id));
   };
+
+  // Handle exercise save from form
+  let handle_exercise_save = Callback::new(move |exercise: Exercise| {
+    set_exercises.update(|exercises| {
+      // Remove existing exercise if updating, then add the new one
+      exercises.retain(|e| e.id != exercise.id);
+      exercises.push(exercise);
+    });
+    set_show_form.set(false);
+  });
+
+  // Handle form cancel
+  let handle_form_cancel = Callback::new(move |_: ()| {
+    set_show_form.set(false);
+  });
 
   view! {
     <div class="p-6 mx-auto max-w-4xl">
@@ -66,54 +41,19 @@ pub fn ExerciseManager() -> impl IntoView {
 
       // Add Exercise Form
       {move || {
-        show_form
-          .get()
-          .then(|| {
-            view! {
-              <div class="p-4 mb-6 bg-gray-50 rounded-lg">
-                <h2 class="mb-4 text-xl font-semibold">"New Exercise"</h2>
-                <div class="space-y-4">
-                  <div>
-                    <label class="block mb-2 text-sm font-medium text-gray-700">
-                      "Exercise Name"
-                    </label>
-                    <input
-                      type="text"
-                      class="py-2 px-3 w-full rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                      placeholder="e.g., C Major Scale Practice"
-                      prop:value=name
-                      on:input=move |ev| set_name.set(event_target_value(&ev))
-                    />
-                  </div>
-
-                  <div>
-                    <label class="block mb-2 text-sm font-medium text-gray-700">
-                      "Exercise Type"
-                    </label>
-                    <select
-                      class="py-2 px-3 w-full rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                      on:change=move |ev| set_exercise_type_str.set(event_target_value(&ev))
-                    >
-                      <option value="Technique">"Technique"</option>
-                      <option value="Scale">"Scale"</option>
-                      <option value="Triad">"Triad"</option>
-                      <option value="Song">"Song"</option>
-                    </select>
-                  </div>
-
-                  <div class="flex space-x-2">
-                    <button
-                      class="py-2 px-4 font-bold text-white bg-green-500 rounded hover:bg-green-700 disabled:bg-gray-400"
-                      on:click=add_exercise
-                      disabled=move || name.get().trim().is_empty()
-                    >
-                      "Add Exercise"
-                    </button>
-                  </div>
-                </div>
-              </div>
-            }
-          })
+        if show_form.get() {
+          view! {
+            <div class="mb-6">
+              <ExerciseForm
+                mode={FormMode::Create}
+                on_save={handle_exercise_save}
+                on_cancel={handle_form_cancel}
+              />
+            </div>
+          }.into_any()
+        } else {
+          view! { <div></div> }.into_any()
+        }
       }}
 
       // Exercise List

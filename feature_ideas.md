@@ -113,6 +113,12 @@ Build a **personal guitar practice tracker** that makes it easy to log practice 
 - `0477bff`: Move WASM rustflags configuration to proper location
 - `7349022`: Add PracticeTimer component to ExerciseDetailPage
 
+#### Missing
+
+- Do another review session of the existing code
+- Think about an interface for storage
+  - currently the functions are used directly
+
 #### Ready for Phase 1.5: Session Logging
 - **Basic Metronome** 🔜
   - Adjustable BPM (30-250)
