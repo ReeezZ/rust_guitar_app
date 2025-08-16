@@ -10,27 +10,65 @@ Build a **personal guitar practice tracker** that makes it easy to log practice 
 ## User Story
 *As a guitar player, I want to easily select what I'm practicing, start a timer with metronome, and automatically track my progress so that I can stay motivated and see my improvement over time.*
 
+## Current Status - August 2025
+
+### ✅ Completed (Phase 0.5)
+- **Exercise Management Foundation**
+  - Type-safe Exercise model with Scale, Triad, Technique, Song variants
+  - Exercise creation, listing, deletion with localStorage persistence
+  - Clean /exercises UI with form and navigation integration
+  - WASM-compatible architecture with js-sys timestamps
+
+### 🚧 In Progress (Phase 1)
+- **Practice Timer & Session Logging** - Core functionality needed for actual practice tracking
+- **Basic Metronome** - Essential for rhythm practice
+- **Session History** - Track practice over time
+
+### 🔮 Planned (Phase 2+)
+- **Enhanced UI/UX** - Better exercise management, fretboard integration
+- **Backend & Analytics** - Data persistence and progress tracking  
+- **Advanced Features** - Routines, gamification, mobile support
+
 ## Core Workflow
-1. **Select Exercise** - Choose what to practice (scales, triads, technique, songs)
-2. **Configure Practice** - Set key, position, target time (optional)
-3. **Start Session** - Timer counts up, metronome provides rhythm
-4. **Practice** - Focus on playing, minimal app interaction needed
-5. **Finish & Save** - Session automatically logged with all details
-6. **Review Progress** - View practice history and trends over time
+1. **Select Exercise** ✅ - Choose what to practice (scales, triads, technique, songs)
+2. **Configure Practice** 🚧 - Set key, position, target time (optional) 
+3. **Start Session** 🚧 - Timer counts up, metronome provides rhythm
+4. **Practice** 🚧 - Focus on playing, minimal app interaction needed
+5. **Finish & Save** 🚧 - Session automatically logged with all details
+6. **Review Progress** 🚧 - View practice history and trends over time
 
 ---
 
 ## Development Phases
 
-### Phase 1: Foundation - Basic Practice Logging
-**Goal:** Get basic timer + exercise tracking working with local storage
+### Phase 0.5: Exercise Management Foundation ✅ COMPLETE
+**Goal:** Build exercise CRUD system as foundation for practice tracking  
+**Status:** Completed August 2025 - Commit a951287
 
-#### Core Features
+#### Completed Features ✅
 - **Exercise Management**
-  - Simple exercise types: Scales, Triads, Technique, Songs
-  - Each exercise has: name, type, optional key, optional position (fret range)
-  - CRUD operations for exercises
+  - Simple exercise types: Scales, Triads, Technique, Songs ✅
+  - Each exercise has: name, type (key/position in data model but not UI yet) ✅
+  - CRUD operations: Create ✅, Read ✅, Delete ✅ (Update pending)
+  - Local storage persistence ✅
   
+#### UI Components ✅
+- Exercise list/selector ✅
+- Simple exercise creation form ✅
+- /exercises route with navigation ✅
+
+#### Technical Implementation ✅
+- Type-safe Exercise domain model with Rust enums ✅
+- WASM-compatible ID generation using js-sys::Date ✅
+- Simple localStorage functions (no complex traits) ✅
+- Leptos 0.7 reactive components ✅
+
+---
+
+### Phase 1: Core Practice Tracking 🚧 NEXT
+**Goal:** Complete basic timer + session tracking to make app actually useful for practice
+
+#### Remaining Core Features
 - **Practice Timer**
   - Count-up timer (shows elapsed time)
   - Optional target time (timer turns green when reached)
@@ -47,12 +85,9 @@ Build a **personal guitar practice tracker** that makes it easy to log practice 
   - Local storage persistence
   - Simple session history list
 
-
-#### UI Components
-- Exercise list/selector
+#### UI Components Needed
 - Practice screen (timer + metronome controls)
-- Basic session history
-- Simple exercise creation form
+- Basic session history view
 
 ---
 
