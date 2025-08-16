@@ -125,15 +125,23 @@ pub fn ExerciseManager() -> impl IntoView {
                                     <p class="text-sm text-gray-500 mt-1">{desc.clone()}</p>
                                 })}
                             </div>
-                            <button
-                                class="text-red-500 hover:text-red-700 font-medium text-sm"
-                                on:click={
-                                    let exercise_id = exercise.id.clone();
-                                    move |_| delete_exercise(exercise_id.clone())
-                                }
-                            >
-                                "Delete"
-                            </button>
+                            <div class="flex space-x-2">
+                                <a
+                                    href={format!("/exercises/{}", exercise.id)}
+                                    class="bg-blue-500 hover:bg-blue-700 text-white font-medium text-sm py-1 px-3 rounded"
+                                >
+                                    "View"
+                                </a>
+                                <button
+                                    class="text-red-500 hover:text-red-700 font-medium text-sm"
+                                    on:click={
+                                        let exercise_id = exercise.id.clone();
+                                        move |_| delete_exercise(exercise_id.clone())
+                                    }
+                                >
+                                    "Delete"
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </For>
