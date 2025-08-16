@@ -9,3 +9,4 @@ pub mod svg_fretboard;
 pub mod svg_fretboard_scale_display;
 pub mod svg_fretboard_trainer;
 pub mod svg_fretboard_with_notes;
+pub mod exercise_manager;

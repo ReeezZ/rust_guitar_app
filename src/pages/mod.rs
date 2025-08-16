@@ -3,3 +3,4 @@ pub mod home;
 pub mod not_found;
 pub mod svg_fretboard;
 pub mod svg_fretboard_scale;
+pub mod exercises;
