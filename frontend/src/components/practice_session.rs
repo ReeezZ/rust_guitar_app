@@ -171,79 +171,85 @@ pub fn PracticeSession(
 
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
         // Timer Section
-        <div class="text-center">
-          <h4 class="mb-3 font-semibold text-gray-700 text-md">"Timer"</h4>
-
-          // Timer display
-          <div class=move || {
-            let base_classes = "text-4xl lg:text-6xl font-mono font-bold mb-4";
-            if is_target_reached() {
-              format!("{base_classes} text-green-600")
-            } else {
-              format!("{base_classes} text-gray-800")
-            }
-          }>{formatted_time}</div>
-
-          // Target time display
-          {move || {
-            if let Some(target) = target_time {
-              let target_mins = target.as_secs() / 60;
-              let target_secs = target.as_secs() % 60;
-              view! {
-                <p class="mb-4 text-sm text-gray-600">
-                  "Target: " {format!("{target_mins:02}:{target_secs:02}")}
-                  {move || if is_target_reached() { " ✓" } else { "" }}
-                </p>
-              }
-                .into_any()
-            } else {
-              view! { <div></div> }.into_any()
-            }
-          }}
-
-          // Control buttons
-          <div class="flex justify-center mb-3 space-x-3">
-            <button
-              class=move || {
-                match timer_state.get() {
-                  TimerState::Running => {
-                    "bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg text-sm"
-                  }
-                  _ => {
-                    "bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg text-sm"
-                  }
-                }
-              }
-              on:click=start_timer
-            >
-              {move || {
-                match timer_state.get() {
-                  TimerState::Running => "Pause",
-                  TimerState::Paused => "Resume",
-                  TimerState::Stopped => "Start",
-                }
-              }}
-            </button>
-
-            <button
-              class="py-2 px-4 text-sm font-bold text-white bg-red-500 rounded-lg hover:bg-red-600 disabled:bg-gray-400"
-              on:click=stop_timer
-              disabled=move || timer_state.get() == TimerState::Stopped
-            >
-              "Stop"
-            </button>
+        <div>
+          <div class="flex justify-between items-center mb-3">
+            <h4 class="font-semibold text-gray-700 text-md">"Timer"</h4>
           </div>
 
-          // Timer state indicator
-          <p class="text-xs text-gray-500">
-            {move || {
-              match timer_state.get() {
-                TimerState::Stopped => "Ready to start",
-                TimerState::Running => "Timer running...",
-                TimerState::Paused => "Timer paused",
-              }
-            }}
-          </p>
+          <div class="p-4 bg-white rounded-lg border border-gray-200">
+            <div class="text-center">
+              // Timer display
+              <div class=move || {
+                let base_classes = "text-4xl lg:text-6xl font-mono font-bold mb-4";
+                if is_target_reached() {
+                  format!("{base_classes} text-green-600")
+                } else {
+                  format!("{base_classes} text-gray-800")
+                }
+              }>{formatted_time}</div>
+
+              // Target time display
+              {move || {
+                if let Some(target) = target_time {
+                  let target_mins = target.as_secs() / 60;
+                  let target_secs = target.as_secs() % 60;
+                  view! {
+                    <p class="mb-4 text-sm text-gray-600">
+                      "Target: " {format!("{target_mins:02}:{target_secs:02}")}
+                      {move || if is_target_reached() { " ✓" } else { "" }}
+                    </p>
+                  }
+                    .into_any()
+                } else {
+                  view! { <div></div> }.into_any()
+                }
+              }}
+
+              // Control buttons
+              <div class="flex justify-center mb-3 space-x-3">
+                <button
+                  class=move || {
+                    match timer_state.get() {
+                      TimerState::Running => {
+                        "bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg text-sm"
+                      }
+                      _ => {
+                        "bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg text-sm"
+                      }
+                    }
+                  }
+                  on:click=start_timer
+                >
+                  {move || {
+                    match timer_state.get() {
+                      TimerState::Running => "Pause",
+                      TimerState::Paused => "Resume",
+                      TimerState::Stopped => "Start",
+                    }
+                  }}
+                </button>
+
+                <button
+                  class="py-2 px-4 text-sm font-bold text-white bg-red-500 rounded-lg hover:bg-red-600 disabled:bg-gray-400"
+                  on:click=stop_timer
+                  disabled=move || timer_state.get() == TimerState::Stopped
+                >
+                  "Stop"
+                </button>
+              </div>
+
+              // Timer state indicator
+              <p class="text-xs text-gray-500">
+                {move || {
+                  match timer_state.get() {
+                    TimerState::Stopped => "Ready to start",
+                    TimerState::Running => "Timer running...",
+                    TimerState::Paused => "Timer paused",
+                  }
+                }}
+              </p>
+            </div>
+          </div>
         </div>
 
         // Metronome Section
