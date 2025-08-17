@@ -28,8 +28,8 @@
 ### **Phase 4: Frontend ↔ Backend Integration**
 - [ ] Add HTTP client to frontend (gloo-net or similar)
 - [ ] Create API service layer in frontend  
-- [ ] Implement backend detection with localStorage fallback
-- [ ] Update exercise management to use API when available
+- [ ] Replace localStorage with direct API calls
+- [ ] Show error messages when backend is unavailable
 - [ ] Test full-stack functionality
 
 ### **Future Phases:**
