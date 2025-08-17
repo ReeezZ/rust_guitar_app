@@ -1,0 +1,52 @@
+use crate::config::{url, BACKEND_PORT, FRONTEND_PORT, RUSTFLAGS_WASM};
+use anyhow::{Context, Result};
+use std::process::Command;
+
+/// Run a cargo workspace command with proper error handling
+pub fn run_cargo_workspace(args: &[&str], description: &str) -> Result<()> {
+  println!("{description}");
+  let status = Command::new("cargo")
+    .args(args)
+    .status()
+    .with_context(|| format!("Failed to run: cargo {}", args.join(" ")))?;
+  if !status.success() {
+    anyhow::bail!(
+      "Command 'cargo {}' exited with status code: {}",
+      args.join(" "),
+      status.code().unwrap_or(-1)
+    );
+  }
+  Ok(())
+}
+
+/// Run a trunk command with WASM flags
+pub fn run_trunk(args: &[&str], description: &str) -> Result<()> {
+  println!("{description}");
+  if args.contains(&"serve") {
+    println!("📍 Frontend will be available at: {}", url(FRONTEND_PORT));
+  }
+  let status = Command::new("trunk")
+    .args(args)
+    .current_dir("frontend")
+    .env("RUSTFLAGS", RUSTFLAGS_WASM)
+    .status()
+    .with_context(|| format!("Failed to run: trunk {}", args.join(" ")))?;
+
+  if !status.success() {
+    anyhow::bail!("trunk command exited with non-zero status: {}", status);
+  }
+  Ok(())
+}
+
+/// Print service URLs for development mode
+pub fn print_dev_info() {
+  println!();
+  println!("✅ Development servers started!");
+  println!();
+  println!("📍 Services:");
+  println!("   🎨 Frontend: {}", url(FRONTEND_PORT));
+  println!("   🔧 Backend:  {}", url(BACKEND_PORT));
+  println!("   📝 API:      {}/api/exercises", url(BACKEND_PORT));
+  println!();
+  println!("📋 Press Ctrl+C to stop both servers");
+}
