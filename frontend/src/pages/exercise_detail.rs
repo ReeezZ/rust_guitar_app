@@ -130,6 +130,11 @@ pub fn ExerciseDetail() -> impl IntoView {
     <div class="container py-8 px-4 mx-auto">
       {move || match exercise.get() {
         Some(ex) => {
+          let ex_for_title = ex.clone();
+          let ex_for_description = ex.clone(); 
+          let ex_for_config = ex.clone();
+          let ex_for_practice = ex.clone();
+          
           if is_editing.get() {
             view! {
               <div class="mb-8">
@@ -142,7 +147,6 @@ pub fn ExerciseDetail() -> impl IntoView {
             }
               .into_any()
           } else {
-            let exercise_for_practice = ex.clone();
             view! {
               <div>
                 <div class="mb-8">
@@ -150,6 +154,7 @@ pub fn ExerciseDetail() -> impl IntoView {
                     // Title section with inline editing
                     <div class="flex-1 mr-4">
                       {move || {
+                        let ex_title = ex_for_title.clone();
                         if is_editing_title.get() {
                           // Edit mode - show input and buttons
                           view! {
@@ -166,8 +171,9 @@ pub fn ExerciseDetail() -> impl IntoView {
                               <div class="flex justify-between items-center">
                                 <div class="flex space-x-2">
                                   {move || {
-                                    if let Some(ref ex) = exercise.get() {
-                                      match ex.exercise_type {
+                                    let ex_title_inner = ex_title.clone();
+                                    if let Some(ref ex_title_check) = Some(ex_title_inner.clone()) {
+                                      match ex_title_check.exercise_type {
                                         ExerciseType::Scale { .. } | ExerciseType::Triad { .. } => {
                                           // Only show generate button for Scale and Triad types
                                           view! {
@@ -207,7 +213,7 @@ pub fn ExerciseDetail() -> impl IntoView {
                           }
                             .into_any()
                         } else {
-                          let title_for_edit = ex.name.clone();
+                          let title_for_edit = ex_title.name.clone();
                           // Display mode - show title with hover effect
                           view! {
                             <h1
@@ -215,7 +221,7 @@ pub fn ExerciseDetail() -> impl IntoView {
                               on:click=move |_| start_title_edit(title_for_edit.clone())
                               title="Click to edit title"
                             >
-                              {ex.name.clone()}
+                              {ex_title.name.clone()}
                               <svg
                                 class="inline-block ml-2 w-5 h-5 text-gray-400 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
                                 fill="none"
@@ -247,6 +253,7 @@ pub fn ExerciseDetail() -> impl IntoView {
                   // Description section with inline editing
                   <div class="mb-4">
                     {move || {
+                      let ex_desc = ex_for_description.clone();
                       if is_editing_description.get() {
                         // Edit mode - show textarea and buttons
                         view! {
@@ -278,7 +285,7 @@ pub fn ExerciseDetail() -> impl IntoView {
                         }
                           .into_any()
                       } else {
-                        match ex.description.as_ref() {
+                        match ex_desc.description.as_ref() {
                           Some(desc) => {
                             let desc_for_edit = desc.clone();
                             // Display mode - show description or placeholder with edit button
@@ -300,7 +307,7 @@ pub fn ExerciseDetail() -> impl IntoView {
                                       stroke-linecap="round"
                                       stroke-linejoin="round"
                                       stroke-width="2"
-                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                                     />
                                   </svg>
                                 </div>
@@ -327,13 +334,38 @@ pub fn ExerciseDetail() -> impl IntoView {
                     }}
                   </div>
 
+                  // Colored configuration buttons with dropdowns
+                  {move || {
+                    let ex_clone = ex_for_config.clone();
+                    match &ex_clone.exercise_type {
+                      ExerciseType::Scale { root_note, scale_type, fret_range } | 
+                      ExerciseType::Triad { root_note, scale_type, fret_range } => {
+                        view! {
+                          <ConfigurationSection
+                            root_note=*root_note
+                            scale_type=*scale_type
+                            fret_range=*fret_range
+                            exercise=ex_clone.clone()
+                            on_exercise_update=Callback::new(move |updated_ex| {
+                              let repo = get_exercise_repository();
+                              if let Ok(()) = repo.update(&updated_ex) {
+                                set_exercise.set(Some(updated_ex));
+                              }
+                            })
+                          />
+                        }.into_any()
+                      }
+                      _ => view! { <div></div> }.into_any()
+                    }
+                  }}
+
                 </div>
 
                 // Practice Session Section
                 <div class="p-6 bg-gray-50 rounded-lg">
                   <PracticeSession
                     target_time=std::time::Duration::from_secs(15 * 60)
-                    exercise=exercise_for_practice
+                    exercise=ex_for_practice
                   />
                 </div>
               </div>
@@ -363,6 +395,232 @@ pub fn ExerciseDetail() -> impl IntoView {
             .into_any()
         }
       }}
+    </div>
+  }
+}
+
+// Configuration section component with colored clickable buttons and dropdowns
+#[component]
+fn ConfigurationSection(
+  root_note: shared::music::notes::Note,
+  scale_type: shared::music::scales::ScaleType, 
+  fret_range: (u8, u8),
+  exercise: Exercise,
+  #[prop(into)] on_exercise_update: Callback<Exercise>
+) -> impl IntoView {
+  use shared::music::{notes::Note, scales::ScaleType, heptatonic_scales::HeptaScaleType};
+  
+  // Dropdown states
+  let (show_root_note_dropdown, set_show_root_note_dropdown) = signal(false);
+  let (show_scale_type_dropdown, set_show_scale_type_dropdown) = signal(false);
+  let (show_fret_range_dropdown, set_show_fret_range_dropdown) = signal(false);
+
+  // Local state for changes
+  let (selected_root_note, set_selected_root_note) = signal(root_note);
+  let (selected_scale_type, set_selected_scale_type) = signal(scale_type);
+  let (selected_start_fret, set_selected_start_fret) = signal(fret_range.0);
+  let (selected_end_fret, set_selected_end_fret) = signal(fret_range.1);
+
+  // Available options
+  let note_options = vec![
+    Note::C, Note::CSharpOrDFlat, Note::D, Note::DSharpOrEFlat, 
+    Note::E, Note::F, Note::FSharpOrGFlat, Note::G, Note::GSharpOrAFlat,
+    Note::A, Note::ASharpOrBFlat, Note::B
+  ];
+
+  let scale_type_options = vec![
+    (ScaleType::Hepatonic(HeptaScaleType::Major), "Major"),
+    (ScaleType::Hepatonic(HeptaScaleType::Minor), "Minor"),
+  ];
+
+  // Update exercise with new values
+  let update_exercise_with_changes = Callback::new(move |_| {
+    let mut updated_exercise = exercise.clone();
+    updated_exercise.exercise_type = match updated_exercise.exercise_type {
+      ExerciseType::Scale { .. } => {
+        ExerciseType::Scale {
+          root_note: selected_root_note.get(),
+          scale_type: selected_scale_type.get(),
+          fret_range: (selected_start_fret.get(), selected_end_fret.get()),
+        }
+      }
+      ExerciseType::Triad { .. } => {
+        ExerciseType::Triad {
+          root_note: selected_root_note.get(),
+          scale_type: selected_scale_type.get(),
+          fret_range: (selected_start_fret.get(), selected_end_fret.get()),
+        }
+      }
+      other => other,
+    };
+    on_exercise_update.run(updated_exercise);
+  });
+
+  view! {
+    <div class="mb-6 bg-gray-50 rounded-lg p-4">
+      <h3 class="text-lg font-semibold mb-3 text-gray-700">"Exercise Configuration"</h3>
+      <div class="flex gap-3 flex-wrap">
+        
+        // Root Note Button (Green)
+        <div class="relative">
+          <button
+            class="px-4 py-2 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition-colors cursor-pointer shadow-sm"
+            on:click=move |_| {
+              set_show_root_note_dropdown.update(|show| *show = !*show);
+              set_show_scale_type_dropdown.set(false);
+              set_show_fret_range_dropdown.set(false);
+            }
+          >
+            "Root: " {move || selected_root_note.get().to_string()}
+            <svg class="inline-block ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          
+          <Show when=move || show_root_note_dropdown.get()>
+            <div class="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 min-w-[150px]">
+              {note_options.iter().map(|&note| {
+                view! {
+                  <button
+                    class=move || {
+                      if selected_root_note.get() == note {
+                        "w-full px-4 py-2 text-left hover:bg-gray-50 bg-green-50 text-green-700 font-medium"
+                      } else {
+                        "w-full px-4 py-2 text-left hover:bg-gray-50"
+                      }
+                    }
+                    on:click=move |_| {
+                      set_selected_root_note.set(note);
+                      set_show_root_note_dropdown.set(false);
+                      update_exercise_with_changes.run(());
+                    }
+                  >
+                    {note.to_string()}
+                  </button>
+                }
+              }).collect::<Vec<_>>()}
+            </div>
+          </Show>
+        </div>
+
+        // Scale Type Button (Purple)  
+        <div class="relative">
+          <button
+            class="px-4 py-2 bg-purple-500 text-white rounded-lg font-medium hover:bg-purple-600 transition-colors cursor-pointer shadow-sm"
+            on:click=move |_| {
+              set_show_scale_type_dropdown.update(|show| *show = !*show);
+              set_show_root_note_dropdown.set(false);
+              set_show_fret_range_dropdown.set(false);
+            }
+          >
+            "Scale: " {move || match selected_scale_type.get() {
+              ScaleType::Hepatonic(HeptaScaleType::Major) => "Major",
+              ScaleType::Hepatonic(HeptaScaleType::Minor) => "Minor",
+              _ => "Unknown"
+            }}
+            <svg class="inline-block ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          
+          <Show when=move || show_scale_type_dropdown.get()>
+            <div class="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 min-w-[150px]">
+              {scale_type_options.iter().map(|&(scale, label)| {
+                view! {
+                  <button
+                    class=move || {
+                      if selected_scale_type.get() == scale {
+                        "w-full px-4 py-2 text-left hover:bg-gray-50 bg-purple-50 text-purple-700 font-medium"
+                      } else {
+                        "w-full px-4 py-2 text-left hover:bg-gray-50"
+                      }
+                    }
+                    on:click=move |_| {
+                      set_selected_scale_type.set(scale);
+                      set_show_scale_type_dropdown.set(false);
+                      update_exercise_with_changes.run(());
+                    }
+                  >
+                    {label}
+                  </button>
+                }
+              }).collect::<Vec<_>>()}
+            </div>
+          </Show>
+        </div>
+
+        // Fret Range Button (Orange)
+        <div class="relative">
+          <button
+            class="px-4 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors cursor-pointer shadow-sm"
+            on:click=move |_| {
+              set_show_fret_range_dropdown.update(|show| *show = !*show);
+              set_show_root_note_dropdown.set(false);
+              set_show_scale_type_dropdown.set(false);
+            }
+          >
+            "Frets: " {move || format!("{}-{}", selected_start_fret.get(), selected_end_fret.get())}
+            <svg class="inline-block ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          
+          <Show when=move || show_fret_range_dropdown.get()>
+            <div class="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 min-w-[200px] p-4">
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">"Start Fret"</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="24"
+                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    prop:value=move || selected_start_fret.get()
+                    on:input=move |e| {
+                      if let Ok(value) = event_target_value(&e).parse::<u8>() {
+                        set_selected_start_fret.set(value);
+                      }
+                    }
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">"End Fret"</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="24"
+                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    prop:value=move || selected_end_fret.get()
+                    on:input=move |e| {
+                      if let Ok(value) = event_target_value(&e).parse::<u8>() {
+                        set_selected_end_fret.set(value);
+                      }
+                    }
+                  />
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                  <button
+                    class="px-3 py-1 text-sm text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+                    on:click=move |_| set_show_fret_range_dropdown.set(false)
+                  >
+                    "Cancel"
+                  </button>
+                  <button
+                    class="px-3 py-1 text-sm bg-orange-500 text-white rounded hover:bg-orange-600"
+                    on:click=move |_| {
+                      set_show_fret_range_dropdown.set(false);
+                      update_exercise_with_changes.run(());
+                    }
+                  >
+                    "Apply"
+                  </button>
+                </div>
+              </div>
+            </div>
+          </Show>
+        </div>
+
+      </div>
     </div>
   }
 }
