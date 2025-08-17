@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: {
-    files: ["frontend/*.html", "./frontend/src/**/*.rs", "./frontend/public/styles/app.css"],
+    files: ["*.html", "./src/**/*.rs", "./public/styles/app.css"],
     transform: {
       rs: (content) => content.replace(/(?:^|\s)class:/g, ' '),
     },
