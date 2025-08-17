@@ -12,7 +12,11 @@ pub enum TimerState {
 }
 
 #[component]
-pub fn PracticeSession(#[prop(optional)] target_time: Option<Duration>) -> impl IntoView {
+pub fn PracticeSession(
+  #[prop(optional)] target_time: Option<Duration>,
+  /// Optional callback when BPM changes
+  #[prop(optional)] on_bpm_change: Option<Callback<u32>>,
+) -> impl IntoView {
   let (elapsed_seconds, set_elapsed_seconds) = signal(0u64);
   let (timer_state, set_timer_state) = signal(TimerState::Stopped);
   let (bpm, set_bpm) = signal(120u32); // Default 120 BPM
@@ -77,8 +81,12 @@ pub fn PracticeSession(#[prop(optional)] target_time: Option<Duration>) -> impl 
   };
 
   // Handle BPM changes from metronome
-  let on_bpm_change = Callback::new(move |new_bpm: u32| {
+  let bpm_change_callback = Callback::new(move |new_bpm: u32| {
     set_bpm.set(new_bpm);
+    // Propagate BPM change to parent component if callback provided
+    if let Some(callback) = on_bpm_change {
+      callback.run(new_bpm);
+    }
   });
 
   view! {
@@ -177,7 +185,7 @@ pub fn PracticeSession(#[prop(optional)] target_time: Option<Duration>) -> impl 
 
           {move || {
             if show_metronome.get() {
-              view! { <Metronome bpm=bpm on_bpm_change /> }.into_any()
+              view! { <Metronome bpm=bpm on_bpm_change=bpm_change_callback /> }.into_any()
             } else {
               view! {
                 <div class="py-8 text-center text-gray-500">
