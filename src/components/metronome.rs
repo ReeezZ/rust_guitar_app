@@ -1,20 +1,13 @@
 use leptos::prelude::*;
 use leptos_use::use_interval_fn;
-use wasm_bindgen::prelude::*;
 use web_sys::{AudioContext, OscillatorType};
-use std::cell::RefCell;
-use std::rc::Rc;
+
+use crate::audio::AudioManager;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum MetronomeState {
   Stopped,
   Running,
-}
-
-// Thread-local AudioContext singleton - appropriate for WASM single-threaded environment
-// This avoids the overhead of creating multiple AudioContexts
-thread_local! {
-  static AUDIO_CONTEXT: RefCell<Option<Rc<AudioContext>>> = const { RefCell::new(None) };
 }
 
 #[component]
@@ -52,7 +45,9 @@ pub fn Metronome(
       };
 
       // Play sound for the NEW beat
-      play_click(next_beat == 1);
+      if let Some(ctx) = AudioManager::get_context() {
+        play_click_with_context(&ctx, next_beat == 1);
+      }
 
       // Update beat counter
       set_current_beat.set(next_beat);
@@ -68,8 +63,12 @@ pub fn Metronome(
       MetronomeState::Stopped => {
         set_current_beat.set(1);
         set_metronome_state.set(MetronomeState::Running);
+        // Try to resume AudioContext in case it's suspended
+        let _ = AudioManager::resume();
         // Play the first beat immediately
-        play_click(true); // Beat 1 is always the accent
+        if let Some(ctx) = AudioManager::get_context() {
+          play_click_with_context(&ctx, true); // Beat 1 is always the accent
+        }
         (metronome_interval.resume)();
       }
       MetronomeState::Running => {
@@ -179,30 +178,8 @@ pub fn Metronome(
   }
 }
 
-/// Get or create the shared AudioContext for the metronome
-fn get_or_create_audio_context() -> Result<Rc<AudioContext>, JsValue> {
-  AUDIO_CONTEXT.with(|ctx| {
-    let mut ctx_ref = ctx.borrow_mut();
-    if let Some(context) = ctx_ref.as_ref() {
-      Ok(context.clone())
-    } else {
-      let new_context = Rc::new(AudioContext::new()?);
-      *ctx_ref = Some(new_context.clone());
-      Ok(new_context)
-    }
-  })
-}
-
-/// Play a click sound using Web Audio API with shared AudioContext
-fn play_click(is_accent: bool) {
-  let audio_ctx = match get_or_create_audio_context() {
-    Ok(ctx) => ctx,
-    Err(err) => {
-      leptos::logging::warn!("Failed to create AudioContext: {:?}", err);
-      return;
-    }
-  };
-
+/// Play a click sound using the provided AudioContext
+fn play_click_with_context(audio_ctx: &AudioContext, is_accent: bool) {
   // Create oscillator for the click sound
   let oscillator = match audio_ctx.create_oscillator() {
     Ok(o) => o,
@@ -211,7 +188,7 @@ fn play_click(is_accent: bool) {
       return;
     }
   };
-  
+
   let gain = match audio_ctx.create_gain() {
     Ok(g) => g,
     Err(err) => {
@@ -225,7 +202,7 @@ fn play_click(is_accent: bool) {
     leptos::logging::warn!("Failed to connect oscillator to gain: {:?}", err);
     return;
   }
-  
+
   if let Err(err) = gain.connect_with_audio_node(&audio_ctx.destination()) {
     leptos::logging::warn!("Failed to connect gain to destination: {:?}", err);
     return;
@@ -250,14 +227,17 @@ fn play_click(is_accent: bool) {
     leptos::logging::warn!("Failed to start oscillator: {:?}", err);
     return;
   }
-  
+
   if let Err(err) = oscillator.stop_with_when(current_time + 0.1) {
     leptos::logging::warn!("Failed to stop oscillator: {:?}", err);
     return;
   }
 
   // Fade out to avoid clicking
-  if let Err(err) = gain.gain().exponential_ramp_to_value_at_time(0.01, current_time + 0.1) {
+  if let Err(err) = gain
+    .gain()
+    .exponential_ramp_to_value_at_time(0.01, current_time + 0.1)
+  {
     leptos::logging::warn!("Failed to set gain ramp: {:?}", err);
   }
 }
