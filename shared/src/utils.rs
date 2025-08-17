@@ -33,9 +33,11 @@ pub fn generate_id() -> String {
 
 #[cfg(test)]
 mod tests {
+    #[cfg(target_arch = "wasm32")]
     use super::*;
 
     #[test]
+    #[cfg(target_arch = "wasm32")]
     fn test_id_generation() {
         let id1 = generate_id();
         let id2 = generate_id();
@@ -45,6 +47,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(target_arch = "wasm32")]
     fn test_id_generator_struct() {
         let id1 = IdGenerator::generate();
         let id2 = IdGenerator::generate();

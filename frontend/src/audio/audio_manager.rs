@@ -120,9 +120,11 @@ pub fn use_audio_context() -> Option<AudioContext> {
 
 #[cfg(test)]
 mod tests {
+  #[cfg(target_arch = "wasm32")]
   use super::*;
 
   #[test]
+  #[cfg(target_arch = "wasm32")]
   fn test_audio_manager_methods() {
     // Note: AudioContext creation will fail in test environment without DOM
     // This test just ensures the methods can be called

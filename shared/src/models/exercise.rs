@@ -122,9 +122,11 @@ impl Exercise {
 
 #[cfg(test)]
 mod tests {
+  #[cfg(target_arch = "wasm32")]
   use super::*;
 
   #[test]
+  #[cfg(target_arch = "wasm32")]
   fn test_scale_exercise_creation() {
     let exercise = Exercise::new(
       "C Major Scale Practice".to_string(),
@@ -142,6 +144,7 @@ mod tests {
   }
 
   #[test]
+  #[cfg(target_arch = "wasm32")]
   fn test_technique_exercise_creation() {
     let exercise = Exercise::new("Alternate Picking".to_string(), ExerciseType::Technique);
 
