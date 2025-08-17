@@ -75,8 +75,16 @@ pub fn ExerciseTypeSpecificFields(
                     }
                   }
                 >
-                  <option value="Major">Major</option>
-                  <option value="Minor">Natural Minor</option>
+                  <option value="Major" selected=move || {
+                    matches!(scale_type.get(), ScaleType::Hepatonic(HeptaScaleType::Major))
+                  }>
+                    Major
+                  </option>
+                  <option value="Minor" selected=move || {
+                    matches!(scale_type.get(), ScaleType::Hepatonic(HeptaScaleType::Minor))
+                  }>
+                    Natural Minor
+                  </option>
                 </select>
               </div>
             </div>

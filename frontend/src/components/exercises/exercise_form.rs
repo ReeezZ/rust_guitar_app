@@ -282,13 +282,20 @@ pub fn ExerciseForm(
                   <label class="block text-sm font-medium text-gray-700 mb-1">Exercise Type</label>
                   <select
                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      prop:value={move || exercise_type_str.get()}
                       on:change=move |e| handle_type_change(event_target_value(&e))
                   >
-                      <option value={TECHNIQUE_TYPE}>Technique</option>
-                      <option value={SCALE_TYPE}>Scale</option>
-                      <option value={TRIAD_TYPE}>Triad</option>
-                      <option value={SONG_TYPE}>Song</option>
+                      <option value={TECHNIQUE_TYPE} selected=move || exercise_type_str.get() == TECHNIQUE_TYPE>
+                          Technique
+                      </option>
+                      <option value={SCALE_TYPE} selected=move || exercise_type_str.get() == SCALE_TYPE>
+                          Scale
+                      </option>
+                      <option value={TRIAD_TYPE} selected=move || exercise_type_str.get() == TRIAD_TYPE>
+                          Triad
+                      </option>
+                      <option value={SONG_TYPE} selected=move || exercise_type_str.get() == SONG_TYPE>
+                          Song
+                      </option>
                   </select>
               </div>
 
