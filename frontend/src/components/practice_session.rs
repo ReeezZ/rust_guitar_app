@@ -2,7 +2,9 @@ use leptos::prelude::*;
 use leptos_use::use_interval_fn;
 use std::time::Duration;
 
+use crate::components::fretboard::scale_display::FretboardScaleDisplay;
 use crate::components::metronome::Metronome;
+use shared::models::exercise::{Exercise, ExerciseType};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum TimerState {
@@ -14,6 +16,9 @@ pub enum TimerState {
 #[component]
 pub fn PracticeSession(
   #[prop(optional)] target_time: Option<Duration>,
+  /// Optional exercise for exercise-specific features like fretboard display
+  #[prop(optional)]
+  exercise: Option<Exercise>,
   /// Optional callback when BPM changes
   #[prop(optional)]
   on_bpm_change: Option<Callback<u32>>,
@@ -22,6 +27,11 @@ pub fn PracticeSession(
   let (timer_state, set_timer_state) = signal(TimerState::Stopped);
   let (bpm, set_bpm) = signal(120u32); // Default 120 BPM
   let (show_metronome, set_show_metronome) = signal(true);
+  let (show_fretboard, set_show_fretboard) = signal(true);
+
+  // Clone exercise for closures to avoid move issues
+  let exercise_clone = exercise.clone();
+  let exercise_clone2 = exercise.clone();
 
   // Set up interval for timer ticking
   let interval_controls = use_interval_fn(
@@ -93,6 +103,42 @@ pub fn PracticeSession(
   view! {
     <div class="p-6 bg-white rounded-lg border border-gray-200">
       <h3 class="mb-4 text-lg font-semibold text-gray-800">"Practice Session"</h3>
+
+      // Exercise info section - compact display
+      {move || {
+        if let Some(ref ex) = exercise_clone {
+          view! {
+            <div class="mb-6 p-3 bg-gray-50 rounded-lg">
+              <div class="flex flex-wrap items-center gap-4 text-sm">
+                <div class="flex items-center gap-2">
+                  <span class="font-medium text-gray-700">"Type:"</span>
+                  <span class="px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded">
+                    {ex.exercise_type.type_name()}
+                  </span>
+                </div>
+
+                {ex.exercise_type.get_fret_range().map(|(min, max)| {
+                  view! {
+                    <div class="flex items-center gap-2">
+                      <span class="font-medium text-gray-700">"Frets:"</span>
+                      <span class="px-2 py-1 text-xs font-medium text-orange-800 bg-orange-100 rounded">
+                        {format!("{min}-{max}")}
+                      </span>
+                    </div>
+                  }
+                })}
+
+                <div class="flex items-center gap-2">
+                  <span class="font-medium text-gray-700">"Details:"</span>
+                  <span class="text-xs text-gray-600">{ex.exercise_type.to_string()}</span>
+                </div>
+              </div>
+            </div>
+          }.into_any()
+        } else {
+          view! { <div></div> }.into_any()
+        }
+      }}
 
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
         // Timer Section
@@ -199,6 +245,63 @@ pub fn PracticeSession(
           }}
         </div>
       </div>
+
+      // Fretboard Section (only show if exercise has fretboard content)
+      {move || {
+        if let Some(ref ex) = exercise_clone2 {
+          match &ex.exercise_type {
+            ExerciseType::Scale { root_note, scale_type, fret_range } |
+            ExerciseType::Triad { root_note, scale_type, fret_range } => {
+              let root_note = *root_note;
+              let scale_type = *scale_type;
+              let fret_range = *fret_range;
+
+              view! {
+                <div class="mt-6">
+                  // Toggle fretboard visibility
+                  <div class="flex justify-between items-center mb-3">
+                    <h4 class="font-semibold text-gray-700 text-md">"Fretboard"</h4>
+                    <button
+                      class="py-1 px-2 text-xs bg-gray-200 rounded hover:bg-gray-300"
+                      on:click=move |_| set_show_fretboard.update(|show| *show = !*show)
+                    >
+                      {move || if show_fretboard.get() { "Hide" } else { "Show" }}
+                    </button>
+                  </div>
+
+                  {move || {
+                    if show_fretboard.get() {
+                      view! {
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                          <FretboardScaleDisplay
+                            fret_range=Signal::derive(move || {
+                              fret_range.0 as usize..=fret_range.1 as usize
+                            })
+                            root_note=Signal::derive(move || root_note)
+                            scale_type=Signal::derive(move || scale_type)
+                          />
+                        </div>
+                      }.into_any()
+                    } else {
+                      view! {
+                        <div class="py-8 text-center text-gray-500">
+                          <p class="text-sm">"Fretboard hidden"</p>
+                          <p class="text-xs">
+                            {format!("{} {} (frets {}-{})", root_note, scale_type, fret_range.0, fret_range.1)}
+                          </p>
+                        </div>
+                      }.into_any()
+                    }
+                  }}
+                </div>
+              }.into_any()
+            }
+            _ => view! { <div></div> }.into_any(),
+          }
+        } else {
+          view! { <div></div> }.into_any()
+        }
+      }}
 
       // Session info
       <div class="pt-4 mt-4 text-center border-t border-gray-200">

@@ -8,3 +8,5 @@ pub mod musical_fretboard_config;
 pub mod navbar;
 pub mod practice_session;
 pub mod practice_timer;
+
+pub use practice_session::PracticeSession;

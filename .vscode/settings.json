@@ -29,19 +29,18 @@
   },
   "css.validate": false,
   "chat.tools.terminal.autoApprove": {
-    // --- Destructive commands explicitly denied ---
-    "rm": false,
-    "rmdir": false,
     "del": false,
-    "kill": false,
     "eval": false,
     "chmod": false,
     "chown": false,
+    "rmdir": false,
     "/^Remove-Item\\b/i": false, // PowerShell remove alias
     // --- External network commands denied ---
     "curl": false,
     "wget": false,
     // --- Approved Commands (using more specific strings and cleaner regex) ---
+    "kill": true,
+    "rm": true,
     "cd": true, // Use simple string for higher priority
     "mv": true,
     "cp": true,

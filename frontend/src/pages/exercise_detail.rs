@@ -1,5 +1,5 @@
 use crate::components::exercises::{ExerciseForm, FormMode};
-use crate::components::practice_session::PracticeSession;
+use crate::components::PracticeSession;
 use crate::models::repository::{get_exercise_repository, ExerciseRepository};
 use leptos::prelude::*;
 use leptos_router::hooks::use_params_map;
@@ -83,6 +83,7 @@ pub fn ExerciseDetail() -> impl IntoView {
                           </div>
                       }.into_any()
                   } else {
+                      let exercise_for_practice = ex.clone();
                       view! {
                           <div>
                               <div class="mb-8">
@@ -174,22 +175,16 @@ pub fn ExerciseDetail() -> impl IntoView {
                                           <h3 class="font-semibold text-green-800">Details</h3>
                                           <p class="text-green-600">{ex.exercise_type.to_string()}</p>
                                       </div>
+                                      </div>
                                   </div>
-
-                                  {ex.exercise_type.get_fret_range().map(|(min, max)| {
-                                      view! {
-                                          <div class="bg-orange-50 p-3 rounded mb-6">
-                                              <h3 class="font-semibold text-orange-800">Fret Range</h3>
-                                              <p class="text-orange-600">Frets {min} - {max}</p>
-                                          </div>
-                                      }
-                                  })}
-                              </div>
 
                               // Practice Session Section
                               <div class="bg-gray-50 p-6 rounded-lg">
                                   <h2 class="text-xl font-semibold mb-4">"Practice Session"</h2>
-                                  <PracticeSession target_time={std::time::Duration::from_secs(15 * 60)} />
+                                  <PracticeSession
+                                      target_time={std::time::Duration::from_secs(15 * 60)}
+                                      exercise={exercise_for_practice}
+                                  />
                               </div>
                           </div>
                       }.into_any()

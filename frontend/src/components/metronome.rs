@@ -87,11 +87,9 @@ pub fn Metronome(
 
   view! {
     <div class="p-4 bg-white rounded-lg border border-gray-200">
-      <h4 class="mb-3 font-semibold text-gray-800 text-md">"Metronome"</h4>
-
-      <div class="mb-4 text-center">
+      <div class="text-center">
         // BPM Display and Control
-        <div class="flex justify-center items-center mb-4 space-x-4">
+        <div class="flex justify-center items-center mb-4">
           <button
             class="flex justify-center items-center w-8 h-8 text-sm font-bold bg-gray-200 rounded-full hover:bg-gray-300"
             on:click=move |_| {
@@ -102,7 +100,7 @@ pub fn Metronome(
             "−"
           </button>
 
-          <div class="text-center">
+          <div class="flex-1 text-center mx-4">
             <div class="text-2xl font-bold text-gray-800">{move || bpm.get().to_string()}</div>
             <div class="text-xs text-gray-500">"BPM"</div>
           </div>
@@ -142,30 +140,32 @@ pub fn Metronome(
             .collect_view()}
         </div>
 
-        // Start/Stop button
-        <button
-          class=move || {
-            match metronome_state.get() {
-              MetronomeState::Running => {
-                "bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg"
-              }
-              MetronomeState::Stopped => {
-                "bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
+        // Start/Stop button - centered
+        <div class="flex justify-center mb-3">
+          <button
+            class=move || {
+              match metronome_state.get() {
+                MetronomeState::Running => {
+                  "bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg"
+                }
+                MetronomeState::Stopped => {
+                  "bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
+                }
               }
             }
-          }
-          on:click=toggle_metronome
-        >
-          {move || {
-            match metronome_state.get() {
-              MetronomeState::Running => "Stop",
-              MetronomeState::Stopped => "Start",
-            }
-          }}
-        </button>
+            on:click=toggle_metronome
+          >
+            {move || {
+              match metronome_state.get() {
+                MetronomeState::Running => "Stop",
+                MetronomeState::Stopped => "Start",
+              }
+            }}
+          </button>
+        </div>
 
         // State indicator
-        <p class="mt-2 text-xs text-gray-500">
+        <p class="text-xs text-gray-500">
           {move || {
             match metronome_state.get() {
               MetronomeState::Stopped => "Click start to begin metronome".to_string(),
