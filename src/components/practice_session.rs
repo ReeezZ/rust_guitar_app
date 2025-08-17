@@ -15,7 +15,8 @@ pub enum TimerState {
 pub fn PracticeSession(
   #[prop(optional)] target_time: Option<Duration>,
   /// Optional callback when BPM changes
-  #[prop(optional)] on_bpm_change: Option<Callback<u32>>,
+  #[prop(optional)]
+  on_bpm_change: Option<Callback<u32>>,
 ) -> impl IntoView {
   let (elapsed_seconds, set_elapsed_seconds) = signal(0u64);
   let (timer_state, set_timer_state) = signal(TimerState::Stopped);
