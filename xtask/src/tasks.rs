@@ -5,10 +5,17 @@ use std::process::Command;
 /// Run a cargo workspace command with proper error handling
 pub fn run_cargo_workspace(args: &[&str], description: &str) -> Result<()> {
   println!("{description}");
-  Command::new("cargo")
+  let status = Command::new("cargo")
     .args(args)
     .status()
     .with_context(|| format!("Failed to run: cargo {}", args.join(" ")))?;
+  if !status.success() {
+    anyhow::bail!(
+      "Command 'cargo {}' exited with status code: {}",
+      args.join(" "),
+      status.code().unwrap_or(-1)
+    );
+  }
   Ok(())
 }
 
@@ -18,13 +25,16 @@ pub fn run_trunk(args: &[&str], description: &str) -> Result<()> {
   if args.contains(&"serve") {
     println!("📍 Frontend will be available at: {}", url(FRONTEND_PORT));
   }
-
-  Command::new("trunk")
+  let status = Command::new("trunk")
     .args(args)
     .current_dir("frontend")
     .env("RUSTFLAGS", RUSTFLAGS_WASM)
     .status()
     .with_context(|| format!("Failed to run: trunk {}", args.join(" ")))?;
+
+  if !status.success() {
+    anyhow::bail!("trunk command exited with non-zero status: {}", status);
+  }
   Ok(())
 }
 
