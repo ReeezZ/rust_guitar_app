@@ -181,17 +181,6 @@ pub fn ExerciseDetail() -> impl IntoView {
                     }}
                   </div>
 
-                  <div class="grid grid-cols-1 gap-4 mb-6 md:grid-cols-2">
-                    <div class="p-4 bg-blue-50 rounded">
-                      <h3 class="font-semibold text-blue-800">Exercise Type</h3>
-                      <p class="text-blue-600">{ex.exercise_type.type_name()}</p>
-                    </div>
-
-                    <div class="p-4 bg-green-50 rounded">
-                      <h3 class="font-semibold text-green-800">Details</h3>
-                      <p class="text-green-600">{ex.exercise_type.to_string()}</p>
-                    </div>
-                  </div>
                 </div>
 
                 // Practice Session Section
@@ -207,6 +196,12 @@ pub fn ExerciseDetail() -> impl IntoView {
           }
         }
         None => {
+
+          // Description section with inline editing
+          // Edit mode - show textarea and buttons
+          // Display mode - show description or placeholder with edit button
+
+          // Practice Session Section
           view! {
             <div class="py-16 text-center">
               <h2 class="mb-4 text-2xl font-bold text-gray-600">Exercise Not Found</h2>

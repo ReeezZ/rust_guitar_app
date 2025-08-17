@@ -108,33 +108,62 @@ pub fn PracticeSession(
       {move || {
         if let Some(ref ex) = exercise_clone {
           view! {
-            <div class="mb-6 p-3 bg-gray-50 rounded-lg">
-              <div class="flex flex-wrap items-center gap-4 text-sm">
-                <div class="flex items-center gap-2">
+            <div class="p-3 mb-6 bg-gray-50 rounded-lg">
+              <div class="flex flex-wrap gap-4 items-center text-sm">
+                <div class="flex gap-2 items-center">
                   <span class="font-medium text-gray-700">"Type:"</span>
-                  <span class="px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded">
+                  <span class="py-1 px-2 text-xs font-medium text-blue-800 bg-blue-100 rounded">
                     {ex.exercise_type.type_name()}
                   </span>
                 </div>
 
-                {ex.exercise_type.get_fret_range().map(|(min, max)| {
-                  view! {
-                    <div class="flex items-center gap-2">
-                      <span class="font-medium text-gray-700">"Frets:"</span>
-                      <span class="px-2 py-1 text-xs font-medium text-orange-800 bg-orange-100 rounded">
-                        {format!("{min}-{max}")}
-                      </span>
-                    </div>
+                // Split root note and scale type into separate boxes
+                {match &ex.exercise_type {
+                  ExerciseType::Scale { root_note, scale_type, .. }
+                  | ExerciseType::Triad { root_note, scale_type, .. } => {
+                    view! {
+                      <>
+                        <div class="flex gap-2 items-center">
+                          <span class="font-medium text-gray-700">"Root:"</span>
+                          <span class="py-1 px-2 text-xs font-medium text-indigo-800 bg-indigo-100 rounded">
+                            {root_note.to_string()}
+                          </span>
+                        </div>
+                        <div class="flex gap-2 items-center">
+                          <span class="font-medium text-gray-700">"Scale:"</span>
+                          <span class="py-1 px-2 text-xs font-medium text-purple-800 bg-purple-100 rounded">
+                            {scale_type.to_string()}
+                          </span>
+                        </div>
+                      </>
+                    }
+                      .into_any()
                   }
-                })}
+                  _ => view! { <div></div> }.into_any(),
+                }}
 
-                <div class="flex items-center gap-2">
+                {ex
+                  .exercise_type
+                  .get_fret_range()
+                  .map(|(min, max)| {
+                    view! {
+                      <div class="flex gap-2 items-center">
+                        <span class="font-medium text-gray-700">"Frets:"</span>
+                        <span class="py-1 px-2 text-xs font-medium text-orange-800 bg-orange-100 rounded">
+                          {format!("{min}-{max}")}
+                        </span>
+                      </div>
+                    }
+                  })}
+
+                <div class="flex gap-2 items-center">
                   <span class="font-medium text-gray-700">"Details:"</span>
                   <span class="text-xs text-gray-600">{ex.exercise_type.to_string()}</span>
                 </div>
               </div>
             </div>
-          }.into_any()
+          }
+            .into_any()
         } else {
           view! { <div></div> }.into_any()
         }
@@ -250,8 +279,8 @@ pub fn PracticeSession(
       {move || {
         if let Some(ref ex) = exercise_clone2 {
           match &ex.exercise_type {
-            ExerciseType::Scale { root_note, scale_type, fret_range } |
-            ExerciseType::Triad { root_note, scale_type, fret_range } => {
+            ExerciseType::Scale { root_note, scale_type, fret_range }
+            | ExerciseType::Triad { root_note, scale_type, fret_range } => {
               let root_note = *root_note;
               let scale_type = *scale_type;
               let fret_range = *fret_range;
@@ -281,20 +310,29 @@ pub fn PracticeSession(
                             scale_type=Signal::derive(move || scale_type)
                           />
                         </div>
-                      }.into_any()
+                      }
+                        .into_any()
                     } else {
                       view! {
                         <div class="py-8 text-center text-gray-500">
                           <p class="text-sm">"Fretboard hidden"</p>
                           <p class="text-xs">
-                            {format!("{} {} (frets {}-{})", root_note, scale_type, fret_range.0, fret_range.1)}
+                            {format!(
+                              "{} {} (frets {}-{})",
+                              root_note,
+                              scale_type,
+                              fret_range.0,
+                              fret_range.1,
+                            )}
                           </p>
                         </div>
-                      }.into_any()
+                      }
+                        .into_any()
                     }
                   }}
                 </div>
-              }.into_any()
+              }
+                .into_any()
             }
             _ => view! { <div></div> }.into_any(),
           }
