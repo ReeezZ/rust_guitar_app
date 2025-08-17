@@ -86,8 +86,8 @@ async fn update_exercise(
     Json(exercise): Json<Exercise>,
 ) -> Result<Json<Exercise>, StatusCode> {
     let mut exercises = store.lock().unwrap();
-    if exercises.contains_key(&id) {
-        exercises.insert(id, exercise.clone());
+    if let std::collections::hash_map::Entry::Occupied(mut e) = exercises.entry(id) {
+        e.insert(exercise.clone());
         Ok(Json(exercise))
     } else {
         Err(StatusCode::NOT_FOUND)
