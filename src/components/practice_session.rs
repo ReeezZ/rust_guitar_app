@@ -1,0 +1,211 @@
+use leptos::prelude::*;
+use leptos_use::use_interval_fn;
+use std::time::Duration;
+
+use crate::components::metronome::Metronome;
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum TimerState {
+  Stopped,
+  Running,
+  Paused,
+}
+
+#[component]
+pub fn PracticeSession(
+  #[prop(optional)] target_time: Option<Duration>,
+  /// Optional callback when BPM changes
+  #[prop(optional)]
+  on_bpm_change: Option<Callback<u32>>,
+) -> impl IntoView {
+  let (elapsed_seconds, set_elapsed_seconds) = signal(0u64);
+  let (timer_state, set_timer_state) = signal(TimerState::Stopped);
+  let (bpm, set_bpm) = signal(120u32); // Default 120 BPM
+  let (show_metronome, set_show_metronome) = signal(true);
+
+  // Set up interval for timer ticking
+  let interval_controls = use_interval_fn(
+    move || {
+      if timer_state.get() == TimerState::Running {
+        set_elapsed_seconds.update(|t| *t += 1);
+      }
+    },
+    1000, // 1 second interval
+  );
+
+  // Format elapsed time as MM:SS
+  let formatted_time = move || {
+    let seconds = elapsed_seconds.get();
+    let minutes = seconds / 60;
+    let secs = seconds % 60;
+    format!("{minutes:02}:{secs:02}")
+  };
+
+  // Check if target time is reached
+  let is_target_reached = move || {
+    if let Some(target) = target_time {
+      elapsed_seconds.get() >= target.as_secs()
+    } else {
+      false
+    }
+  };
+
+  let start_timer = {
+    let pause = interval_controls.pause.clone();
+    let resume = interval_controls.resume.clone();
+    move |_| {
+      match timer_state.get() {
+        TimerState::Stopped => {
+          set_elapsed_seconds.set(0);
+          set_timer_state.set(TimerState::Running);
+          resume(); // Start the interval
+        }
+        TimerState::Paused => {
+          set_timer_state.set(TimerState::Running);
+          resume(); // Resume the interval
+        }
+        TimerState::Running => {
+          set_timer_state.set(TimerState::Paused);
+          pause(); // Pause the interval
+        }
+      }
+    }
+  };
+
+  let stop_timer = {
+    let pause = interval_controls.pause.clone();
+    move |_| {
+      set_timer_state.set(TimerState::Stopped);
+      set_elapsed_seconds.set(0);
+      pause(); // Stop the interval
+    }
+  };
+
+  // Handle BPM changes from metronome
+  let bpm_change_callback = Callback::new(move |new_bpm: u32| {
+    set_bpm.set(new_bpm);
+    // Propagate BPM change to parent component if callback provided
+    if let Some(callback) = on_bpm_change {
+      callback.run(new_bpm);
+    }
+  });
+
+  view! {
+    <div class="p-6 bg-white rounded-lg border border-gray-200">
+      <h3 class="mb-4 text-lg font-semibold text-gray-800">"Practice Session"</h3>
+
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        // Timer Section
+        <div class="text-center">
+          <h4 class="mb-3 font-semibold text-gray-700 text-md">"Timer"</h4>
+
+          // Timer display
+          <div class=move || {
+            let base_classes = "text-4xl lg:text-6xl font-mono font-bold mb-4";
+            if is_target_reached() {
+              format!("{base_classes} text-green-600")
+            } else {
+              format!("{base_classes} text-gray-800")
+            }
+          }>{formatted_time}</div>
+
+          // Target time display
+          {move || {
+            if let Some(target) = target_time {
+              let target_mins = target.as_secs() / 60;
+              let target_secs = target.as_secs() % 60;
+              view! {
+                <p class="mb-4 text-sm text-gray-600">
+                  "Target: " {format!("{target_mins:02}:{target_secs:02}")}
+                  {move || if is_target_reached() { " ✓" } else { "" }}
+                </p>
+              }
+                .into_any()
+            } else {
+              view! { <div></div> }.into_any()
+            }
+          }}
+
+          // Control buttons
+          <div class="flex justify-center mb-3 space-x-3">
+            <button
+              class=move || {
+                match timer_state.get() {
+                  TimerState::Running => {
+                    "bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg text-sm"
+                  }
+                  _ => {
+                    "bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg text-sm"
+                  }
+                }
+              }
+              on:click=start_timer
+            >
+              {move || {
+                match timer_state.get() {
+                  TimerState::Running => "Pause",
+                  TimerState::Paused => "Resume",
+                  TimerState::Stopped => "Start",
+                }
+              }}
+            </button>
+
+            <button
+              class="py-2 px-4 text-sm font-bold text-white bg-red-500 rounded-lg hover:bg-red-600 disabled:bg-gray-400"
+              on:click=stop_timer
+              disabled=move || timer_state.get() == TimerState::Stopped
+            >
+              "Stop"
+            </button>
+          </div>
+
+          // Timer state indicator
+          <p class="text-xs text-gray-500">
+            {move || {
+              match timer_state.get() {
+                TimerState::Stopped => "Ready to start",
+                TimerState::Running => "Timer running...",
+                TimerState::Paused => "Timer paused",
+              }
+            }}
+          </p>
+        </div>
+
+        // Metronome Section
+        <div>
+          // Toggle metronome visibility
+          <div class="flex justify-between items-center mb-3">
+            <h4 class="font-semibold text-gray-700 text-md">"Metronome"</h4>
+            <button
+              class="py-1 px-2 text-xs bg-gray-200 rounded hover:bg-gray-300"
+              on:click=move |_| set_show_metronome.update(|show| *show = !*show)
+            >
+              {move || if show_metronome.get() { "Hide" } else { "Show" }}
+            </button>
+          </div>
+
+          {move || {
+            if show_metronome.get() {
+              view! { <Metronome bpm=bpm on_bpm_change=bpm_change_callback /> }.into_any()
+            } else {
+              view! {
+                <div class="py-8 text-center text-gray-500">
+                  <p class="text-sm">"Metronome hidden"</p>
+                  <p class="text-xs">"Current BPM: " {move || bpm.get().to_string()}</p>
+                </div>
+              }
+                .into_any()
+            }
+          }}
+        </div>
+      </div>
+
+      // Session info
+      <div class="pt-4 mt-4 text-center border-t border-gray-200">
+        <p class="text-xs text-gray-500">
+          "Session BPM: " {move || bpm.get().to_string()} " • Duration: " {formatted_time}
+        </p>
+      </div>
+    </div>
+  }
+}
