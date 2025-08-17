@@ -3,11 +3,12 @@
 /// This component provides a single fretboard with all configuration parameters
 /// exposed as interactive controls, allowing users to experiment with different
 /// settings in real-time and understand their effects.
-use crate::components::{
-  fretboard::FretClickEvent, fretboard_visual_config::FretboardVisualConfig,
-  svg_fretboard_with_notes::SvgFretboardWithNotes,
-};
 use leptos::{logging::log, prelude::*};
+
+use crate::components::fretboard::{
+  visual_config::FretboardVisualConfig,
+  with_notes::{FretClickEventWithNote, FretboardWithNotes},
+};
 
 #[component]
 pub fn FretboardConfigExamples() -> impl IntoView {
@@ -115,11 +116,11 @@ pub fn FretboardConfigExamples() -> impl IntoView {
       <div class="flex flex-col gap-6 xl:flex-row">
         // Main fretboard display - responsive sizing, not too constrained
         <div class="p-4 bg-blue-50 rounded-lg border-2 border-blue-200 xl:min-w-0 xl:flex-[2]">
-          <SvgFretboardWithNotes
+          <FretboardWithNotes
             start_fret=start_fret.read_only().into()
             end_fret=end_fret.read_only().into()
             config=Signal::from(visual_config)
-            on_note_clicked=Callback::new(|event: FretClickEvent| {
+            on_note_clicked=Callback::new(|event: FretClickEventWithNote| {
               log!(
                 "Fret clicked: String {}, Fret {}, Note {}", event.coord.string_idx, event.coord.fret_idx, event.note
               );

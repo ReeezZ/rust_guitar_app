@@ -1,9 +1,15 @@
-use crate::components::fretboard::FretClickEvent;
-use crate::components::fretboard_visual_config::FretboardVisualConfig;
-use crate::components::svg_fretboard::{SvgFretClickEvent, SvgFretboard};
-use crate::models::fretboard_model::{FretState, FretboardModel};
+use crate::components::fretboard::base::{FretClickEvent, Fretboard};
+use crate::components::fretboard::visual_config::FretboardVisualConfig;
+use crate::models::fretboard_model::{FretCoord, FretState, FretboardModel};
 use crate::music::notes::Note;
 use leptos::prelude::*;
+
+#[derive(Clone, Copy, Debug)]
+pub struct FretClickEventWithNote {
+  pub note: Note,
+  pub coord: FretCoord,
+  pub fret_state: FretState,
+}
 
 /// SVG fretboard component that adds note awareness to the base SvgFretboard.
 ///
@@ -15,7 +21,7 @@ use leptos::prelude::*;
 /// ```rust
 /// # use leptos::prelude::*;
 /// # use rust_guitar_app::components::svg_fretboard_with_notes::SvgFretboardWithNotes;
-/// # use rust_guitar_app::components::fretboard::FretClickEvent;
+/// # use rust_guitar_app::components::fretboard::base::FretClickEvent;
 ///
 /// # fn example() -> impl IntoView {
 /// let start = RwSignal::new(3);
@@ -41,8 +47,8 @@ use leptos::prelude::*;
 /// ```rust
 /// # use leptos::prelude::*;
 /// # use rust_guitar_app::components::svg_fretboard_with_notes::SvgFretboardWithNotes;
-/// # use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
-/// # use rust_guitar_app::components::fretboard::FretClickEvent;
+/// # use rust_guitar_app::components::fretboard::visual_config::FretboardVisualConfig;
+/// # use rust_guitar_app::components::fretboard::base::FretClickEvent;
 ///
 /// # fn example() -> impl IntoView {
 /// let start = RwSignal::new(0);
@@ -63,7 +69,7 @@ use leptos::prelude::*;
 /// # }
 /// ```
 #[component]
-pub fn SvgFretboardWithNotes(
+pub fn FretboardWithNotes(
   /// First fret in the active/playable range
   start_fret: Signal<usize>,
   /// Last fret in the active/playable range
@@ -75,7 +81,7 @@ pub fn SvgFretboardWithNotes(
   tuning: Option<Signal<Vec<Note>>>,
   /// Callback for note click events (enriched with note information)
   #[prop(optional)]
-  on_note_clicked: Option<Callback<FretClickEvent>>,
+  on_note_clicked: Option<Callback<FretClickEventWithNote>>,
 
   // Visual configuration
   /// Visual configuration for fretboard display properties
@@ -86,7 +92,7 @@ pub fn SvgFretboardWithNotes(
   let tuning = tuning.unwrap_or_else(|| Signal::derive(FretboardModel::standard_tuning));
 
   // Handle coordinate-to-note conversion
-  let on_svg_fret_clicked = Callback::new(move |svg_event: SvgFretClickEvent| {
+  let on_svg_fret_clicked = Callback::new(move |svg_event: FretClickEvent| {
     if let Some(callback) = on_note_clicked {
       let tuning_vec = tuning.get();
       let string_idx = svg_event.coord.string_idx;
@@ -100,7 +106,7 @@ pub fn SvgFretboardWithNotes(
         let note = base_note.add_steps(fret_idx as usize);
 
         // Create enriched event with note information
-        let fret_click_event = FretClickEvent {
+        let fret_click_event = FretClickEventWithNote {
           note,
           coord: svg_event.coord,
           fret_state: FretState::Normal, // Default state, could be enhanced later
@@ -112,7 +118,7 @@ pub fn SvgFretboardWithNotes(
   });
 
   view! {
-    <SvgFretboard
+    <Fretboard
       start_fret=start_fret
       end_fret=end_fret
       config=config.unwrap_or_else(|| Signal::derive(FretboardVisualConfig::default))

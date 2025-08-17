@@ -6,8 +6,8 @@ use crate::{
   components::navbar::Navbar,
   pages::{
     exercise_detail::ExerciseDetail, exercises::ExercisesPage, fretboard_trainer::FretboardTrainer,
-    home::Home, not_found::NotFound, svg_fretboard::SvgFretboardPage,
-    svg_fretboard_scale::SvgFretboardScalePage,
+    home::Home, not_found::NotFound, fretboard::SvgFretboardPage,
+    fretboard_scale::FretboardScalePage,
   },
 };
 #[component]
@@ -30,7 +30,7 @@ pub fn App() -> impl IntoView {
           <Route path=path!("/exercises/:id") view=ExerciseDetail />
           <Route path=path!("/fretboard_trainer") view=FretboardTrainer />
           <Route path=path!("/svg_fretboard") view=SvgFretboardPage />
-          <Route path=path!("/svg_fretboard_scale") view=SvgFretboardScalePage />
+          <Route path=path!("/svg_fretboard_scale") view=FretboardScalePage />
         </Routes>
       </main>
     </Router>

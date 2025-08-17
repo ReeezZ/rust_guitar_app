@@ -1,9 +1,8 @@
-use crate::components::fretboard::FretClickEvent;
-use crate::components::fretboard_visual_config::FretboardVisualConfig;
+use crate::components::fretboard::visual_config::FretboardVisualConfig;
+use crate::components::fretboard::with_notes::{FretClickEventWithNote, FretboardWithNotes};
 use crate::components::musical_fretboard_config::{
   MusicalFretboardConfig, MusicalFretboardConfigSignals,
 };
-use crate::components::svg_fretboard_with_notes::SvgFretboardWithNotes;
 use crate::fretboard_view_helper::calculate_fret_positions;
 use crate::music::notes::Note;
 use crate::music::scales::{Scale, ScaleTrait, ScaleType};
@@ -23,7 +22,7 @@ use leptos::prelude::*;
 /// # use leptos::prelude::*;
 /// # use rust_guitar_app::components::svg_fretboard_scale_display::SvgFretboardScaleDisplay;
 /// # use rust_guitar_app::components::musical_fretboard_config::MusicalFretboardConfig;
-/// # use rust_guitar_app::components::fretboard::FretClickEvent;
+/// # use rust_guitar_app::components::fretboard::base::FretClickEvent;
 /// # use rust_guitar_app::music::notes::Note;
 /// # use rust_guitar_app::music::scales::ScaleType;
 /// # use rust_guitar_app::music::heptatonic_scales::HeptaScaleType;
@@ -62,7 +61,7 @@ use leptos::prelude::*;
 /// - `3..=7` - Higher position practice (barre chord area)
 /// - `0..=0` - Just open strings (useful for chord tone analysis)
 #[component]
-pub fn SvgFretboardScaleDisplay(
+pub fn FretboardScaleDisplay(
   /// Range of frets to include in scale display (e.g., 0..=5 includes open strings, 1..=5 excludes them)
   fret_range: Signal<std::ops::RangeInclusive<usize>>,
 
@@ -81,7 +80,7 @@ pub fn SvgFretboardScaleDisplay(
   extra_frets: Option<Signal<usize>>,
   /// Callback for note click events (enriched with note information)
   #[prop(optional)]
-  on_note_clicked: Option<Callback<FretClickEvent>>,
+  on_note_clicked: Option<Callback<FretClickEventWithNote>>,
 ) -> impl IntoView {
   // Use provided config or create default
   let fretboard_config = config.unwrap_or_default();
@@ -121,7 +120,7 @@ pub fn SvgFretboardScaleDisplay(
   view! {
     <div class="relative">
       // Base fretboard with note awareness
-      <SvgFretboardWithNotes
+      <FretboardWithNotes
         start_fret=start_fret
         end_fret=end_fret
         tuning=config_signals.tuning
@@ -181,100 +180,107 @@ fn ScaleNoteOverlays(
           let base_width = 800.0;
           let height = base_width / svg_aspect_ratio.get();
           let current_nut_width = nut_width.get();
-
-          // Extract start and end from range for visual calculations (extra frets, etc.)
           let current_start_fret = *current_fret_range.start();
           let current_end_fret = *current_fret_range.end();
-
-          // Use the SAME calculation logic as the main SVG fretboard
           let string_spacing = height / (current_num_strings as f64 + 1.0);
-
-          // Calculate visible range using the same logic as SVG fretboard
           let min_visible = current_start_fret.saturating_sub(current_extra_frets);
           let max_visible = (current_end_fret + current_extra_frets).min(22);
-
-          // Calculate full fret positions (same as SVG fretboard)
           let full_fret_positions = calculate_fret_positions(base_width, 22);
-
-          // Calculate zoom transform (same logic as SVG fretboard ZoomTransform::new)
           let has_nut = min_visible == 0;
           let range_start = if has_nut { 0.0 } else { full_fret_positions[min_visible] };
           let range_end = full_fret_positions[max_visible];
           let range_width = range_end - range_start;
           let available_width = if has_nut { base_width - current_nut_width } else { base_width };
           let scale_factor = available_width / range_width;
-
-          // Transform function (matches SVG fretboard's to_viewbox_x)
           let to_viewbox_x = |absolute_x: f64| -> f64 {
             let offset = if has_nut { current_nut_width } else { 0.0 };
             offset + (absolute_x - range_start) * scale_factor
           };
-
-          // Generate overlays for each visible string and fret
           let mut overlays = Vec::new();
-
           for string_idx in 0..current_num_strings {
-            // Convert SVG string index to tuning array index (reverse order)
             let tuning_index = (current_tuning.len() - 1) - (string_idx as usize);
             if let Some(base_note) = current_tuning.get(tuning_index) {
-              // Only render scale notes in the specified fret range (clean and simple!)
               for fret_idx in current_fret_range.clone() {
                 let note = base_note.add_steps(fret_idx);
-
                 if current_scale.contains_note(note) {
                   let is_root = current_scale.root_note() == Some(note);
-
-                  // Calculate Y position (same as SVG fretboard string calculation)
                   let y = (string_idx as f64 + 1.0) * string_spacing;
-
-                  // Calculate X position using the same transform as SVG fretboard
                   let x = if fret_idx == 0 {
-                    // Nut position: center of nut width
                     current_nut_width / 2.0
                   } else {
-                    // Fret position: place in the middle of the playable area between fret lines
-                    // This matches the clickable area positioning: (x_prev + x_curr) / 2.0
-                    let x_prev = if fret_idx == 0 { 0.0 } else { full_fret_positions[(fret_idx - 1).max(0)] };
+                    let x_prev = if fret_idx == 0 {
+                      0.0
+                    } else {
+                      full_fret_positions[(fret_idx - 1).max(0)]
+                    };
                     let x_curr = full_fret_positions[fret_idx];
                     let playable_position = (x_prev + x_curr) / 2.0;
                     to_viewbox_x(playable_position)
                   };
-
                   let (fill_color, stroke_color, radius) = if is_root {
-                    ("#ff4444", "#cc0000", 12.0) // Red for root notes
+                    ("#ff4444", "#cc0000", 12.0)
                   } else {
-                    ("#4444ff", "#0000cc", 8.0) // Blue for other scale notes
+                    ("#4444ff", "#0000cc", 8.0)
                   };
+                  overlays
+                    .push(
 
-                  overlays.push(view! {
-                    <g>
-                      <circle
-                        cx=x
-                        cy=y
-                        r=radius
-                        fill=fill_color
-                        stroke=stroke_color
-                        stroke-width="2"
-                        opacity="0.8"
-                      />
-                      <text
-                        x=x
-                        y=y + 1.0
-                        text-anchor="middle"
-                        dominant-baseline="central"
-                        fill="white"
-                        font-size="8"
-                        font-weight="bold"
-                      >
-                        {note.to_string()}
-                      </text>
-                    </g>
-                  });
+                      // Extract start and end from range for visual calculations (extra frets, etc.)
+
+                      // Use the SAME calculation logic as the main SVG fretboard
+
+                      // Calculate visible range using the same logic as SVG fretboard
+
+                      // Calculate full fret positions (same as SVG fretboard)
+
+                      // Calculate zoom transform (same logic as SVG fretboard ZoomTransform::new)
+
+                      // Transform function (matches SVG fretboard's to_viewbox_x)
+
+                      // Generate overlays for each visible string and fret
+
+                      // Convert SVG string index to tuning array index (reverse order)
+                      // Only render scale notes in the specified fret range (clean and simple!)
+
+                      // Calculate Y position (same as SVG fretboard string calculation)
+
+                      // Calculate X position using the same transform as SVG fretboard
+                      // Nut position: center of nut width
+                      // Fret position: place in the middle of the playable area between fret lines
+                      // This matches the clickable area positioning: (x_prev + x_curr) / 2.0
+
+                      // Red for root notes
+                      // Blue for other scale notes
+
+                      view! {
+                        <g>
+                          <circle
+                            cx=x
+                            cy=y
+                            r=radius
+                            fill=fill_color
+                            stroke=stroke_color
+                            stroke-width="2"
+                            opacity="0.8"
+                          />
+                          <text
+                            x=x
+                            y=y + 1.0
+                            text-anchor="middle"
+                            dominant-baseline="central"
+                            fill="white"
+                            font-size="8"
+                            font-weight="bold"
+                          >
+                            {note.to_string()}
+                          </text>
+                        </g>
+                      },
+                    );
                 }
               }
             }
           }
-
           overlays.into_iter().collect_view()
         }}
       </svg>

@@ -1,4 +1,4 @@
-use crate::components::fretboard_visual_config::FretboardVisualConfig;
+use crate::components::fretboard::visual_config::FretboardVisualConfig;
 use crate::music::notes::Note;
 use leptos::prelude::*;
 

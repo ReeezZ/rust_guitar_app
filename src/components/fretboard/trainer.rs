@@ -1,9 +1,8 @@
-use crate::components::fretboard::FretClickEvent;
-use crate::components::fretboard_visual_config::FretboardVisualConfig;
+use crate::components::fretboard::visual_config::FretboardVisualConfig;
+use crate::components::fretboard::with_notes::{FretClickEventWithNote, FretboardWithNotes};
 use crate::components::musical_fretboard_config::{
   MusicalFretboardConfig, MusicalFretboardConfigSignals,
 };
-use crate::components::svg_fretboard_with_notes::SvgFretboardWithNotes;
 use crate::fretboard_view_helper::calculate_fret_positions;
 use crate::models::fretboard_model::FretCoord;
 use crate::music::notes::Note;
@@ -21,7 +20,7 @@ use leptos::prelude::*;
 /// ```rust
 /// # use leptos::prelude::*;
 /// # use rust_guitar_app::components::svg_fretboard_trainer::SvgFretboardTrainer;
-/// # use rust_guitar_app::components::fretboard::FretClickEvent;
+/// # use rust_guitar_app::components::fretboard::base::FretClickEvent;
 /// # use rust_guitar_app::models::fretboard_model::FretCoord;
 /// # use rust_guitar_app::music::notes::Note;
 ///
@@ -66,7 +65,7 @@ pub fn SvgFretboardTrainer(
   fret_range: Option<Signal<std::ops::RangeInclusive<usize>>>,
   /// Callback for fret click events (enriched with note information)
   #[prop(optional)]
-  on_fret_clicked: Option<Callback<FretClickEvent>>,
+  on_fret_clicked: Option<Callback<FretClickEventWithNote>>,
 ) -> impl IntoView {
   // Use provided config or create default
   let fretboard_config = config.unwrap_or_default();
@@ -168,25 +167,21 @@ pub fn SvgFretboardTrainer(
       {move || {
         if let Some(callback) = on_fret_clicked {
           view! {
-            <SvgFretboardWithNotes
+            <FretboardWithNotes
               start_fret=start_fret
               end_fret=end_fret
               config=visual_config
               on_note_clicked=callback
             />
-          }.into_any()
+          }
+            .into_any()
         } else {
           view! {
-            <SvgFretboardWithNotes
-              start_fret=start_fret
-              end_fret=end_fret
-              config=visual_config
-            />
-          }.into_any()
+            <FretboardWithNotes start_fret=start_fret end_fret=end_fret config=visual_config />
+          }
+            .into_any()
         }
-      }}
-
-      // Overlay SVG for reference and error highlights
+      }} // Overlay SVG for reference and error highlights
       <svg
         class="absolute top-0 left-0 w-full h-full pointer-events-none"
         viewBox="0 0 1000 300"
@@ -194,106 +189,137 @@ pub fn SvgFretboardTrainer(
       >
         // Reference note highlight (green)
         {move || {
-          reference_note.get().map(|coord| {
-            let (positions, _min_fret, _max_fret, has_nut, range_start, scale_factor, nut_width, string_spacing, _svg_width, _svg_height) = position_data.get();
+          reference_note
+            .get()
+            .map(|coord| {
+              let (
+                positions,
+                _min_fret,
+                _max_fret,
+                has_nut,
+                range_start,
+                scale_factor,
+                nut_width,
+                string_spacing,
+                _svg_width,
+                _svg_height,
+              ) = position_data.get();
+              let x = if coord.fret_idx == 0 {
+                nut_width / 2.0
+              } else {
+                let fret_idx = coord.fret_idx as usize;
+                let x_prev = if fret_idx == 0 { 0.0 } else { positions[(fret_idx - 1).max(0)] };
+                let x_curr = positions[fret_idx];
+                let x_center = (x_prev + x_curr) / 2.0;
+                let offset = if has_nut { nut_width } else { 0.0 };
+                offset + (x_center - range_start) * scale_factor
+              };
+              let y = string_spacing * (coord.string_idx as f64 + 1.0);
 
-            // Calculate position using the same logic as the main component
-            let x = if coord.fret_idx == 0 {
+              // Calculate position using the same logic as the main component
               // Nut position
-              nut_width / 2.0
-            } else {
               // Fretted position - use midpoint between frets
-              let fret_idx = coord.fret_idx as usize;
-              let x_prev = if fret_idx == 0 { 0.0 } else { positions[(fret_idx - 1).max(0)] };
-              let x_curr = positions[fret_idx];
-              let x_center = (x_prev + x_curr) / 2.0;
 
               // Apply zoom transform
-              let offset = if has_nut { nut_width } else { 0.0 };
-              offset + (x_center - range_start) * scale_factor
-            };
 
-            let y = string_spacing * (coord.string_idx as f64 + 1.0);
-
-            view! {
-              <g>
-                <circle
-                  cx=x
-                  cy=y
-                  r="12"
-                  fill="rgba(34, 197, 94, 0.7)"
-                  stroke="rgb(34, 197, 94)"
-                  stroke-width="2"
-                />
-                <text
-                  x=x
-                  y=y
-                  text-anchor="middle"
-                  dominant-baseline="central"
-                  font-size="10"
-                  font-weight="bold"
-                  fill="white"
-                >
-                  {move || {
-                    reference_note_name.get().map(|note| note.to_string()).unwrap_or_else(|| "?".to_string())
-                  }}
-                </text>
-              </g>
-            }
-          })
+              view! {
+                <g>
+                  <circle
+                    cx=x
+                    cy=y
+                    r="12"
+                    fill="rgba(34, 197, 94, 0.7)"
+                    stroke="rgb(34, 197, 94)"
+                    stroke-width="2"
+                  />
+                  <text
+                    x=x
+                    y=y
+                    text-anchor="middle"
+                    dominant-baseline="central"
+                    font-size="10"
+                    font-weight="bold"
+                    fill="white"
+                  >
+                    {move || {
+                      reference_note_name
+                        .get()
+                        .map(|note| note.to_string())
+                        .unwrap_or_else(|| "?".to_string())
+                    }}
+                  </text>
+                </g>
+              }
+            })
         }}
 
         // Error note highlights (red)
         {move || {
           let coords = error_notes.get();
           let names = error_note_names.get();
+          coords
+            .into_iter()
+            .enumerate()
+            .map(|(idx, coord)| {
+              let (
+                positions,
+                _min_fret,
+                _max_fret,
+                has_nut,
+                range_start,
+                scale_factor,
+                nut_width,
+                string_spacing,
+                _svg_width,
+                _svg_height,
+              ) = position_data.get();
+              let x = if coord.fret_idx == 0 {
+                nut_width / 2.0
+              } else {
+                let fret_idx = coord.fret_idx as usize;
+                let x_prev = if fret_idx == 0 { 0.0 } else { positions[(fret_idx - 1).max(0)] };
+                let x_curr = positions[fret_idx];
+                let x_center = (x_prev + x_curr) / 2.0;
+                let offset = if has_nut { nut_width } else { 0.0 };
+                offset + (x_center - range_start) * scale_factor
+              };
+              let y = string_spacing * (coord.string_idx as f64 + 1.0);
+              let note_name = names
+                .get(idx)
+                .map(|n| n.to_string())
+                .unwrap_or_else(|| "?".to_string());
 
-          coords.into_iter().enumerate().map(|(idx, coord)| {
-            let (positions, _min_fret, _max_fret, has_nut, range_start, scale_factor, nut_width, string_spacing, _svg_width, _svg_height) = position_data.get();
-
-            // Calculate position using the same logic as the main component
-            let x = if coord.fret_idx == 0 {
+              // Calculate position using the same logic as the main component
               // Nut position
-              nut_width / 2.0
-            } else {
               // Fretted position - use midpoint between frets
-              let fret_idx = coord.fret_idx as usize;
-              let x_prev = if fret_idx == 0 { 0.0 } else { positions[(fret_idx - 1).max(0)] };
-              let x_curr = positions[fret_idx];
-              let x_center = (x_prev + x_curr) / 2.0;
 
               // Apply zoom transform
-              let offset = if has_nut { nut_width } else { 0.0 };
-              offset + (x_center - range_start) * scale_factor
-            };
 
-            let y = string_spacing * (coord.string_idx as f64 + 1.0);
-            let note_name = names.get(idx).map(|n| n.to_string()).unwrap_or_else(|| "?".to_string());
-
-            view! {
-              <g>
-                <circle
-                  cx=x
-                  cy=y
-                  r="12"
-                  fill="rgba(239, 68, 68, 0.7)"
-                  stroke="rgb(239, 68, 68)"
-                  stroke-width="2"
-                />
-                <text
-                  x=x
-                  y=y
-                  text-anchor="middle"
-                  dominant-baseline="central"
-                  font-size="10"
-                  font-weight="bold"
-                  fill="white"
-                >
-                  {note_name}
-                </text>
-              </g>
-            }
-          }).collect_view()
+              view! {
+                <g>
+                  <circle
+                    cx=x
+                    cy=y
+                    r="12"
+                    fill="rgba(239, 68, 68, 0.7)"
+                    stroke="rgb(239, 68, 68)"
+                    stroke-width="2"
+                  />
+                  <text
+                    x=x
+                    y=y
+                    text-anchor="middle"
+                    dominant-baseline="central"
+                    font-size="10"
+                    font-weight="bold"
+                    fill="white"
+                  >
+                    {note_name}
+                  </text>
+                </g>
+              }
+            })
+            .collect_view()
         }}
       </svg>
     </div>

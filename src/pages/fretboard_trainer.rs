@@ -2,8 +2,8 @@ use leptos::prelude::*;
 use rand::seq::IteratorRandom;
 use strum::IntoEnumIterator;
 
-use crate::components::fretboard::FretClickEvent;
-use crate::components::svg_fretboard_trainer::SvgFretboardTrainer;
+use crate::components::fretboard::trainer::SvgFretboardTrainer;
+use crate::components::fretboard::with_notes::FretClickEventWithNote;
 use crate::models::fretboard_model::{FretCoord, FretboardModel};
 use crate::models::fretboard_trainer::FretboardTrainerTrait;
 use crate::music::intervals::Interval;
@@ -52,7 +52,7 @@ pub fn FretboardTrainer() -> impl IntoView {
   });
 
   // Handle fret clicks
-  let on_fret_clicked = Callback::new(move |evt: FretClickEvent| {
+  let on_fret_clicked = Callback::new(move |evt: FretClickEventWithNote| {
     fretboard_model.with(|model| {
       let clicked_note = model.note_from_fret(evt.coord);
       let target_note = current_interval.get().of(current_note.get());
@@ -126,18 +126,22 @@ pub fn FretboardTrainer() -> impl IntoView {
 
       <div class="text-center">
         <p class="text-lg">
-          "Looking for " <b>{move || format!("{} ", interval_str())}</b>
-          "of " <b>{move || format!("{} ", note_str())}</b>
+          "Looking for " <b>{move || format!("{} ", interval_str())}</b> "of "
+          <b>{move || format!("{} ", note_str())}</b>
         </p>
       </div>
 
       <div class="flex flex-col items-center space-y-2">
         <div class="grid grid-cols-2 gap-4 text-center">
           <div>
-            <p class="text-green-600 font-semibold">{move || format!("Correct: {}", num_correct.get())}</p>
+            <p class="font-semibold text-green-600">
+              {move || format!("Correct: {}", num_correct.get())}
+            </p>
           </div>
           <div>
-            <p class="text-red-600 font-semibold">{move || format!("Incorrect: {}", num_incorrect.get())}</p>
+            <p class="font-semibold text-red-600">
+              {move || format!("Incorrect: {}", num_incorrect.get())}
+            </p>
           </div>
         </div>
 
@@ -145,12 +149,10 @@ pub fn FretboardTrainer() -> impl IntoView {
           {move || format!("Total answers: {}", num_correct.get() + num_incorrect.get())}
         </p>
 
-        <p class="font-semibold">
-          {move || format!("Success rate: {}%", success_rate())}
-        </p>
+        <p class="font-semibold">{move || format!("Success rate: {}%", success_rate())}</p>
       </div>
 
-      <div class="overflow-hidden min-h-[2rem] flex justify-center">
+      <div class="flex overflow-hidden justify-center min-h-[2rem]">
         {move || {
           if !error_text.get().is_empty() {
             Some(

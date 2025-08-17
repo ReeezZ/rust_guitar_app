@@ -1,11 +1,12 @@
-use crate::components::fretboard_visual_config::FretboardVisualConfig;
+use crate::components::fretboard::visual_config::FretboardVisualConfig;
 use crate::fretboard_view_helper::calculate_fret_positions;
 use crate::models::fretboard_model::FretCoord;
 use leptos::prelude::*;
 
 /// Event emitted when a fret position is clicked on the SVG fretboard
+
 #[derive(Clone, Copy, Debug)]
-pub struct SvgFretClickEvent {
+pub struct FretClickEvent {
   pub coord: FretCoord,
 }
 
@@ -326,79 +327,85 @@ fn FretboardClickableAreas(
   /// Width of the nut (only used if has_nut is true)
   nut_width: f64,
   /// Callback for fret clicks
-  on_fret_clicked: Callback<SvgFretClickEvent>,
+  on_fret_clicked: Callback<FretClickEvent>,
 ) -> impl IntoView {
   view! {
     <>
       // Clickable areas for each fret position
-      {(0..num_strings).map(|string_idx| {
-        let string_y = (string_idx as f64 + 1.0) * string_spacing;
+      {(0..num_strings)
+        .map(|string_idx| {
+          let string_y = (string_idx as f64 + 1.0) * string_spacing;
 
-        view! {
-          <>
-            // Nut clickable area (fret 0) if visible
-            {if has_nut {
-              let on_click = move |_| {
-                on_fret_clicked.run(SvgFretClickEvent {
-                  coord: FretCoord {
-                    string_idx,
-                    fret_idx: 0,
+          view! {
+            <>
+              // Nut clickable area (fret 0) if visible
+              {if has_nut {
+                let on_click = move |_| {
+                  on_fret_clicked
+                    .run(FretClickEvent {
+                      coord: FretCoord {
+                        string_idx,
+                        fret_idx: 0,
+                      },
+                    });
+                };
+                Some(
+
+                  view! {
+                    <rect
+                      x="0"
+                      y=string_y - string_spacing * 0.4
+                      width=nut_width
+                      height=string_spacing * 0.8
+                      fill="transparent"
+                      stroke="red"
+                      stroke-width="1"
+                      stroke-opacity="0.3"
+                      on:click=on_click
+                      style="cursor: pointer;"
+                    />
                   },
-                });
-              };
+                )
+              } else {
+                None
+              }} // Clickable areas for fretted positions
+              {(min_fret.max(1)..=max_fret)
+                .map(|fret_idx| {
+                  let x_prev = if fret_idx == 0 { 0.0 } else { positions[(fret_idx - 1).max(0)] };
+                  let x_curr = positions[fret_idx];
+                  let x_start = to_viewbox_x((x_prev + x_curr) / 2.0 - (x_curr - x_prev) / 4.0);
+                  let x_width = to_viewbox_x((x_prev + x_curr) / 2.0 + (x_curr - x_prev) / 4.0)
+                    - x_start;
+                  let on_click = move |_| {
+                    on_fret_clicked
+                      .run(FretClickEvent {
+                        coord: FretCoord {
+                          string_idx,
+                          fret_idx: fret_idx as u8,
+                        },
+                      });
+                  };
 
-              Some(view! {
-                <rect
-                  x="0"
-                  y=string_y - string_spacing * 0.4
-                  width=nut_width
-                  height=string_spacing * 0.8
-                  fill="transparent"
-                  stroke="red"
-                  stroke-width="1"
-                  stroke-opacity="0.3"
-                  on:click=on_click
-                  style="cursor: pointer;"
-                />
-              })
-            } else {
-              None
-            }}
-
-            // Clickable areas for fretted positions
-            {(min_fret.max(1)..=max_fret).map(|fret_idx| {
-              let x_prev = if fret_idx == 0 { 0.0 } else { positions[(fret_idx - 1).max(0)] };
-              let x_curr = positions[fret_idx];
-              let x_start = to_viewbox_x((x_prev + x_curr) / 2.0 - (x_curr - x_prev) / 4.0);
-              let x_width = to_viewbox_x((x_prev + x_curr) / 2.0 + (x_curr - x_prev) / 4.0) - x_start;
-
-              let on_click = move |_| {
-                on_fret_clicked.run(SvgFretClickEvent {
-                  coord: FretCoord {
-                    string_idx,
-                    fret_idx: fret_idx as u8,
-                  },
-                });
-              };
-
-              view! {
-                <rect
-                  x=x_start
-                  y=string_y - string_spacing * 0.4
-                  width=x_width
-                  height=string_spacing * 0.8
-                  fill="transparent"
-                  stroke="red"
-                  stroke-width="1"
-                  stroke-opacity="0.3"
-                  on:click=on_click
-                  style="cursor: pointer;"
-                />
-              }
-            }).collect_view()}
-          </>
-        }
-      }).collect_view()}
+                  view! {
+                    <rect
+                      x=x_start
+                      y=string_y - string_spacing * 0.4
+                      width=x_width
+                      height=string_spacing * 0.8
+                      fill="transparent"
+                      stroke="red"
+                      stroke-width="1"
+                      stroke-opacity="0.3"
+                      on:click=on_click
+                      style="cursor: pointer;"
+                    />
+                  }
+                })
+                .collect_view()}
+            </>
+          }
+        })
+        .collect_view()}
     </>
   }
 }
@@ -444,7 +451,7 @@ fn FretboardClickableAreas(
 ///
 /// With custom configuration, pass a FretboardVisualConfig through the config prop.
 #[component]
-pub fn SvgFretboard(
+pub fn Fretboard(
   /// First fret in the active/playable range
   start_fret: Signal<usize>,
   /// Last fret in the active/playable range
@@ -454,7 +461,7 @@ pub fn SvgFretboard(
   config: Option<Signal<FretboardVisualConfig>>,
   /// Optional callback for fret click events
   #[prop(optional)]
-  on_fret_clicked: Option<Callback<SvgFretClickEvent>>,
+  on_fret_clicked: Option<Callback<FretClickEvent>>,
 ) -> impl IntoView {
   // Use provided config signal or create one with default
   let config_signal = config.unwrap_or_else(|| Signal::derive(FretboardVisualConfig::default));
@@ -597,19 +604,22 @@ pub fn SvgFretboard(
             />
 
             // Render clickable areas if callback is provided
-            {on_fret_clicked.map(|callback| view! {
-                <FretboardClickableAreas
-                  min_fret=min_f
-                  max_fret=max_f
-                  num_strings=current_num_strings
-                  string_spacing=string_spacing
-                  positions=positions
-                  to_viewbox_x=to_viewbox_x
-                  has_nut=current_zoom_transform.has_nut
-                  nut_width=current_nut_width
-                  on_fret_clicked=callback
-                />
-               })}
+            {on_fret_clicked
+              .map(|callback| {
+                view! {
+                  <FretboardClickableAreas
+                    min_fret=min_f
+                    max_fret=max_f
+                    num_strings=current_num_strings
+                    string_spacing=string_spacing
+                    positions=positions
+                    to_viewbox_x=to_viewbox_x
+                    has_nut=current_zoom_transform.has_nut
+                    nut_width=current_nut_width
+                    on_fret_clicked=callback
+                  />
+                }
+              })}
           }
         }}
       </svg>

@@ -1,8 +1,9 @@
-use crate::components::{
-  fretboard::FretClickEvent, fretboard_config_examples::FretboardConfigExamples,
-  svg_fretboard_with_notes::SvgFretboardWithNotes,
-};
 use leptos::{ev, logging::log, prelude::*};
+
+use crate::components::fretboard::{
+  config_examples::FretboardConfigExamples,
+  with_notes::{FretClickEventWithNote, FretboardWithNotes},
+};
 
 /// Extracts the value from an input event.
 /// See: https://leptos.dev/docs/reference/events/
@@ -22,9 +23,9 @@ pub fn SvgFretboardPage() -> impl IntoView {
   let end_fret = RwSignal::new(5_usize);
 
   // Track clicked note for testing note-aware interactivity
-  let (clicked_note_event, set_clicked_note_event) = signal::<Option<FretClickEvent>>(None);
+  let (clicked_note_event, set_clicked_note_event) = signal::<Option<FretClickEventWithNote>>(None);
 
-  let on_note_clicked = Callback::new(move |event: FretClickEvent| {
+  let on_note_clicked = Callback::new(move |event: FretClickEventWithNote| {
     log!(
       "🎵 SVG Fretboard (with notes) - Note: {}, String: {} (1-indexed: {}), Fret: {}",
       event.note,
@@ -90,7 +91,7 @@ pub fn SvgFretboardPage() -> impl IntoView {
 
     <h3>"2. SVG Fretboard (With Note Information)"</h3>
     <div style="margin: 2em; border: 2px solid #4a90e2; padding: 1em; border-radius: 5px;">
-      <SvgFretboardWithNotes
+      <FretboardWithNotes
         start_fret=start_fret.read_only().into()
         end_fret=end_fret.read_only().into()
         on_note_clicked=on_note_clicked

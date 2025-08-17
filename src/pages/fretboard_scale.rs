@@ -1,9 +1,8 @@
 use crate::components::{
   fret_range_selector::FretRangeSelector,
-  fretboard::FretClickEvent,
+  fretboard::{scale_display::FretboardScaleDisplay, with_notes::FretClickEventWithNote},
   music_selectors::{NoteSelector, ScaleTypeSelector},
   musical_fretboard_config::MusicalFretboardConfig,
-  svg_fretboard_scale_display::SvgFretboardScaleDisplay,
 };
 use crate::music::heptatonic_scales::HeptaScaleType;
 use crate::music::notes::Note;
@@ -12,7 +11,7 @@ use leptos::{logging::log, prelude::*, wasm_bindgen::JsCast};
 
 /// Page demonstrating the SVG fretboard with scale display functionality
 #[component]
-pub fn SvgFretboardScalePage() -> impl IntoView {
+pub fn FretboardScalePage() -> impl IntoView {
   // Single fret range control (replaces start_fret and end_fret)
   let fret_range = RwSignal::new(0..=7_usize);
 
@@ -24,9 +23,9 @@ pub fn SvgFretboardScalePage() -> impl IntoView {
   let scale_type = RwSignal::new(ScaleType::Hepatonic(HeptaScaleType::Major));
 
   // Track clicked note for testing
-  let (clicked_note_event, set_clicked_note_event) = signal::<Option<FretClickEvent>>(None);
+  let (clicked_note_event, set_clicked_note_event) = signal::<Option<FretClickEventWithNote>>(None);
 
-  let on_note_clicked = Callback::new(move |event: FretClickEvent| {
+  let on_note_clicked = Callback::new(move |event: FretClickEventWithNote| {
     log!(
       "🎵 Scale Display - Note: {}, String: {} (1-indexed: {}), Fret: {}",
       event.note,
@@ -146,7 +145,7 @@ pub fn SvgFretboardScalePage() -> impl IntoView {
 
       // Main fretboard display
       <div class="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
-        <SvgFretboardScaleDisplay
+        <FretboardScaleDisplay
           fret_range=fret_range.read_only().into()
           root_note=root_note.read_only().into()
           scale_type=scale_type.read_only().into()
@@ -172,8 +171,7 @@ pub fn SvgFretboardScalePage() -> impl IntoView {
         <div class="space-y-2">
           <label class="block text-sm font-medium text-gray-700">"Extra Frets"</label>
           <div class="text-sm text-gray-600">
-            "Context: " {move || extra_frets.get()} " frets"
-            <br />
+            "Context: " {move || extra_frets.get()} " frets" <br />
             <span class="text-xs text-gray-500">"(Visual context beyond playable range)"</span>
           </div>
           <input
