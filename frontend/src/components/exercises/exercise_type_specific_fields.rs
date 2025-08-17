@@ -1,7 +1,7 @@
 use super::{constants::*, PositionPresetButtons};
 use crate::components::fretboard::scale_display::FretboardScaleDisplay;
-use shared::music::{heptatonic_scales::HeptaScaleType, notes::Note, scales::ScaleType};
 use leptos::prelude::*;
+use shared::music::{heptatonic_scales::HeptaScaleType, notes::Note, scales::ScaleType};
 
 #[component]
 pub fn ExerciseTypeSpecificFields(

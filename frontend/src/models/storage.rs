@@ -1,6 +1,6 @@
-use shared::models::exercise::Exercise;
 use leptos::logging;
 use serde_json;
+use shared::models::exercise::Exercise;
 use web_sys::{window, Storage};
 
 /// Simple exercise storage - just save and load exercises

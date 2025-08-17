@@ -6,5 +6,5 @@ pub const RUSTFLAGS_WASM: &str = "--cfg getrandom_backend=\"wasm_js\"";
 
 /// Generate URL for a given port
 pub fn url(port: u16) -> String {
-    format!("http://127.0.0.1:{port}")
+  format!("http://127.0.0.1:{port}")
 }

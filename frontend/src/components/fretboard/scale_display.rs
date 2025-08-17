@@ -4,9 +4,9 @@ use crate::components::musical_fretboard_config::{
   MusicalFretboardConfig, MusicalFretboardConfigSignals,
 };
 use crate::fretboard_view_helper::calculate_fret_positions;
+use leptos::prelude::*;
 use shared::music::notes::Note;
 use shared::music::scales::{Scale, ScaleTrait, ScaleType};
-use leptos::prelude::*;
 
 /// SVG fretboard component that adds scale visualization to the note-aware fretboard.
 ///
@@ -20,12 +20,12 @@ use leptos::prelude::*;
 ///
 /// ```rust
 /// # use leptos::prelude::*;
-/// # use rust_guitar_app::components::svg_fretboard_scale_display::SvgFretboardScaleDisplay;
-/// # use rust_guitar_app::components::musical_fretboard_config::MusicalFretboardConfig;
-/// # use rust_guitar_app::components::fretboard::base::FretClickEvent;
-/// # use rust_guitar_app::music::notes::Note;
-/// # use rust_guitar_app::music::scales::ScaleType;
-/// # use rust_guitar_app::music::heptatonic_scales::HeptaScaleType;
+/// # use frontend::components::fretboard::scale_display::FretboardScaleDisplay;
+/// # use frontend::components::musical_fretboard_config::MusicalFretboardConfig;
+/// # use frontend::components::fretboard::with_notes::FretClickEventWithNote;
+/// # use shared::music::notes::Note;
+/// # use shared::music::scales::ScaleType;
+/// # use shared::music::heptatonic_scales::HeptaScaleType;
 ///
 /// # fn example() -> impl IntoView {
 /// let fret_range = RwSignal::new(3..=7);  // Focus on frets 3-7
@@ -37,13 +37,13 @@ use leptos::prelude::*;
 ///   .with_aspect_ratio(2.5)
 ///   .with_num_strings(7);
 ///
-/// let on_note_clicked = Callback::new(move |event: FretClickEvent| {
+/// let on_note_clicked = Callback::new(move |event: FretClickEventWithNote| {
 ///   leptos::logging::log!("Clicked note: {} at fret {}, string {}",
 ///     event.note, event.coord.fret_idx, event.coord.string_idx);
 /// });
 ///
 /// view! {
-///   <SvgFretboardScaleDisplay
+///   <FretboardScaleDisplay
 ///     fret_range=fret_range.into()
 ///     root_note=root_note.into()
 ///     scale_type=scale_type.into()

@@ -1,8 +1,8 @@
 use crate::components::fretboard::base::{FretClickEvent, Fretboard};
 use crate::components::fretboard::visual_config::FretboardVisualConfig;
 use crate::models::fretboard_model::{FretCoord, FretState, FretboardModel};
-use shared::music::notes::Note;
 use leptos::prelude::*;
+use shared::music::notes::Note;
 
 #[derive(Clone, Copy, Debug)]
 pub struct FretClickEventWithNote {
@@ -20,20 +20,19 @@ pub struct FretClickEventWithNote {
 ///
 /// ```rust
 /// # use leptos::prelude::*;
-/// # use rust_guitar_app::components::svg_fretboard_with_notes::SvgFretboardWithNotes;
-/// # use rust_guitar_app::components::fretboard::base::FretClickEvent;
+/// # use frontend::components::fretboard::with_notes::{FretboardWithNotes, FretClickEventWithNote};
 ///
 /// # fn example() -> impl IntoView {
 /// let start = RwSignal::new(3);
 /// let end = RwSignal::new(7);
 ///
-/// let on_note_clicked = Callback::new(move |event: FretClickEvent| {
+/// let on_note_clicked = Callback::new(move |event: FretClickEventWithNote| {
 ///   leptos::logging::log!("Clicked note: {} at fret {}, string {}",
 ///     event.note, event.coord.fret_idx, event.coord.string_idx);
 /// });
 ///
 /// view! {
-///   <SvgFretboardWithNotes
+///   <FretboardWithNotes
 ///     start_fret=start.into()
 ///     end_fret=end.into()
 ///     on_note_clicked=on_note_clicked
@@ -46,9 +45,9 @@ pub struct FretClickEventWithNote {
 ///
 /// ```rust
 /// # use leptos::prelude::*;
-/// # use rust_guitar_app::components::svg_fretboard_with_notes::SvgFretboardWithNotes;
-/// # use rust_guitar_app::components::fretboard::visual_config::FretboardVisualConfig;
-/// # use rust_guitar_app::components::fretboard::base::FretClickEvent;
+/// # use frontend::components::fretboard::with_notes::FretboardWithNotes;
+/// # use frontend::components::fretboard::visual_config::FretboardVisualConfig;
+/// # use frontend::components::fretboard::base::FretClickEvent;
 ///
 /// # fn example() -> impl IntoView {
 /// let start = RwSignal::new(0);
@@ -60,7 +59,7 @@ pub struct FretClickEventWithNote {
 ///   .with_max_frets(24);
 ///
 /// view! {
-///   <SvgFretboardWithNotes
+///   <FretboardWithNotes
 ///     start_fret=start.into()
 ///     end_fret=end.into()
 ///     config=bass_config

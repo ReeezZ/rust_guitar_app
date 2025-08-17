@@ -5,8 +5,8 @@ use crate::models::{
   exercise::{Exercise, ExerciseType},
   repository::{get_exercise_repository, ExerciseRepository},
 };
-use shared::music::{heptatonic_scales::HeptaScaleType, notes::Note, scales::ScaleType};
 use leptos::prelude::*;
+use shared::music::{heptatonic_scales::HeptaScaleType, notes::Note, scales::ScaleType};
 use web_sys::console;
 
 #[derive(Clone)]

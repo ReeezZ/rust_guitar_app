@@ -4,10 +4,10 @@ use crate::components::{
   music_selectors::{NoteSelector, ScaleTypeSelector},
   musical_fretboard_config::MusicalFretboardConfig,
 };
+use leptos::{logging::log, prelude::*, wasm_bindgen::JsCast};
 use shared::music::heptatonic_scales::HeptaScaleType;
 use shared::music::notes::Note;
 use shared::music::scales::ScaleType;
-use leptos::{logging::log, prelude::*, wasm_bindgen::JsCast};
 
 /// Page demonstrating the SVG fretboard with scale display functionality
 #[component]

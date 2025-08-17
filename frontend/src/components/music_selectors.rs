@@ -1,7 +1,7 @@
+use leptos::prelude::*;
 use shared::music::heptatonic_scales::HeptaScaleType;
 use shared::music::notes::Note;
 use shared::music::scales::ScaleType;
-use leptos::prelude::*;
 
 /// Extracts the value from an HTML input or select event.
 /// This is a helper function used by all selector components.

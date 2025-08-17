@@ -432,7 +432,7 @@ fn FretboardClickableAreas(
 ///
 /// ```rust
 /// # use leptos::prelude::*;
-/// # use rust_guitar_app::components::svg_fretboard::SvgFretboard;
+/// # use frontend::components::fretboard::base::Fretboard;
 ///
 /// // This would be inside a component
 /// # fn example_usage() -> impl IntoView {
@@ -441,7 +441,7 @@ fn FretboardClickableAreas(
 ///
 /// // The component usage (this is what users copy)
 /// view! {
-///     <SvgFretboard
+///     <Fretboard
 ///         start_fret=start.into()
 ///         end_fret=end.into()
 ///     />

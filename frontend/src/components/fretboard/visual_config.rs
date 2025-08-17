@@ -8,7 +8,7 @@ use leptos::prelude::*;
 ///
 /// # Basic Usage
 /// ```rust
-/// use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
+/// use frontend::components::fretboard::visual_config::FretboardVisualConfig;
 ///
 /// // Use defaults (6-string guitar, 22 frets, 3:1 aspect ratio)
 /// let config = FretboardVisualConfig::default();
@@ -22,7 +22,7 @@ use leptos::prelude::*;
 ///
 /// # Preset Configurations
 /// ```rust
-/// use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
+/// use frontend::components::fretboard::visual_config::FretboardVisualConfig;
 ///
 /// // Bass guitar (4 strings)
 /// let bass_config = FretboardVisualConfig::bass_guitar();
@@ -41,7 +41,7 @@ use leptos::prelude::*;
 ///
 /// # Advanced Customization
 /// ```rust
-/// use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
+/// use frontend::components::fretboard::visual_config::FretboardVisualConfig;
 ///
 /// let advanced_config = FretboardVisualConfig::default()
 ///   .with_marker_positions(vec![3, 5, 7, 9, 12, 15, 17]) // Custom fret markers
@@ -93,7 +93,7 @@ impl FretboardVisualConfig {
   ///
   /// # Examples
   /// ```rust
-  /// use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
+  /// use frontend::components::fretboard::visual_config::FretboardVisualConfig;
   ///
   /// let bass = FretboardVisualConfig::default().with_num_strings(4);
   /// let seven_string = FretboardVisualConfig::default().with_num_strings(7);
@@ -113,7 +113,7 @@ impl FretboardVisualConfig {
   ///
   /// # Examples
   /// ```rust
-  /// use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
+  /// use frontend::components::fretboard::visual_config::FretboardVisualConfig;
   ///
   /// let acoustic = FretboardVisualConfig::default().with_max_frets(14);
   /// let electric = FretboardVisualConfig::default().with_max_frets(24);
@@ -133,7 +133,7 @@ impl FretboardVisualConfig {
   ///
   /// # Examples
   /// ```rust
-  /// use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
+  /// use frontend::components::fretboard::visual_config::FretboardVisualConfig;
   ///
   /// let compact = FretboardVisualConfig::default().with_aspect_ratio(2.5);
   /// let wide = FretboardVisualConfig::default().with_aspect_ratio(4.5);
@@ -152,7 +152,7 @@ impl FretboardVisualConfig {
   ///
   /// # Examples
   /// ```rust
-  /// use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
+  /// use frontend::components::fretboard::visual_config::FretboardVisualConfig;
   ///
   /// let tight = FretboardVisualConfig::default().with_fret_margin(0.02);
   /// let spacious = FretboardVisualConfig::default().with_fret_margin(0.1);
@@ -193,7 +193,7 @@ impl FretboardVisualConfig {
   ///
   /// # Examples
   /// ```rust
-  /// use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
+  /// use frontend::components::fretboard::visual_config::FretboardVisualConfig;
   ///
   /// // Standard guitar markers
   /// let standard = FretboardVisualConfig::default()
@@ -223,7 +223,7 @@ impl FretboardVisualConfig {
   ///
   /// # Examples
   /// ```rust
-  /// use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
+  /// use frontend::components::fretboard::visual_config::FretboardVisualConfig;
   ///
   /// let bass_config = FretboardVisualConfig::bass_guitar();
   /// // Further customize if needed
@@ -248,7 +248,7 @@ impl FretboardVisualConfig {
   ///
   /// # Examples
   /// ```rust
-  /// use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
+  /// use frontend::components::fretboard::visual_config::FretboardVisualConfig;
   ///
   /// let seven_string = FretboardVisualConfig::seven_string();
   /// // Add extended fret range if desired

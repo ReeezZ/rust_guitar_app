@@ -2,7 +2,7 @@ use leptos::prelude::*;
 use rand::seq::IteratorRandom;
 use strum::IntoEnumIterator;
 
-use crate::components::fretboard::trainer::SvgFretboardTrainer;
+use crate::components::fretboard::trainer::FretboardTrainer;
 use crate::components::fretboard::with_notes::FretClickEventWithNote;
 use crate::models::fretboard_model::{FretCoord, FretboardModel};
 use crate::models::fretboard_trainer::FretboardTrainerTrait;
@@ -23,7 +23,7 @@ fn random_interval() -> Interval {
 /// them to find the specified interval. Uses the modern SVG overlay approach for
 /// clean separation between game logic and visual presentation.
 #[component]
-pub fn FretboardTrainer() -> impl IntoView {
+pub fn FretboardTrainerPage() -> impl IntoView {
   // Initialize fretboard model for note calculations
   let fretboard_model = RwSignal::new(FretboardModel::new(6, 5, FretboardModel::standard_tuning()));
 
@@ -116,7 +116,7 @@ pub fn FretboardTrainer() -> impl IntoView {
         <p>"Train intervals of notes"</p>
       </div>
 
-      <SvgFretboardTrainer
+      <FretboardTrainer
         reference_note=reference_note_coord.into()
         reference_note_name=reference_note_name.into()
         error_notes=error_coords.into()

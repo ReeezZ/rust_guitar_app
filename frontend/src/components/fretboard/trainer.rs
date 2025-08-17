@@ -5,8 +5,8 @@ use crate::components::musical_fretboard_config::{
 };
 use crate::fretboard_view_helper::calculate_fret_positions;
 use crate::models::fretboard_model::FretCoord;
-use shared::music::notes::Note;
 use leptos::prelude::*;
+use shared::music::notes::Note;
 
 /// SVG fretboard component for interval training exercises.
 ///
@@ -19,10 +19,10 @@ use leptos::prelude::*;
 ///
 /// ```rust
 /// # use leptos::prelude::*;
-/// # use rust_guitar_app::components::svg_fretboard_trainer::SvgFretboardTrainer;
-/// # use rust_guitar_app::components::fretboard::base::FretClickEvent;
-/// # use rust_guitar_app::models::fretboard_model::FretCoord;
-/// # use rust_guitar_app::music::notes::Note;
+/// # use frontend::components::fretboard::trainer::FretboardTrainer;
+/// # use frontend::components::fretboard::with_notes::FretClickEventWithNote;
+/// # use frontend::models::fretboard_model::FretCoord;
+/// # use shared::music::notes::Note;
 ///
 /// # fn example() -> impl IntoView {
 /// let reference_coord = RwSignal::new(Some(FretCoord { fret_idx: 2, string_idx: 1 }));
@@ -30,12 +30,12 @@ use leptos::prelude::*;
 /// let error_coords = RwSignal::new(vec![]);
 /// let error_notes = RwSignal::new(vec![]);
 ///
-/// let on_fret_clicked = Callback::new(move |event: FretClickEvent| {
+/// let on_fret_clicked = Callback::new(move |event: FretClickEventWithNote| {
 ///   leptos::logging::log!("Clicked note: {} at {:?}", event.note, event.coord);
 /// });
 ///
 /// view! {
-///   <SvgFretboardTrainer
+///   <FretboardTrainer
 ///     reference_note=reference_coord.into()
 ///     reference_note_name=reference_note.into()
 ///     error_notes=error_coords.into()
@@ -46,7 +46,7 @@ use leptos::prelude::*;
 /// # }
 /// ```
 #[component]
-pub fn SvgFretboardTrainer(
+pub fn FretboardTrainer(
   /// The reference note coordinate to highlight in green (None = no highlight)
   reference_note: Signal<Option<FretCoord>>,
   /// The note at the reference coordinate (for display)

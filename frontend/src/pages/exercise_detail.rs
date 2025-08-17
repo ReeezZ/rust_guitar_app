@@ -1,9 +1,9 @@
 use crate::components::exercises::{ExerciseForm, FormMode};
 use crate::components::practice_session::PracticeSession;
-use shared::models::exercise::Exercise;
 use crate::models::repository::{get_exercise_repository, ExerciseRepository};
 use leptos::prelude::*;
 use leptos_router::hooks::use_params_map;
+use shared::models::exercise::Exercise;
 
 #[component]
 pub fn ExerciseDetail() -> impl IntoView {

@@ -5,5 +5,5 @@ mod fretboard_view_helper;
 pub mod models;
 mod pages;
 
-// Re-export shared types for convenience  
+// Re-export shared types for convenience
 pub use shared::{models::*, music::*, *};

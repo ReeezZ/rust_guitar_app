@@ -1,6 +1,6 @@
 use crate::components::fretboard::visual_config::FretboardVisualConfig;
-use shared::music::notes::Note;
 use leptos::prelude::*;
+use shared::music::notes::Note;
 
 /// Configuration struct for musical fretboard visualization components.
 ///
@@ -10,8 +10,8 @@ use leptos::prelude::*;
 ///
 /// # Example
 /// ```rust
-/// use rust_guitar_app::components::musical_fretboard_config::MusicalFretboardConfig;
-/// use rust_guitar_app::components::fretboard_visual_config::FretboardVisualConfig;
+/// use frontend::components::musical_fretboard_config::MusicalFretboardConfig;
+/// use frontend::components::fretboard::visual_config::FretboardVisualConfig;
 ///
 /// let config = MusicalFretboardConfig::default()
 ///   .with_visual(FretboardVisualConfig::seven_string());
