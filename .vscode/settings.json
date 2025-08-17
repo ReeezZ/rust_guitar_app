@@ -49,9 +49,11 @@
     "cat": true,
     "find": true,
     "cargo check": true,
+    "cargo run": true,
     "cargo build": true,
     // --- Use a single regex for related, safe commands ---
     "/^git (status|diff|show|log)/": true,
-    "/^cargo (test|clippy|check)/": true
+    "/^cargo (test|clippy|check)/": true,
+    "./x": true
   }
 }

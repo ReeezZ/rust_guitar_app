@@ -1,5 +1,5 @@
 /// Utilities for generating unique IDs across different platforms
-
+///
 /// Simple unique ID generator using timestamps
 pub struct IdGenerator;
 
@@ -10,7 +10,7 @@ impl IdGenerator {
         {
             // Use JavaScript's Date.now() for WASM compatibility
             let timestamp = js_sys::Date::now() as u64;
-            format!("ex_{}", timestamp)
+            format!("ex_{timestamp}")
         }
         
         #[cfg(not(feature = "wasm"))]
@@ -21,7 +21,7 @@ impl IdGenerator {
                 .duration_since(UNIX_EPOCH)
                 .expect("Time went backwards")
                 .as_millis() as u64;
-            format!("ex_{}", timestamp)
+            format!("ex_{timestamp}")
         }
     }
 }
