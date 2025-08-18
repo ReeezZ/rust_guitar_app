@@ -85,6 +85,18 @@ impl FromStr for Note {
   }
 }
 
+pub trait NoteExt {
+  /// Returns a short string representation of the note, e.g., "C", "D♯/E♭".
+  fn to_short_string(&self) -> String;
+}
+
+impl NoteExt for Note {
+  fn to_short_string(&self) -> String {
+    let full_string = self.to_string();
+    full_string.chars().take(2).collect()
+  }
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;

@@ -5,7 +5,7 @@ use std::time::Duration;
 use crate::components::fretboard::scale_display::FretboardScaleDisplay;
 use crate::components::metronome::Metronome;
 use shared::models::exercise::{Exercise, ExerciseType};
-use shared::music::notes::Note;
+use shared::music::notes::{Note, NoteExt};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum TimerState {
@@ -204,7 +204,7 @@ pub fn PracticeSession(
                                   Note::all_notes()
                                     .iter()
                                     .map(|&note| {
-                                      let note_str = note.to_string();
+                                      let note_str = note.to_short_string();
                                       let is_root_note = note == root_note;
                                       let is_current_root = note
                                         == temp_selected_note.get().unwrap_or(root_note);
