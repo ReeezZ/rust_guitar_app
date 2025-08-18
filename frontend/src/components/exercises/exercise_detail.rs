@@ -329,9 +329,8 @@ pub fn ExerciseDetail(#[prop(into)] exercise_id: String) -> impl IntoView {
                     }}
                   </div>
 
-                  // Colored configuration buttons with dropdowns - REMOVED
-                  // Now handled by the PracticeSession component
-
+                // Colored configuration buttons with dropdowns - REMOVED
+                // Now handled by the PracticeSession component
                 </div>
 
                 // Practice Session Section
@@ -340,12 +339,10 @@ pub fn ExerciseDetail(#[prop(into)] exercise_id: String) -> impl IntoView {
                     target_time=std::time::Duration::from_secs(15 * 60)
                     exercise=ex_for_practice
                     on_exercise_update=Callback::new(move |updated_exercise: Exercise| {
-                      // Update the exercise in the repository
                       let repo = get_exercise_repository();
                       if let Err(e) = repo.update(&updated_exercise) {
                         leptos::logging::error!("Failed to update exercise: {:?}", e);
                       } else {
-                        // Update the local signal
                         set_exercise.set(Some(updated_exercise));
                       }
                     })
