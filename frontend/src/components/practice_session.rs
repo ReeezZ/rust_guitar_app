@@ -197,9 +197,11 @@ pub fn PracticeSession(
 
                           // Root note dropdown
                           <Show when=move || show_root_note_modal.get()>
-                            <div class="absolute left-0 top-full z-10 p-4 mt-1 bg-white rounded-lg border border-gray-300 shadow-lg min-w-[320px]">
-                              <h4 class="mb-3 text-sm font-semibold">"Select Root Note"</h4>
-                              <div class="grid grid-cols-4 gap-2 mb-4">
+                            <div class="absolute left-1/2 top-full z-10 mt-1 w-32 bg-white rounded-lg border border-gray-300 shadow-lg transform -translate-x-1/2">
+                              <h4 class="mb-1 text-xs font-semibold text-center">
+                                "Root Note"
+                              </h4>
+                              <div class="flex flex-col">
                                 {move || {
                                   Note::all_notes()
                                     .iter()
@@ -212,11 +214,11 @@ pub fn PracticeSession(
                                       view! {
                                         <button
                                           class=if is_current_root {
-                                            "p-2 text-sm font-medium rounded border-2 border-indigo-600 bg-indigo-600 text-white transition-colors"
+                                            "my-1 text-xs font-bold rounded border-2 border-indigo-600 bg-indigo-600 text-white transition-colors"
                                           } else if is_root_note {
-                                            "p-2 text-sm font-medium rounded border-2 border-green-600 bg-green-600 text-white transition-colors"
+                                            "my-1 text-xs font-bold rounded border-2 border-green-600 bg-green-600 text-white transition-colors"
                                           } else {
-                                            "p-2 text-sm font-medium rounded border border-gray-300 bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+                                            "my-1 text-xs font-medium rounded border border-gray-300 bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
                                           }
                                           on:click=move |_| {
                                             set_temp_selected_note.set(Some(note));
@@ -231,9 +233,9 @@ pub fn PracticeSession(
                               </div>
 
                               // Action buttons
-                              <div class="flex gap-2 justify-end">
+                              <div class="flex flex-col justify-end mt-2">
                                 <button
-                                  class="py-2 px-4 text-sm text-gray-600 bg-gray-200 rounded transition-colors hover:bg-gray-300"
+                                  class="px-1 my-1 text-sm text-gray-800 bg-red-100 rounded transition-colors hover:bg-red-300"
                                   on:click=move |_| {
                                     set_temp_selected_note.set(None);
                                     set_show_root_note_modal.set(false);
@@ -242,7 +244,7 @@ pub fn PracticeSession(
                                   "Cancel"
                                 </button>
                                 <button
-                                  class="py-2 px-4 text-sm text-white bg-blue-600 rounded transition-colors hover:bg-blue-700 disabled:bg-gray-400"
+                                  class="px-1 my-1 text-sm text-white bg-blue-600 rounded transition-colors hover:bg-blue-700 disabled:bg-gray-400"
                                   disabled=move || temp_selected_note.get().is_none()
                                   on:click=move |_| {
                                     if let Some(selected_note) = temp_selected_note.get() {
