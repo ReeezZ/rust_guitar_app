@@ -29,6 +29,11 @@ pub fn PracticeSession(
   let (show_metronome, set_show_metronome) = signal(true);
   let (show_fretboard, set_show_fretboard) = signal(true);
 
+  // Modal states for exercise configuration
+  let (show_root_note_modal, set_show_root_note_modal) = signal(false);
+  let (show_scale_type_modal, set_show_scale_type_modal) = signal(false);
+  let (show_fret_range_modal, set_show_fret_range_modal) = signal(false);
+
   // Clone exercise for closures to avoid move issues
   let exercise_clone = exercise.clone();
   let exercise_clone2 = exercise.clone();
@@ -117,23 +122,62 @@ pub fn PracticeSession(
                   </span>
                 </div>
 
-                // Split root note and scale type into separate boxes
+                // Split root note and scale type into separate boxes - make them clickable
                 {match &ex.exercise_type {
                   ExerciseType::Scale { root_note, scale_type, .. }
                   | ExerciseType::Triad { root_note, scale_type, .. } => {
+                    let root_note = *root_note;
+                    let scale_type = *scale_type;
                     view! {
                       <>
-                        <div class="flex gap-2 items-center">
+                        <div class="relative flex gap-2 items-center">
                           <span class="font-medium text-gray-700">"Root:"</span>
-                          <span class="py-1 px-2 text-xs font-medium text-indigo-800 bg-indigo-100 rounded">
+                          <button
+                            class="py-1 px-2 text-xs font-medium text-indigo-800 bg-indigo-100 rounded transition-colors cursor-pointer hover:bg-indigo-200"
+                            on:click=move |_| set_show_root_note_modal.set(true)
+                            title="Click to change root note"
+                          >
                             {root_note.to_string()}
-                          </span>
+                          </button>
+                          
+                          // Root note dropdown
+                          <Show when=move || show_root_note_modal.get()>
+                            <div class="absolute top-full left-0 z-10 mt-1 p-4 bg-white rounded-lg border border-gray-300 shadow-lg min-w-[200px]">
+                              <h4 class="mb-2 text-sm font-semibold">"Select Root Note"</h4>
+                              <p class="mb-3 text-xs text-gray-600">"Root note selection - functionality coming soon"</p>
+                              <button
+                                class="py-1 px-3 text-xs text-gray-600 bg-gray-200 rounded hover:bg-gray-300"
+                                on:click=move |_| set_show_root_note_modal.set(false)
+                              >
+                                "Close"
+                              </button>
+                            </div>
+                          </Show>
                         </div>
-                        <div class="flex gap-2 items-center">
+                        
+                        <div class="relative flex gap-2 items-center">
                           <span class="font-medium text-gray-700">"Scale:"</span>
-                          <span class="py-1 px-2 text-xs font-medium text-purple-800 bg-purple-100 rounded">
+                          <button
+                            class="py-1 px-2 text-xs font-medium text-purple-800 bg-purple-100 rounded transition-colors cursor-pointer hover:bg-purple-200"
+                            on:click=move |_| set_show_scale_type_modal.set(true)
+                            title="Click to change scale type"
+                          >
                             {scale_type.to_string()}
-                          </span>
+                          </button>
+                          
+                          // Scale type dropdown
+                          <Show when=move || show_scale_type_modal.get()>
+                            <div class="absolute top-full left-0 z-10 mt-1 p-4 bg-white rounded-lg border border-gray-300 shadow-lg min-w-[200px]">
+                              <h4 class="mb-2 text-sm font-semibold">"Select Scale Type"</h4>
+                              <p class="mb-3 text-xs text-gray-600">"Scale type selection - functionality coming soon"</p>
+                              <button
+                                class="py-1 px-3 text-xs text-gray-600 bg-gray-200 rounded hover:bg-gray-300"
+                                on:click=move |_| set_show_scale_type_modal.set(false)
+                              >
+                                "Close"
+                              </button>
+                            </div>
+                          </Show>
                         </div>
                       </>
                     }
@@ -147,11 +191,29 @@ pub fn PracticeSession(
                   .get_fret_range()
                   .map(|(min, max)| {
                     view! {
-                      <div class="flex gap-2 items-center">
+                      <div class="relative flex gap-2 items-center">
                         <span class="font-medium text-gray-700">"Frets:"</span>
-                        <span class="py-1 px-2 text-xs font-medium text-orange-800 bg-orange-100 rounded">
+                        <button
+                          class="py-1 px-2 text-xs font-medium text-orange-800 bg-orange-100 rounded transition-colors cursor-pointer hover:bg-orange-200"
+                          on:click=move |_| set_show_fret_range_modal.set(true)
+                          title="Click to change fret range"
+                        >
                           {format!("{min}-{max}")}
-                        </span>
+                        </button>
+                        
+                        // Fret range dropdown
+                        <Show when=move || show_fret_range_modal.get()>
+                          <div class="absolute top-full left-0 z-10 mt-1 p-4 bg-white rounded-lg border border-gray-300 shadow-lg min-w-[200px]">
+                            <h4 class="mb-2 text-sm font-semibold">"Set Fret Range"</h4>
+                            <p class="mb-3 text-xs text-gray-600">"Fret range selection - functionality coming soon"</p>
+                            <button
+                              class="py-1 px-3 text-xs text-gray-600 bg-gray-200 rounded hover:bg-gray-300"
+                              on:click=move |_| set_show_fret_range_modal.set(false)
+                            >
+                              "Close"
+                            </button>
+                          </div>
+                        </Show>
                       </div>
                     }
                   })}
