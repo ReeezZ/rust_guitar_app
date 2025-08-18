@@ -15,6 +15,10 @@ Build a **personal guitar practice tracker** that makes it easy to log practice 
 - **Metronome** - Adjustable BPM (30-250), 4/4 time, accent on beat 1, reactive updates
 - **Practice Session** - Combined timer + metronome with show/hide toggle
 
+### Exercise Routine Tracking ideas
+- Exercise Type chord change
+  - No chords yet, yould need chord displaying 
+
 ### 🔜 Next Up
 - **Session Logging** - Auto-save practice sessions with exercise, duration, BPM, timestamp
 - **Session History** - View past practice sessions chronologically
