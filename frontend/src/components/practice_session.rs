@@ -134,7 +134,13 @@ pub fn PracticeSession(
                           <span class="font-medium text-gray-700">"Root:"</span>
                           <button
                             class="py-1 px-2 text-xs font-medium text-indigo-800 bg-indigo-100 rounded transition-colors cursor-pointer hover:bg-indigo-200"
-                            on:click=move |_| set_show_root_note_modal.set(true)
+                            on:click=move |_| {
+                              // Close other modals first
+                              set_show_scale_type_modal.set(false);
+                              set_show_fret_range_modal.set(false);
+                              // Toggle this modal
+                              set_show_root_note_modal.set(!show_root_note_modal.get());
+                            }
                             title="Click to change root note"
                           >
                             {root_note.to_string()}
@@ -159,7 +165,13 @@ pub fn PracticeSession(
                           <span class="font-medium text-gray-700">"Scale:"</span>
                           <button
                             class="py-1 px-2 text-xs font-medium text-purple-800 bg-purple-100 rounded transition-colors cursor-pointer hover:bg-purple-200"
-                            on:click=move |_| set_show_scale_type_modal.set(true)
+                            on:click=move |_| {
+                              // Close other modals first
+                              set_show_root_note_modal.set(false);
+                              set_show_fret_range_modal.set(false);
+                              // Toggle this modal
+                              set_show_scale_type_modal.set(!show_scale_type_modal.get());
+                            }
                             title="Click to change scale type"
                           >
                             {scale_type.to_string()}
@@ -195,7 +207,13 @@ pub fn PracticeSession(
                         <span class="font-medium text-gray-700">"Frets:"</span>
                         <button
                           class="py-1 px-2 text-xs font-medium text-orange-800 bg-orange-100 rounded transition-colors cursor-pointer hover:bg-orange-200"
-                          on:click=move |_| set_show_fret_range_modal.set(true)
+                          on:click=move |_| {
+                            // Close other modals first
+                            set_show_root_note_modal.set(false);
+                            set_show_scale_type_modal.set(false);
+                            // Toggle this modal
+                            set_show_fret_range_modal.set(!show_fret_range_modal.get());
+                          }
                           title="Click to change fret range"
                         >
                           {format!("{min}-{max}")}
