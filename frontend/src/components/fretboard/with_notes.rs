@@ -91,7 +91,7 @@ pub fn FretboardWithNotes(
   let tuning = tuning.unwrap_or_else(|| Signal::derive(FretboardModel::standard_tuning));
 
   // Handle coordinate-to-note conversion
-  let on_svg_fret_clicked = Callback::new(move |svg_event: FretClickEvent| {
+  let on_fret_clicked = Callback::new(move |svg_event: FretClickEvent| {
     if let Some(callback) = on_note_clicked {
       let tuning_vec = tuning.get();
       let string_idx = svg_event.coord.string_idx;
@@ -121,7 +121,7 @@ pub fn FretboardWithNotes(
       start_fret=start_fret
       end_fret=end_fret
       config=config.unwrap_or_else(|| Signal::derive(FretboardVisualConfig::default))
-      on_fret_clicked=on_svg_fret_clicked
+      on_fret_clicked=on_fret_clicked
     />
   }
 }

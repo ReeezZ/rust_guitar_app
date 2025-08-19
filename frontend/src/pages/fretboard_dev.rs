@@ -1,9 +1,6 @@
 use leptos::{ev, logging::log, prelude::*};
 
-use crate::components::fretboard::{
-  config_examples::FretboardConfigExamples,
-  with_notes::{FretClickEventWithNote, FretboardWithNotes},
-};
+use crate::components::fretboard::with_notes::{FretClickEventWithNote, FretboardWithNotes};
 
 /// Extracts the value from an input event.
 /// See: https://leptos.dev/docs/reference/events/
@@ -17,7 +14,7 @@ fn event_target_value(ev: &ev::Event) -> String {
 /// Page for the SVG fretboard with a runtime-adjustable fret count slider.
 /// See: https://leptos.dev/docs/reference/signals/
 #[component]
-pub fn SvgFretboardPage() -> impl IntoView {
+pub fn FretboardDevPage() -> impl IntoView {
   const MAX_FRETS: usize = 22;
   let start_fret = RwSignal::new(0_usize);
   let end_fret = RwSignal::new(5_usize);
@@ -97,6 +94,5 @@ pub fn SvgFretboardPage() -> impl IntoView {
         on_note_clicked=on_note_clicked
       />
     </div>
-    <FretboardConfigExamples />
   }
 }
