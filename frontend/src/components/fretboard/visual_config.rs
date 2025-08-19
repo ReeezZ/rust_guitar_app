@@ -1,5 +1,3 @@
-use leptos::prelude::*;
-
 /// Configuration struct for visual fretboard properties shared across all fretboard components.
 ///
 /// This consolidates the common visual configuration that controls the appearance
@@ -275,46 +273,5 @@ impl FretboardVisualConfig {
   /// ```
   pub fn wide_aspect() -> Self {
     Self::default().with_aspect_ratio(4.0)
-  }
-}
-
-/// Signal utilities for FretboardVisualConfig
-///
-/// Provides individual reactive signals for each configuration property.
-/// This is used internally by components that need reactive access to
-/// individual config properties.
-#[derive(Clone)]
-pub struct FretboardVisualConfigSignals {
-  /// Reactive signal for number of strings
-  pub num_strings: Signal<u8>,
-  /// Reactive signal for maximum frets
-  pub max_frets: Signal<usize>,
-  /// Reactive signal for SVG aspect ratio
-  pub svg_aspect_ratio: Signal<f64>,
-  /// Reactive signal for fret margin percentage
-  pub fret_margin_percentage: Signal<f64>,
-  /// Reactive signal for nut width
-  pub nut_width: Signal<f64>,
-  /// Reactive signal for extra frets
-  pub extra_frets: Signal<usize>,
-  /// Reactive signal for marker positions
-  pub marker_positions: Signal<Vec<u8>>,
-}
-
-impl From<FretboardVisualConfig> for FretboardVisualConfigSignals {
-  /// Convert a FretboardVisualConfig into individual reactive signals
-  ///
-  /// This conversion creates derived signals for each configuration property,
-  /// allowing components to access individual reactive config properties.
-  fn from(config: FretboardVisualConfig) -> Self {
-    Self {
-      num_strings: Signal::derive(move || config.num_strings),
-      max_frets: Signal::derive(move || config.max_frets),
-      svg_aspect_ratio: Signal::derive(move || config.svg_aspect_ratio),
-      fret_margin_percentage: Signal::derive(move || config.fret_margin_percentage),
-      nut_width: Signal::derive(move || config.nut_width),
-      extra_frets: Signal::derive(move || config.extra_frets),
-      marker_positions: Signal::derive(move || config.marker_positions.clone()),
-    }
   }
 }

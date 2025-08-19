@@ -265,7 +265,7 @@ fn ScaleNoteOverlays(
                           />
                           <text
                             x=x
-                            y=y + 1.0
+                            y=y
                             text-anchor="middle"
                             dominant-baseline="central"
                             fill="white"
