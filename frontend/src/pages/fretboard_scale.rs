@@ -1,8 +1,5 @@
 use crate::components::{
-  fret_range_selector::FretRangeSelector,
-  fretboard::{scale_display::FretboardScaleDisplay, with_notes::FretClickEventWithNote},
-  music_selectors::{NoteSelector, ScaleTypeSelector},
-  musical_fretboard_config::MusicalFretboardConfig,
+  fret_range_selector::FretRangeSelector, fretboard::with_notes::FretClickEventWithNote, music_selectors::{NoteSelector, ScaleTypeSelector}, musical_fretboard_config::MusicalFretboardConfig
 };
 use leptos::{logging::log, prelude::*, wasm_bindgen::JsCast};
 use shared::music::heptatonic_scales::HeptaScaleType;
@@ -144,15 +141,15 @@ pub fn FretboardScalePage() -> impl IntoView {
       </div>
 
       // Main fretboard display
-      <div class="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
-        <FretboardScaleDisplay
-          fret_range=fret_range.read_only().into()
-          root_note=root_note.read_only().into()
-          scale_type=scale_type.read_only().into()
-          extra_frets=extra_frets.read_only()
-          on_note_clicked=on_note_clicked
-          config=MusicalFretboardConfig::default()
-        />
+      <div class="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">//
+      // <FretboardScaleDisplay
+      // fret_range=fret_range.read_only().into()
+      // root_note=root_note.read_only().into()
+      // scale_type=scale_type.read_only().into()
+      // extra_frets=extra_frets.read_only()
+      // on_note_clicked=on_note_clicked
+      // config=MusicalFretboardConfig::default()
+      // />
       // Show 2 extra frets beyond the end fret
       </div>
 

@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::components::fretboard::base::{FretClickEvent, Fretboard};
 use crate::components::fretboard::visual_config::FretboardVisualConfig;
 use crate::models::fretboard_model::{FretCoord, FretState, FretboardModel};
@@ -86,6 +88,10 @@ pub fn FretboardWithNotes(
   /// Visual configuration for fretboard display properties
   #[prop(optional, into)]
   config: Option<Signal<FretboardVisualConfig>>,
+
+  /// Callback for fret click events
+  #[prop(optional)]
+  fret_states: Signal<HashMap<FretCoord, Signal<FretState>>>,
 ) -> impl IntoView {
   // Use default tuning if not provided (standard guitar tuning)
   let tuning = tuning.unwrap_or_else(|| Signal::derive(FretboardModel::standard_tuning));
@@ -122,6 +128,7 @@ pub fn FretboardWithNotes(
       end_fret=end_fret
       config=config.unwrap_or_else(|| Signal::derive(FretboardVisualConfig::default))
       on_fret_clicked=on_fret_clicked
+      fret_states=fret_states
     />
   }
 }

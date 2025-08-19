@@ -12,17 +12,6 @@ pub enum FretStateColor {
   Blue,
 }
 
-// TODO add a proper to css color string trait
-impl FretStateColor {
-  pub fn as_str(&self) -> &str {
-    match self {
-      FretStateColor::Red => "red",
-      FretStateColor::Green => "green",
-      FretStateColor::Blue => "blue",
-    }
-  }
-}
-
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum FretState {
   Hidden,
@@ -42,7 +31,7 @@ pub struct FretboardModel {
   tuning: Vec<Note>,
 }
 
-#[derive(Clone, Copy, PartialEq, Debug, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub struct FretCoord {
   pub string_idx: u8,
   pub fret_idx: u8,

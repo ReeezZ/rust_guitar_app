@@ -2,7 +2,7 @@ use leptos::prelude::*;
 use rand::seq::IteratorRandom;
 use strum::IntoEnumIterator;
 
-use crate::components::fretboard::trainer::FretboardTrainer;
+// use crate::components::fretboard::trainer::FretboardTrainer;
 use crate::components::fretboard::with_notes::FretClickEventWithNote;
 use crate::models::fretboard_model::{FretCoord, FretboardModel};
 use crate::models::fretboard_trainer::FretboardTrainerTrait;
@@ -116,13 +116,13 @@ pub fn FretboardTrainerPage() -> impl IntoView {
         <p>"Train intervals of notes"</p>
       </div>
 
-      <FretboardTrainer
-        reference_note=reference_note_coord.into()
-        reference_note_name=reference_note_name.into()
-        error_notes=error_coords.into()
-        error_note_names=error_note_names.into()
-        on_fret_clicked=on_fret_clicked
-      />
+      // <FretboardTrainer
+      // reference_note=reference_note_coord.into()
+      // reference_note_name=reference_note_name.into()
+      // error_notes=error_coords.into()
+      // error_note_names=error_note_names.into()
+      // on_fret_clicked=on_fret_clicked
+      // />
 
       <div class="text-center">
         <p class="text-lg">

@@ -2,7 +2,7 @@ use leptos::prelude::*;
 use leptos_use::use_interval_fn;
 use std::time::Duration;
 
-use crate::components::fretboard::scale_display::FretboardScaleDisplay;
+// use crate::components::fretboard::scale_display::FretboardScaleDisplay;
 use crate::components::metronome::Metronome;
 use shared::models::exercise::{Exercise, ExerciseType};
 use shared::music::notes::{Note, NoteExt};
@@ -198,9 +198,7 @@ pub fn PracticeSession(
                           // Root note dropdown
                           <Show when=move || show_root_note_modal.get()>
                             <div class="absolute left-1/2 top-full z-10 mt-1 w-32 bg-white rounded-lg border border-gray-300 shadow-lg transform -translate-x-1/2">
-                              <h4 class="mb-1 text-xs font-semibold text-center">
-                                "Root Note"
-                              </h4>
+                              <h4 class="mb-1 text-xs font-semibold text-center">"Root Note"</h4>
                               <div class="flex flex-col">
                                 {move || {
                                   Note::all_notes()
@@ -488,13 +486,13 @@ pub fn PracticeSession(
                     if show_fretboard.get() {
                       view! {
                         <div class="p-4 bg-gray-50 rounded-lg">
-                          <FretboardScaleDisplay
-                            fret_range=Signal::derive(move || {
-                              fret_range.0 as usize..=fret_range.1 as usize
-                            })
-                            root_note=Signal::derive(move || root_note)
-                            scale_type=Signal::derive(move || scale_type)
-                          />
+                        // <FretboardScaleDisplay
+                        // fret_range=Signal::derive(move || {
+                        // fret_range.0 as usize..=fret_range.1 as usize
+                        // })
+                        // root_note=Signal::derive(move || root_note)
+                        // scale_type=Signal::derive(move || scale_type)
+                        // />
                         </div>
                       }
                         .into_any()

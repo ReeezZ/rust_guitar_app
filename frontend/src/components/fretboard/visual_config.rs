@@ -1,3 +1,9 @@
+use std::collections::HashMap;
+
+use leptos::prelude::{RwSignal, Signal};
+
+use crate::models::{FretCoord, FretState};
+
 /// Configuration struct for visual fretboard properties shared across all fretboard components.
 ///
 /// This consolidates the common visual configuration that controls the appearance
