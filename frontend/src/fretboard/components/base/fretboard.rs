@@ -79,9 +79,6 @@ pub fn Fretboard(
   on_fret_clicked: Option<Callback<FretClickEvent>>,
 
   #[prop(optional)] fret_states: Signal<HashMap<FretCoord, Signal<FretState>>>,
-  /// Optional labels (e.g. note names) per fret coordinate
-  #[prop(optional)]
-  fret_labels: Option<Signal<HashMap<FretCoord, Signal<Option<String>>>>>,
 ) -> impl IntoView {
   // Use provided config signal or create one with default
   let config_signal = config.unwrap_or_else(|| Signal::derive(FretboardVisualConfig::default));
@@ -199,7 +196,6 @@ pub fn Fretboard(
             // Grid: iterate frets/strings once and compose per-cell components
             <FretboardGrid
               layout=layout_snapshot.clone()
-              fret_labels=fret_labels.clone()
               click_cb=on_fret_clicked.clone()
               fret_states=fret_states
             />

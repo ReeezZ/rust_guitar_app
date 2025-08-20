@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use leptos::prelude::*;
+use leptos::{form, prelude::*};
 
 use crate::fretboard::{
   components::{
@@ -16,7 +16,10 @@ fn get_fret_positions() -> HashMap<FretCoord, Signal<FretState>> {
 
   // Normal notes across several strings/frets
   for (s, f) in [(0, 5), (1, 3), (2, 7), (3, 2)] {
-    let sig = RwSignal::new(FretState::Normal);
+    let sig = RwSignal::new(FretState::Normal(
+      FretStateColor::Green,
+      format!("{}-{}", f, s),
+    ));
     fret_positions.insert(
       FretCoord {
         string_idx: s,
@@ -32,14 +35,14 @@ fn get_fret_positions() -> HashMap<FretCoord, Signal<FretState>> {
       string_idx: 4,
       fret_idx: 8,
     },
-    RwSignal::new(FretState::Colored(FretStateColor::Blue)).into(),
+    RwSignal::new(FretState::Normal(FretStateColor::Blue, "foo".into())).into(),
   );
   fret_positions.insert(
     FretCoord {
       string_idx: 5,
       fret_idx: 0,
     },
-    RwSignal::new(FretState::Colored(FretStateColor::Green)).into(),
+    RwSignal::new(FretState::Normal(FretStateColor::Red, "foo".into())).into(),
   );
 
   // A hidden example (should not render) - included to ensure Hidden is ignored
@@ -68,19 +71,6 @@ pub fn FretboardDevPage() -> impl IntoView {
     leptos::logging::log!("{:?}", coord);
   });
 
-  let fret_labels = Signal::derive(move || {
-    frets
-      .get()
-      .iter()
-      .map(|(coord, _)| {
-        let rw: RwSignal<Option<String>> =
-          RwSignal::new(Some(format!("{}-{}", coord.string_idx, coord.fret_idx)));
-        // RwSignal -> Signal so it matches HashMap<FretCoord, Signal<Option<String>>>
-        (*coord, rw.into())
-      })
-      .collect::<HashMap<_, _>>()
-  });
-
   view! {
     <h1 class="mb-2 text-xl font-bold">"Fretboard Dev: FretboardWithNotes"</h1>
     <p class="mb-4 text-sm text-gray-600">
@@ -103,7 +93,6 @@ pub fn FretboardDevPage() -> impl IntoView {
         start_fret=0.into()
         end_fret=12.into()
         on_fret_clicked=handle_fret_clicked
-        fret_labels=fret_labels.into()
       />
     </div>
 

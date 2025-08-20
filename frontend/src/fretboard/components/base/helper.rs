@@ -40,9 +40,8 @@ impl FretStateColor {
   }
 }
 
-#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum FretState {
   Hidden,
-  Normal,
-  Colored(FretStateColor),
+  Normal(FretStateColor, String),
 }

@@ -98,7 +98,7 @@ impl FretboardModel {
   pub fn set_all(&self, state: FretState) {
     for string in &self.frets {
       for fret in string.get() {
-        fret.set(state);
+        fret.set(state.clone());
       }
     }
   }
@@ -133,8 +133,10 @@ impl FretboardModel {
   fn determine_fret_state(note: Note, scale: &Scale) -> FretState {
     if scale.contains_note(note) {
       match scale.root_note() {
-        Some(root_note) if root_note == note => FretState::Colored(FretStateColor::Red),
-        _ => FretState::Normal,
+        Some(root_note) if root_note == note => {
+          FretState::Normal(FretStateColor::Red, note.to_string())
+        }
+        _ => FretState::Normal(FretStateColor::Blue, note.to_string()),
       }
     } else {
       FretState::Hidden

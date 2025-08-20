@@ -214,7 +214,6 @@ fn FretboardNote(
   layout: Signal<LayoutSnapshot>,
   coord: FretCoord,
   state: Signal<FretState>,
-  label: Option<Signal<Option<String>>>,
 ) -> impl IntoView {
   let position = Signal::derive(move || layout.get().note_position(coord));
   move || {
@@ -223,15 +222,11 @@ fn FretboardNote(
       None => return None,
     };
     let current_state = state.get();
-    let label_text = label.as_ref().and_then(|s| s.get());
-    if matches!(current_state, FretState::Hidden) && label_text.is_none() {
-      return None;
-    }
-    let (fill_color, radius) = match current_state {
-      FretState::Hidden => ("transparent".to_string(), 0.0),
-      FretState::Normal => ("red".to_string(), 12.0),
-      FretState::Colored(color) => (color.as_str().to_string(), 12.0),
+    let (fill_color, radius, label) = match current_state {
+      FretState::Hidden => ("transparent".to_string(), 0.0, None),
+      FretState::Normal(color, label) => (color.as_str().to_string(), 12.0, Some(label)),
     };
+
     Some(view! {
       <g class="note" data-string=coord.string_idx data-fret=coord.fret_idx>
         {if radius > 0.0 {
@@ -239,7 +234,7 @@ fn FretboardNote(
         } else {
           None
         }}
-        {label_text
+        {label
           .map(|text| {
             view! {
               <text
@@ -264,7 +259,6 @@ fn FretboardNote(
 #[component]
 pub(crate) fn FretboardGrid(
   #[prop(into)] layout: Signal<LayoutSnapshot>,
-  fret_labels: Option<Signal<HashMap<FretCoord, Signal<Option<String>>>>>,
   fret_states: Signal<HashMap<FretCoord, Signal<FretState>>>,
   /// Optional callback for fret click events
   click_cb: Option<Callback<FretClickEvent>>,
@@ -275,7 +269,6 @@ pub(crate) fn FretboardGrid(
         let layout = layout.clone();
         move || {
           let states_map = fret_states.clone();
-          let labels_map_opt = fret_labels.clone();
           (layout.get().min_fret..=layout.get().max_fret)
             .flat_map(|fret_idx| {
               let layout_cell = layout.clone();
@@ -286,15 +279,6 @@ pub(crate) fn FretboardGrid(
                     fret_idx: fret_idx as u8,
                   };
                   let state_sig_opt = states_map.get().get(&coord).cloned();
-                  let label_sig_opt = labels_map_opt
-                    .as_ref()
-                    .map(|s| s.get())
-                    .and_then(|m| m.get(&coord).cloned());
-                  // clone once for capture
-                  // copy the signal handle (Copy)
-                  // clone Option<Signal<_>> (cheap)
-                  // cloned map each run
-                  // no move of Option
                   view! {
                     <g class="cell-group" data-fret=fret_idx data-string=string_idx>
                       {
@@ -320,7 +304,6 @@ pub(crate) fn FretboardGrid(
                               layout=layout_cell.clone()
                               coord=coord
                               state=state_signal
-                              label=label_sig_opt
                             />
                           }
                         })}
