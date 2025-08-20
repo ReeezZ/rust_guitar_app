@@ -50,8 +50,6 @@
 pub struct FretboardVisualConfig {
   /// Number of guitar strings (default: 6)
   pub num_strings: u8,
-  /// Maximum number of frets to display (default: 22)
-  pub max_frets: usize,
   /// Width-to-height aspect ratio (default: 3.0)
   pub svg_aspect_ratio: f64,
   /// Percentage of SVG height used as margin (default: 0.05)
@@ -68,7 +66,6 @@ impl Default for FretboardVisualConfig {
   fn default() -> Self {
     Self {
       num_strings: 6,
-      max_frets: 22,
       svg_aspect_ratio: 3.0,
       fret_margin_percentage: 0.05,
       nut_width: 14.0,
@@ -98,26 +95,6 @@ impl FretboardVisualConfig {
   /// ```
   pub fn with_num_strings(mut self, num_strings: u8) -> Self {
     self.num_strings = num_strings;
-    self
-  }
-
-  /// Builder method to set the maximum number of frets
-  ///
-  /// Controls how many frets are available for display, regardless of the
-  /// current view range (start_fret to end_fret).
-  ///
-  /// # Arguments
-  /// * `max_frets` - Maximum frets (typically 12-24)
-  ///
-  /// # Examples
-  /// ```rust
-  /// use frontend::components::fretboard::visual_config::FretboardVisualConfig;
-  ///
-  /// let acoustic = FretboardVisualConfig::default().with_max_frets(14);
-  /// let electric = FretboardVisualConfig::default().with_max_frets(24);
-  /// ```
-  pub fn with_max_frets(mut self, max_frets: usize) -> Self {
-    self.max_frets = max_frets;
     self
   }
 

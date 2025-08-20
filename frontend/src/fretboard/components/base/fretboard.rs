@@ -85,14 +85,11 @@ pub fn Fretboard(
 
   // Create reactive signals from config values - using clone since Signal is Copy
   let num_strings = Signal::derive(move || config_signal.get().num_strings);
-  let max_frets = Signal::derive(move || config_signal.get().max_frets);
   let svg_aspect_ratio = Signal::derive(move || config_signal.get().svg_aspect_ratio);
   let fret_margin_percentage = Signal::derive(move || config_signal.get().fret_margin_percentage);
   let nut_width = Signal::derive(move || config_signal.get().nut_width);
   let extra_frets = Signal::derive(move || config_signal.get().extra_frets);
   let marker_positions = Signal::derive(move || config_signal.get().marker_positions.clone());
-
-  let num_frets = Memo::new(move |_| end_fret.get().max(max_frets.get()));
 
   // Use a fixed base width for calculations, SVG will be scaled by CSS
   let base_svg_width = 800.0; // Fixed base width for consistent calculations
@@ -100,9 +97,11 @@ pub fn Fretboard(
   let svg_height = Memo::new(move |_| svg_width.get() / svg_aspect_ratio.get());
   let fret_margin = Memo::new(move |_| svg_height.get() * fret_margin_percentage.get());
 
+  let end_plus_extra_fret = Memo::new(move |_| end_fret.get() + extra_frets.get());
+
   // Calculate fret positions for the FULL fretboard
   let full_fret_positions =
-    Memo::new(move |_| calculate_fret_positions(svg_width.get(), num_frets.get() as u8));
+    Memo::new(move |_| calculate_fret_positions(svg_width.get(), end_plus_extra_fret.get() as u8));
 
   // Calculate visible range - logic extracted to VisibleRange::new
   let visible_range = Memo::new(move |_| {
@@ -110,7 +109,7 @@ pub fn Fretboard(
       start_fret.get(),
       end_fret.get(),
       extra_frets.get(),
-      num_frets.get(),
+      end_plus_extra_fret.get(),
     )
   });
 

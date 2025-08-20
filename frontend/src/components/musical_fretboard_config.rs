@@ -59,12 +59,6 @@ impl MusicalFretboardConfig {
     self
   }
 
-  /// Builder method to set the maximum number of frets (updates visual config)
-  pub fn with_max_frets(mut self, max_frets: usize) -> Self {
-    self.visual.max_frets = max_frets;
-    self
-  }
-
   /// Builder method to set the aspect ratio (updates visual config)
   pub fn with_aspect_ratio(mut self, ratio: f64) -> Self {
     self.visual.svg_aspect_ratio = ratio;
@@ -146,7 +140,6 @@ impl MusicalFretboardConfig {
 #[derive(Clone)]
 pub struct MusicalFretboardConfigSignals {
   pub num_strings: Signal<u8>,
-  pub max_frets: Signal<usize>,
   pub svg_aspect_ratio: Signal<f64>,
   pub fret_margin_percentage: Signal<f64>,
   pub nut_width: Signal<f64>,
@@ -159,7 +152,6 @@ impl From<MusicalFretboardConfig> for MusicalFretboardConfigSignals {
   fn from(config: MusicalFretboardConfig) -> Self {
     Self {
       num_strings: Signal::derive(move || config.visual.num_strings),
-      max_frets: Signal::derive(move || config.visual.max_frets),
       svg_aspect_ratio: Signal::derive(move || config.visual.svg_aspect_ratio),
       fret_margin_percentage: Signal::derive(move || config.visual.fret_margin_percentage),
       nut_width: Signal::derive(move || config.visual.nut_width),

@@ -18,7 +18,6 @@ pub fn FretboardConfigExamples() -> impl IntoView {
 
   // Configuration controls
   let num_strings = RwSignal::new(6_u8);
-  let max_frets = RwSignal::new(22_usize);
   let svg_aspect_ratio = RwSignal::new(3.0_f64);
   let fret_margin_percentage = RwSignal::new(0.05_f64);
   let nut_width = RwSignal::new(14.0_f64);
@@ -38,7 +37,6 @@ pub fn FretboardConfigExamples() -> impl IntoView {
   let visual_config = Memo::new(move |_| {
     FretboardVisualConfig::default()
       .with_num_strings(num_strings.get())
-      .with_max_frets(max_frets.get())
       .with_aspect_ratio(svg_aspect_ratio.get())
       .with_fret_margin(fret_margin_percentage.get())
       .with_nut_width(nut_width.get())
@@ -59,7 +57,6 @@ pub fn FretboardConfigExamples() -> impl IntoView {
             on:click=move |_| {
               num_strings.set(6);
               svg_aspect_ratio.set(3.0);
-              max_frets.set(22);
               marker_preset.set("standard".to_string());
             }
           >
@@ -70,7 +67,6 @@ pub fn FretboardConfigExamples() -> impl IntoView {
             on:click=move |_| {
               num_strings.set(4);
               svg_aspect_ratio.set(4.0);
-              max_frets.set(20);
               marker_preset.set("standard".to_string());
             }
           >
@@ -81,7 +77,6 @@ pub fn FretboardConfigExamples() -> impl IntoView {
             on:click=move |_| {
               num_strings.set(7);
               svg_aspect_ratio.set(2.8);
-              max_frets.set(24);
               extra_frets.set(2);
               marker_preset.set("standard".to_string());
             }
@@ -207,23 +202,6 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                       _ => "Custom",
                     }}
                   </div>
-                </div>
-                <div>
-                  <label class="block mb-1 text-xs font-medium">
-                    "Max Frets: " <span class="font-bold">{move || max_frets.get()}</span>
-                  </label>
-                  <input
-                    type="range"
-                    min="12"
-                    max="27"
-                    class="w-full"
-                    prop:value=move || max_frets.get()
-                    on:input=move |ev| {
-                      if let Ok(val) = event_target_value(&ev).parse::<usize>() {
-                        max_frets.set(val);
-                      }
-                    }
-                  />
                 </div>
               </div>
             </div>

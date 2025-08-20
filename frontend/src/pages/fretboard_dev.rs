@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use leptos::{form, prelude::*};
+use leptos::prelude::*;
 
 use crate::fretboard::{
   components::{
