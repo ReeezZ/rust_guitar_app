@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use crate::components::fretboard::base::helper::{
   calculate_string_spacing, VisibleRange, ZoomTransform,
 };
+use crate::components::fretboard::base::layout::LayoutSnapshot;
 use crate::components::fretboard::base::parts::{
   FretboardClickableAreas, FretboardFrets, FretboardMarkers, FretboardNotes, FretboardNut,
   FretboardOverlays, FretboardStrings,
@@ -12,6 +13,7 @@ use crate::fretboard_view_helper::calculate_fret_positions;
 use crate::models::fretboard_model::FretCoord;
 use crate::models::FretState;
 use leptos::prelude::*;
+use std::rc::Rc;
 
 #[derive(Clone, Copy, Debug)]
 pub struct FretClickEvent {
@@ -110,7 +112,6 @@ pub fn Fretboard(
   let min_fret = Memo::new(move |_| visible_range.get().min_fret);
   let max_fret = Memo::new(move |_| visible_range.get().max_fret);
 
-  // Clean zoom transformation - calculation logic extracted to ZoomTransform::new
   let zoom_transform = Memo::new(move |_| {
     ZoomTransform::new(
       &full_fret_positions.get(),
@@ -120,12 +121,6 @@ pub fn Fretboard(
       nut_width.get(),
     )
   });
-
-  // Clean coordinate transformation function
-  let to_viewbox_x = move |absolute_x: f64| -> f64 {
-    let transform = zoom_transform.get_untracked();
-    transform.to_viewbox_x(absolute_x, nut_width.get_untracked())
-  };
 
   view! {
     <div class="flex justify-center items-center w-full">
@@ -144,18 +139,31 @@ pub fn Fretboard(
           let current_num_strings = num_strings.get();
           let string_spacing = calculate_string_spacing(current_num_strings, current_svg_height);
           let positions = full_fret_positions.get();
-          let positions_for_click = positions.clone();
-          let positions_for_markers = positions.clone();
-          let positions_for_overlays = positions.clone();
           let min_f = min_fret.get();
           let max_f = max_fret.get();
           let start = start_fret.get();
           let end = end_fret.get();
+          let current_zoom_transform = zoom_transform.get();
           let current_svg_width = svg_width.get();
           let viewbox_width = current_svg_width;
           let current_nut_width = nut_width.get();
           let current_marker_positions = marker_positions.get();
-          let current_zoom_transform = zoom_transform.get();
+          let layout_snapshot = Rc::new(
+            LayoutSnapshot::new(
+              positions.clone(),
+              &current_zoom_transform,
+              min_f,
+              max_f,
+              start,
+              end,
+              current_num_strings,
+              string_spacing,
+              current_svg_width,
+              current_svg_height,
+              current_fret_margin,
+              current_nut_width,
+            ),
+          );
 
           view! {
             // Conditionally render nut when fret 0 is visible
@@ -174,16 +182,7 @@ pub fn Fretboard(
             }}
 
             // Render all fret lines
-            <FretboardFrets
-              min_fret=min_f
-              max_fret=max_f
-              start_fret=start
-              end_fret=end
-              positions=positions.clone()
-              to_viewbox_x=to_viewbox_x
-              fret_margin=current_fret_margin
-              svg_height=current_svg_height
-            />
+            <FretboardFrets layout=(*layout_snapshot).clone() />
 
             // Render string lines
             <FretboardStrings
@@ -194,57 +193,30 @@ pub fn Fretboard(
 
             // Render fret markers
             <FretboardMarkers
-              min_fret=min_f
-              max_fret=max_f
+              layout=(*layout_snapshot).clone()
               marker_positions=current_marker_positions
-              positions=positions_for_markers
-              to_viewbox_x=to_viewbox_x
-              svg_height=current_svg_height
             />
 
             // Render overlays for non-playable regions
-            <FretboardOverlays
-              min_fret=min_f
-              max_fret=max_f
-              start_fret=start
-              end_fret=end
-              positions=positions_for_overlays
-              to_viewbox_x=to_viewbox_x
-              nut_width=current_zoom_transform.effective_nut_width(current_nut_width)
-              fret_margin=current_fret_margin
-              svg_height=current_svg_height
-              svg_width=current_svg_width
-            />
+            <FretboardOverlays layout=(*layout_snapshot).clone() />
 
             // Render clickable areas if callback is provided
             {on_fret_clicked
-              .map(move |callback| {
-                view! {
-                  <FretboardClickableAreas
-                    min_fret=min_f
-                    max_fret=max_f
-                    num_strings=current_num_strings
-                    string_spacing=string_spacing
-                    positions=positions_for_click
-                    to_viewbox_x=to_viewbox_x
-                    has_nut=current_zoom_transform.has_nut
-                    nut_width=current_nut_width
-                    on_fret_clicked=callback
-                  />
+              .map({
+                let layout_snapshot = layout_snapshot.clone();
+                move |callback| {
+                  let layout_for_click = (*layout_snapshot).clone();
+                  view! {
+                    <FretboardClickableAreas layout=layout_for_click on_fret_clicked=callback />
+                  }
                 }
               })}
 
-            <FretboardNotes
-              min_fret=min_f
-              max_fret=max_f
-              positions=positions
-              to_viewbox_x=to_viewbox_x
-              frets=fret_states
-                num_strings=current_num_strings
-                string_spacing=string_spacing
-                nut_width=current_nut_width
-                has_nut=current_zoom_transform.has_nut
-            />
+            // notes layer (always shown)
+            {
+              let layout_for_notes = (*layout_snapshot).clone();
+              view! { <FretboardNotes layout=layout_for_notes frets=fret_states /> }
+            }
           }
         }}
       </svg>

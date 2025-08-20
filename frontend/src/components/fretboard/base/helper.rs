@@ -65,19 +65,4 @@ impl ZoomTransform {
       has_nut,
     }
   }
-
-  /// Transform absolute fretboard coordinates to scaled viewbox coordinates
-  pub fn to_viewbox_x(&self, absolute_x: f64, nut_width: f64) -> f64 {
-    let offset = if self.has_nut { nut_width } else { 0.0 };
-    offset + (absolute_x - self.range_start) * self.scale_factor
-  }
-
-  /// Get nut width to use in calculations (0 if nut not visible)
-  pub fn effective_nut_width(&self, nut_width: f64) -> f64 {
-    if self.has_nut {
-      nut_width
-    } else {
-      0.0
-    }
-  }
 }
