@@ -3,7 +3,10 @@ use std::collections::HashMap;
 use leptos::prelude::*;
 
 use crate::{
-  components::fretboard::{base::Fretboard, with_notes::FretboardWithNotes},
+  components::fretboard::{
+    base::{FretClickEvent, Fretboard},
+    with_notes::{FretClickEventWithNote, FretboardWithNotes},
+  },
   models::{fretboard_model::FretStateColor, FretCoord, FretState},
 };
 
@@ -57,14 +60,37 @@ fn get_fret_positions() -> HashMap<FretCoord, Signal<FretState>> {
 pub fn FretboardDevPage() -> impl IntoView {
   let frets = RwSignal::new(get_fret_positions());
 
+  let handle_note_clicked = Callback::new(|coord: FretClickEventWithNote| {
+    leptos::logging::log!("{:?} {:?}", coord.note, coord.coord);
+  });
+
+  let handle_fret_clicked = Callback::new(|coord: FretClickEvent| {
+    leptos::logging::log!("{:?}", coord);
+  });
+
   view! {
     <h1 class="mb-2 text-xl font-bold">"Fretboard Dev: FretboardWithNotes"</h1>
     <p class="mb-4 text-sm text-gray-600">
       Test page showing a variety of FretState values (Normal, Colored, Hidden).
     </p>
     <div>
-      <FretboardWithNotes fret_states=frets.into() start_fret=0.into() end_fret=12.into() />
+      <FretboardWithNotes
+        fret_states=frets.into()
+        start_fret=0.into()
+        end_fret=12.into()
+        on_note_clicked=handle_note_clicked
+      />
 
+    </div>
+
+    <div>
+      <h1 class="mb-2 text-xl font-bold">"Fretboard (base)"</h1>
+      <Fretboard
+        fret_states=frets.into()
+        start_fret=0.into()
+        end_fret=12.into()
+        on_fret_clicked=handle_fret_clicked
+      />
     </div>
 
     <div>

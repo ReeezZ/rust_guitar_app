@@ -81,7 +81,7 @@ pub fn FretboardWithNotes(
   #[prop(optional, into)]
   tuning: Option<Signal<Vec<Note>>>,
   /// Callback for note click events (enriched with note information)
-  #[prop(optional)]
+  #[prop(optional, into)]
   on_note_clicked: Option<Callback<FretClickEventWithNote>>,
 
   // Visual configuration
