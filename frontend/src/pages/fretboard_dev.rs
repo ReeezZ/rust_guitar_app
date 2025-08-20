@@ -68,7 +68,7 @@ pub fn FretboardDevPage() -> impl IntoView {
     leptos::logging::log!("{:?}", coord);
   });
 
-  let fret_labels = RwSignal::new(
+  let fret_labels = Signal::derive(move || {
     frets
       .get()
       .iter()
@@ -78,8 +78,8 @@ pub fn FretboardDevPage() -> impl IntoView {
         // RwSignal -> Signal so it matches HashMap<FretCoord, Signal<Option<String>>>
         (*coord, rw.into())
       })
-      .collect::<HashMap<_, _>>(),
-  );
+      .collect::<HashMap<_, _>>()
+  });
 
   view! {
     <h1 class="mb-2 text-xl font-bold">"Fretboard Dev: FretboardWithNotes"</h1>
