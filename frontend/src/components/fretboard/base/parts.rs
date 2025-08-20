@@ -246,7 +246,7 @@ pub fn FretboardClickableAreas(
     <>
       // Clickable areas for each fret position
       {(0..num_strings)
-        .map(|string_idx| {
+        .map(move |string_idx| {
           let string_y = (string_idx as f64 + 1.0) * string_spacing;
           view! {
             <>
@@ -344,7 +344,7 @@ pub fn FretboardNotes(
   view! {
     <>
       {(min_fret..=max_fret)
-        .flat_map(|fret| {
+        .flat_map(move |fret| {
           (0..6)
             .filter_map({
               let positions = positions.clone();

@@ -215,7 +215,7 @@ pub fn Fretboard(
 
             // Render clickable areas if callback is provided
             {on_fret_clicked
-              .map(|callback| {
+              .map(move |callback| {
                 view! {
                   <FretboardClickableAreas
                     min_fret=min_f
