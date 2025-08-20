@@ -198,6 +198,7 @@ pub(crate) fn FretboardClickableAreas(
                         width=layout.nut_width
                         height=layout.string_spacing * 0.8
                         fill="transparent"
+                        // TODO show clickable areas in red to see for debugging
                         stroke="red"
                         stroke-width="1"
                         stroke-opacity="0.3"
@@ -261,46 +262,48 @@ pub(crate) fn FretboardNotes(
   layout: LayoutSnapshot,
   frets: Signal<HashMap<FretCoord, Signal<FretState>>>,
 ) -> impl IntoView {
-  let fret_states = frets.get();
   let min_fret = layout.min_fret;
   let max_fret = layout.max_fret;
   let num_strings = layout.num_strings;
 
   view! {
     <g class="notes-layer">
-      {(0..num_strings)
-        .map(move |string_idx| {
-          view! {
-            <g class="string-group" data-string=string_idx>
-              {(min_fret..=max_fret)
-                .filter_map({
-                  let value = fret_states.clone();
-                  let layout = layout.clone();
-                  move |fret| {
-                    let coord = FretCoord {
-                      string_idx,
-                      fret_idx: fret as u8,
-                    };
-                    let state_signal = value.get(&coord)?;
-                    match state_signal.get() {
-                      FretState::Hidden => None,
-                      other_state => {
-                        let (x, y) = layout.note_position(coord)?;
-                        let (fill, radius) = match other_state {
-                          FretState::Hidden => unreachable!(),
-                          FretState::Normal => ("red".to_string(), 6.0),
-                          FretState::Colored(color) => (color.as_str().to_string(), 6.0),
-                        };
-                        Some(view! { <circle cx=x cy=y r=radius fill=fill opacity="0.85" /> })
+      {move || {
+        let fret_states = frets.get();
+        (0..num_strings)
+          .map(|string_idx| {
+            view! {
+              <g class="string-group" data-string=string_idx>
+                {(min_fret..=max_fret)
+                  .filter_map({
+                    let layout = layout.clone();
+                    let fret_states_ref = &fret_states;
+                    move |fret| {
+                      let coord = FretCoord {
+                        string_idx,
+                        fret_idx: fret as u8,
+                      };
+                      let state_signal = fret_states_ref.get(&coord)?;
+                      match state_signal.get() {
+                        FretState::Hidden => None,
+                        other_state => {
+                          let (x, y) = layout.note_position(coord)?;
+                          let (fill, radius) = match other_state {
+                            FretState::Hidden => unreachable!(),
+                            FretState::Normal => ("red".to_string(), 6.0),
+                            FretState::Colored(color) => (color.as_str().to_string(), 6.0),
+                          };
+                          Some(view! { <circle cx=x cy=y r=radius fill=fill opacity="0.85" /> })
+                        }
                       }
                     }
-                  }
-                })
-                .collect_view()}
-            </g>
-          }
-        })
-        .collect_view()}
+                  })
+                  .collect_view()}
+              </g>
+            }
+          })
+          .collect_view()
+      }}
     </g>
   }
 }

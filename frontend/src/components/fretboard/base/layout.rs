@@ -1,11 +1,11 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use crate::models::fretboard_model::FretCoord;
 
 /// Snapshot of fretboard geometry for a render cycle.
 #[derive(Clone, Debug)]
 pub struct LayoutSnapshot {
-  pub positions: Rc<Vec<f64>>, // absolute fret line x positions (full, unzoomed)
+  pub positions: Arc<Vec<f64>>,
   pub min_fret: usize,
   pub max_fret: usize,
   pub start_fret: usize,
@@ -47,7 +47,7 @@ impl LayoutSnapshot {
     };
     let scale_factor = available_width / range_width;
     Self {
-      positions: Rc::new(positions),
+      positions: Arc::new(positions),
       min_fret,
       max_fret,
       start_fret,
