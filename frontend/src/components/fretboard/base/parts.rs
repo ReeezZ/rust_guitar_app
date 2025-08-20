@@ -91,7 +91,11 @@ pub fn FretboardMarkers(layout: LayoutSnapshot, marker_positions: Vec<u8>) -> im
       let y = layout.svg_height / 2.0;
       let r = if fret == 12 || fret == 24 { 8.0 } else { 6.0 };
       let y_offset = 28.0;
-      let (cy1, cy2, op2) = if fret == 12 || fret == 24 { (y - y_offset, y + y_offset, 0.25) } else { (y, y + y_offset, 0.0) };
+      let (cy1, cy2, op2) = if fret == 12 || fret == 24 {
+        (y - y_offset, y + y_offset, 0.25)
+      } else {
+        (y, y + y_offset, 0.0)
+      };
       view! { <g>
         <circle cx=x cy=cy1 r=r fill="#444" opacity="0.25" />
         <circle cx=x cy=cy2 r=r fill="#444" opacity=op2 />
@@ -104,31 +108,42 @@ pub fn FretboardMarkers(layout: LayoutSnapshot, marker_positions: Vec<u8>) -> im
 #[component]
 pub fn FretboardOverlays(layout: LayoutSnapshot) -> impl IntoView {
   let overlay_left = if layout.start_fret > layout.min_fret {
-    let x_prev = if layout.start_fret == 0 { 0.0 } else { layout.positions[(layout.start_fret - 1).max(0)] };
+    let x_prev = if layout.start_fret == 0 {
+      0.0
+    } else {
+      layout.positions[(layout.start_fret - 1).max(0)]
+    };
     let x_curr = layout.positions[layout.start_fret];
     let playable_area_start = (x_prev + x_curr) / 2.0 - (x_curr - x_prev) / 4.0;
     let start_x = layout.absolute_to_viewbox_x(playable_area_start);
     let width = start_x - layout.effective_nut_width();
     Some(view! { <rect
-      x=layout.effective_nut_width() y=layout.fret_margin width=width
-      height=layout.svg_height - 2.0 * layout.fret_margin fill="#fff" opacity="0.35"
-      style="pointer-events:none;" /> })
-  } else { None };
+    x=layout.effective_nut_width() y=layout.fret_margin width=width
+    height=layout.svg_height - 2.0 * layout.fret_margin fill="#fff" opacity="0.35"
+    style="pointer-events:none;" /> })
+  } else {
+    None
+  };
 
   let overlay_right = if layout.end_fret < layout.max_fret {
     let end_x = layout.absolute_to_viewbox_x(layout.positions[layout.end_fret]);
     let width = layout.svg_width - end_x;
     Some(view! { <rect
-      x=end_x y=layout.fret_margin width=width height=layout.svg_height - 2.0 * layout.fret_margin
-      fill="#fff" opacity="0.35" style="pointer-events:none;" /> })
-  } else { None };
+    x=end_x y=layout.fret_margin width=width height=layout.svg_height - 2.0 * layout.fret_margin
+    fill="#fff" opacity="0.35" style="pointer-events:none;" /> })
+  } else {
+    None
+  };
 
   view! { {overlay_left} {overlay_right} }
 }
 
 /// Renders invisible clickable areas over each fret position
 #[component]
-pub fn FretboardClickableAreas(layout: LayoutSnapshot, on_fret_clicked: Callback<FretClickEvent>) -> impl IntoView {
+pub fn FretboardClickableAreas(
+  layout: LayoutSnapshot,
+  on_fret_clicked: Callback<FretClickEvent>,
+) -> impl IntoView {
   view! { <>
     {(0..layout.num_strings).map(move |string_idx| {
       let string_y = (string_idx as f64 + 1.0) * layout.string_spacing;

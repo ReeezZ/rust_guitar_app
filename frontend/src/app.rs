@@ -5,9 +5,10 @@ use leptos_router::{components::*, path};
 use crate::{
   components::navbar::Navbar,
   pages::{
-    exercise_detail::ExerciseDetailPage, exercises::ExercisesPage, fretboard_dev::FretboardDevPage,
-    fretboard_config_examples::FretboardConfigExamples, fretboard_scale::FretboardScalePage,
-    fretboard_trainer::FretboardTrainerPage, home::Home, not_found::NotFound,
+    exercise_detail::ExerciseDetailPage, exercises::ExercisesPage,
+    fretboard_config_examples::FretboardConfigExamples, fretboard_dev::FretboardDevPage,
+    fretboard_scale::FretboardScalePage, fretboard_trainer::FretboardTrainerPage, home::Home,
+    not_found::NotFound,
   },
 };
 #[component]

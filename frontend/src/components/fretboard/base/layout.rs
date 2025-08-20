@@ -1,14 +1,13 @@
 use std::rc::Rc;
 
 use crate::{
-  components::fretboard::base::helper::ZoomTransform,
-  models::fretboard_model::FretCoord,
+  components::fretboard::base::helper::ZoomTransform, models::fretboard_model::FretCoord,
 };
 
 /// Snapshot of fretboard geometry for a render cycle.
 #[derive(Clone, Debug)]
 pub struct LayoutSnapshot {
-  pub positions: Rc<Vec<f64>>,      // absolute fret line x positions (full, unzoomed)
+  pub positions: Rc<Vec<f64>>, // absolute fret line x positions (full, unzoomed)
   pub min_fret: usize,
   pub max_fret: usize,
   pub start_fret: usize,
@@ -64,19 +63,34 @@ impl LayoutSnapshot {
   }
 
   /// Transform an absolute (unscaled) x coordinate into the current viewbox space
-  pub fn absolute_to_viewbox_x(&self, absolute_x: f64) -> f64 { self.abs_to_viewbox_x(absolute_x) }
+  pub fn absolute_to_viewbox_x(&self, absolute_x: f64) -> f64 {
+    self.abs_to_viewbox_x(absolute_x)
+  }
 
   /// Effective nut width (0 if nut not visible)
-  pub fn effective_nut_width(&self) -> f64 { if self.has_nut { self.nut_width } else { 0.0 } }
+  pub fn effective_nut_width(&self) -> f64 {
+    if self.has_nut {
+      self.nut_width
+    } else {
+      0.0
+    }
+  }
 
   /// X position of a fret line (transformed). Returns None if out of range.
   pub fn fret_line_x(&self, fret_no: usize) -> Option<f64> {
-    self.positions.get(fret_no).map(|x| self.absolute_to_viewbox_x(*x))
+    self
+      .positions
+      .get(fret_no)
+      .map(|x| self.absolute_to_viewbox_x(*x))
   }
 
   pub fn fret_center_x(&self, fret: usize) -> Option<f64> {
     if fret == 0 {
-      return if self.has_nut { Some(self.nut_width / 2.0) } else { None };
+      return if self.has_nut {
+        Some(self.nut_width / 2.0)
+      } else {
+        None
+      };
     }
     if fret < self.positions.len() {
       let prev = self.positions[fret - 1];

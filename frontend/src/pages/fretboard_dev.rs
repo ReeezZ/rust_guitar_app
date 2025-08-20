@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use leptos::{ev, logging::log, prelude::*};
+use leptos::prelude::*;
 
 use crate::{
   components::fretboard::{base::Fretboard, with_notes::FretboardWithNotes},
@@ -69,7 +69,7 @@ pub fn FretboardDevPage() -> impl IntoView {
 
     <div>
       <h1 class="mb-2 text-xl font-bold">
-        "Fretboard with not callback to check Clickable areas are not rendered"
+        "Fretboard (base) with no callback to check Clickable areas are not rendered"
       </h1>
       <Fretboard fret_states=frets.into() start_fret=0.into() end_fret=12.into() />
     </div>

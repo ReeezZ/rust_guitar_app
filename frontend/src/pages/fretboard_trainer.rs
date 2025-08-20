@@ -1,3 +1,7 @@
+// Currently refactoring fretboard trainer
+// TODO: reenable warnings
+#![allow(warnings)]
+
 use leptos::prelude::*;
 use rand::seq::IteratorRandom;
 use strum::IntoEnumIterator;
