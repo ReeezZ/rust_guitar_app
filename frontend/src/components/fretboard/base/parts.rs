@@ -231,8 +231,8 @@ fn FretboardNote(
     }
     let (fill_color, radius) = match current_state {
       FretState::Hidden => ("transparent".to_string(), 0.0),
-      FretState::Normal => ("red".to_string(), 6.0),
-      FretState::Colored(color) => (color.as_str().to_string(), 6.0),
+      FretState::Normal => ("red".to_string(), 12.0),
+      FretState::Colored(color) => (color.as_str().to_string(), 12.0),
     };
     Some(view! {
       <g class="note" data-string=coord.string_idx data-fret=coord.fret_idx>
