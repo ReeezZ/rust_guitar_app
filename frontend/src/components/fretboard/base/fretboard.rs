@@ -1,8 +1,6 @@
 use std::collections::HashMap;
 
-use crate::components::fretboard::base::helper::{
-  calculate_string_spacing, VisibleRange, ZoomTransform,
-};
+use crate::components::fretboard::base::helper::{calculate_string_spacing, VisibleRange};
 use crate::components::fretboard::base::layout::LayoutSnapshot;
 use crate::components::fretboard::base::parts::{
   FretboardClickableAreas, FretboardFrets, FretboardMarkers, FretboardNotes, FretboardNut,
@@ -112,16 +110,6 @@ pub fn Fretboard(
   let min_fret = Memo::new(move |_| visible_range.get().min_fret);
   let max_fret = Memo::new(move |_| visible_range.get().max_fret);
 
-  let zoom_transform = Memo::new(move |_| {
-    ZoomTransform::new(
-      &full_fret_positions.get(),
-      min_fret.get(),
-      max_fret.get(),
-      svg_width.get(),
-      nut_width.get(),
-    )
-  });
-
   view! {
     <div class="flex justify-center items-center w-full">
       <svg
@@ -143,7 +131,6 @@ pub fn Fretboard(
           let max_f = max_fret.get();
           let start = start_fret.get();
           let end = end_fret.get();
-          let current_zoom_transform = zoom_transform.get();
           let current_svg_width = svg_width.get();
           let viewbox_width = current_svg_width;
           let current_nut_width = nut_width.get();
@@ -151,7 +138,6 @@ pub fn Fretboard(
           let layout_snapshot = Rc::new(
             LayoutSnapshot::new(
               positions.clone(),
-              &current_zoom_transform,
               min_f,
               max_f,
               start,
@@ -167,11 +153,11 @@ pub fn Fretboard(
 
           view! {
             // Conditionally render nut when fret 0 is visible
-            {if current_zoom_transform.has_nut {
+            {if layout_snapshot.has_nut {
               Some(
                 view! {
                   <FretboardNut
-                    nut_width=current_nut_width
+                    nut_width=layout_snapshot.nut_width
                     fret_margin=current_fret_margin
                     svg_height=current_svg_height
                   />

@@ -1,8 +1,6 @@
 use std::rc::Rc;
 
-use crate::{
-  components::fretboard::base::helper::ZoomTransform, models::fretboard_model::FretCoord,
-};
+use crate::models::fretboard_model::FretCoord;
 
 /// Snapshot of fretboard geometry for a render cycle.
 #[derive(Clone, Debug)]
@@ -27,7 +25,6 @@ impl LayoutSnapshot {
   #[allow(clippy::too_many_arguments)]
   pub fn new(
     positions: Vec<f64>,
-    zoom: &ZoomTransform,
     min_fret: usize,
     max_fret: usize,
     start_fret: usize,
@@ -39,6 +36,16 @@ impl LayoutSnapshot {
     fret_margin: f64,
     nut_width: f64,
   ) -> Self {
+    let has_nut = min_fret == 0;
+    let range_start = if has_nut { 0.0 } else { positions[min_fret] };
+    let range_end = positions[max_fret];
+    let range_width = range_end - range_start;
+    let available_width = if has_nut {
+      svg_width - nut_width
+    } else {
+      svg_width
+    };
+    let scale_factor = available_width / range_width;
     Self {
       positions: Rc::new(positions),
       min_fret,
@@ -51,9 +58,9 @@ impl LayoutSnapshot {
       svg_height,
       fret_margin,
       nut_width,
-      has_nut: zoom.has_nut,
-      range_start: zoom.range_start,
-      scale_factor: zoom.scale_factor,
+      has_nut,
+      range_start,
+      scale_factor,
     }
   }
 
@@ -76,13 +83,7 @@ impl LayoutSnapshot {
     }
   }
 
-  /// X position of a fret line (transformed). Returns None if out of range.
-  pub fn fret_line_x(&self, fret_no: usize) -> Option<f64> {
-    self
-      .positions
-      .get(fret_no)
-      .map(|x| self.absolute_to_viewbox_x(*x))
-  }
+  // Removed unused fret_line_x helper (can be reinstated if needed later)
 
   pub fn fret_center_x(&self, fret: usize) -> Option<f64> {
     if fret == 0 {
