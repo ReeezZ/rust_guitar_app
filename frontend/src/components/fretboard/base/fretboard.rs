@@ -144,6 +144,9 @@ pub fn Fretboard(
           let current_num_strings = num_strings.get();
           let string_spacing = calculate_string_spacing(current_num_strings, current_svg_height);
           let positions = full_fret_positions.get();
+          let positions_for_click = positions.clone();
+          let positions_for_markers = positions.clone();
+          let positions_for_overlays = positions.clone();
           let min_f = min_fret.get();
           let max_f = max_fret.get();
           let start = start_fret.get();
@@ -194,7 +197,7 @@ pub fn Fretboard(
               min_fret=min_f
               max_fret=max_f
               marker_positions=current_marker_positions
-              positions=positions.clone()
+              positions=positions_for_markers
               to_viewbox_x=to_viewbox_x
               svg_height=current_svg_height
             />
@@ -205,7 +208,7 @@ pub fn Fretboard(
               max_fret=max_f
               start_fret=start
               end_fret=end
-              positions=positions.clone()
+              positions=positions_for_overlays
               to_viewbox_x=to_viewbox_x
               nut_width=current_zoom_transform.effective_nut_width(current_nut_width)
               fret_margin=current_fret_margin
@@ -222,7 +225,7 @@ pub fn Fretboard(
                     max_fret=max_f
                     num_strings=current_num_strings
                     string_spacing=string_spacing
-                    positions=positions.clone()
+                    positions=positions_for_click
                     to_viewbox_x=to_viewbox_x
                     has_nut=current_zoom_transform.has_nut
                     nut_width=current_nut_width
@@ -236,8 +239,11 @@ pub fn Fretboard(
               max_fret=max_f
               positions=positions
               to_viewbox_x=to_viewbox_x
-              svg_height=current_svg_height
               frets=fret_states
+                num_strings=current_num_strings
+                string_spacing=string_spacing
+                nut_width=current_nut_width
+                has_nut=current_zoom_transform.has_nut
             />
           }
         }}

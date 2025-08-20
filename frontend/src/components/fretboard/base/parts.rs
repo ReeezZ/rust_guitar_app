@@ -14,7 +14,7 @@ pub fn FretboardNut(
   nut_width: f64,
   /// Top margin for the nut
   fret_margin: f64,
-  /// Total SVG height
+  /// Total SVG height (needed for nut rect height calculation)
   svg_height: f64,
 ) -> impl IntoView {
   view! {
@@ -334,55 +334,61 @@ pub fn FretboardNotes(
   positions: Vec<f64>,
   /// Function to transform absolute x to viewbox x
   to_viewbox_x: impl Fn(f64) -> f64 + Copy + 'static,
-  /// Total SVG height
-  svg_height: f64,
   /// Fret states for each string and fret
   frets: Signal<HashMap<FretCoord, Signal<FretState>>>,
+  /// Number of strings (dynamic, replaces previous hard-coded 6)
+  num_strings: u8,
+  /// Spacing between strings (precomputed for consistency with other layers)
+  string_spacing: f64,
+  /// Width of the nut (needed to center open-string notes)
+  nut_width: f64,
+  /// Whether nut is visible (min fret == 0 in current zoom window)
+  has_nut: bool,
 ) -> impl IntoView {
   let fret_states = frets.get();
 
   view! {
     <>
-      {(min_fret..=max_fret)
-        .flat_map(move |fret| {
-          (0..6)
-            .filter_map({
-              let positions = positions.clone();
-              {
-                let value = fret_states.clone();
-                move |string_idx| {
-                  let coord = FretCoord {
-                    string_idx,
-                    fret_idx: fret as u8,
-                  };
-                  if let Some(state) = value.get(&coord) {
-                    if fret == 0 {}
-                    let midpoint = (positions[fret - 1] + positions[fret]) / 2.0;
-                    let pos = positions[fret];
-                    let x = to_viewbox_x(pos);
-                    let y = (string_idx as f64 + 1.0) * (svg_height / 7.0);
-                    match state.get() {
+      {(0..num_strings)
+        .map(move |string_idx| {
+          // Group per string for future styling / interactions
+          view! {
+            <g class="string-group" data-string=string_idx>
+              {(min_fret..=max_fret)
+                .filter_map({
+                  let positions = positions.clone();
+                  let value = fret_states.clone();
+                  move |fret| {
+                    let coord = FretCoord { string_idx, fret_idx: fret as u8 };
+                    let state_signal = value.get(&coord)?;
+                    match state_signal.get() {
                       FretState::Hidden => None,
-                      FretState::Normal => {
-                        Some(
-
-                          view! { <circle cx=x cy=y r="4" fill="red" opacity="0.8" /> }
-                            .into_any(),
-                        )
-                      }
-                      FretState::Colored(color) => {
-                        let color = color.as_str().to_string();
-                        Some(
-                          view! { <circle cx=x cy=y r="4" fill=color opacity="0.8" /> }.into_any(),
-                        )
+                      other_state => {
+                        // Compute x centered in playable area (midpoint between previous and current fret lines)
+                        let x = if fret == 0 {
+                          // Place open-string note centered in nut if nut visible; else skip (outside view)
+                          if has_nut { nut_width / 2.0 } else { return None; }
+                        } else {
+                          let x_prev = positions[fret - 1];
+                          let x_curr = positions[fret];
+                          let mid = (x_prev + x_curr) / 2.0;
+                          to_viewbox_x(mid)
+                        };
+                        // Y based on provided string spacing
+                        let y = (string_idx as f64 + 1.0) * string_spacing;
+                        let (fill_owned, radius) = match other_state {
+                          FretState::Hidden => unreachable!(),
+                          FretState::Normal => ("red".to_string(), 6.0),
+                          FretState::Colored(color) => (color.as_str().to_string(), 6.0),
+                        };
+                        Some(view! { <circle cx=x cy=y r=radius fill=fill_owned opacity="0.85" /> })
                       }
                     }
-                  } else {
-                    None
                   }
-                }
-              }
-            })
+                })
+                .collect_view()}
+            </g>
+          }
         })
         .collect_view()}
     </>
