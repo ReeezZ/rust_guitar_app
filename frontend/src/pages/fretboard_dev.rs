@@ -7,10 +7,7 @@ use crate::{
   models::{fretboard_model::FretStateColor, FretCoord, FretState},
 };
 
-/// Page for the SVG fretboard with a runtime-adjustable fret count slider.
-/// See: https://leptos.dev/docs/reference/signals/
-#[component]
-pub fn FretboardDevPage() -> impl IntoView {
+fn get_fret_positions() -> HashMap<FretCoord, Signal<FretState>> {
   // Build a sample set of fret states to visualize different cases
   let mut fret_positions: HashMap<FretCoord, Signal<FretState>> = HashMap::new();
 
@@ -51,7 +48,14 @@ pub fn FretboardDevPage() -> impl IntoView {
     RwSignal::new(FretState::Hidden).into(),
   );
 
-  let frets = RwSignal::new(fret_positions);
+  fret_positions
+}
+
+/// Page for the SVG fretboard with a runtime-adjustable fret count slider.
+/// See: https://leptos.dev/docs/reference/signals/
+#[component]
+pub fn FretboardDevPage() -> impl IntoView {
+  let frets = RwSignal::new(get_fret_positions());
 
   view! {
     <h1 class="mb-2 text-xl font-bold">"Fretboard Dev: FretboardWithNotes"</h1>
