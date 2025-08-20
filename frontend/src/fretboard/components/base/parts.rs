@@ -2,11 +2,9 @@
 
 use std::collections::HashMap;
 
-use crate::{
-  components::fretboard::base::{
-    fretboard::FretClickEvent, helper::FretState, layout::LayoutSnapshot,
-  },
-  models::FretCoord,
+use crate::fretboard::{
+  components::base::{fretboard::FretClickEvent, helper::FretState, layout::LayoutSnapshot},
+  model::FretCoord,
 };
 
 use leptos::prelude::*;

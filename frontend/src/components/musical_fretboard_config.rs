@@ -1,6 +1,7 @@
-use crate::components::fretboard::visual_config::FretboardVisualConfig;
 use leptos::prelude::*;
 use shared::music::notes::Note;
+
+use crate::fretboard::components::visual_config::FretboardVisualConfig;
 
 /// Configuration struct for musical fretboard visualization components.
 ///

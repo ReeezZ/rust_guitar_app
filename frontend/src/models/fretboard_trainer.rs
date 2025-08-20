@@ -1,9 +1,10 @@
 use shared::music::{intervals::Interval, notes::Note};
 
-use super::fretboard_model::{FretCoord, FretboardModel};
 use leptos::prelude::GetUntracked;
 use rand::{seq::IteratorRandom, Rng};
 use strum::IntoEnumIterator;
+
+use crate::fretboard::model::{FretCoord, FretboardModel};
 
 pub trait FretboardTrainerTrait {
   fn note_from_fret(&self, coord: FretCoord) -> Note;

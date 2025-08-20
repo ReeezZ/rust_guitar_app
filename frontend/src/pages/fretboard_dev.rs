@@ -2,12 +2,12 @@ use std::collections::HashMap;
 
 use leptos::prelude::*;
 
-use crate::{
-  components::fretboard::{
+use crate::fretboard::{
+  components::{
     base::{FretClickEvent, FretState, FretStateColor, Fretboard},
     with_notes::{FretClickEventWithNote, FretboardWithNotes},
   },
-  models::FretCoord,
+  model::FretCoord,
 };
 
 fn get_fret_positions() -> HashMap<FretCoord, Signal<FretState>> {

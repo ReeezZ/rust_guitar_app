@@ -1,16 +1,20 @@
 use std::collections::HashMap;
 
-use crate::components::fretboard::base::{FretClickEvent, FretState, Fretboard};
-use crate::components::fretboard::visual_config::FretboardVisualConfig;
-use crate::models::fretboard_model::{FretCoord, FretboardModel};
 use leptos::prelude::*;
 use shared::music::notes::Note;
+
+use crate::fretboard::{
+  components::{
+    base::{FretClickEvent, FretState, Fretboard},
+    visual_config::FretboardVisualConfig,
+  },
+  model::{FretCoord, FretboardModel},
+};
 
 #[derive(Clone, Copy, Debug)]
 pub struct FretClickEventWithNote {
   pub note: Note,
   pub coord: FretCoord,
-  pub fret_state: FretState,
 }
 
 /// SVG fretboard component that adds note awareness to the base SvgFretboard.
@@ -114,7 +118,6 @@ pub fn FretboardWithNotes(
         let fret_click_event = FretClickEventWithNote {
           note,
           coord: svg_event.coord,
-          fret_state: FretState::Normal, // Default state, could be enhanced later
         };
 
         callback.run(fret_click_event);

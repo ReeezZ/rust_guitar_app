@@ -1,16 +1,23 @@
 use std::collections::HashMap;
 
-use crate::components::fretboard::base::helper::{
-  calculate_string_spacing, FretState, VisibleRange,
+use crate::{
+  fretboard::{
+    components::{
+      base::{
+        helper::{calculate_string_spacing, VisibleRange},
+        layout::LayoutSnapshot,
+        parts::{
+          FretboardFrets, FretboardGrid, FretboardMarkers, FretboardNut, FretboardOverlays,
+          FretboardStrings,
+        },
+        FretState,
+      },
+      visual_config::FretboardVisualConfig,
+    },
+    model::FretCoord,
+  },
+  fretboard_view_helper::calculate_fret_positions,
 };
-use crate::components::fretboard::base::layout::LayoutSnapshot;
-use crate::components::fretboard::base::parts::{
-  FretboardFrets, FretboardGrid, FretboardMarkers, FretboardNut, FretboardOverlays,
-  FretboardStrings,
-};
-use crate::components::fretboard::visual_config::FretboardVisualConfig;
-use crate::fretboard_view_helper::calculate_fret_positions;
-use crate::models::fretboard_model::FretCoord;
 use leptos::prelude::*;
 
 #[derive(Clone, Copy, Debug)]

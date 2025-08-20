@@ -5,7 +5,7 @@
 /// settings in real-time and understand their effects.
 use leptos::{logging::log, prelude::*};
 
-use crate::components::fretboard::{
+use crate::fretboard::components::{
   visual_config::FretboardVisualConfig,
   with_notes::{FretClickEventWithNote, FretboardWithNotes},
 };

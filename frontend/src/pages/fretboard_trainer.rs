@@ -7,8 +7,8 @@ use rand::seq::IteratorRandom;
 use strum::IntoEnumIterator;
 
 // use crate::components::fretboard::trainer::FretboardTrainer;
-use crate::components::fretboard::with_notes::FretClickEventWithNote;
-use crate::models::fretboard_model::{FretCoord, FretboardModel};
+use crate::fretboard::components::with_notes::FretClickEventWithNote;
+use crate::fretboard::model::{FretCoord, FretboardModel};
 use crate::models::fretboard_trainer::FretboardTrainerTrait;
 use shared::music::intervals::Interval;
 use shared::music::notes::Note;

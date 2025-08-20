@@ -5,7 +5,7 @@ use shared::music::{
   scales::{Scale, ScaleTrait},
 };
 
-use crate::components::fretboard::base::{FretState, FretStateColor};
+use crate::fretboard::components::base::FretState;
 
 pub type FretNoteSignal = RwSignal<FretState>;
 pub type FretStringSignals = RwSignal<Vec<FretNoteSignal>>;
