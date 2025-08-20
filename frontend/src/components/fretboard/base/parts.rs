@@ -213,14 +213,14 @@ fn FretboardClickableArea(
 /// Single note (circle + optional label) at a fret/string coordinate.
 #[component]
 fn FretboardNote(
-  layout: LayoutSnapshot,
+  layout: Signal<LayoutSnapshot>,
   coord: FretCoord,
   state: Signal<FretState>,
   label: Option<Signal<Option<String>>>,
 ) -> impl IntoView {
-  let position = layout.note_position(coord);
+  let position = Signal::derive(move || layout.get().note_position(coord));
   move || {
-    let (x, y) = match position {
+    let (x, y) = match position.get() {
       Some(p) => p,
       None => return None,
     };
@@ -265,7 +265,7 @@ fn FretboardNote(
 
 #[component]
 pub(crate) fn FretboardGrid(
-  layout: LayoutSnapshot,
+  #[prop(into)] layout: Signal<LayoutSnapshot>,
   fret_labels: Option<Signal<HashMap<FretCoord, Signal<Option<String>>>>>,
   fret_states: Signal<HashMap<FretCoord, Signal<FretState>>>,
   /// Optional callback for fret click events
@@ -273,49 +273,66 @@ pub(crate) fn FretboardGrid(
 ) -> impl IntoView {
   view! {
     <g class="interactive-layer">
-      {(layout.min_fret..=layout.max_fret)
-        .flat_map(move |fret_idx| {
-          let layout_cell = layout.clone();
-          (0..layout.num_strings)
-            .map(move |string_idx| {
-              let coord = FretCoord {
-                string_idx,
-                fret_idx: fret_idx as u8,
-              };
-              let state_opt = fret_states.get().get(&coord).cloned();
-              let label_sig_opt = fret_labels.as_ref().and_then(|m| m.get().get(&coord).cloned());
-              // clone once for capture
-              // copy the signal handle (Copy)
-              // clone Option<Signal<_>> (cheap)
-              view! {
-                <g class="cell-group" data-fret=fret_idx data-string=string_idx>
-                  {click_cb
+      {
+        let layout = layout.clone();
+        move || {
+          let states_map = fret_states.clone();
+          let labels_map_opt = fret_labels.clone();
+          (layout.get().min_fret..=layout.get().max_fret)
+            .flat_map(|fret_idx| {
+              let layout_cell = layout.clone();
+              (0..layout.get().num_strings)
+                .map(move |string_idx| {
+                  let coord = FretCoord {
+                    string_idx,
+                    fret_idx: fret_idx as u8,
+                  };
+                  let state_sig_opt = states_map.get().get(&coord).cloned();
+                  let label_sig_opt = labels_map_opt
                     .as_ref()
-                    .map(|cb| {
-                      view! {
-                        <FretboardClickableArea
-                          layout=layout_cell.clone()
-                          coord=coord
-                          on_fret_clicked=*cb
-                        />
+                    .map(|s| s.get())
+                    .and_then(|m| m.get(&coord).cloned());
+                  // clone once for capture
+                  // copy the signal handle (Copy)
+                  // clone Option<Signal<_>> (cheap)
+                  // cloned map each run
+                  // no move of Option
+                  view! {
+                    <g class="cell-group" data-fret=fret_idx data-string=string_idx>
+                      {
+                        let click_cb = click_cb.clone();
+                        move || {
+                          click_cb
+                            .as_ref()
+                            .map(|cb| {
+                              view! {
+                                <FretboardClickableArea
+                                  layout=layout_cell.get()
+                                  coord=coord
+                                  on_fret_clicked=cb.clone()
+                                />
+                              }
+                            })
+                        }
                       }
-                    })}
-                  {state_opt
-                    .map(|state_signal| {
-                      view! {
-                        <FretboardNote
-                          layout=layout_cell.clone()
-                          coord=coord
-                          state=state_signal
-                          label=label_sig_opt
-                        />
-                      }
-                    })}
-                </g>
-              }
+                      {state_sig_opt
+                        .map(|state_signal| {
+                          view! {
+                            <FretboardNote
+                              layout=layout_cell.clone()
+                              coord=coord
+                              state=state_signal
+                              label=label_sig_opt
+                            />
+                          }
+                        })}
+                    </g>
+                  }
+                })
             })
-        })
-        .collect_view()}
+            .collect_view()
+        }
+      }
     </g>
   }
 }

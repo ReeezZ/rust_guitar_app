@@ -12,7 +12,6 @@ use crate::components::fretboard::visual_config::FretboardVisualConfig;
 use crate::fretboard_view_helper::calculate_fret_positions;
 use crate::models::fretboard_model::FretCoord;
 use leptos::prelude::*;
-use std::rc::Rc;
 
 #[derive(Clone, Copy, Debug)]
 pub struct FretClickEvent {
@@ -139,7 +138,7 @@ pub fn Fretboard(
           let viewbox_width = current_svg_width;
           let current_nut_width = nut_width.get();
           let current_marker_positions = marker_positions.get();
-          let layout_snapshot = Rc::new(
+          let layout_snapshot = RwSignal::new(
             LayoutSnapshot::new(
               positions.clone(),
               min_f,
@@ -157,11 +156,11 @@ pub fn Fretboard(
 
           view! {
             // Conditionally render nut when fret 0 is visible
-            {if layout_snapshot.has_nut {
+            {if layout_snapshot.get().has_nut {
               Some(
                 view! {
                   <FretboardNut
-                    nut_width=layout_snapshot.nut_width
+                    nut_width=layout_snapshot.get().nut_width
                     fret_margin=current_fret_margin
                     svg_height=current_svg_height
                   />
@@ -172,7 +171,7 @@ pub fn Fretboard(
             }}
 
             // Render all fret lines
-            <FretboardFrets layout=(*layout_snapshot).clone() />
+            <FretboardFrets layout=layout_snapshot.get() />
 
             // Render string lines
             <FretboardStrings
@@ -183,16 +182,16 @@ pub fn Fretboard(
 
             // Render fret markers
             <FretboardMarkers
-              layout=(*layout_snapshot).clone()
+              layout=layout_snapshot.get()
               marker_positions=current_marker_positions
             />
 
             // Render overlays for non-playable regions
-            <FretboardOverlays layout=(*layout_snapshot).clone() />
+            <FretboardOverlays layout=layout_snapshot.get() />
 
             // Grid: iterate frets/strings once and compose per-cell components
             <FretboardGrid
-              layout=(*layout_snapshot).clone()
+              layout=layout_snapshot.clone()
               fret_labels=fret_labels.clone()
               click_cb=on_fret_clicked.clone()
               fret_states=fret_states
