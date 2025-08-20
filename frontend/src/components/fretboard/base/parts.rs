@@ -1,8 +1,12 @@
+// (No HashMap needed in per-cell components currently.)
+
 use std::collections::HashMap;
 
 use crate::{
-  components::fretboard::base::{fretboard::FretClickEvent, layout::LayoutSnapshot},
-  models::{FretCoord, FretState},
+  components::fretboard::base::{
+    fretboard::FretClickEvent, helper::FretState, layout::LayoutSnapshot,
+  },
+  models::FretCoord,
 };
 
 use leptos::prelude::*;
@@ -165,145 +169,153 @@ pub(crate) fn FretboardOverlays(layout: LayoutSnapshot) -> impl IntoView {
   }
 }
 
-/// Renders invisible clickable areas over each fret position
+/// Single clickable area for one fret/string coordinate.
 #[component]
-pub(crate) fn FretboardClickableAreas(
+fn FretboardClickableArea(
   layout: LayoutSnapshot,
+  coord: FretCoord,
   on_fret_clicked: Callback<FretClickEvent>,
 ) -> impl IntoView {
+  let string_y = layout.string_y(coord.string_idx);
+  let (x, width) = if coord.fret_idx == 0 {
+    // Nut rectangle
+    if layout.has_nut {
+      (0.0, layout.nut_width)
+    } else {
+      (0.0, 0.0)
+    }
+  } else {
+    let prev = layout.positions[(coord.fret_idx as usize - 1).max(0)];
+    let curr = layout.positions[coord.fret_idx as usize];
+    let start = layout.absolute_to_viewbox_x((prev + curr) / 2.0 - (curr - prev) / 4.0);
+    let end = layout.absolute_to_viewbox_x((prev + curr) / 2.0 + (curr - prev) / 4.0);
+    (start, end - start)
+  };
+  let on_click = move |_| {
+    on_fret_clicked.run(FretClickEvent { coord });
+  };
   view! {
-    <>
-      {(0..layout.num_strings)
-        .map(move |string_idx| {
-          let string_y = (string_idx as f64 + 1.0) * layout.string_spacing;
-          view! {
-            <>
-              // nut clickable
-              {move || {
-                if layout.has_nut {
-                  let on_click = move |_| {
-                    on_fret_clicked
-                      .run(FretClickEvent {
-                        coord: FretCoord {
-                          string_idx,
-                          fret_idx: 0,
-                        },
-                      })
-                  };
-                  Some(
-                    view! {
-                      <rect
-                        x="0"
-                        y=string_y - layout.string_spacing * 0.4
-                        width=layout.nut_width
-                        height=layout.string_spacing * 0.8
-                        fill="transparent"
-                        // TODO show clickable areas in red to see for debugging
-                        stroke="red"
-                        stroke-width="1"
-                        stroke-opacity="0.3"
-                        on:click=on_click
-                        style="cursor: pointer;"
-                      />
-                    },
-                  )
-                } else {
-                  None
-                }
-              }}
-              {(layout.min_fret.max(1)..=layout.max_fret)
-                .map(|fret_idx| {
-                  let x_prev = if fret_idx == 0 {
-                    0.0
-                  } else {
-                    layout.positions[(fret_idx - 1).max(0)]
-                  };
-                  let x_curr = layout.positions[fret_idx];
-                  let x_start = layout
-                    .absolute_to_viewbox_x((x_prev + x_curr) / 2.0 - (x_curr - x_prev) / 4.0);
-                  let x_width = layout
-                    .absolute_to_viewbox_x((x_prev + x_curr) / 2.0 + (x_curr - x_prev) / 4.0)
-                    - x_start;
-                  let on_click = move |_| {
-                    on_fret_clicked
-                      .run(FretClickEvent {
-                        coord: FretCoord {
-                          string_idx,
-                          fret_idx: fret_idx as u8,
-                        },
-                      })
-                  };
-                  view! {
-                    <rect
-                      x=x_start
-                      y=string_y - layout.string_spacing * 0.4
-                      width=x_width
-                      height=layout.string_spacing * 0.8
-                      fill="transparent"
-                      stroke="red"
-                      stroke-width="1"
-                      stroke-opacity="0.3"
-                      on:click=on_click
-                      style="cursor: pointer;"
-                    />
-                  }
-                })
-                .collect_view()}
-            </>
-          }
-        })
-        .collect_view()}
-    </>
+    <rect
+      x=x
+      y=string_y - layout.string_spacing * 0.4
+      width=width
+      height=layout.string_spacing * 0.8
+      fill="transparent"
+      stroke="red"
+      stroke-width="1"
+      stroke-opacity="0.3"
+      on:click=on_click
+      style="cursor: pointer;"
+    />
+  }
+}
+
+/// Single note (circle + optional label) at a fret/string coordinate.
+#[component]
+fn FretboardNote(
+  layout: LayoutSnapshot,
+  coord: FretCoord,
+  state: Signal<FretState>,
+  label: Option<Signal<Option<String>>>,
+) -> impl IntoView {
+  let position = layout.note_position(coord);
+  move || {
+    let (x, y) = match position {
+      Some(p) => p,
+      None => return None,
+    };
+    let current_state = state.get();
+    let label_text = label.as_ref().and_then(|s| s.get());
+    if matches!(current_state, FretState::Hidden) && label_text.is_none() {
+      return None;
+    }
+    let (fill_color, radius) = match current_state {
+      FretState::Hidden => ("transparent".to_string(), 0.0),
+      FretState::Normal => ("red".to_string(), 6.0),
+      FretState::Colored(color) => (color.as_str().to_string(), 6.0),
+    };
+    Some(view! {
+      <g class="note" data-string=coord.string_idx data-fret=coord.fret_idx>
+        {if radius > 0.0 {
+          Some(view! { <circle cx=x cy=y r=radius fill=fill_color opacity="0.85" /> })
+        } else {
+          None
+        }}
+        {label_text
+          .map(|text| {
+            view! {
+              <text
+                x=x
+                y=y
+                text-anchor="middle"
+                dominant-baseline="central"
+                fill="white"
+                font-size="8"
+                font-weight="bold"
+                style="pointer-events:none;user-select:none;"
+              >
+                {text}
+              </text>
+            }
+          })}
+      </g>
+    })
   }
 }
 
 #[component]
-pub(crate) fn FretboardNotes(
+pub(crate) fn FretboardGrid(
   layout: LayoutSnapshot,
-  frets: Signal<HashMap<FretCoord, Signal<FretState>>>,
+  fret_labels: Option<Signal<HashMap<FretCoord, Signal<Option<String>>>>>,
+  fret_states: Signal<HashMap<FretCoord, Signal<FretState>>>,
+  /// Optional callback for fret click events
+  click_cb: Option<Callback<FretClickEvent>>,
 ) -> impl IntoView {
-  let min_fret = layout.min_fret;
-  let max_fret = layout.max_fret;
-  let num_strings = layout.num_strings;
-
   view! {
-    <g class="notes-layer">
-      {move || {
-        let fret_states = frets.get();
-        (0..num_strings)
-          .map(|string_idx| {
-            view! {
-              <g class="string-group" data-string=string_idx>
-                {(min_fret..=max_fret)
-                  .filter_map({
-                    let layout = layout.clone();
-                    let fret_states_ref = &fret_states;
-                    move |fret| {
-                      let coord = FretCoord {
-                        string_idx,
-                        fret_idx: fret as u8,
-                      };
-                      let state_signal = fret_states_ref.get(&coord)?;
-                      match state_signal.get() {
-                        FretState::Hidden => None,
-                        other_state => {
-                          let (x, y) = layout.note_position(coord)?;
-                          let (fill, radius) = match other_state {
-                            FretState::Hidden => unreachable!(),
-                            FretState::Normal => ("red".to_string(), 6.0),
-                            FretState::Colored(color) => (color.as_str().to_string(), 6.0),
-                          };
-                          Some(view! { <circle cx=x cy=y r=radius fill=fill opacity="0.85" /> })
-                        }
+    <g class="interactive-layer">
+      {(layout.min_fret..=layout.max_fret)
+        .flat_map(move |fret_idx| {
+          let layout_cell = layout.clone();
+          (0..layout.num_strings)
+            .map(move |string_idx| {
+              let coord = FretCoord {
+                string_idx,
+                fret_idx: fret_idx as u8,
+              };
+              let state_opt = fret_states.get().get(&coord).cloned();
+              let label_sig_opt = fret_labels.as_ref().and_then(|m| m.get().get(&coord).cloned());
+              // clone once for capture
+              // copy the signal handle (Copy)
+              // clone Option<Signal<_>> (cheap)
+              view! {
+                <g class="cell-group" data-fret=fret_idx data-string=string_idx>
+                  {click_cb
+                    .as_ref()
+                    .map(|cb| {
+                      view! {
+                        <FretboardClickableArea
+                          layout=layout_cell.clone()
+                          coord=coord
+                          on_fret_clicked=*cb
+                        />
                       }
-                    }
-                  })
-                  .collect_view()}
-              </g>
-            }
-          })
-          .collect_view()
-      }}
+                    })}
+                  {state_opt
+                    .map(|state_signal| {
+                      view! {
+                        <FretboardNote
+                          layout=layout_cell.clone()
+                          coord=coord
+                          state=state_signal
+                          label=label_sig_opt
+                        />
+                      }
+                    })}
+                </g>
+              }
+            })
+        })
+        .collect_view()}
     </g>
   }
 }

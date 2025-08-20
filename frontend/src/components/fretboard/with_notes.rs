@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use crate::components::fretboard::base::{FretClickEvent, Fretboard};
+use crate::components::fretboard::base::{FretClickEvent, FretState, Fretboard};
 use crate::components::fretboard::visual_config::FretboardVisualConfig;
-use crate::models::fretboard_model::{FretCoord, FretState, FretboardModel};
+use crate::models::fretboard_model::{FretCoord, FretboardModel};
 use leptos::prelude::*;
 use shared::music::notes::Note;
 

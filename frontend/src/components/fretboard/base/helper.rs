@@ -21,3 +21,28 @@ impl VisibleRange {
     Self { min_fret, max_fret }
   }
 }
+
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum FretStateColor {
+  Red,
+  Green,
+  Blue,
+}
+
+// TODO add a proper to css color string trait
+impl FretStateColor {
+  pub fn as_str(&self) -> &str {
+    match self {
+      FretStateColor::Red => "red",
+      FretStateColor::Green => "green",
+      FretStateColor::Blue => "blue",
+    }
+  }
+}
+
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum FretState {
+  Hidden,
+  Normal,
+  Colored(FretStateColor),
+}

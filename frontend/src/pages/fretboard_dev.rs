@@ -4,10 +4,10 @@ use leptos::prelude::*;
 
 use crate::{
   components::fretboard::{
-    base::{FretClickEvent, Fretboard},
+    base::{FretClickEvent, FretState, FretStateColor, Fretboard},
     with_notes::{FretClickEventWithNote, FretboardWithNotes},
   },
-  models::{fretboard_model::FretStateColor, FretCoord, FretState},
+  models::FretCoord,
 };
 
 fn get_fret_positions() -> HashMap<FretCoord, Signal<FretState>> {

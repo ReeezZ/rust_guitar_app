@@ -5,30 +5,7 @@ use shared::music::{
   scales::{Scale, ScaleTrait},
 };
 
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub enum FretStateColor {
-  Red,
-  Green,
-  Blue,
-}
-
-// TODO add a proper to css color string trait
-impl FretStateColor {
-  pub fn as_str(&self) -> &str {
-    match self {
-      FretStateColor::Red => "red",
-      FretStateColor::Green => "green",
-      FretStateColor::Blue => "blue",
-    }
-  }
-}
-
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub enum FretState {
-  Hidden,
-  Normal,
-  Colored(FretStateColor),
-}
+use crate::components::fretboard::base::{FretState, FretStateColor};
 
 pub type FretNoteSignal = RwSignal<FretState>;
 pub type FretStringSignals = RwSignal<Vec<FretNoteSignal>>;

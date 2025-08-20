@@ -1,15 +1,16 @@
 use std::collections::HashMap;
 
-use crate::components::fretboard::base::helper::{calculate_string_spacing, VisibleRange};
+use crate::components::fretboard::base::helper::{
+  calculate_string_spacing, FretState, VisibleRange,
+};
 use crate::components::fretboard::base::layout::LayoutSnapshot;
 use crate::components::fretboard::base::parts::{
-  FretboardClickableAreas, FretboardFrets, FretboardMarkers, FretboardNotes, FretboardNut,
-  FretboardOverlays, FretboardStrings,
+  FretboardFrets, FretboardGrid, FretboardMarkers, FretboardNut, FretboardOverlays,
+  FretboardStrings,
 };
 use crate::components::fretboard::visual_config::FretboardVisualConfig;
 use crate::fretboard_view_helper::calculate_fret_positions;
 use crate::models::fretboard_model::FretCoord;
-use crate::models::FretState;
 use leptos::prelude::*;
 use std::rc::Rc;
 
@@ -72,6 +73,9 @@ pub fn Fretboard(
   on_fret_clicked: Option<Callback<FretClickEvent>>,
 
   #[prop(optional)] fret_states: Signal<HashMap<FretCoord, Signal<FretState>>>,
+  /// Optional labels (e.g. note names) per fret coordinate
+  #[prop(optional)]
+  fret_labels: Option<Signal<HashMap<FretCoord, Signal<Option<String>>>>>,
 ) -> impl IntoView {
   // Use provided config signal or create one with default
   let config_signal = config.unwrap_or_else(|| Signal::derive(FretboardVisualConfig::default));
@@ -186,23 +190,13 @@ pub fn Fretboard(
             // Render overlays for non-playable regions
             <FretboardOverlays layout=(*layout_snapshot).clone() />
 
-            // Render clickable areas if callback is provided
-            {on_fret_clicked
-              .map({
-                let layout_snapshot = layout_snapshot.clone();
-                move |callback| {
-                  let layout_for_click = (*layout_snapshot).clone();
-                  view! {
-                    <FretboardClickableAreas layout=layout_for_click on_fret_clicked=callback />
-                  }
-                }
-              })}
-
-            // notes layer (always shown)
-            {
-              let layout_for_notes = (*layout_snapshot).clone();
-              view! { <FretboardNotes layout=layout_for_notes frets=fret_states /> }
-            }
+            // Grid: iterate frets/strings once and compose per-cell components
+            <FretboardGrid
+              layout=(*layout_snapshot).clone()
+              fret_labels=fret_labels.clone()
+              click_cb=on_fret_clicked.clone()
+              fret_states=fret_states
+            />
           }
         }}
       </svg>
