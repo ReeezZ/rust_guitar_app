@@ -1,6 +1,6 @@
 // (No HashMap needed in per-cell components currently.)
 
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::format};
 
 use crate::fretboard::{
   components::base::{fretboard::FretClickEvent, helper::FretState, layout::LayoutSnapshot},
@@ -169,11 +169,7 @@ pub(crate) fn FretboardOverlays(layout: LayoutSnapshot) -> impl IntoView {
 
 /// Single clickable area for one fret/string coordinate.
 #[component]
-fn FretboardClickableArea(
-  layout: LayoutSnapshot,
-  coord: FretCoord,
-  on_fret_clicked: Callback<FretClickEvent>,
-) -> impl IntoView {
+fn FretboardClickableArea(layout: LayoutSnapshot, coord: FretCoord) -> impl IntoView {
   let string_y = layout.string_y(coord.string_idx);
   let (x, width) = if coord.fret_idx == 0 {
     // Nut rectangle
@@ -189,9 +185,6 @@ fn FretboardClickableArea(
     let end = layout.absolute_to_viewbox_x((prev + curr) / 2.0 + (curr - prev) / 4.0);
     (start, end - start)
   };
-  let on_click = move |_| {
-    on_fret_clicked.run(FretClickEvent { coord });
-  };
   view! {
     <rect
       x=x
@@ -202,8 +195,6 @@ fn FretboardClickableArea(
       stroke="red"
       stroke-width="1"
       stroke-opacity="0.3"
-      on:click=on_click
-      style="cursor: pointer;"
     />
   }
 }
@@ -245,8 +236,8 @@ fn FretboardNote(
                 fill="white"
                 font-size="8"
                 font-weight="bold"
-                style="pointer-events:none;user-select:none;"
               >
+                // style="pointer-events:none;user-select:none;"
                 {text}
               </text>
             }
@@ -280,23 +271,29 @@ pub(crate) fn FretboardGrid(
                   };
                   let state_sig_opt = states_map.get().get(&coord).cloned();
                   view! {
-                    <g class="cell-group" data-fret=fret_idx data-string=string_idx>
-                      {
-                        let click_cb = click_cb.clone();
-                        move || {
-                          click_cb
-                            .as_ref()
-                            .map(|cb| {
-                              view! {
-                                <FretboardClickableArea
-                                  layout=layout_cell.get()
-                                  coord=coord
-                                  on_fret_clicked=cb.clone()
-                                />
-                              }
-                            })
+                    <g
+                      class="cell-group"
+                      data-fret=fret_idx
+                      data-string=string_idx
+                      style=format!(
+                        "cursor: {};",
+                        if click_cb.is_some() { "pointer" } else { "default" },
+                      )
+                      on:click=move |_| {
+                        if let Some(click_cb) = click_cb.as_ref() {
+                          click_cb.run(FretClickEvent { coord });
                         }
                       }
+                    >
+                      {move || {
+                        click_cb
+                          .as_ref()
+                          .map(|_| {
+                            view! {
+                              <FretboardClickableArea layout=layout_cell.get() coord=coord />
+                            }
+                          })
+                      }}
                       {state_sig_opt
                         .map(|state_signal| {
                           view! {

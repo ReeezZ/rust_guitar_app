@@ -44,6 +44,13 @@ fn get_fret_positions() -> HashMap<FretCoord, Signal<FretState>> {
     },
     RwSignal::new(FretState::Normal(FretStateColor::Red, "foo".into())).into(),
   );
+  fret_positions.insert(
+    FretCoord {
+      string_idx: 5,
+      fret_idx: 4,
+    },
+    RwSignal::new(FretState::Normal(FretStateColor::Red, "loooooooong text".into())).into(),
+  );
 
   // A hidden example (should not render) - included to ensure Hidden is ignored
   fret_positions.insert(
