@@ -104,7 +104,7 @@ pub fn FretboardDevPage() -> impl IntoView {
     <p class="mb-4 text-sm text-gray-600">
       Test page showing a variety of FretState values (Normal, Colored, Hidden).
     </p>
-    <FretsEditor frets label color hidden apply_change=update_fret />
+    <FretsEditor frets label color hidden />
     <div>
       <FretboardWithNotes
         fret_states=frets
@@ -140,48 +140,13 @@ fn FretsEditor(
   #[prop(into)] label: RwSignal<String>,
   #[prop(into)] color: RwSignal<FretStateColor>,
   #[prop(into)] hidden: RwSignal<bool>,
-  #[prop(into)] apply_change: Callback<FretCoord>,
 ) -> impl IntoView {
-  // Local editor state
-  let selected_string = RwSignal::new(0usize);
-  let selected_fret = RwSignal::new(0usize);
-
   let reset_sample = move |_| frets.set(get_fret_positions());
 
   view! {
     <div class="p-4 mt-4 space-y-3 bg-gray-50 rounded border">
       <h2 class="font-semibold">"Edit Fret State"</h2>
       <div class="flex flex-wrap gap-4 items-end">
-        <label class="flex flex-col text-sm">
-          <span>"String"</span>
-          <input
-            r#type="number"
-            min="0"
-            max="8"
-            class="p-1 w-24 rounded border"
-            prop:value=move || selected_string.get()
-            on:input=move |ev| {
-              if let Ok(v) = event_target_value(&ev).parse() {
-                selected_string.set(v);
-              }
-            }
-          />
-        </label>
-        <label class="flex flex-col text-sm">
-          <span>"Fret"</span>
-          <input
-            r#type="number"
-            min="0"
-            max="24"
-            class="p-1 w-24 rounded border"
-            prop:value=move || selected_fret.get()
-            on:input=move |ev| {
-              if let Ok(v) = event_target_value(&ev).parse() {
-                selected_fret.set(v);
-              }
-            }
-          />
-        </label>
         <label class="flex flex-col text-sm">
           <span>"Label"</span>
           <input
@@ -229,18 +194,6 @@ fn FretsEditor(
           />
           <span>"Hidden"</span>
         </label>
-        <button
-          class="py-1 px-3 text-white bg-blue-600 rounded"
-          on:click=move |_| {
-            let coord = FretCoord {
-              string_idx: selected_string.get() as u8,
-              fret_idx: selected_fret.get() as u8,
-            };
-            apply_change.run(coord);
-          }
-        >
-          "Apply"
-        </button>
         <button class="py-1 px-3 text-gray-800 bg-gray-300 rounded" on:click=reset_sample>
           "Reset Sample"
         </button>
