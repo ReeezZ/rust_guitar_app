@@ -8,7 +8,7 @@ use strum::IntoEnumIterator;
 
 // use crate::components::fretboard::trainer::FretboardTrainer;
 use crate::fretboard::components::with_notes::FretClickEventWithNote;
-use crate::fretboard::model::{FretCoord, FretboardModel};
+use crate::fretboard::with_notes_model::{FretCoord, FretboardWithNotesModel};
 use crate::models::fretboard_trainer::FretboardTrainerTrait;
 use shared::music::intervals::Interval;
 use shared::music::notes::Note;
@@ -29,7 +29,11 @@ fn random_interval() -> Interval {
 #[component]
 pub fn FretboardTrainerPage() -> impl IntoView {
   // Initialize fretboard model for note calculations
-  let fretboard_model = RwSignal::new(FretboardModel::new(6, 5, FretboardModel::standard_tuning()));
+  let fretboard_model = RwSignal::new(FretboardWithNotesModel::new(
+    6,
+    5,
+    FretboardWithNotesModel::standard_tuning(),
+  ));
 
   // Game state
   let (num_correct, set_num_correct) = signal(0);

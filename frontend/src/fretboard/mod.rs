@@ -1,2 +1,3 @@
+pub mod base_model;
 pub mod components;
-pub mod model;
+pub mod with_notes_model;

@@ -3,11 +3,13 @@ use std::collections::HashMap;
 use leptos::prelude::*;
 
 use crate::fretboard::{
+  base_model::FretClickEvent,
   components::{
-    base::{FretClickEvent, FretState, FretStateColor, Fretboard},
+    base::{FretState, FretStateColor, Fretboard},
+    visual_config::FretboardVisualConfig,
     with_notes::{FretClickEventWithNote, FretboardWithNotes},
   },
-  model::FretCoord,
+  with_notes_model::FretCoord,
 };
 
 fn get_fret_positions() -> HashMap<FretCoord, Signal<FretState>> {
@@ -110,6 +112,7 @@ pub fn FretboardDevPage() -> impl IntoView {
         fret_states=frets
         start_fret=0
         end_fret=12
+        config=Signal::derive(FretboardVisualConfig::default)
         on_note_clicked=handle_note_clicked
       />
 
@@ -118,10 +121,11 @@ pub fn FretboardDevPage() -> impl IntoView {
     <div>
       <h1 class="mb-2 text-xl font-bold">"Fretboard (base)"</h1>
       <Fretboard
-        fret_states=frets.into()
-        start_fret=0.into()
-        end_fret=12.into()
-        on_fret_clicked=handle_fret_clicked
+        fret_states=frets
+        start_fret=0
+        end_fret=12
+        config=Signal::derive(FretboardVisualConfig::default)
+        on_fret_clicked=Some(handle_fret_clicked)
       />
     </div>
 
@@ -129,7 +133,13 @@ pub fn FretboardDevPage() -> impl IntoView {
       <h1 class="mb-2 text-xl font-bold">
         "Fretboard (base) with no callback to check Clickable areas are not rendered"
       </h1>
-      <Fretboard fret_states=frets.into() start_fret=0.into() end_fret=12.into() />
+      <Fretboard
+        config=Signal::derive(FretboardVisualConfig::default)
+        fret_states=frets
+        start_fret=0
+        end_fret=12
+        on_fret_clicked=None
+      />
     </div>
   }
 }

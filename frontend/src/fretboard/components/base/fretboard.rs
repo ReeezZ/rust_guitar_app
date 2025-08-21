@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use crate::{
   fretboard::{
+    base_model::{FretClickEvent, FretboardBaseModel},
     components::{
       base::{
         helper::{calculate_string_spacing, VisibleRange},
@@ -14,15 +15,23 @@ use crate::{
       },
       visual_config::FretboardVisualConfig,
     },
-    model::FretCoord,
+    with_notes_model::FretCoord,
   },
   fretboard_view_helper::calculate_fret_positions,
 };
 use leptos::prelude::*;
 
-#[derive(Clone, Copy, Debug)]
-pub struct FretClickEvent {
-  pub coord: FretCoord,
+#[component]
+pub fn FretboardViewModel(model: Signal<FretboardBaseModel>) -> impl IntoView {
+  view! {
+    <Fretboard
+      start_fret=model.get().start_fret
+      end_fret=model.get().end_fret
+      config=model.get().config
+      on_fret_clicked=model.get().on_fret_clicked
+      fret_states=model.get().fret_states
+    />
+  }
 }
 
 /// Interactive SVG fretboard component that displays a zoomable guitar fretboard
@@ -68,28 +77,25 @@ pub struct FretClickEvent {
 #[component]
 pub fn Fretboard(
   /// First fret in the active/playable range
+  #[prop(into)]
   start_fret: Signal<usize>,
   /// Last fret in the active/playable range
+  #[prop(into)]
   end_fret: Signal<usize>,
   /// Visual configuration for fretboard display properties
-  #[prop(optional, into)]
-  config: Option<Signal<FretboardVisualConfig>>,
+  config: Signal<FretboardVisualConfig>,
   /// Optional callback for fret click events
-  #[prop(optional)]
   on_fret_clicked: Option<Callback<FretClickEvent>>,
 
-  #[prop(optional)] fret_states: Signal<HashMap<FretCoord, Signal<FretState>>>,
+  #[prop(into)] fret_states: Signal<HashMap<FretCoord, Signal<FretState>>>,
 ) -> impl IntoView {
-  // Use provided config signal or create one with default
-  let config_signal = config.unwrap_or_else(|| Signal::derive(FretboardVisualConfig::default));
-
   // Create reactive signals from config values - using clone since Signal is Copy
-  let num_strings = Signal::derive(move || config_signal.get().num_strings);
-  let svg_aspect_ratio = Signal::derive(move || config_signal.get().svg_aspect_ratio);
-  let fret_margin_percentage = Signal::derive(move || config_signal.get().fret_margin_percentage);
-  let nut_width = Signal::derive(move || config_signal.get().nut_width);
-  let extra_frets = Signal::derive(move || config_signal.get().extra_frets);
-  let marker_positions = Signal::derive(move || config_signal.get().marker_positions.clone());
+  let num_strings = Signal::derive(move || config.get().num_strings);
+  let svg_aspect_ratio = Signal::derive(move || config.get().svg_aspect_ratio);
+  let fret_margin_percentage = Signal::derive(move || config.get().fret_margin_percentage);
+  let nut_width = Signal::derive(move || config.get().nut_width);
+  let extra_frets = Signal::derive(move || config.get().extra_frets);
+  let marker_positions = Signal::derive(move || config.get().marker_positions.clone());
 
   // Use a fixed base width for calculations, SVG will be scaled by CSS
   let base_svg_width = 800.0; // Fixed base width for consistent calculations

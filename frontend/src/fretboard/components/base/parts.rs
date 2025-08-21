@@ -1,10 +1,11 @@
 // (No HashMap needed in per-cell components currently.)
 
-use std::{collections::HashMap, fmt::format};
+use std::collections::HashMap;
 
 use crate::fretboard::{
-  components::base::{fretboard::FretClickEvent, helper::FretState, layout::LayoutSnapshot},
-  model::FretCoord,
+  base_model::FretClickEvent,
+  components::base::{helper::FretState, layout::LayoutSnapshot},
+  with_notes_model::FretCoord,
 };
 
 use leptos::prelude::*;

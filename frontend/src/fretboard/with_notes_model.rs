@@ -12,7 +12,7 @@ pub type FretStringSignals = RwSignal<Vec<FretNoteSignal>>;
 pub type FretboardSignals = Vec<FretStringSignals>;
 
 #[derive(Clone, Debug)]
-pub struct FretboardModel {
+pub struct FretboardWithNotesModel {
   frets: FretboardSignals,
   num_strings: u8,
   num_frets: RwSignal<u8>,
@@ -25,7 +25,7 @@ pub struct FretCoord {
   pub fret_idx: u8,
 }
 
-impl FretboardModel {
+impl FretboardWithNotesModel {
   pub fn new(num_strings: u8, num_frets: u8, tuning: Vec<Note>) -> Self {
     assert_eq!(
       num_strings as usize,
@@ -35,7 +35,7 @@ impl FretboardModel {
 
     let frets = Self::generate_frets(num_strings, num_frets);
 
-    FretboardModel {
+    FretboardWithNotesModel {
       frets,
       num_strings,
       num_frets: RwSignal::new(num_frets),

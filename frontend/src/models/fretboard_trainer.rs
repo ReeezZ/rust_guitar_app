@@ -4,7 +4,7 @@ use leptos::prelude::GetUntracked;
 use rand::{seq::IteratorRandom, Rng};
 use strum::IntoEnumIterator;
 
-use crate::fretboard::model::{FretCoord, FretboardModel};
+use crate::fretboard::with_notes_model::{FretCoord, FretboardWithNotesModel};
 
 pub trait FretboardTrainerTrait {
   fn note_from_fret(&self, coord: FretCoord) -> Note;
@@ -17,7 +17,7 @@ pub trait FretboardTrainerTrait {
   fn get_random_fret(&self) -> FretCoord;
 }
 
-impl FretboardTrainerTrait for FretboardModel {
+impl FretboardTrainerTrait for FretboardWithNotesModel {
   fn get_random_fret(&self) -> FretCoord {
     let string_idx = rand::rng().random_range(0..self.get_num_strings());
     let fret_idx = rand::rng().random_range(0..self.get_num_frets().get_untracked());

@@ -4,11 +4,12 @@ use leptos::prelude::*;
 use shared::music::notes::Note;
 
 use crate::fretboard::{
+  base_model::FretClickEvent,
   components::{
-    base::{FretClickEvent, FretState, Fretboard},
+    base::{FretState, Fretboard},
     visual_config::FretboardVisualConfig,
   },
-  model::{FretCoord, FretboardModel},
+  with_notes_model::{FretCoord, FretboardWithNotesModel},
 };
 
 #[derive(Clone, Copy, Debug)]
@@ -90,21 +91,19 @@ pub fn FretboardWithNotes(
   #[prop(optional, into)]
   on_note_clicked: Option<Callback<FretClickEventWithNote>>,
 
-  // Visual configuration
   /// Visual configuration for fretboard display properties
-  #[prop(optional, into)]
-  config: Option<Signal<FretboardVisualConfig>>,
+  config: Signal<FretboardVisualConfig>,
 
   /// Callback for fret click events
   #[prop(optional, into)]
   fret_states: Signal<HashMap<FretCoord, Signal<FretState>>>,
 ) -> impl IntoView {
   // Use default tuning if not provided (standard guitar tuning)
-  let tuning = tuning.unwrap_or_else(|| Signal::derive(FretboardModel::standard_tuning));
+  let tuning = tuning.unwrap_or_else(|| Signal::derive(FretboardWithNotesModel::standard_tuning));
 
   // Handle coordinate-to-note conversion
-  let on_fret_clicked = Callback::new(move |svg_event: FretClickEvent| {
-    if let Some(callback) = on_note_clicked {
+  let on_fret_clicked = if let Some(callback) = on_note_clicked {
+    Some(Callback::new(move |svg_event: FretClickEvent| {
       let tuning_vec = tuning.get();
       let string_idx = svg_event.coord.string_idx;
       let fret_idx = svg_event.coord.fret_idx;
@@ -124,14 +123,16 @@ pub fn FretboardWithNotes(
 
         callback.run(fret_click_event);
       }
-    }
-  });
+    }))
+  } else {
+    None
+  };
 
   view! {
     <Fretboard
       start_fret=start_fret
       end_fret=end_fret
-      config=config.unwrap_or_else(|| Signal::derive(FretboardVisualConfig::default))
+      config=config
       on_fret_clicked=on_fret_clicked
       fret_states=fret_states
     />
