@@ -7,8 +7,7 @@ use crate::fretboard::{
   with_notes_model::FretCoord,
 };
 
-// TODO define types for the fret states and use them everywhere instead of direct HashMap usage
-pub(crate) type FretSignalState = Signal<FretState>;
+pub(crate) type FretStateSignals = HashMap<FretCoord, Signal<FretState>>;
 
 #[derive(Clone, Copy, Debug)]
 pub struct FretClickEvent {
@@ -26,5 +25,5 @@ pub struct FretboardBaseModel {
   /// Optional callback for fret click events
   pub on_fret_clicked: Option<Callback<FretClickEvent>>,
   /// States for each fret
-  pub fret_states: Signal<HashMap<FretCoord, Signal<FretState>>>,
+  pub fret_states: Signal<FretStateSignals>,
 }

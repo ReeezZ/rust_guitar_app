@@ -1,8 +1,6 @@
-use std::collections::HashMap;
-
 use crate::{
   fretboard::{
-    base_model::{FretClickEvent, FretboardBaseModel},
+    base_model::{FretClickEvent, FretStateSignals, FretboardBaseModel},
     components::{
       base::{
         helper::{calculate_string_spacing, VisibleRange},
@@ -11,11 +9,9 @@ use crate::{
           FretboardFrets, FretboardGrid, FretboardMarkers, FretboardNut, FretboardOverlays,
           FretboardStrings,
         },
-        FretState,
       },
       visual_config::FretboardVisualConfig,
     },
-    with_notes_model::FretCoord,
   },
   fretboard_view_helper::calculate_fret_positions,
 };
@@ -87,7 +83,7 @@ pub fn Fretboard(
   /// Optional callback for fret click events
   on_fret_clicked: Option<Callback<FretClickEvent>>,
 
-  #[prop(into)] fret_states: Signal<HashMap<FretCoord, Signal<FretState>>>,
+  #[prop(into)] fret_states: Signal<FretStateSignals>,
 ) -> impl IntoView {
   // Create reactive signals from config values - using clone since Signal is Copy
   let num_strings = Signal::derive(move || config.get().num_strings);

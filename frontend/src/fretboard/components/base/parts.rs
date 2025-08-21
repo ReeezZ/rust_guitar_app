@@ -1,9 +1,7 @@
 // (No HashMap needed in per-cell components currently.)
 
-use std::collections::HashMap;
-
 use crate::fretboard::{
-  base_model::FretClickEvent,
+  base_model::{FretClickEvent, FretStateSignals},
   components::base::{helper::FretState, layout::LayoutSnapshot},
   with_notes_model::FretCoord,
 };
@@ -251,7 +249,7 @@ fn FretboardNote(
 #[component]
 pub(crate) fn FretboardGrid(
   #[prop(into)] layout: Signal<LayoutSnapshot>,
-  fret_states: Signal<HashMap<FretCoord, Signal<FretState>>>,
+  fret_states: Signal<FretStateSignals>,
   /// Optional callback for fret click events
   click_cb: Option<Callback<FretClickEvent>>,
 ) -> impl IntoView {

@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use leptos::prelude::*;
 
 use crate::fretboard::{
-  base_model::FretClickEvent,
+  base_model::{FretClickEvent, FretStateSignals},
   components::{
     base::{FretState, FretStateColor, Fretboard},
     visual_config::FretboardVisualConfig,
@@ -12,9 +12,9 @@ use crate::fretboard::{
   with_notes_model::FretCoord,
 };
 
-fn get_fret_positions() -> HashMap<FretCoord, Signal<FretState>> {
+fn get_fret_positions() -> FretStateSignals {
   // Build a sample set of fret states to visualize different cases
-  let mut fret_positions: HashMap<FretCoord, Signal<FretState>> = HashMap::new();
+  let mut fret_positions: FretStateSignals = HashMap::new();
 
   // Normal notes across several strings/frets
   for (s, f) in [(0, 5), (1, 3), (2, 7), (3, 2)] {
@@ -146,7 +146,7 @@ pub fn FretboardDevPage() -> impl IntoView {
 
 #[component]
 fn FretsEditor(
-  frets: RwSignal<HashMap<FretCoord, Signal<FretState>>>,
+  frets: RwSignal<FretStateSignals>,
   #[prop(into)] label: RwSignal<String>,
   #[prop(into)] color: RwSignal<FretStateColor>,
   #[prop(into)] hidden: RwSignal<bool>,

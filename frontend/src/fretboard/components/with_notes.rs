@@ -1,14 +1,9 @@
-use std::collections::HashMap;
-
 use leptos::prelude::*;
 use shared::music::notes::Note;
 
 use crate::fretboard::{
-  base_model::FretClickEvent,
-  components::{
-    base::{FretState, Fretboard},
-    visual_config::FretboardVisualConfig,
-  },
+  base_model::{FretClickEvent, FretStateSignals},
+  components::{base::Fretboard, visual_config::FretboardVisualConfig},
   with_notes_model::{FretCoord, FretboardWithNotesModel},
 };
 
@@ -96,7 +91,7 @@ pub fn FretboardWithNotes(
 
   /// Callback for fret click events
   #[prop(optional, into)]
-  fret_states: Signal<HashMap<FretCoord, Signal<FretState>>>,
+  fret_states: Signal<FretStateSignals>,
 ) -> impl IntoView {
   // Use default tuning if not provided (standard guitar tuning)
   let tuning = tuning.unwrap_or_else(|| Signal::derive(FretboardWithNotesModel::standard_tuning));
