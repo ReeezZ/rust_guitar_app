@@ -74,6 +74,10 @@ fn get_fret_positions() -> HashMap<FretCoord, Signal<FretState>> {
 pub fn FretboardDevPage() -> impl IntoView {
   let frets = RwSignal::new(get_fret_positions());
 
+  let label = RwSignal::new(String::from("Label"));
+  let color = RwSignal::new(FretStateColor::Green);
+  let hidden = RwSignal::new(false);
+
   let handle_note_clicked = Callback::new(|coord: FretClickEventWithNote| {
     leptos::logging::log!("{:?} {:?}", coord.note, coord.coord);
   });
@@ -87,12 +91,12 @@ pub fn FretboardDevPage() -> impl IntoView {
     <p class="mb-4 text-sm text-gray-600">
       Test page showing a variety of FretState values (Normal, Colored, Hidden).
     </p>
-    <FretsEditor frets=frets />
+    <FretsEditor frets label color hidden />
     <div>
       <FretboardWithNotes
-        fret_states=frets.into()
-        start_fret=0.into()
-        end_fret=12.into()
+        fret_states=frets
+        start_fret=0
+        end_fret=12
         on_note_clicked=handle_note_clicked
       />
 
@@ -118,13 +122,15 @@ pub fn FretboardDevPage() -> impl IntoView {
 }
 
 #[component]
-fn FretsEditor(frets: RwSignal<HashMap<FretCoord, Signal<FretState>>>) -> impl IntoView {
+fn FretsEditor(
+  frets: RwSignal<HashMap<FretCoord, Signal<FretState>>>,
+  #[prop(into)] label: RwSignal<String>,
+  #[prop(into)] color: RwSignal<FretStateColor>,
+  #[prop(into)] hidden: RwSignal<bool>,
+) -> impl IntoView {
   // Local editor state
   let selected_string = RwSignal::new(0usize);
   let selected_fret = RwSignal::new(0usize);
-  let label = RwSignal::new(String::from("Label"));
-  let color = RwSignal::new(FretStateColor::Green);
-  let hidden = RwSignal::new(false);
 
   let apply_change = move |_| {
     frets.update(|map| {

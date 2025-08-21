@@ -76,8 +76,10 @@ pub struct FretClickEventWithNote {
 #[component]
 pub fn FretboardWithNotes(
   /// First fret in the active/playable range
+  #[prop(into)]
   start_fret: Signal<usize>,
   /// Last fret in the active/playable range
+  #[prop(into)]
   end_fret: Signal<usize>,
 
   // Musical properties
@@ -94,7 +96,7 @@ pub fn FretboardWithNotes(
   config: Option<Signal<FretboardVisualConfig>>,
 
   /// Callback for fret click events
-  #[prop(optional)]
+  #[prop(optional, into)]
   fret_states: Signal<HashMap<FretCoord, Signal<FretState>>>,
 ) -> impl IntoView {
   // Use default tuning if not provided (standard guitar tuning)

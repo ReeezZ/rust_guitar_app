@@ -112,8 +112,8 @@ pub fn FretboardConfigExamples() -> impl IntoView {
         // Main fretboard display - responsive sizing, not too constrained
         <div class="p-4 bg-blue-50 rounded-lg border-2 border-blue-200 xl:min-w-0 xl:flex-[2]">
           <FretboardWithNotes
-            start_fret=start_fret.read_only().into()
-            end_fret=end_fret.read_only().into()
+            start_fret=start_fret.read_only()
+            end_fret=end_fret.read_only()
             config=Signal::from(visual_config)
             on_note_clicked=Callback::new(|event: FretClickEventWithNote| {
               log!(
