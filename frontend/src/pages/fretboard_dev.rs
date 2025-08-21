@@ -1,15 +1,16 @@
 use std::collections::HashMap;
 
 use leptos::prelude::*;
+use shared::models;
 
 use crate::fretboard::{
-  base_model::{FretClickEvent, FretStateSignals},
+  base_model::{FretClickEvent, FretStateSignals, FretboardBaseModel},
   components::{
-    base::{FretState, FretStateColor, Fretboard},
+    base::{FretState, FretStateColor, Fretboard, FretboardViewModel},
     visual_config::FretboardVisualConfig,
     with_notes::{FretClickEventWithNote, FretboardWithNotes},
   },
-  with_notes_model::FretCoord,
+  FretCoord,
 };
 
 fn get_fret_positions() -> FretStateSignals {
@@ -74,6 +75,8 @@ fn get_fret_positions() -> FretStateSignals {
 /// See: https://leptos.dev/docs/reference/signals/
 #[component]
 pub fn FretboardDevPage() -> impl IntoView {
+  let model = RwSignal::new(FretboardBaseModel::from_defaults());
+
   let frets = RwSignal::new(get_fret_positions());
 
   let label = RwSignal::new(String::from("Label"));
@@ -112,6 +115,7 @@ pub fn FretboardDevPage() -> impl IntoView {
         fret_states=frets
         start_fret=0
         end_fret=12
+        num_strings=6
         config=Signal::derive(FretboardVisualConfig::default)
         on_note_clicked=handle_note_clicked
       />
@@ -124,8 +128,9 @@ pub fn FretboardDevPage() -> impl IntoView {
         fret_states=frets
         start_fret=0
         end_fret=12
+        num_strings=6
         config=Signal::derive(FretboardVisualConfig::default)
-        on_fret_clicked=Some(handle_fret_clicked)
+        on_fret_clicked=RwSignal::new(Some(handle_fret_clicked)).into()
       />
     </div>
 
@@ -133,13 +138,7 @@ pub fn FretboardDevPage() -> impl IntoView {
       <h1 class="mb-2 text-xl font-bold">
         "Fretboard (base) with no callback to check Clickable areas are not rendered"
       </h1>
-      <Fretboard
-        config=Signal::derive(FretboardVisualConfig::default)
-        fret_states=frets
-        start_fret=0
-        end_fret=12
-        on_fret_clicked=None
-      />
+      <FretboardViewModel model=model.into() />
     </div>
   }
 }

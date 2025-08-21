@@ -1,9 +1,9 @@
 // (No HashMap needed in per-cell components currently.)
 
 use crate::fretboard::{
+  base_model::FretCoord,
   base_model::{FretClickEvent, FretStateSignals},
   components::base::{helper::FretState, layout::LayoutSnapshot},
-  with_notes_model::FretCoord,
 };
 
 use leptos::prelude::*;
@@ -251,7 +251,7 @@ pub(crate) fn FretboardGrid(
   #[prop(into)] layout: Signal<LayoutSnapshot>,
   fret_states: Signal<FretStateSignals>,
   /// Optional callback for fret click events
-  click_cb: Option<Callback<FretClickEvent>>,
+  click_cb: Signal<Option<Callback<FretClickEvent>>>,
 ) -> impl IntoView {
   view! {
     <g class="interactive-layer">
@@ -276,16 +276,17 @@ pub(crate) fn FretboardGrid(
                       data-string=string_idx
                       style=format!(
                         "cursor: {};",
-                        if click_cb.is_some() { "pointer" } else { "default" },
+                        if click_cb.get().is_some() { "pointer" } else { "default" },
                       )
                       on:click=move |_| {
-                        if let Some(click_cb) = click_cb.as_ref() {
+                        if let Some(click_cb) = click_cb.get().as_ref() {
                           click_cb.run(FretClickEvent { coord });
                         }
                       }
                     >
                       {move || {
                         click_cb
+                          .get()
                           .as_ref()
                           .map(|_| {
                             view! {
@@ -299,7 +300,7 @@ pub(crate) fn FretboardGrid(
                             <FretboardNote
                               layout=layout_cell.clone()
                               coord=coord
-                              state=state_signal
+                              state=state_signal.into()
                             />
                           }
                         })}

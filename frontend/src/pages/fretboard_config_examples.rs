@@ -36,7 +36,6 @@ pub fn FretboardConfigExamples() -> impl IntoView {
   // Create a derived config that updates when any control changes
   let visual_config = Memo::new(move |_| {
     FretboardVisualConfig::default()
-      .with_num_strings(num_strings.get())
       .with_aspect_ratio(svg_aspect_ratio.get())
       .with_fret_margin(fret_margin_percentage.get())
       .with_nut_width(nut_width.get())
@@ -114,6 +113,7 @@ pub fn FretboardConfigExamples() -> impl IntoView {
           <FretboardWithNotes
             start_fret=start_fret.read_only()
             end_fret=end_fret.read_only()
+            num_strings=num_strings.read_only()
             config=Signal::from(visual_config)
             on_note_clicked=Callback::new(|event: FretClickEventWithNote| {
               log!(

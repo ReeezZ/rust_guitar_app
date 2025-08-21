@@ -23,8 +23,9 @@ pub fn FretboardViewModel(model: Signal<FretboardBaseModel>) -> impl IntoView {
     <Fretboard
       start_fret=model.get().start_fret
       end_fret=model.get().end_fret
-      config=model.get().config
-      on_fret_clicked=model.get().on_fret_clicked
+      num_strings=model.get().num_strings
+      config=model.get().config.into()
+      on_fret_clicked=model.get().on_fret_clicked.into()
       fret_states=model.get().fret_states
     />
   }
@@ -78,15 +79,17 @@ pub fn Fretboard(
   /// Last fret in the active/playable range
   #[prop(into)]
   end_fret: Signal<usize>,
+  /// Number of guitar strings (default: 6)
+  #[prop(into)]
+  num_strings: Signal<u8>,
   /// Visual configuration for fretboard display properties
   config: Signal<FretboardVisualConfig>,
   /// Optional callback for fret click events
-  on_fret_clicked: Option<Callback<FretClickEvent>>,
+  on_fret_clicked: Signal<Option<Callback<FretClickEvent>>>,
 
   #[prop(into)] fret_states: Signal<FretStateSignals>,
 ) -> impl IntoView {
   // Create reactive signals from config values - using clone since Signal is Copy
-  let num_strings = Signal::derive(move || config.get().num_strings);
   let svg_aspect_ratio = Signal::derive(move || config.get().svg_aspect_ratio);
   let fret_margin_percentage = Signal::derive(move || config.get().fret_margin_percentage);
   let nut_width = Signal::derive(move || config.get().nut_width);
@@ -197,7 +200,7 @@ pub fn Fretboard(
             // Grid: iterate frets/strings once and compose per-cell components
             <FretboardGrid
               layout=layout_snapshot.clone()
-              click_cb=on_fret_clicked.clone()
+              click_cb=on_fret_clicked.clone().into()
               fret_states=fret_states
             />
           }

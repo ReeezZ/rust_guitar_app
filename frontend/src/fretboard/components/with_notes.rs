@@ -4,13 +4,31 @@ use shared::music::notes::Note;
 use crate::fretboard::{
   base_model::{FretClickEvent, FretStateSignals},
   components::{base::Fretboard, visual_config::FretboardVisualConfig},
-  with_notes_model::{FretCoord, FretboardWithNotesModel},
+  with_notes_model::FretboardWithNotesModel,
+  FretCoord,
 };
 
 #[derive(Clone, Copy, Debug)]
 pub struct FretClickEventWithNote {
   pub note: Note,
   pub coord: FretCoord,
+}
+
+#[component]
+pub fn FretboardWithNotesViewModel(model: FretboardWithNotesModel) -> impl IntoView {
+  view! {
+    <FretboardWithNotes
+      start_fret=model.start_fret
+      end_fret=model.end_fret
+      num_strings=model.num_strings
+      tuning=model.tuning
+      on_note_clicked=model.on_note_clicked
+      config=model.config.into()
+      fret_states=model.fret_states
+    />
+  }
+
+  // Build the view using the start and end fret signals
 }
 
 /// SVG fretboard component that adds note awareness to the base SvgFretboard.
@@ -77,6 +95,9 @@ pub fn FretboardWithNotes(
   /// Last fret in the active/playable range
   #[prop(into)]
   end_fret: Signal<usize>,
+  /// Number of guitar strings (default: 6)
+  #[prop(into)]
+  num_strings: Signal<u8>,
 
   // Musical properties
   /// Guitar tuning (defaults to standard: E-A-D-G-B-E from lowest to highest string)
@@ -84,7 +105,7 @@ pub fn FretboardWithNotes(
   tuning: Option<Signal<Vec<Note>>>,
   /// Callback for note click events (enriched with note information)
   #[prop(optional, into)]
-  on_note_clicked: Option<Callback<FretClickEventWithNote>>,
+  on_note_clicked: Signal<Option<Callback<FretClickEventWithNote>>>,
 
   /// Visual configuration for fretboard display properties
   config: Signal<FretboardVisualConfig>,
@@ -97,36 +118,39 @@ pub fn FretboardWithNotes(
   let tuning = tuning.unwrap_or_else(|| Signal::derive(FretboardWithNotesModel::standard_tuning));
 
   // Handle coordinate-to-note conversion
-  let on_fret_clicked = if let Some(callback) = on_note_clicked {
-    Some(Callback::new(move |svg_event: FretClickEvent| {
-      let tuning_vec = tuning.get();
-      let string_idx = svg_event.coord.string_idx;
-      let fret_idx = svg_event.coord.fret_idx;
+  let on_fret_clicked = Signal::derive(move || {
+    if let Some(callback) = on_note_clicked.get() {
+      Some(Callback::new(move |svg_event: FretClickEvent| {
+        let tuning_vec = tuning.get();
+        let string_idx = svg_event.coord.string_idx;
+        let fret_idx = svg_event.coord.fret_idx;
 
-      // Calculate note from tuning and fret position
-      // NOTE: Reverse the string index because SVG layout is top-to-bottom (high to low)
-      // but tuning array is low-to-high [E, A, D, G, H, E]
-      let tuning_index = (tuning_vec.len() - 1) - (string_idx as usize);
-      if let Some(base_note) = tuning_vec.get(tuning_index) {
-        let note = base_note.add_steps(fret_idx as usize);
+        // Calculate note from tuning and fret position
+        // NOTE: Reverse the string index because SVG layout is top-to-bottom (high to low)
+        // but tuning array is low-to-high [E, A, D, G, H, E]
+        let tuning_index = (tuning_vec.len() - 1) - (string_idx as usize);
+        if let Some(base_note) = tuning_vec.get(tuning_index) {
+          let note = base_note.add_steps(fret_idx as usize);
 
-        // Create enriched event with note information
-        let fret_click_event = FretClickEventWithNote {
-          note,
-          coord: svg_event.coord,
-        };
+          // Create enriched event with note information
+          let fret_click_event = FretClickEventWithNote {
+            note,
+            coord: svg_event.coord,
+          };
 
-        callback.run(fret_click_event);
-      }
-    }))
-  } else {
-    None
-  };
+          callback.run(fret_click_event);
+        }
+      }))
+    } else {
+      None
+    }
+  });
 
   view! {
     <Fretboard
       start_fret=start_fret
       end_fret=end_fret
+      num_strings=num_strings
       config=config
       on_fret_clicked=on_fret_clicked
       fret_states=fret_states

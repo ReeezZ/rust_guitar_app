@@ -54,10 +54,10 @@ impl MusicalFretboardConfig {
   }
 
   /// Builder method to set the number of strings (updates visual config)
-  pub fn with_num_strings(mut self, num_strings: u8) -> Self {
-    self.visual.num_strings = num_strings;
-    self
-  }
+  // pub fn with_num_strings(mut self, num_strings: u8) -> Self {
+  //   self.visual.num_strings = num_strings;
+  //   self
+  // }
 
   /// Builder method to set the aspect ratio (updates visual config)
   pub fn with_aspect_ratio(mut self, ratio: f64) -> Self {
@@ -98,7 +98,7 @@ impl MusicalFretboardConfig {
   /// Preset for 7-string guitar configuration
   pub fn seven_string() -> Self {
     Self::default()
-      .with_visual(FretboardVisualConfig::seven_string())
+      // .with_visual(FretboardVisualConfig::seven_string())
       .with_tuning(vec![
         Note::B, // 7th string (low B)
         Note::E, // 6th string
@@ -113,7 +113,7 @@ impl MusicalFretboardConfig {
   /// Preset for bass guitar configuration (4 strings)
   pub fn bass_guitar() -> Self {
     Self::default()
-      .with_visual(FretboardVisualConfig::bass_guitar())
+      // .with_visual(FretboardVisualConfig::bass_guitar())
       .with_tuning(vec![
         Note::E, // 4th string (low E)
         Note::A, // 3rd string
@@ -139,7 +139,7 @@ impl MusicalFretboardConfig {
 /// This allows gradual migration of existing components.
 #[derive(Clone)]
 pub struct MusicalFretboardConfigSignals {
-  pub num_strings: Signal<u8>,
+  // pub num_strings: Signal<u8>,
   pub svg_aspect_ratio: Signal<f64>,
   pub fret_margin_percentage: Signal<f64>,
   pub nut_width: Signal<f64>,
@@ -151,7 +151,7 @@ pub struct MusicalFretboardConfigSignals {
 impl From<MusicalFretboardConfig> for MusicalFretboardConfigSignals {
   fn from(config: MusicalFretboardConfig) -> Self {
     Self {
-      num_strings: Signal::derive(move || config.visual.num_strings),
+      // num_strings: Signal::derive(move || config.visual.num_strings),
       svg_aspect_ratio: Signal::derive(move || config.visual.svg_aspect_ratio),
       fret_margin_percentage: Signal::derive(move || config.visual.fret_margin_percentage),
       nut_width: Signal::derive(move || config.visual.nut_width),

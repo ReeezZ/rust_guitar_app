@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::fretboard::with_notes_model::FretCoord;
+use crate::fretboard::base_model::FretCoord;
 
 /// Snapshot of fretboard geometry for a render cycle.
 #[derive(Clone, Debug)]

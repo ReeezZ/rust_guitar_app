@@ -48,8 +48,6 @@
 /// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct FretboardVisualConfig {
-  /// Number of guitar strings (default: 6)
-  pub num_strings: u8,
   /// Width-to-height aspect ratio (default: 3.0)
   pub svg_aspect_ratio: f64,
   /// Percentage of SVG height used as margin (default: 0.05)
@@ -65,7 +63,6 @@ pub struct FretboardVisualConfig {
 impl Default for FretboardVisualConfig {
   fn default() -> Self {
     Self {
-      num_strings: 6,
       svg_aspect_ratio: 3.0,
       fret_margin_percentage: 0.05,
       nut_width: 14.0,
@@ -79,23 +76,6 @@ impl FretboardVisualConfig {
   /// Create a new visual configuration with default values
   pub fn new() -> Self {
     Self::default()
-  }
-
-  /// Builder method to set the number of strings
-  ///
-  /// # Arguments
-  /// * `num_strings` - Number of guitar strings (typically 4-8)
-  ///
-  /// # Examples
-  /// ```rust
-  /// use frontend::components::fretboard::visual_config::FretboardVisualConfig;
-  ///
-  /// let bass = FretboardVisualConfig::default().with_num_strings(4);
-  /// let seven_string = FretboardVisualConfig::default().with_num_strings(7);
-  /// ```
-  pub fn with_num_strings(mut self, num_strings: u8) -> Self {
-    self.num_strings = num_strings;
-    self
   }
 
   /// Builder method to set the aspect ratio
@@ -181,56 +161,6 @@ impl FretboardVisualConfig {
   pub fn with_marker_positions(mut self, positions: Vec<u8>) -> Self {
     self.marker_positions = positions;
     self
-  }
-
-  /// Preset configuration for bass guitar (4 strings)
-  ///
-  /// Creates a configuration optimized for bass guitar display with fewer strings
-  /// and adjusted proportions.
-  ///
-  /// Features:
-  /// - 4 strings instead of standard 6
-  /// - Same fret range as standard guitar
-  /// - Default aspect ratio works well for bass proportions
-  ///
-  /// # Returns
-  /// A `FretboardVisualConfig` configured for 4-string bass guitar
-  ///
-  /// # Examples
-  /// ```rust
-  /// use frontend::components::fretboard::visual_config::FretboardVisualConfig;
-  ///
-  /// let bass_config = FretboardVisualConfig::bass_guitar();
-  /// // Further customize if needed
-  /// let custom_bass = bass_config.with_max_frets(20);
-  /// ```
-  pub fn bass_guitar() -> Self {
-    Self::default().with_num_strings(4)
-  }
-
-  /// Preset configuration for 7-string guitar
-  ///
-  /// Creates a configuration for 7-string guitars commonly used in metal
-  /// and extended range playing.
-  ///
-  /// Features:
-  /// - 7 strings instead of standard 6
-  /// - Standard fret range (same as 6-string)
-  /// - Same aspect ratio (7th string doesn't significantly change proportions)
-  ///
-  /// # Returns
-  /// A `FretboardVisualConfig` configured for 7-string guitar
-  ///
-  /// # Examples
-  /// ```rust
-  /// use frontend::components::fretboard::visual_config::FretboardVisualConfig;
-  ///
-  /// let seven_string = FretboardVisualConfig::seven_string();
-  /// // Add extended fret range if desired
-  /// let extended_seven = seven_string.with_max_frets(24);
-  /// ```
-  pub fn seven_string() -> Self {
-    Self::default().with_num_strings(7)
   }
 
   /// Preset configuration for wide aspect ratio display
