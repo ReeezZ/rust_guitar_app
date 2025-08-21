@@ -78,12 +78,25 @@ pub fn FretboardDevPage() -> impl IntoView {
   let color = RwSignal::new(FretStateColor::Green);
   let hidden = RwSignal::new(false);
 
-  let handle_note_clicked = Callback::new(|coord: FretClickEventWithNote| {
-    leptos::logging::log!("{:?} {:?}", coord.note, coord.coord);
+  let update_fret = Callback::new(move |coord: FretCoord| {
+    frets.update(|map| {
+      let state = if hidden.get() {
+        FretState::Hidden
+      } else {
+        FretState::Normal(color.get(), label.get())
+      };
+      map.insert(coord, RwSignal::new(state).into());
+    });
   });
 
-  let handle_fret_clicked = Callback::new(|coord: FretClickEvent| {
+  let handle_note_clicked = Callback::new(move |coord: FretClickEventWithNote| {
+    leptos::logging::log!("{:?} {:?}", coord.note, coord.coord);
+    update_fret.run(coord.coord);
+  });
+
+  let handle_fret_clicked = Callback::new(move |coord: FretClickEvent| {
     leptos::logging::log!("{:?}", coord);
+    update_fret.run(coord.coord);
   });
 
   view! {
@@ -91,7 +104,7 @@ pub fn FretboardDevPage() -> impl IntoView {
     <p class="mb-4 text-sm text-gray-600">
       Test page showing a variety of FretState values (Normal, Colored, Hidden).
     </p>
-    <FretsEditor frets label color hidden />
+    <FretsEditor frets label color hidden apply_change=update_fret />
     <div>
       <FretboardWithNotes
         fret_states=frets
@@ -127,25 +140,11 @@ fn FretsEditor(
   #[prop(into)] label: RwSignal<String>,
   #[prop(into)] color: RwSignal<FretStateColor>,
   #[prop(into)] hidden: RwSignal<bool>,
+  #[prop(into)] apply_change: Callback<FretCoord>,
 ) -> impl IntoView {
   // Local editor state
   let selected_string = RwSignal::new(0usize);
   let selected_fret = RwSignal::new(0usize);
-
-  let apply_change = move |_| {
-    frets.update(|map| {
-      let coord = FretCoord {
-        string_idx: selected_string.get() as u8,
-        fret_idx: selected_fret.get() as u8,
-      };
-      let state = if hidden.get() {
-        FretState::Hidden
-      } else {
-        FretState::Normal(color.get(), label.get())
-      };
-      map.insert(coord, RwSignal::new(state).into());
-    });
-  };
 
   let reset_sample = move |_| frets.set(get_fret_positions());
 
@@ -230,7 +229,16 @@ fn FretsEditor(
           />
           <span>"Hidden"</span>
         </label>
-        <button class="py-1 px-3 text-white bg-blue-600 rounded" on:click=apply_change>
+        <button
+          class="py-1 px-3 text-white bg-blue-600 rounded"
+          on:click=move |_| {
+            let coord = FretCoord {
+              string_idx: selected_string.get() as u8,
+              fret_idx: selected_fret.get() as u8,
+            };
+            apply_change.run(coord);
+          }
+        >
           "Apply"
         </button>
         <button class="py-1 px-3 text-gray-800 bg-gray-300 rounded" on:click=reset_sample>
