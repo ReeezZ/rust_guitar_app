@@ -73,11 +73,6 @@ impl Default for FretboardVisualConfig {
 }
 
 impl FretboardVisualConfig {
-  /// Create a new visual configuration with default values
-  pub fn new() -> Self {
-    Self::default()
-  }
-
   /// Builder method to set the aspect ratio
   ///
   /// Controls the width-to-height ratio of the SVG display.
@@ -161,24 +156,5 @@ impl FretboardVisualConfig {
   pub fn with_marker_positions(mut self, positions: Vec<u8>) -> Self {
     self.marker_positions = positions;
     self
-  }
-
-  /// Preset configuration for wide aspect ratio display
-  ///
-  /// Creates a configuration with a wider aspect ratio, useful for:
-  /// - Horizontal layouts where height is constrained
-  /// - Desktop displays with wide screens
-  /// - Embedded views in wider containers
-  ///
-  /// Features:
-  /// - 4.0 aspect ratio (vs default 3.0)
-  /// - Creates a more stretched, horizontal appearance
-  /// - Same string and fret configuration as default
-  ///
-  /// # Returns
-  /// A `FretboardVisualConfig` with wide aspect ratio
-  /// ```
-  pub fn wide_aspect() -> Self {
-    Self::default().with_aspect_ratio(4.0)
   }
 }

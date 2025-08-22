@@ -1,13 +1,13 @@
 use leptos::prelude::*;
+use shared::Note;
 
 use crate::{
   fretboard::{
-    base_model::{FretClickEvent, FretboardBaseModel},
     components::{
-      base::{FretState, FretStateColor, FretboardViewModel},
+      base::{FretState, FretStateColor, Fretboard, FretboardViewModel},
       visual_config::FretboardVisualConfig,
-      with_notes::{FretClickEventWithNote, FretboardWithNotes},
     },
+    fretboard_model::{FretClickEvent, FretboardModel},
     FretCoord,
   },
   pages::fretboard_dev::{frets_editor::FretsEditor, helper::get_fret_positions},
@@ -15,7 +15,7 @@ use crate::{
 
 #[component]
 pub fn SharedModelDemo() -> impl IntoView {
-  let model = RwSignal::new(FretboardBaseModel::from_defaults());
+  let model = RwSignal::new(FretboardModel::default());
 
   let frets = RwSignal::new(get_fret_positions());
 
@@ -34,7 +34,7 @@ pub fn SharedModelDemo() -> impl IntoView {
     });
   });
 
-  let handle_note_clicked = Callback::new(move |coord: FretClickEventWithNote| {
+  let handle_note_clicked = Callback::new(move |coord: FretClickEvent| {
     leptos::logging::log!("{:?} {:?}", coord.note, coord.coord);
     update_fret.run(coord.coord);
   });
@@ -45,7 +45,7 @@ pub fn SharedModelDemo() -> impl IntoView {
   });
 
   model.update(|m| {
-    m.on_fret_clicked.set(Some(handle_fret_clicked));
+    m.on_note_clicked.set(Some(handle_fret_clicked));
   });
 
   Effect::new(move || {
@@ -62,11 +62,11 @@ pub fn SharedModelDemo() -> impl IntoView {
     </p>
     <FretsEditor frets label color hidden />
     <div>
-      <FretboardWithNotes
+      <Fretboard
         fret_states=frets
         start_fret=0
         end_fret=12
-        num_strings=6
+        tuning=RwSignal::new(vec![Note::E, Note::A, Note::D, Note::G, Note::B, Note::E])
         config=Signal::derive(FretboardVisualConfig::default)
         on_note_clicked=handle_note_clicked
       />
@@ -82,7 +82,7 @@ pub fn SharedModelDemo() -> impl IntoView {
       <h1 class="mb-2 text-xl font-bold">
         "Fretboard (base) with no callback to check Clickable areas are not rendered"
       </h1>
-      <FretboardViewModel model=RwSignal::new(FretboardBaseModel::from_defaults()) />
+      <FretboardViewModel model=RwSignal::new(FretboardModel::default()) />
     </div>
   }
 }

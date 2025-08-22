@@ -1,5 +1,5 @@
 use crate::components::fretboard::visual_config::FretboardVisualConfig;
-use crate::components::fretboard::with_notes::{FretClickEventWithNote, FretboardWithNotes};
+use crate::components::fretboard::with_notes::{FretClickEvent, FretboardWithNotes};
 use crate::components::musical_fretboard_config::{
   MusicalFretboardConfig, MusicalFretboardConfigSignals,
 };
@@ -22,7 +22,7 @@ use shared::music::scales::{Scale, ScaleTrait, ScaleType};
 /// # use leptos::prelude::*;
 /// # use frontend::components::fretboard::scale_display::FretboardScaleDisplay;
 /// # use frontend::components::musical_fretboard_config::MusicalFretboardConfig;
-/// # use frontend::components::fretboard::with_notes::FretClickEventWithNote;
+/// # use frontend::components::fretboard::with_notes::FretClickEvent;
 /// # use shared::music::notes::Note;
 /// # use shared::music::scales::ScaleType;
 /// # use shared::music::heptatonic_scales::HeptaScaleType;
@@ -37,7 +37,7 @@ use shared::music::scales::{Scale, ScaleTrait, ScaleType};
 ///   .with_aspect_ratio(2.5)
 ///   .with_num_strings(7);
 ///
-/// let on_note_clicked = Callback::new(move |event: FretClickEventWithNote| {
+/// let on_note_clicked = Callback::new(move |event: FretClickEvent| {
 ///   leptos::logging::log!("Clicked note: {} at fret {}, string {}",
 ///     event.note, event.coord.fret_idx, event.coord.string_idx);
 /// });
@@ -80,7 +80,7 @@ pub fn FretboardScaleDisplay(
   extra_frets: Option<Signal<usize>>,
   /// Callback for note click events (enriched with note information)
   #[prop(optional)]
-  on_note_clicked: Option<Callback<FretClickEventWithNote>>,
+  on_note_clicked: Option<Callback<FretClickEvent>>,
 ) -> impl IntoView {
   // Use provided config or create default
   let fretboard_config = config.unwrap_or_default();

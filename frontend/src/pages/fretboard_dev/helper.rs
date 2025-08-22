@@ -1,8 +1,8 @@
 use leptos::prelude::*;
 
 use crate::fretboard::{
-  base_model::FretStateSignals,
   components::base::{FretState, FretStateColor},
+  fretboard_model::FretStateSignals,
   FretCoord,
 };
 
@@ -62,18 +62,4 @@ pub(super) fn get_fret_positions() -> FretStateSignals {
   );
 
   fret_positions
-}
-
-// Local helper to extract value from input/select elements
-fn event_target_value(ev: &leptos::ev::Event) -> String {
-  use leptos::wasm_bindgen::JsCast;
-  if let Some(target) = ev.target() {
-    if let Ok(input) = target.clone().dyn_into::<web_sys::HtmlInputElement>() {
-      return input.value();
-    }
-    if let Ok(select) = target.dyn_into::<web_sys::HtmlSelectElement>() {
-      return select.value();
-    }
-  }
-  String::new()
 }

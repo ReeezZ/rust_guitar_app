@@ -1,5 +1,5 @@
 use crate::components::fretboard::visual_config::FretboardVisualConfig;
-use crate::components::fretboard::with_notes::{FretClickEventWithNote, FretboardWithNotes};
+use crate::components::fretboard::with_notes::{FretClickEvent, FretboardWithNotes};
 use crate::components::musical_fretboard_config::{
   MusicalFretboardConfig, MusicalFretboardConfigSignals,
 };
@@ -20,7 +20,7 @@ use shared::music::notes::Note;
 /// ```rust
 /// # use leptos::prelude::*;
 /// # use frontend::components::fretboard::trainer::FretboardTrainer;
-/// # use frontend::components::fretboard::with_notes::FretClickEventWithNote;
+/// # use frontend::components::fretboard::with_notes::FretClickEvent;
 /// # use frontend::models::fretboard_model::FretCoord;
 /// # use shared::music::notes::Note;
 ///
@@ -30,7 +30,7 @@ use shared::music::notes::Note;
 /// let error_coords = RwSignal::new(vec![]);
 /// let error_notes = RwSignal::new(vec![]);
 ///
-/// let on_fret_clicked = Callback::new(move |event: FretClickEventWithNote| {
+/// let on_note_clicked = Callback::new(move |event: FretClickEvent| {
 ///   leptos::logging::log!("Clicked note: {} at {:?}", event.note, event.coord);
 /// });
 ///
@@ -40,7 +40,7 @@ use shared::music::notes::Note;
 ///     reference_note_name=reference_note.into()
 ///     error_notes=error_coords.into()
 ///     error_note_names=error_notes.into()
-///     on_fret_clicked=on_fret_clicked
+///     on_note_clicked=on_note_clicked
 ///   />
 /// }
 /// # }
@@ -65,7 +65,7 @@ pub fn FretboardTrainer(
   fret_range: Option<Signal<std::ops::RangeInclusive<usize>>>,
   /// Callback for fret click events (enriched with note information)
   #[prop(optional)]
-  on_fret_clicked: Option<Callback<FretClickEventWithNote>>,
+  on_note_clicked: Option<Callback<FretClickEvent>>,
 ) -> impl IntoView {
   // Use provided config or create default
   let fretboard_config = config.unwrap_or_default();
@@ -165,7 +165,7 @@ pub fn FretboardTrainer(
   view! {
     <div class="relative">
       {move || {
-        if let Some(callback) = on_fret_clicked {
+        if let Some(callback) = on_note_clicked {
           view! {
             <FretboardWithNotes
               start_fret=start_fret

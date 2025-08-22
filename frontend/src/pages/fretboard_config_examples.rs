@@ -3,11 +3,12 @@
 /// This component provides a single fretboard with all configuration parameters
 /// exposed as interactive controls, allowing users to experiment with different
 /// settings in real-time and understand their effects.
-use leptos::{logging::log, prelude::*};
+use leptos::prelude::*;
+use shared::Note;
 
-use crate::fretboard::components::{
-  visual_config::FretboardVisualConfig,
-  with_notes::{FretClickEventWithNote, FretboardWithNotes},
+use crate::fretboard::{
+  components::{base::Fretboard, visual_config::FretboardVisualConfig},
+  fretboard_model::{FretClickEvent, FretStateSignals},
 };
 
 #[component]
@@ -18,6 +19,7 @@ pub fn FretboardConfigExamples() -> impl IntoView {
 
   // Configuration controls
   let num_strings = RwSignal::new(6_u8);
+  let tuning = Signal::derive(move || (0..=num_strings.get()).map(|_| Note::E).collect::<Vec<_>>());
   let svg_aspect_ratio = RwSignal::new(3.0_f64);
   let fret_margin_percentage = RwSignal::new(0.05_f64);
   let nut_width = RwSignal::new(14.0_f64);
@@ -42,6 +44,8 @@ pub fn FretboardConfigExamples() -> impl IntoView {
       .with_extra_frets(extra_frets.get())
       .with_marker_positions(marker_positions.get())
   });
+
+  let fret_state = RwSignal::new(FretStateSignals::default());
 
   view! {
     <div class="space-y-3">
@@ -110,17 +114,19 @@ pub fn FretboardConfigExamples() -> impl IntoView {
       <div class="flex flex-col gap-6 xl:flex-row">
         // Main fretboard display - responsive sizing, not too constrained
         <div class="p-4 bg-blue-50 rounded-lg border-2 border-blue-200 xl:min-w-0 xl:flex-[2]">
-          <FretboardWithNotes
+          <Fretboard
             start_fret=start_fret.read_only()
             end_fret=end_fret.read_only()
-            num_strings=num_strings.read_only()
+            tuning=tuning
             config=Signal::from(visual_config)
-            on_note_clicked=Callback::new(|event: FretClickEventWithNote| {
-              log!(
+            on_note_clicked=Callback::new(|event: FretClickEvent| {
+              leptos::logging::log!(
                 "Fret clicked: String {}, Fret {}, Note {}", event.coord.string_idx, event.coord.fret_idx, event.note
               );
             })
+            fret_states=fret_state.read_only()
           />
+
         </div>
 
         // Configuration controls panel - compact and efficient use of space

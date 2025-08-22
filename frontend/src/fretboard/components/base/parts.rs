@@ -1,12 +1,13 @@
 // (No HashMap needed in per-cell components currently.)
 
 use crate::fretboard::{
-  base_model::FretCoord,
-  base_model::{FretClickEvent, FretStateSignals},
   components::base::{helper::FretState, layout::LayoutSnapshot},
+  fretboard_model::FretCoord,
+  fretboard_model::{FretClickEvent, FretStateSignals},
 };
 
 use leptos::prelude::*;
+use shared::Note;
 
 /// Renders the nut (zero fret) when visible
 #[component]
@@ -250,6 +251,7 @@ fn FretboardNote(
 pub(crate) fn FretboardGrid(
   #[prop(into)] layout: Signal<LayoutSnapshot>,
   fret_states: Signal<FretStateSignals>,
+  tuning: Signal<Vec<Note>>,
   /// Optional callback for fret click events
   click_cb: Signal<Option<Callback<FretClickEvent>>>,
 ) -> impl IntoView {
@@ -280,7 +282,12 @@ pub(crate) fn FretboardGrid(
                       )
                       on:click=move |_| {
                         if let Some(click_cb) = click_cb.get().as_ref() {
-                          click_cb.run(FretClickEvent { coord });
+                          let note = tuning
+                            .get()
+                            .get(string_idx as usize)
+                            .expect("Bounds checking on model construction")
+                            .add_steps(fret_idx);
+                          click_cb.run(FretClickEvent { coord, note });
                         }
                       }
                     >

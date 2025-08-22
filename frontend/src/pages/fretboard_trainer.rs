@@ -6,9 +6,8 @@ use leptos::prelude::*;
 use rand::seq::IteratorRandom;
 use strum::IntoEnumIterator;
 
+use crate::fretboard::fretboard_model::{FretClickEvent, FretboardModel};
 // use crate::components::fretboard::trainer::FretboardTrainer;
-use crate::fretboard::components::with_notes::FretClickEventWithNote;
-use crate::fretboard::with_notes_model::FretboardWithNotesModel;
 use crate::fretboard::FretCoord;
 use crate::models::fretboard_trainer::FretboardTrainerTrait;
 use shared::music::intervals::Interval;
@@ -30,7 +29,7 @@ fn random_interval() -> Interval {
 #[component]
 pub fn FretboardTrainerPage() -> impl IntoView {
   // Initialize fretboard model for note calculations
-  let fretboard_model = RwSignal::new(FretboardWithNotesModel::default());
+  let fretboard_model = RwSignal::new(FretboardModel::default());
 
   // Game state
   let (num_correct, set_num_correct) = signal(0);
@@ -57,7 +56,7 @@ pub fn FretboardTrainerPage() -> impl IntoView {
   });
 
   // Handle fret clicks
-  let on_fret_clicked = Callback::new(move |evt: FretClickEventWithNote| {
+  let on_note_clicked = Callback::new(move |evt: FretClickEvent| {
     fretboard_model.with(|model| {
       let clicked_note = model.note_from_fret(evt.coord);
       let target_note = current_interval.get().of(current_note.get());
@@ -126,7 +125,7 @@ pub fn FretboardTrainerPage() -> impl IntoView {
       // reference_note_name=reference_note_name.into()
       // error_notes=error_coords.into()
       // error_note_names=error_note_names.into()
-      // on_fret_clicked=on_fret_clicked
+      // on_note_clicked=on_note_clicked
       // />
 
       <div class="text-center">

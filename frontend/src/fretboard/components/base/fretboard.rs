@@ -1,5 +1,4 @@
 use crate::fretboard::{
-  base_model::{FretClickEvent, FretStateSignals, FretboardBaseModel},
   components::{
     base::{
       helper::{calculate_fret_positions, calculate_string_spacing, VisibleRange},
@@ -11,27 +10,20 @@ use crate::fretboard::{
     },
     visual_config::FretboardVisualConfig,
   },
+  fretboard_model::{FretClickEvent, FretStateSignals, FretboardModel},
 };
 use leptos::prelude::*;
+use shared::Note;
 
 #[component]
-pub fn FretboardViewModel(#[prop(into)] model: Signal<FretboardBaseModel>) -> impl IntoView {
+pub fn FretboardViewModel(#[prop(into)] model: Signal<FretboardModel>) -> impl IntoView {
   let start_fret = Signal::derive(move || model.get().start_fret.get());
   let end_fret = Signal::derive(move || model.get().end_fret.get());
-  let num_strings = Signal::derive(move || model.get().num_strings.get());
+  let tuning = Signal::derive(move || model.get().tuning.get());
   let config = Signal::derive(move || model.get().config.get());
-  let on_fret_clicked = Signal::derive(move || model.get().on_fret_clicked.get());
+  let on_note_clicked = Signal::derive(move || model.get().on_note_clicked.get());
   let fret_states = Signal::derive(move || model.get().fret_states.get());
-  view! {
-    <Fretboard
-      start_fret=start_fret
-      end_fret=end_fret
-      num_strings=num_strings
-      config=config
-      on_fret_clicked=on_fret_clicked
-      fret_states=fret_states
-    />
-  }
+  view! { <Fretboard start_fret end_fret tuning config on_note_clicked fret_states /> }
 }
 
 /// Interactive SVG fretboard component that displays a zoomable guitar fretboard
@@ -84,13 +76,13 @@ pub fn Fretboard(
   end_fret: Signal<usize>,
   /// Number of guitar strings (default: 6)
   #[prop(into)]
-  num_strings: Signal<u8>,
+  tuning: Signal<Vec<Note>>,
   /// Visual configuration for fretboard display properties
   #[prop(into)]
   config: Signal<FretboardVisualConfig>,
   /// Optional callback for fret click events
   #[prop(into)]
-  on_fret_clicked: Signal<Option<Callback<FretClickEvent>>>,
+  on_note_clicked: Signal<Option<Callback<FretClickEvent>>>,
 
   #[prop(into)] fret_states: Signal<FretStateSignals>,
 ) -> impl IntoView {
@@ -100,6 +92,7 @@ pub fn Fretboard(
   let nut_width = Signal::derive(move || config.get().nut_width);
   let extra_frets = Signal::derive(move || config.get().extra_frets);
   let marker_positions = Signal::derive(move || config.get().marker_positions.clone());
+  let num_strings = Signal::derive(move || tuning.get().len() as u8);
 
   // Use a fixed base width for calculations, SVG will be scaled by CSS
   let base_svg_width = 800.0; // Fixed base width for consistent calculations
@@ -205,7 +198,8 @@ pub fn Fretboard(
             // Grid: iterate frets/strings once and compose per-cell components
             <FretboardGrid
               layout=layout_snapshot.clone()
-              click_cb=on_fret_clicked.clone().into()
+              tuning=tuning.clone()
+              click_cb=on_note_clicked.clone().into()
               fret_states=fret_states
             />
           }

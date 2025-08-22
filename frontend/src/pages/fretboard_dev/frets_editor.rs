@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 
 use crate::{
-  fretboard::{base_model::FretStateSignals, components::base::FretStateColor},
+  fretboard::{components::base::FretStateColor, fretboard_model::FretStateSignals},
   pages::fretboard_dev::helper::get_fret_positions,
 };
 

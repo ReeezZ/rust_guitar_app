@@ -1,10 +1,10 @@
 use shared::music::{intervals::Interval, notes::Note};
 
-use leptos::prelude::{Get, GetUntracked};
+use leptos::prelude::*;
 use rand::{seq::IteratorRandom, Rng};
 use strum::IntoEnumIterator;
 
-use crate::fretboard::{base_model::FretCoord, with_notes_model::FretboardWithNotesModel};
+use crate::fretboard::fretboard_model::{FretCoord, FretboardModel};
 
 pub trait FretboardTrainerTrait {
   fn note_from_fret(&self, coord: FretCoord) -> Note;
@@ -17,10 +17,10 @@ pub trait FretboardTrainerTrait {
   fn get_random_fret(&self) -> FretCoord;
 }
 
-impl FretboardTrainerTrait for FretboardWithNotesModel {
+impl FretboardTrainerTrait for FretboardModel {
   fn get_random_fret(&self) -> FretCoord {
-    let string_idx = rand::rng().random_range(0..self.num_strings.get());
-    let fret_idx = rand::rng().random_range(0..self.get_num_frets());
+    let string_idx = rand::rng().random_range(0..self.tuning.get().len() as u8);
+    let fret_idx = rand::rng().random_range(0..self.get_num_frets() as u8);
 
     FretCoord {
       string_idx,
