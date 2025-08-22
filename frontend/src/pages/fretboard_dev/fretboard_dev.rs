@@ -1,15 +1,19 @@
 use leptos::prelude::*;
 
 use crate::{
-  components::musical_fretboard_config::FretboardWithNotesModelBuilder, fretboard::{
+  fretboard::{
     components::with_notes::FretboardWithNotesViewModel, with_notes_model::FretboardWithNotesModel,
-  }, pages::fretboard_dev::shared_model_demo::SharedModelDemo
+  },
+  pages::fretboard_dev::shared_model_demo::SharedModelDemo,
 };
 
 #[component]
 pub fn FretboardDevPage() -> impl IntoView {
-  FretboardWithNotesModelBuilder::default();
   let model = RwSignal::new(FretboardWithNotesModel::default());
-  view! { <FretboardWithNotesViewModel model=model /> }
-  // view! { <SharedModelDemo /> }
+  view! {
+    <>
+      <FretboardWithNotesViewModel model=model />
+      <SharedModelDemo />
+    </>
+  }
 }

@@ -34,22 +34,7 @@ pub struct FretboardBaseModel {
 }
 
 pub trait FretboardBaseModelTrait {
-  // fn get_start_fret(&self) -> usize;
-  fn set_start_fret(&self, fret: usize);
-
-  // fn get_end_fret(&self) -> usize;
-  fn set_end_fret(&self, fret: usize);
-
-  // fn get_num_strings(&self) -> u8;
-  fn set_num_strings(&self, num: u8);
-
-  // fn get_config(&self) -> FretboardVisualConfig;
-  fn set_config(&self, config: FretboardVisualConfig);
-
-  // fn get_fret_states(&self) -> FretStateSignals;
-  fn set_fret_states(&self, states: FretStateSignals);
-
-  // fn get_on_fret_clicked(&self) -> Option<Callback<FretClickEvent>>;
+  fn clear_fret_states(&self);
 }
 
 impl FretboardBaseModel {
@@ -94,44 +79,7 @@ impl FretboardBaseModel {
 }
 
 impl FretboardBaseModelTrait for FretboardBaseModel {
-  // fn generate_frets(num_strings: u8, num_frets: u8) -> FretStateSignals {
-  //   let mut frets: FretStateSignals = HashMap::with_capacity(num_strings as usize);
-
-  //   for string_idx in 0..num_strings {
-  //     let mut string_frets = Vec::with_capacity(num_frets as usize);
-  //     for fret_idx in 0..num_frets {
-  //       string_frets.push(RwSignal::new(FretState::Hidden));
-  //       frets.insert(
-  //         FretCoord {
-  //           string_idx,
-  //           fret_idx,
-  //         },
-  //         RwSignal::new(FretState::Hidden),
-  //       );
-  //     }
-  //   }
-
-  //   frets
-  // }
-
-  // Creates non interactive fretboard
-  fn set_start_fret(&self, fret: usize) {
-    self.start_fret.set(fret);
-  }
-
-  fn set_end_fret(&self, fret: usize) {
-    self.end_fret.set(fret);
-  }
-
-  fn set_num_strings(&self, num: u8) {
-    self.num_strings.set(num);
-  }
-
-  fn set_config(&self, config: FretboardVisualConfig) {
-    self.config.set(config);
-  }
-
-  fn set_fret_states(&self, states: FretStateSignals) {
-    self.fret_states.set(states);
+  fn clear_fret_states(&self) {
+    self.fret_states.set(HashMap::new());
   }
 }

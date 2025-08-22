@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use leptos::{logging::log, prelude::*};
 
 use shared::music::{
@@ -6,9 +8,11 @@ use shared::music::{
 };
 
 use crate::fretboard::{
-  base_model::{self, FretClickEvent, FretCoord, FretStateSignals, FretboardBaseModel},
+  base_model::{
+    self, FretClickEvent, FretCoord, FretStateSignals, FretboardBaseModel, FretboardBaseModelTrait,
+  },
   components::{
-    base::{FretState, FretStateColor},
+    base::{self, FretState, FretStateColor},
     visual_config::FretboardVisualConfig,
     with_notes::FretClickEventWithNote,
   },
@@ -39,11 +43,21 @@ impl Default for FretboardWithNotesModel {
   }
 }
 
+impl FretboardBaseModelTrait for FretboardWithNotesModel {
+  fn clear_fret_states(&self) {
+    self.fret_states.set(HashMap::new());
+  }
+}
+
 impl FretboardWithNotesModel {
+  /// Create a new FretboardWithNotesModel from a FretboardBaseModel and a tuning
+  /// tuning length must match the number of strings in the base model
   pub fn from_fretboard_base_model(
     base_model: FretboardBaseModel,
     tuning: RwSignal<Vec<Note>>,
   ) -> Self {
+    assert!(tuning.get().len() == base_model.num_strings.get() as usize);
+
     let on_note_clicked = Signal::derive(move || {
       if let Some(callback) = base_model.on_fret_clicked.get() {
         let on_note_clicked = Callback::new(move |event: FretClickEventWithNote| {
@@ -78,6 +92,8 @@ impl FretboardWithNotesModel {
   pub fn get_num_frets(&self) -> u8 {
     self.end_fret.get() as u8 - self.start_fret.get() as u8
   }
+
+  // pub fn update_from_scale(&self, scale: &Scale) {}
 
   // fn generate_frets(num_strings: u8, num_frets: u8) -> FretboardSignals {
   //   let mut frets: FretboardSignals = Vec::with_capacity(num_strings as usize);
