@@ -123,7 +123,7 @@ pub fn FretboardConfigExamples() -> impl IntoView {
             start_fret=start_fret.read_only()
             end_fret=end_fret.read_only()
             tuning=tuning
-            config=Signal::from(visual_config)
+            config=visual_config.get()
             on_note_clicked=Callback::new(|event: FretClickEvent| {
               leptos::logging::log!(
                 "Fret clicked: String {}, Fret {}, Note {}", event.coord.string_idx, event.coord.fret_idx, event.note

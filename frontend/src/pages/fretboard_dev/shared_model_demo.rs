@@ -67,7 +67,7 @@ pub fn SharedModelDemo() -> impl IntoView {
         start_fret=0
         end_fret=12
         tuning=RwSignal::new(vec![Note::E, Note::A, Note::D, Note::G, Note::B, Note::E])
-        config=Signal::derive(FretboardVisualConfig::default)
+        config=FretboardVisualConfig::default()
         on_note_clicked=handle_note_clicked
       />
 

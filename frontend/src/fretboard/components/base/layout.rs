@@ -5,7 +5,7 @@ use leptos::prelude::{Get, RwSignal, Signal};
 use crate::fretboard::fretboard_model::FretCoord;
 
 /// Snapshot of fretboard geometry for a render cycle.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct LayoutSnapshot {
   pub positions: Arc<Vec<f64>>,
   pub min_fret: usize,

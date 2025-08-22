@@ -55,19 +55,17 @@ pub fn FretboardScalePage() -> impl IntoView {
 
   Effect::new(move || {
     model.update(move |model| {
-      model.config.update(|config| {
-        config.extra_frets.set(extra_frets.get());
-      });
+      model.config.get().extra_frets.set(extra_frets.get());
     });
   });
 
   // TODO when adding this back in it breaks, find out why
-  // Effect::new(move || {
-  //   model.update(move |model| {
-  //     model.start_fret.set(*fret_range.get().start());
-  //     model.end_fret.set(*fret_range.get().end());
-  //   });
-  // });
+  Effect::new(move || {
+    model.update(move |model| {
+      model.start_fret.set(*fret_range.get().start());
+      model.end_fret.set(*fret_range.get().end());
+    });
+  });
 
   view! {
     <div class="p-6 space-y-6">
