@@ -1,5 +1,7 @@
 use std::sync::Arc;
 
+use leptos::prelude::{Get, RwSignal, Signal};
+
 use crate::fretboard::fretboard_model::FretCoord;
 
 /// Snapshot of fretboard geometry for a render cycle.

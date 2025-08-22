@@ -6,12 +6,18 @@ use crate::{
     fret_range_selector::FretRangeSelector,
     music_selectors::{NoteSelector, ScaleTypeSelector},
   },
-  fretboard::fretboard_model::FretClickEvent,
+  fretboard::{
+    components::{
+      base::{Fretboard, FretboardViewModel},
+      visual_config::FretboardVisualConfig,
+    },
+    fretboard_model::{FretClickEvent, FretboardModel},
+  },
 };
 use leptos::{logging::log, prelude::*, wasm_bindgen::JsCast};
-use shared::music::heptatonic_scales::HeptaScaleType;
-use shared::music::notes::Note;
 use shared::music::scales::ScaleType;
+use shared::{music::heptatonic_scales::HeptaScaleType, Scale};
+use shared::{music::notes::Note, ScaleTrait};
 
 /// Page demonstrating the SVG fretboard with scale display functionality
 #[component]
@@ -39,6 +45,29 @@ pub fn FretboardScalePage() -> impl IntoView {
     );
     set_clicked_note_event.set(Some(event));
   });
+
+  let model = RwSignal::new(FretboardModel::default());
+  Effect::new(move || {
+    model.update(move |model| {
+      model.update_from_scale(Scale::new(root_note.get(), scale_type.get()));
+    });
+  });
+
+  Effect::new(move || {
+    model.update(move |model| {
+      model.config.update(|config| {
+        config.extra_frets.set(extra_frets.get());
+      });
+    });
+  });
+
+  // TODO when adding this back in it breaks, find out why
+  // Effect::new(move || {
+  //   model.update(move |model| {
+  //     model.start_fret.set(*fret_range.get().start());
+  //     model.end_fret.set(*fret_range.get().end());
+  //   });
+  // });
 
   view! {
     <div class="p-6 space-y-6">
@@ -149,16 +178,10 @@ pub fn FretboardScalePage() -> impl IntoView {
 
       // Main fretboard display
       //
-      // <FretboardScaleDisplay
-      // fret_range=fret_range.read_only().into()
-      // root_note=root_note.read_only().into()
-      // scale_type=scale_type.read_only().into()
-      // extra_frets=extra_frets.read_only()
-      // on_note_clicked=on_note_clicked
-      <div class="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">// config=MusicalFretboardConfig::default()
+      <FretboardViewModel model />
       // />
       // Show 2 extra frets beyond the end fret
-      </div>
+      <div class="p-4 bg-gray-50 rounded-lg border-2 border-gray-200"></div>
 
       // Scale configuration controls
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">

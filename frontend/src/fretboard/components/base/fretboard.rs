@@ -87,11 +87,12 @@ pub fn Fretboard(
   #[prop(into)] fret_states: Signal<FretStateSignals>,
 ) -> impl IntoView {
   // Create reactive signals from config values - using clone since Signal is Copy
-  let svg_aspect_ratio = Signal::derive(move || config.get().svg_aspect_ratio);
-  let fret_margin_percentage = Signal::derive(move || config.get().fret_margin_percentage);
-  let nut_width = Signal::derive(move || config.get().nut_width);
-  let extra_frets = Signal::derive(move || config.get().extra_frets);
-  let marker_positions = Signal::derive(move || config.get().marker_positions.clone());
+  let svg_aspect_ratio = Signal::derive(move || config.get().svg_aspect_ratio.get());
+  let fret_margin_percentage = Signal::derive(move || config.get().fret_margin_percentage.get());
+  let nut_width = Signal::derive(move || config.get().nut_width.get());
+  let extra_frets = Signal::derive(move || config.get().extra_frets.get());
+  let marker_positions = Signal::derive(move || config.get().marker_positions.get());
+
   let num_strings = Signal::derive(move || tuning.get().len() as u8);
 
   // Use a fixed base width for calculations, SVG will be scaled by CSS
@@ -135,30 +136,24 @@ pub fn Fretboard(
           let current_fret_margin = fret_margin.get();
           let current_num_strings = num_strings.get();
           let string_spacing = calculate_string_spacing(current_num_strings, current_svg_height);
-          let positions = full_fret_positions.get();
-          let min_f = min_fret.get();
-          let max_f = max_fret.get();
-          let start = start_fret.get();
-          let end = end_fret.get();
           let current_svg_width = svg_width.get();
           let viewbox_width = current_svg_width;
-          let current_nut_width = nut_width.get();
           let current_marker_positions = marker_positions.get();
-          let layout_snapshot = RwSignal::new(
+          let layout_snapshot = Signal::derive(move || {
             LayoutSnapshot::new(
-              positions.clone(),
-              min_f,
-              max_f,
-              start,
-              end,
-              current_num_strings,
-              string_spacing,
-              current_svg_width,
-              current_svg_height,
-              current_fret_margin,
-              current_nut_width,
-            ),
-          );
+              full_fret_positions.get(),
+              min_fret.get(),
+              max_fret.get(),
+              start_fret.get(),
+              end_fret.get(),
+              num_strings.get(),
+              calculate_string_spacing(num_strings.get(), svg_height.get()),
+              svg_width.get(),
+              svg_height.get(),
+              fret_margin.get(),
+              nut_width.get(),
+            )
+          });
 
           view! {
             // Conditionally render nut when fret 0 is visible
@@ -197,7 +192,7 @@ pub fn Fretboard(
 
             // Grid: iterate frets/strings once and compose per-cell components
             <FretboardGrid
-              layout=layout_snapshot.clone()
+              layout=layout_snapshot
               tuning=tuning.clone()
               click_cb=on_note_clicked.clone().into()
               fret_states=fret_states

@@ -202,13 +202,12 @@ fn FretboardClickableArea(layout: LayoutSnapshot, coord: FretCoord) -> impl Into
 /// Single note (circle + optional label) at a fret/string coordinate.
 #[component]
 fn FretboardNote(
-  layout: Signal<LayoutSnapshot>,
+  layout: LayoutSnapshot,
   coord: FretCoord,
   state: Signal<FretState>,
 ) -> impl IntoView {
-  let position = Signal::derive(move || layout.get().note_position(coord));
   move || {
-    let (x, y) = match position.get() {
+    let (x, y) = match layout.note_position(coord) {
       Some(p) => p,
       None => return None,
     };
@@ -257,68 +256,59 @@ pub(crate) fn FretboardGrid(
 ) -> impl IntoView {
   view! {
     <g class="interactive-layer">
-      {
-        let layout = layout.clone();
-        move || {
-          let states_map = fret_states.clone();
-          (layout.get().min_fret..=layout.get().max_fret)
-            .flat_map(|fret_idx| {
-              let layout_cell = layout.clone();
-              (0..layout.get().num_strings)
-                .map(move |string_idx| {
-                  let coord = FretCoord {
-                    string_idx,
-                    fret_idx: fret_idx as u8,
-                  };
-                  let state_sig_opt = states_map.get().get(&coord).cloned();
-                  view! {
-                    <g
-                      class="cell-group"
-                      data-fret=fret_idx
-                      data-string=string_idx
-                      style=format!(
-                        "cursor: {};",
-                        if click_cb.get().is_some() { "pointer" } else { "default" },
-                      )
-                      on:click=move |_| {
-                        if let Some(click_cb) = click_cb.get().as_ref() {
-                          let note = tuning
-                            .get()
-                            .get(string_idx as usize)
-                            .expect("Bounds checking on model construction")
-                            .add_steps(fret_idx);
-                          click_cb.run(FretClickEvent { coord, note });
-                        }
+      {move || {
+        (layout.get().min_fret..=layout.get().max_fret)
+          .flat_map(|fret_idx| {
+            (0..layout.get().num_strings)
+              .map(move |string_idx| {
+                let coord = FretCoord {
+                  string_idx,
+                  fret_idx: fret_idx as u8,
+                };
+                view! {
+                  <g
+                    class="cell-group"
+                    data-fret=fret_idx
+                    data-string=string_idx
+                    style=format!(
+                      "cursor: {};",
+                      if click_cb.get().is_some() { "pointer" } else { "default" },
+                    )
+                    on:click=move |_| {
+                      if let Some(click_cb) = click_cb.get().as_ref() {
+                        let note = tuning
+                          .get()
+                          .get(string_idx as usize)
+                          .expect("Bounds checking on model construction")
+                          .add_steps(fret_idx);
+                        click_cb.run(FretClickEvent { coord, note });
                       }
-                    >
-                      {move || {
-                        if click_cb.get().is_some() {
-                          Some(
-                            view! {
-                              <FretboardClickableArea layout=layout_cell.get() coord=coord />
-                            },
-                          )
-                        } else {
-                          None
-                        }
-                      }}
-                      {state_sig_opt
-                        .map(|state_signal| {
+                    }
+                  >
+                    {move || {
+                      if click_cb.get().is_some() {
+                        Some(view! { <FretboardClickableArea layout=layout.get() coord=coord /> })
+                      } else {
+                        None
+                      }
+                    }}
+                    {move || {
+                      if let Some(state_signal) = fret_states.get().get(&coord).cloned() {
+                        Some(
                           view! {
-                            <FretboardNote
-                              layout=layout_cell.clone()
-                              coord=coord
-                              state=state_signal.into()
-                            />
-                          }
-                        })}
-                    </g>
-                  }
-                })
-            })
-            .collect_view()
-        }
-      }
+                            <FretboardNote layout=layout.get() coord state=state_signal.into() />
+                          },
+                        )
+                      } else {
+                        None
+                      }
+                    }}
+                  </g>
+                }
+              })
+          })
+          .collect_view()
+      }}
     </g>
   }
 }

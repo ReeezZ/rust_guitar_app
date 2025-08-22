@@ -1,3 +1,5 @@
+use leptos::prelude::RwSignal;
+
 /// Configuration struct for visual fretboard properties shared across all fretboard components.
 ///
 /// This consolidates the common visual configuration that controls the appearance
@@ -49,112 +51,25 @@
 #[derive(Clone, Debug, PartialEq)]
 pub struct FretboardVisualConfig {
   /// Width-to-height aspect ratio (default: 3.0)
-  pub svg_aspect_ratio: f64,
+  pub svg_aspect_ratio: RwSignal<f64>,
   /// Percentage of SVG height used as margin (default: 0.05)
-  pub fret_margin_percentage: f64,
+  pub fret_margin_percentage: RwSignal<f64>,
   /// Width of the nut in SVG units (default: 14.0)
-  pub nut_width: f64,
+  pub nut_width: RwSignal<f64>,
   /// Number of extra frets to show for context (default: 1)
-  pub extra_frets: usize,
+  pub extra_frets: RwSignal<usize>,
   /// Fret positions where markers should be displayed
-  pub marker_positions: Vec<u8>,
+  pub marker_positions: RwSignal<Vec<u8>>,
 }
 
 impl Default for FretboardVisualConfig {
   fn default() -> Self {
     Self {
-      svg_aspect_ratio: 3.0,
-      fret_margin_percentage: 0.05,
-      nut_width: 14.0,
-      extra_frets: 1,
-      marker_positions: vec![3, 5, 7, 9, 12, 15, 17, 19, 21, 24],
+      svg_aspect_ratio: RwSignal::new(3.0),
+      fret_margin_percentage: RwSignal::new(0.05),
+      nut_width: RwSignal::new(14.0),
+      extra_frets: RwSignal::new(1),
+      marker_positions: RwSignal::new(vec![3, 5, 7, 9, 12, 15, 17, 19, 21, 24]),
     }
-  }
-}
-
-impl FretboardVisualConfig {
-  /// Builder method to set the aspect ratio
-  ///
-  /// Controls the width-to-height ratio of the SVG display.
-  /// Higher values create wider, shorter fretboards.
-  ///
-  /// # Arguments
-  /// * `ratio` - Width/height ratio (typically 2.0-5.0)
-  ///
-  /// # Examples
-  /// ```rust
-  /// use frontend::components::fretboard::visual_config::FretboardVisualConfig;
-  ///
-  /// let compact = FretboardVisualConfig::default().with_aspect_ratio(2.5);
-  /// let wide = FretboardVisualConfig::default().with_aspect_ratio(4.5);
-  /// ```
-  pub fn with_aspect_ratio(mut self, ratio: f64) -> Self {
-    self.svg_aspect_ratio = ratio;
-    self
-  }
-
-  /// Builder method to set the fret margin percentage
-  ///
-  /// Controls the spacing around the fretboard as a percentage of total height.
-  ///
-  /// # Arguments
-  /// * `margin` - Margin as decimal percentage (e.g., 0.05 = 5%)
-  ///
-  /// # Examples
-  /// ```rust
-  /// use frontend::components::fretboard::visual_config::FretboardVisualConfig;
-  ///
-  /// let tight = FretboardVisualConfig::default().with_fret_margin(0.02);
-  /// let spacious = FretboardVisualConfig::default().with_fret_margin(0.1);
-  /// ```
-  pub fn with_fret_margin(mut self, margin: f64) -> Self {
-    self.fret_margin_percentage = margin;
-    self
-  }
-
-  /// Builder method to set the nut width
-  ///
-  /// Controls the visual width of the nut (zero fret) in SVG units.
-  ///
-  /// # Arguments
-  /// * `width` - Nut width in SVG units (typically 10.0-20.0)
-  pub fn with_nut_width(mut self, width: f64) -> Self {
-    self.nut_width = width;
-    self
-  }
-
-  /// Builder method to set the extra frets
-  ///
-  /// Controls how many frets beyond the visible range to show for context.
-  ///
-  /// # Arguments
-  /// * `extra` - Number of extra frets (typically 0-3)
-  pub fn with_extra_frets(mut self, extra: usize) -> Self {
-    self.extra_frets = extra;
-    self
-  }
-
-  /// Builder method to set marker positions
-  ///
-  /// Sets which fret positions should display visual markers (dots).
-  ///
-  /// # Arguments
-  /// * `positions` - Vector of fret numbers to mark
-  ///
-  /// # Examples
-  /// ```rust
-  /// use frontend::components::fretboard::visual_config::FretboardVisualConfig;
-  ///
-  /// // Standard guitar markers
-  /// let standard = FretboardVisualConfig::default()
-  ///   .with_marker_positions(vec![3, 5, 7, 9, 12, 15, 17, 19, 21]);
-  ///
-  /// // Minimal markers
-  /// let minimal = FretboardVisualConfig::default()
-  ///   .with_marker_positions(vec![3, 12]);
-  /// ```
-  pub fn with_marker_positions(mut self, positions: Vec<u8>) -> Self {
-    self.marker_positions = positions;
-    self
   }
 }

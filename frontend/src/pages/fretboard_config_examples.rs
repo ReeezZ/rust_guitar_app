@@ -36,13 +36,18 @@ pub fn FretboardConfigExamples() -> impl IntoView {
   });
 
   // Create a derived config that updates when any control changes
-  let visual_config = Memo::new(move |_| {
-    FretboardVisualConfig::default()
-      .with_aspect_ratio(svg_aspect_ratio.get())
-      .with_fret_margin(fret_margin_percentage.get())
-      .with_nut_width(nut_width.get())
-      .with_extra_frets(extra_frets.get())
-      .with_marker_positions(marker_positions.get())
+  let visual_config = RwSignal::new(FretboardVisualConfig::default());
+
+  Effect::new(move || {
+    visual_config.update(|config| {
+      config.svg_aspect_ratio.set(svg_aspect_ratio.get());
+      config
+        .fret_margin_percentage
+        .set(fret_margin_percentage.get());
+      config.nut_width.set(nut_width.get());
+      config.extra_frets.set(extra_frets.get());
+      config.marker_positions.set(marker_positions.get());
+    });
   });
 
   let fret_state = RwSignal::new(FretStateSignals::default());

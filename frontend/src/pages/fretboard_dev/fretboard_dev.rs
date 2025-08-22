@@ -9,11 +9,14 @@ use crate::{
 #[component]
 pub fn FretboardDevPage() -> impl IntoView {
   let model = RwSignal::new(FretboardModel::default());
-  model.update(|model| {
-    model.update_from_scale(Scale::new(
-      Note::C,
-      ScaleType::Hepatonic(HeptaScaleType::Major),
-    ));
+
+  Effect::new(move || {
+    model.update(|model| {
+      model.update_from_scale(Scale::new(
+        Note::C,
+        ScaleType::Hepatonic(HeptaScaleType::Major),
+      ));
+    });
   });
   view! {
     <>
