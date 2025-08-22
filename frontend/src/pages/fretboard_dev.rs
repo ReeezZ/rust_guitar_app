@@ -107,6 +107,13 @@ pub fn FretboardDevPage() -> impl IntoView {
     m.on_fret_clicked.set(Some(handle_fret_clicked));
   });
 
+  Effect::new(move || {
+    // Ensure the model is updated with the current fret states
+    model.update(|m| {
+      m.fret_states.set(frets.get());
+    });
+  });
+
   view! {
     <h1 class="mb-2 text-xl font-bold">"Fretboard Dev: FretboardWithNotes"</h1>
     <p class="mb-4 text-sm text-gray-600">
@@ -126,10 +133,15 @@ pub fn FretboardDevPage() -> impl IntoView {
     </div>
 
     <div>
+      <h1 class="mb-2 text-xl font-bold">"Fretboard (base) from model"</h1>
+      <FretboardViewModel model=model />
+    </div>
+
+    <div>
       <h1 class="mb-2 text-xl font-bold">
         "Fretboard (base) with no callback to check Clickable areas are not rendered"
       </h1>
-      <FretboardViewModel model=model />
+      <FretboardViewModel model=RwSignal::new(FretboardBaseModel::from_defaults()) />
     </div>
   }
 }
