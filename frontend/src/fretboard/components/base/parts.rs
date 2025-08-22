@@ -285,14 +285,15 @@ pub(crate) fn FretboardGrid(
                       }
                     >
                       {move || {
-                        click_cb
-                          .get()
-                          .as_ref()
-                          .map(|_| {
+                        if click_cb.get().is_some() {
+                          Some(
                             view! {
                               <FretboardClickableArea layout=layout_cell.get() coord=coord />
-                            }
-                          })
+                            },
+                          )
+                        } else {
+                          None
+                        }
                       }}
                       {state_sig_opt
                         .map(|state_signal| {
