@@ -17,7 +17,9 @@ pub struct FretClickEventWithNote {
 }
 
 #[component]
-pub fn FretboardWithNotesViewModel(model: Signal<FretboardWithNotesModel>) -> impl IntoView {
+pub fn FretboardWithNotesViewModel(
+  #[prop(into)] model: Signal<FretboardWithNotesModel>,
+) -> impl IntoView {
   let start_fret = Signal::derive(move || model.get().start_fret.get());
   let end_fret = Signal::derive(move || model.get().end_fret.get());
   let num_strings = Signal::derive(move || model.get().num_strings.get());
