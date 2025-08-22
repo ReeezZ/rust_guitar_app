@@ -1,9 +1,12 @@
 use std::{collections::HashMap, hash::Hash};
 
 use leptos::prelude::*;
-use shared::Note;
+use shared::{Note, Scale, ScaleTrait};
 
-use crate::fretboard::components::{base::FretState, visual_config::FretboardVisualConfig};
+use crate::fretboard::components::{
+  base::{FretState, FretStateColor},
+  visual_config::FretboardVisualConfig,
+};
 
 pub(crate) type FretStateSignals = HashMap<FretCoord, RwSignal<FretState>>;
 
@@ -51,5 +54,36 @@ impl Default for FretboardModel {
 impl FretboardModel {
   pub fn get_num_frets(&self) -> usize {
     self.end_fret.get() - self.start_fret.get()
+  }
+
+  pub fn get_num_strings(&self) -> usize {
+    self.tuning.get().len()
+  }
+
+  pub fn update_from_scale(&self, scale: Scale) {
+    self
+      .tuning
+      .get()
+      .iter()
+      .enumerate()
+      .for_each(|(string_idx, string_note)| {
+        for fret_idx in self.start_fret.get()..=self.end_fret.get() {
+          let coord = FretCoord {
+            string_idx: string_idx as u8,
+            fret_idx: fret_idx as u8,
+          };
+          let note_at_fret = string_note.add_steps(fret_idx);
+          let state = if scale.root_note() == Some(note_at_fret) {
+            FretState::Normal(FretStateColor::Green, note_at_fret.to_string())
+          } else if scale.contains_note(note_at_fret) {
+            FretState::Normal(FretStateColor::Blue, note_at_fret.to_string())
+          } else {
+            FretState::Hidden
+          };
+          self.fret_states.update(|fret_states| {
+            fret_states.insert(coord, RwSignal::new(state));
+          });
+        }
+      });
   }
 }
