@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use leptos::prelude::*;
-use shared::models;
 
 use crate::fretboard::{
   base_model::{FretClickEvent, FretStateSignals, FretboardBaseModel},
@@ -104,6 +103,10 @@ pub fn FretboardDevPage() -> impl IntoView {
     update_fret.run(coord.coord);
   });
 
+  model.update(|m| {
+    m.on_fret_clicked.set(Some(handle_fret_clicked));
+  });
+
   view! {
     <h1 class="mb-2 text-xl font-bold">"Fretboard Dev: FretboardWithNotes"</h1>
     <p class="mb-4 text-sm text-gray-600">
@@ -123,22 +126,10 @@ pub fn FretboardDevPage() -> impl IntoView {
     </div>
 
     <div>
-      <h1 class="mb-2 text-xl font-bold">"Fretboard (base)"</h1>
-      <Fretboard
-        fret_states=frets
-        start_fret=0
-        end_fret=12
-        num_strings=6
-        config=Signal::derive(FretboardVisualConfig::default)
-        on_fret_clicked=RwSignal::new(Some(handle_fret_clicked)).into()
-      />
-    </div>
-
-    <div>
       <h1 class="mb-2 text-xl font-bold">
         "Fretboard (base) with no callback to check Clickable areas are not rendered"
       </h1>
-      <FretboardViewModel model=model.into() />
+      <FretboardViewModel model=model />
     </div>
   }
 }

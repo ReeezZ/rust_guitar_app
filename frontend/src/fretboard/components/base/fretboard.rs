@@ -18,15 +18,21 @@ use crate::{
 use leptos::prelude::*;
 
 #[component]
-pub fn FretboardViewModel(model: Signal<FretboardBaseModel>) -> impl IntoView {
+pub fn FretboardViewModel(#[prop(into)] model: Signal<FretboardBaseModel>) -> impl IntoView {
+  let start_fret = Signal::derive(move || model.get().start_fret.get());
+  let end_fret = Signal::derive(move || model.get().end_fret.get());
+  let num_strings = Signal::derive(move || model.get().num_strings.get());
+  let config = Signal::derive(move || model.get().config.get());
+  let on_fret_clicked = Signal::derive(move || model.get().on_fret_clicked.get());
+  let fret_states = Signal::derive(move || model.get().fret_states.get());
   view! {
     <Fretboard
-      start_fret=model.get().start_fret
-      end_fret=model.get().end_fret
-      num_strings=model.get().num_strings
-      config=model.get().config.into()
-      on_fret_clicked=model.get().on_fret_clicked.into()
-      fret_states=model.get().fret_states
+      start_fret=start_fret
+      end_fret=end_fret
+      num_strings=num_strings
+      config=config
+      on_fret_clicked=on_fret_clicked
+      fret_states=fret_states
     />
   }
 }
@@ -83,8 +89,10 @@ pub fn Fretboard(
   #[prop(into)]
   num_strings: Signal<u8>,
   /// Visual configuration for fretboard display properties
+  #[prop(into)]
   config: Signal<FretboardVisualConfig>,
   /// Optional callback for fret click events
+  #[prop(into)]
   on_fret_clicked: Signal<Option<Callback<FretClickEvent>>>,
 
   #[prop(into)] fret_states: Signal<FretStateSignals>,

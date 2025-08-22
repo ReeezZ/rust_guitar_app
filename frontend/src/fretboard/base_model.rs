@@ -17,7 +17,7 @@ pub struct FretClickEvent {
   pub coord: FretCoord,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct FretboardBaseModel {
   /// First fret in the active/playable range
   pub start_fret: RwSignal<usize>,
@@ -31,6 +31,25 @@ pub struct FretboardBaseModel {
   pub on_fret_clicked: RwSignal<Option<Callback<FretClickEvent>>>,
   /// States for each fret
   pub fret_states: RwSignal<FretStateSignals>,
+}
+
+pub trait FretboardBaseModelTrait {
+  // fn get_start_fret(&self) -> usize;
+  fn set_start_fret(&self, fret: usize);
+
+  // fn get_end_fret(&self) -> usize;
+  fn set_end_fret(&self, fret: usize);
+
+  // fn get_num_strings(&self) -> u8;
+  fn set_num_strings(&self, num: u8);
+
+  // fn get_config(&self) -> FretboardVisualConfig;
+  fn set_config(&self, config: FretboardVisualConfig);
+
+  // fn get_fret_states(&self) -> FretStateSignals;
+  fn set_fret_states(&self, states: FretStateSignals);
+
+  // fn get_on_fret_clicked(&self) -> Option<Callback<FretClickEvent>>;
 }
 
 impl FretboardBaseModel {
@@ -62,6 +81,19 @@ impl FretboardBaseModel {
     }
   }
 
+  pub fn from_defaults() -> Self {
+    Self {
+      start_fret: RwSignal::new(1),
+      end_fret: RwSignal::new(9),
+      num_strings: RwSignal::new(6),
+      config: RwSignal::new(FretboardVisualConfig::default()),
+      on_fret_clicked: RwSignal::new(None),
+      fret_states: RwSignal::new(HashMap::new()),
+    }
+  }
+}
+
+impl FretboardBaseModelTrait for FretboardBaseModel {
   // fn generate_frets(num_strings: u8, num_frets: u8) -> FretStateSignals {
   //   let mut frets: FretStateSignals = HashMap::with_capacity(num_strings as usize);
 
@@ -83,34 +115,23 @@ impl FretboardBaseModel {
   // }
 
   // Creates non interactive fretboard
-  pub fn from_defaults() -> Self {
-    Self {
-      start_fret: RwSignal::new(1),
-      end_fret: RwSignal::new(9),
-      num_strings: RwSignal::new(6),
-      config: RwSignal::new(FretboardVisualConfig::default()),
-      on_fret_clicked: RwSignal::new(None),
-      fret_states: RwSignal::new(HashMap::new()),
-    }
-  }
-
-  pub fn set_start_fret(&self, fret: usize) {
+  fn set_start_fret(&self, fret: usize) {
     self.start_fret.set(fret);
   }
 
-  pub fn set_end_fret(&self, fret: usize) {
+  fn set_end_fret(&self, fret: usize) {
     self.end_fret.set(fret);
   }
 
-  pub fn set_num_strings(&self, num: u8) {
+  fn set_num_strings(&self, num: u8) {
     self.num_strings.set(num);
   }
 
-  pub fn set_config(&self, config: FretboardVisualConfig) {
+  fn set_config(&self, config: FretboardVisualConfig) {
     self.config.set(config);
   }
 
-  pub fn set_fret_states(&self, states: FretStateSignals) {
+  fn set_fret_states(&self, states: FretStateSignals) {
     self.fret_states.set(states);
   }
 }
