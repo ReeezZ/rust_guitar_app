@@ -32,6 +32,13 @@ pub struct FretboardWithNotesModel {
   pub tuning: RwSignal<Vec<Note>>,
 }
 
+impl Default for FretboardWithNotesModel {
+  fn default() -> Self {
+    let base_model = FretboardBaseModel::from_defaults();
+    Self::from_fretboard_base_model(base_model, RwSignal::new(Self::standard_tuning()))
+  }
+}
+
 impl FretboardWithNotesModel {
   pub fn from_fretboard_base_model(
     base_model: FretboardBaseModel,
@@ -66,11 +73,6 @@ impl FretboardWithNotesModel {
       .get(coord.string_idx as usize)
       .expect("Broken string bounds checking with tuning")
       .add_steps(coord.fret_idx as usize)
-  }
-
-  pub fn default() -> Self {
-    let base_model = FretboardBaseModel::from_defaults();
-    Self::from_fretboard_base_model(base_model, RwSignal::new(Self::standard_tuning()))
   }
 
   pub fn get_num_frets(&self) -> u8 {
