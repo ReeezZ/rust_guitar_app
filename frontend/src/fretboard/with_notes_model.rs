@@ -29,11 +29,14 @@ pub struct FretboardWithNotesModel {
   /// States for each fret
   pub fret_states: RwSignal<FretStateSignals>,
 
-  pub tuning: Vec<Note>,
+  pub tuning: RwSignal<Vec<Note>>,
 }
 
 impl FretboardWithNotesModel {
-  pub fn from_fretboard_base_model(base_model: FretboardBaseModel, tuning: Vec<Note>) -> Self {
+  pub fn from_fretboard_base_model(
+    base_model: FretboardBaseModel,
+    tuning: RwSignal<Vec<Note>>,
+  ) -> Self {
     let on_note_clicked = Signal::derive(move || {
       if let Some(callback) = base_model.on_fret_clicked.get() {
         let on_note_clicked = Callback::new(move |event: FretClickEventWithNote| {
@@ -67,7 +70,7 @@ impl FretboardWithNotesModel {
 
   pub fn default() -> Self {
     let base_model = FretboardBaseModel::from_defaults();
-    Self::from_fretboard_base_model(base_model, Self::standard_tuning())
+    Self::from_fretboard_base_model(base_model, RwSignal::new(Self::standard_tuning()))
   }
 
   pub fn get_num_frets(&self) -> u8 {

@@ -1,3 +1,5 @@
+use core::num;
+
 use leptos::prelude::*;
 use shared::music::notes::Note;
 
@@ -15,17 +17,16 @@ pub struct FretClickEventWithNote {
 }
 
 #[component]
-pub fn FretboardWithNotesViewModel(model: FretboardWithNotesModel) -> impl IntoView {
+pub fn FretboardWithNotesViewModel(model: Signal<FretboardWithNotesModel>) -> impl IntoView {
+  let start_fret = Signal::derive(move || model.get().start_fret.get());
+  let end_fret = Signal::derive(move || model.get().end_fret.get());
+  let num_strings = Signal::derive(move || model.get().num_strings.get());
+  let tuning = Signal::derive(move || model.get().tuning.get());
+  let config = Signal::derive(move || model.get().config.get());
+  let on_note_clicked = Signal::derive(move || model.get().on_note_clicked.get());
+  let fret_states = Signal::derive(move || model.get().fret_states.get());
   view! {
-    <FretboardWithNotes
-      start_fret=model.start_fret
-      end_fret=model.end_fret
-      num_strings=model.num_strings
-      tuning=model.tuning
-      on_note_clicked=model.on_note_clicked
-      config=model.config.into()
-      fret_states=model.fret_states
-    />
+    <FretboardWithNotes start_fret end_fret num_strings tuning on_note_clicked config fret_states />
   }
 
   // Build the view using the start and end fret signals

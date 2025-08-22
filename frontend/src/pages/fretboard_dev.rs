@@ -5,7 +5,7 @@ use leptos::prelude::*;
 use crate::fretboard::{
   base_model::{FretClickEvent, FretStateSignals, FretboardBaseModel},
   components::{
-    base::{FretState, FretStateColor, Fretboard, FretboardViewModel},
+    base::{FretState, FretStateColor, FretboardViewModel},
     visual_config::FretboardVisualConfig,
     with_notes::{FretClickEventWithNote, FretboardWithNotes},
   },

@@ -42,7 +42,7 @@ impl FretboardTrainerTrait for FretboardWithNotesModel {
   }
 
   fn note_from_fret(&self, coord: FretCoord) -> Note {
-    let string_note = self.tuning[coord.string_idx as usize];
+    let string_note = self.tuning.get()[coord.string_idx as usize];
     string_note.add_steps(coord.fret_idx as usize)
   }
 }
