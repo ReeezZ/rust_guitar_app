@@ -32,9 +32,9 @@ pub struct VisibleRange {
 
 impl VisibleRange {
   /// Calculate the visible fret range including extra context frets
-  pub fn new(start_fret: usize, end_fret: usize, extra_frets: usize, max_frets: usize) -> Self {
+  pub fn new(start_fret: usize, end_fret: usize, extra_frets: usize) -> Self {
     let min_fret = start_fret.saturating_sub(extra_frets);
-    let max_fret = (end_fret + extra_frets).min(max_frets);
+    let max_fret = end_fret + extra_frets;
 
     Self { min_fret, max_fret }
   }

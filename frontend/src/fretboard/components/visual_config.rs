@@ -59,7 +59,7 @@ pub struct FretboardVisualConfig {
   /// Number of extra frets to show for context (default: 1)
   pub extra_frets: RwSignal<usize>,
   /// Fret positions where markers should be displayed
-  pub marker_positions: RwSignal<Vec<u8>>,
+  pub marker_positions: RwSignal<Vec<usize>>,
 }
 
 impl Default for FretboardVisualConfig {

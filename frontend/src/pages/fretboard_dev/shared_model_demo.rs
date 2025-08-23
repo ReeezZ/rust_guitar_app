@@ -45,13 +45,12 @@ pub fn SharedModelDemo() -> impl IntoView {
   });
 
   model.update(|m| {
-    m.on_note_clicked.set(Some(handle_fret_clicked));
+    m.set_on_note_clicked(Some(handle_fret_clicked));
   });
 
   Effect::new(move || {
-    // Ensure the model is updated with the current fret states
     model.update(|m| {
-      m.fret_states.set(frets.get());
+      m.set_fret_states(frets.get());
     });
   });
 
@@ -75,14 +74,14 @@ pub fn SharedModelDemo() -> impl IntoView {
 
     <div>
       <h1 class="mb-2 text-xl font-bold">"Fretboard (base) from model"</h1>
-      <FretboardViewModel model=model />
+      <FretboardViewModel model=model.get() />
     </div>
 
     <div>
       <h1 class="mb-2 text-xl font-bold">
         "Fretboard (base) with no callback to check Clickable areas are not rendered"
       </h1>
-      <FretboardViewModel model=RwSignal::new(FretboardModel::default()) />
+      <FretboardViewModel model=FretboardModel::default() />
     </div>
   }
 }

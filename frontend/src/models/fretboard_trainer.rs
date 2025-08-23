@@ -19,8 +19,8 @@ pub trait FretboardTrainerTrait {
 
 impl FretboardTrainerTrait for FretboardModel {
   fn get_random_fret(&self) -> FretCoord {
-    let string_idx = rand::rng().random_range(0..self.tuning.get().len() as u8);
-    let fret_idx = rand::rng().random_range(0..self.get_num_frets() as u8);
+    let string_idx = rand::rng().random_range(0..self.get_tuning().get().len() as u8);
+    let fret_idx = rand::rng().random_range(0..self.get_num_frets_untracked() as u8);
 
     FretCoord {
       string_idx,
@@ -42,7 +42,7 @@ impl FretboardTrainerTrait for FretboardModel {
   }
 
   fn note_from_fret(&self, coord: FretCoord) -> Note {
-    let string_note = self.tuning.get()[coord.string_idx as usize];
+    let string_note = self.get_tuning().get()[coord.string_idx as usize];
     string_note.add_steps(coord.fret_idx as usize)
   }
 }

@@ -1,62 +1,76 @@
-use std::sync::Arc;
+use leptos::prelude::*;
 
 use crate::fretboard::fretboard_model::FretCoord;
 
 /// Snapshot of fretboard geometry for a render cycle.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Copy)]
 pub struct LayoutSnapshot {
-  pub positions: Arc<Vec<f64>>,
-  pub num_strings: u8,
-  pub string_spacing: f64,
-  pub svg_width: f64,
-  pub svg_height: f64,
-  pub fret_margin: f64,
-  pub nut_width: f64,
-  pub has_nut: bool,
-  range_start: f64,
-  scale_factor: f64,
+  pub positions: Signal<Vec<f64>>,
+  pub num_strings: Signal<u8>,
+  pub string_spacing: Signal<f64>,
+  pub svg_width: Signal<f64>,
+  pub svg_height: Signal<f64>,
+  pub fret_margin: Signal<f64>,
+  pub nut_width: Signal<f64>,
+  pub has_nut: Signal<bool>,
+  range_start: Signal<f64>,
+  scale_factor: Signal<f64>,
 }
 
 impl LayoutSnapshot {
   #[allow(clippy::too_many_arguments)]
   pub fn new(
-    positions: Vec<f64>,
-    min_fret: usize,
-    max_fret: usize,
-    num_strings: u8,
-    string_spacing: f64,
-    svg_width: f64,
-    svg_height: f64,
-    fret_margin: f64,
-    nut_width: f64,
+    positions: Signal<Vec<f64>>,
+    min_fret: Signal<usize>,
+    max_fret: Signal<usize>,
+    num_strings: Signal<u8>,
+    string_spacing: Signal<f64>,
+    svg_width: Signal<f64>,
+    svg_height: Signal<f64>,
+    fret_margin: Signal<f64>,
+    nut_width: Signal<f64>,
   ) -> Self {
-    let has_nut = min_fret == 0;
-    let range_start = if has_nut { 0.0 } else { positions[min_fret] };
-    let range_end = positions[max_fret];
-    let range_width = range_end - range_start;
-    let available_width = if has_nut {
-      svg_width - nut_width
-    } else {
-      svg_width
-    };
-    let scale_factor = available_width / range_width;
+    let has_nut = Memo::new(move |_| min_fret.get() == 0);
+    let range_start = Memo::new(move |_| {
+      if has_nut.get() {
+        0.0
+      } else {
+        positions.get()[min_fret.get()]
+      }
+    });
+    let scale_factor = Memo::new(move |_| {
+      let index_with_selected_range_offset = max_fret.get() - min_fret.get();
+      let range_end = positions.get()[index_with_selected_range_offset];
+      let range_width = range_end - range_start.get();
+      let available_width = if has_nut.get() {
+        svg_width.get() - nut_width.get()
+      } else {
+        svg_width.get()
+      };
+      available_width / range_width
+    });
+
     Self {
-      positions: Arc::new(positions),
+      positions: positions,
       num_strings,
       string_spacing,
       svg_width,
       svg_height,
       fret_margin,
       nut_width,
-      has_nut,
-      range_start,
-      scale_factor,
+      has_nut: has_nut.into(),
+      range_start: range_start.into(),
+      scale_factor: scale_factor.into(),
     }
   }
 
   fn abs_to_viewbox_x(&self, absolute_x: f64) -> f64 {
-    let offset = if self.has_nut { self.nut_width } else { 0.0 };
-    offset + (absolute_x - self.range_start) * self.scale_factor
+    let offset = if self.has_nut.get() {
+      self.nut_width.get()
+    } else {
+      0.0
+    };
+    offset + (absolute_x - self.range_start.get()) * self.scale_factor.get()
   }
 
   /// Transform an absolute (unscaled) x coordinate into the current viewbox space
@@ -66,8 +80,8 @@ impl LayoutSnapshot {
 
   /// Effective nut width (0 if nut not visible)
   pub fn effective_nut_width(&self) -> f64 {
-    if self.has_nut {
-      self.nut_width
+    if self.has_nut.get() {
+      self.nut_width.get()
     } else {
       0.0
     }
@@ -77,15 +91,15 @@ impl LayoutSnapshot {
 
   pub fn fret_center_x(&self, fret: usize) -> Option<f64> {
     if fret == 0 {
-      return if self.has_nut {
-        Some(self.nut_width / 2.0)
+      return if self.has_nut.get() {
+        Some(self.nut_width.get() / 2.0)
       } else {
         None
       };
     }
-    if fret < self.positions.len() {
-      let prev = self.positions[fret - 1];
-      let curr = self.positions[fret];
+    if fret < self.positions.get().len() {
+      let prev = self.positions.get()[fret - 1];
+      let curr = self.positions.get()[fret];
       Some(self.abs_to_viewbox_x((prev + curr) / 2.0))
     } else {
       None
@@ -93,7 +107,7 @@ impl LayoutSnapshot {
   }
 
   pub fn string_y(&self, string_idx: u8) -> f64 {
-    (string_idx as f64 + 1.0) * self.string_spacing
+    (string_idx as f64 + 1.0) * self.string_spacing.get()
   }
 
   pub fn note_position(&self, coord: FretCoord) -> Option<(f64, f64)> {

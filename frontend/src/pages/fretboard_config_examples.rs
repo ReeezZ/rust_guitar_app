@@ -7,8 +7,8 @@ use leptos::prelude::*;
 use shared::Note;
 
 use crate::fretboard::{
-  components::{base::Fretboard, visual_config::FretboardVisualConfig},
-  fretboard_model::{FretClickEvent, FretStateSignals},
+  components::{base::FretboardViewModel, visual_config::FretboardVisualConfig},
+  fretboard_model::{FretClickEvent, FretStateSignals, FretboardModel},
 };
 
 #[component]
@@ -28,29 +28,68 @@ pub fn FretboardConfigExamples() -> impl IntoView {
 
   // Convert marker preset to actual marker positions
   let marker_positions = Memo::new(move |_| match marker_preset.get().as_str() {
-    "standard" => vec![3_u8, 5, 7, 9, 12, 15, 17, 19, 21, 24],
-    "octaves" => vec![12_u8, 24],
-    "pentatonic" => vec![3_u8, 5, 7, 12, 15, 17, 24],
+    "standard" => vec![3, 5, 7, 9, 12, 15, 17, 19, 21, 24],
+    "octaves" => vec![12, 24],
+    "pentatonic" => vec![3, 5, 7, 12, 15, 17, 24],
     "none" => vec![],
-    _ => vec![3_u8, 5, 7, 9, 12, 15, 17, 19, 21, 24],
+    _ => vec![3, 5, 7, 9, 12, 15, 17, 19, 21, 24],
   });
 
-  // Create a derived config that updates when any control changes
-  let visual_config = RwSignal::new(FretboardVisualConfig::default());
+  let model = RwSignal::new(FretboardModel::default());
 
   Effect::new(move || {
-    visual_config.update(|config| {
-      config.svg_aspect_ratio.set(svg_aspect_ratio.get());
-      config
-        .fret_margin_percentage
-        .set(fret_margin_percentage.get());
-      config.nut_width.set(nut_width.get());
-      config.extra_frets.set(extra_frets.get());
-      config.marker_positions.set(marker_positions.get());
+    model.update(move |model| {
+      model.update_visual_config(|config| {
+        config.extra_frets.set(extra_frets.get());
+      });
+    });
+  });
+  Effect::new(move || {
+    model.update(move |model| {
+      model.update_visual_config(|config| {
+        config.marker_positions.set(marker_positions.get());
+      });
+    });
+  });
+  Effect::new(move || {
+    model.update(move |model| {
+      model.update_visual_config(|config| {
+        config.svg_aspect_ratio.set(svg_aspect_ratio.get());
+      });
+    });
+  });
+  Effect::new(move || {
+    model.update(move |model| {
+      model.update_visual_config(|config| {
+        config
+          .fret_margin_percentage
+          .set(fret_margin_percentage.get());
+      });
+    });
+  });
+  Effect::new(move || {
+    model.update(move |model| {
+      model.update_visual_config(|config| {
+        config.nut_width.set(nut_width.get());
+      });
     });
   });
 
-  let fret_state = RwSignal::new(FretStateSignals::default());
+  Effect::new(move || {
+    model.update(move |m| {
+      m.set_end_fret(end_fret.get());
+    });
+  });
+  Effect::new(move || {
+    model.update(move |m| {
+      m.set_start_fret(start_fret.get());
+    });
+  });
+  Effect::new(move || {
+    model.update(move |m| {
+      m.set_tuning(tuning.get());
+    });
+  });
 
   view! {
     <div class="space-y-3">
@@ -119,18 +158,7 @@ pub fn FretboardConfigExamples() -> impl IntoView {
       <div class="flex flex-col gap-6 xl:flex-row">
         // Main fretboard display - responsive sizing, not too constrained
         <div class="p-4 bg-blue-50 rounded-lg border-2 border-blue-200 xl:min-w-0 xl:flex-[2]">
-          <Fretboard
-            start_fret=start_fret.read_only()
-            end_fret=end_fret.read_only()
-            tuning=tuning
-            config=visual_config.get()
-            on_note_clicked=Callback::new(|event: FretClickEvent| {
-              leptos::logging::log!(
-                "Fret clicked: String {}, Fret {}, Note {}", event.coord.string_idx, event.coord.fret_idx, event.note
-              );
-            })
-            fret_states=fret_state.read_only()
-          />
+          <FretboardViewModel model=model.get() />
 
         </div>
 

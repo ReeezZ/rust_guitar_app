@@ -20,7 +20,7 @@ pub fn FretboardDevPage() -> impl IntoView {
   });
   view! {
     <>
-      <FretboardViewModel model=model />
+      <FretboardViewModel model=model.get() />
       <SharedModelDemo />
     </>
   }

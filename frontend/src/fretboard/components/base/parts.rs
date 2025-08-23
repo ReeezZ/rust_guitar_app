@@ -47,28 +47,50 @@ pub(crate) fn FretboardFrets(
   view! {
     <For
       each=move || (min_visible_fret.get()..=max_visible_fret.get())
-      key=|fret_no| *fret_no
+      key=move |fret_no| (
+        *fret_no,
+        min_visible_fret.get(),
+        max_visible_fret.get(),
+        start_fret.get(),
+        end_fret.get(),
+      )
       let(fret_no)
     >
       {
         let layout = layout.clone();
         move || {
-          let absolute_x = layout.positions[fret_no];
+          let checked_fret_index = fret_no.checked_sub(min_visible_fret.get());
+          leptos::logging::log!(
+            "Rendering fret line: fret_no={}, min_visible_fret={:?}, max_visible_fret={:?}, checked_fret_index={:?}, start_fret={:?}, end_fret={:?}",
+            fret_no,
+            min_visible_fret.get(),
+            max_visible_fret.get(),
+            checked_fret_index,
+            start_fret.get(),
+            end_fret.get()
+          );
+          if checked_fret_index.is_none() {
+            return None;
+          }
+          let absolute_x = layout.positions.get()[checked_fret_index.unwrap()];
           let x_pos = layout.absolute_to_viewbox_x(absolute_x);
           let is_playable = fret_no >= start_fret.get() && fret_no <= end_fret.get();
           let color = if is_playable { "#444" } else { "#bbb" };
           let width = if is_playable { "5" } else { "3" };
-          view! {
-            <line
-              x1=x_pos
-              y1=layout.fret_margin
-              x2=x_pos
-              y2=layout.svg_height - layout.fret_margin
-              stroke=color
-              stroke-width=width
-              opacity=if is_playable { "1.0" } else { "0.6" }
-            />
-          }
+          Some(
+
+            view! {
+              <line
+                x1=x_pos
+                y1=layout.fret_margin.get()
+                x2=x_pos
+                y2=layout.svg_height.get() - layout.fret_margin.get()
+                stroke=color
+                stroke-width=width
+                opacity=if is_playable { "1.0" } else { "0.6" }
+              />
+            },
+          )
         }
       }
     </For>
@@ -109,34 +131,42 @@ pub(crate) fn FretboardStrings(
 /// Renders fret position markers (dots)
 #[component]
 pub(crate) fn FretboardMarkers(
-  layout: LayoutSnapshot,
-  marker_positions: Vec<u8>,
+  #[prop(into)] layout: LayoutSnapshot,
+  #[prop(into)] marker_positions: Signal<Vec<usize>>,
   #[prop(into)] min_visible_fret: Signal<usize>,
   #[prop(into)] max_visible_fret: Signal<usize>,
 ) -> impl IntoView {
-  (min_visible_fret.get()..=max_visible_fret.get())
-    .filter(|&fret| marker_positions.contains(&(fret as u8)))
-    .map(|fret| {
-      let x_prev = layout.positions[(fret - 1).max(0)];
-      let x_curr = layout.positions[fret];
-      let x_center = (x_prev + x_curr) / 2.0;
-      let x = layout.absolute_to_viewbox_x(x_center);
-      let y = layout.svg_height / 2.0;
-      let r = if fret == 12 || fret == 24 { 8.0 } else { 6.0 };
-      let y_offset = 28.0;
-      let (cy1, cy2, op2) = if fret == 12 || fret == 24 {
-        (y - y_offset, y + y_offset, 0.25)
-      } else {
-        (y, y + y_offset, 0.0)
-      };
-      view! {
-        <g>
-          <circle cx=x cy=cy1 r=r fill="#444" opacity="0.25" />
-          <circle cx=x cy=cy2 r=r fill="#444" opacity=op2 />
-        </g>
+  view! {
+    <For
+      each=move || {
+        (min_visible_fret.get()..=max_visible_fret.get())
+          .filter(move |fret| marker_positions.get().contains(fret))
       }
-    })
-    .collect_view()
+      key=|fret| *fret
+      let(fret)
+    >
+      {move || {
+        let x_prev = layout.positions.get()[(fret - 1).max(0)];
+        let x_curr = layout.positions.get()[fret];
+        let x_center = (x_prev + x_curr) / 2.0;
+        let x = layout.absolute_to_viewbox_x(x_center);
+        let y = layout.svg_height.get() / 2.0;
+        let r = if fret == 12 || fret == 24 { 8.0 } else { 6.0 };
+        let y_offset = 28.0;
+        let (cy1, cy2, op2) = if fret == 12 || fret == 24 {
+          (y - y_offset, y + y_offset, 0.25)
+        } else {
+          (y, y + y_offset, 0.0)
+        };
+        view! {
+          <g>
+            <circle cx=x cy=cy1 r=r fill="#444" opacity="0.25" />
+            <circle cx=x cy=cy2 r=r fill="#444" opacity=op2 />
+          </g>
+        }
+      }}
+    </For>
+  }
 }
 
 /// Renders semi-transparent overlays for non-playable regions
@@ -148,31 +178,24 @@ pub(crate) fn FretboardOverlays(
   #[prop(into)] min_visible_fret: Signal<usize>,
   #[prop(into)] max_visible_fret: Signal<usize>,
 ) -> impl IntoView {
-  leptos::logging::log!(
-    "Rendering FretboardOverlays: start_fret={}, end_fret={}, layout={:?}",
-    start_fret.get(),
-    end_fret.get(),
-    layout
-  );
-
   let layout_clone = layout.clone();
   let overlay_left = move || {
     if start_fret.get() > min_visible_fret.get() {
       let x_prev = if start_fret.get() == 0 {
         0.0
       } else {
-        layout.positions[(start_fret.get() - 1).max(0)]
+        layout.positions.get()[(start_fret.get() - 1).max(0)]
       };
-      let x_curr = layout.positions[start_fret.get()];
+      let x_curr = layout.positions.get()[start_fret.get()];
       let playable_area_start = (x_prev + x_curr) / 2.0 - (x_curr - x_prev) / 4.0;
       let start_x = layout.absolute_to_viewbox_x(playable_area_start);
       let width = start_x - layout.effective_nut_width();
       Some(view! {
         <rect
           x=layout.effective_nut_width()
-          y=layout.fret_margin
+          y=layout.fret_margin.get()
           width=width
-          height=layout.svg_height - 2.0 * layout.fret_margin
+          height=layout.svg_height.get() - 2.0 * layout.fret_margin.get()
           fill="#fff"
           opacity="0.35"
           style="pointer-events:none;"
@@ -186,14 +209,14 @@ pub(crate) fn FretboardOverlays(
   let layout = layout_clone;
   let overlay_right = move || {
     if end_fret.get() < max_visible_fret.get() {
-      let end_x = layout.absolute_to_viewbox_x(layout.positions[end_fret.get()]);
-      let width = layout.svg_width - end_x;
+      let end_x = layout.absolute_to_viewbox_x(layout.positions.get()[end_fret.get()]);
+      let width = layout.svg_width.get() - end_x;
       Some(view! {
         <rect
           x=end_x
-          y=layout.fret_margin
+          y=layout.fret_margin.get()
           width=width
-          height=layout.svg_height - 2.0 * layout.fret_margin
+          height=layout.svg_height.get() - 2.0 * layout.fret_margin.get()
           fill="#fff"
           opacity="0.35"
           style="pointer-events:none;"
@@ -213,27 +236,33 @@ pub(crate) fn FretboardOverlays(
 /// Single clickable area for one fret/string coordinate.
 #[component]
 fn FretboardClickableArea(layout: LayoutSnapshot, coord: FretCoord) -> impl IntoView {
-  let string_y = layout.string_y(coord.string_idx);
-  let (x, width) = if coord.fret_idx == 0 {
-    // Nut rectangle
-    if layout.has_nut {
-      (0.0, layout.nut_width)
+  let string_y = Memo::new(move |_| layout.string_y(coord.string_idx));
+  let x_and_width = Memo::new(move |_| {
+    if coord.fret_idx == 0 {
+      // Nut rectangle
+      if layout.has_nut.get() {
+        (0.0, layout.nut_width.get())
+      } else {
+        (0.0, 0.0)
+      }
     } else {
-      (0.0, 0.0)
+      let prev = layout.positions.get()[(coord.fret_idx as usize - 1).max(0)];
+      let curr = layout.positions.get()[coord.fret_idx as usize];
+      let start = layout.absolute_to_viewbox_x((prev + curr) / 2.0 - (curr - prev) / 4.0);
+      let end = layout.absolute_to_viewbox_x((prev + curr) / 2.0 + (curr - prev) / 4.0);
+      (start, end - start)
     }
-  } else {
-    let prev = layout.positions[(coord.fret_idx as usize - 1).max(0)];
-    let curr = layout.positions[coord.fret_idx as usize];
-    let start = layout.absolute_to_viewbox_x((prev + curr) / 2.0 - (curr - prev) / 4.0);
-    let end = layout.absolute_to_viewbox_x((prev + curr) / 2.0 + (curr - prev) / 4.0);
-    (start, end - start)
-  };
+  });
+  let x = Memo::new(move |_| x_and_width.get().0);
+  let width = Memo::new(move |_| x_and_width.get().1);
+  let height = Memo::new(move |_| layout.string_spacing.get() * 0.8);
+  let y = Memo::new(move |_| string_y.get() - layout.string_spacing.get() * 0.4);
   view! {
     <rect
       x=x
-      y=string_y - layout.string_spacing * 0.4
+      y=y
       width=width
-      height=layout.string_spacing * 0.8
+      height=height
       fill="transparent"
       stroke="red"
       stroke-width="1"
@@ -247,14 +276,18 @@ fn FretboardClickableArea(layout: LayoutSnapshot, coord: FretCoord) -> impl Into
 fn FretboardNote(
   layout: LayoutSnapshot,
   coord: FretCoord,
-  state: Signal<FretState>,
+  state: Signal<Option<FretState>>,
 ) -> impl IntoView {
   move || {
     let (x, y) = match layout.note_position(coord) {
       Some(p) => p,
       None => return None,
     };
-    let current_state = state.get();
+    let current_state = match state.get() {
+      Some(fret_state) => fret_state,
+      None => return None,
+    };
+
     let (fill_color, radius, label) = match current_state {
       FretState::Hidden => ("transparent".to_string(), 0.0, None),
       FretState::Normal(color, label) => (color.as_str().to_string(), 12.0, Some(label)),
@@ -291,7 +324,7 @@ fn FretboardNote(
 
 #[component]
 pub(crate) fn FretboardGrid(
-  #[prop(into)] layout: Signal<LayoutSnapshot>,
+  #[prop(into)] layout: LayoutSnapshot,
   #[prop(into)] min_visible_fret: Signal<usize>,
   #[prop(into)] max_visible_fret: Signal<usize>,
   fret_states: Signal<FretStateSignals>,
@@ -306,7 +339,7 @@ pub(crate) fn FretboardGrid(
       let(fret_idx)
     >
       <For
-        each=move || (0..layout.get().num_strings)
+        each=move || (0..layout.num_strings.get())
         key=move |string_idx| (*string_idx as usize, fret_idx)
         let(string_idx)
       >
@@ -338,22 +371,21 @@ pub(crate) fn FretboardGrid(
             >
               {move || {
                 if click_cb.get().is_some() {
-                  Some(view! { <FretboardClickableArea layout=layout.get() coord=coord /> })
+                  Some(view! { <FretboardClickableArea layout=layout coord=coord /> })
                 } else {
                   None
                 }
               }}
-              {move || {
-                if let Some(state_signal) = fret_states.get().get(&coord) {
-                  Some(
-                    view! {
-                      <FretboardNote layout=layout.get() coord state=(*state_signal).into() />
-                    },
-                  )
-                } else {
-                  None
-                }
-              }}
+              <FretboardNote
+                layout=layout
+                coord=coord
+                state=Signal::derive(move || {
+                  match fret_states.get().get(&coord) {
+                    Some(fret_state) => Some(fret_state.get()),
+                    None => None,
+                  }
+                })
+              />
             </g>
           }
         }

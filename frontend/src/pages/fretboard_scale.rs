@@ -8,10 +8,10 @@ use crate::{
   },
   fretboard::{
     components::{
-      base::{Fretboard, FretboardViewModel},
-      visual_config::FretboardVisualConfig,
+      base::FretboardViewModel,
+      visual_config::{self, FretboardVisualConfig},
     },
-    fretboard_model::{FretClickEvent, FretboardModel},
+    fretboard_model::{default_tuning, FretClickEvent, FretboardModel},
   },
 };
 use leptos::{logging::log, prelude::*, wasm_bindgen::JsCast};
@@ -46,18 +46,7 @@ pub fn FretboardScalePage() -> impl IntoView {
     set_clicked_note_event.set(Some(event));
   });
 
-  let model = RwSignal::new({
-    FretboardModel {
-      start_fret,
-      end_fret,
-      on_note_clicked: RwSignal::new(Some(on_note_clicked)).into(),
-      config: RwSignal::new(FretboardVisualConfig {
-        extra_frets,
-        ..Default::default()
-      }),
-      ..Default::default()
-    }
-  });
+  let model = RwSignal::new(FretboardModel::default());
 
   Effect::new(move || {
     model.update(move |model| {
@@ -180,7 +169,7 @@ pub fn FretboardScalePage() -> impl IntoView {
 
       // Main fretboard display
       //
-      <FretboardViewModel model />
+      <FretboardViewModel model=model.get() />
       // />
       // Show 2 extra frets beyond the end fret
       <div class="p-4 bg-gray-50 rounded-lg border-2 border-gray-200"></div>
