@@ -36,26 +36,31 @@ pub(crate) fn FretboardNut(
 /// Renders all fret lines with different styles for playable vs non-playable
 #[component]
 pub(crate) fn FretboardFrets(layout: LayoutSnapshot) -> impl IntoView {
-  (layout.min_fret..=layout.max_fret)
-    .map(|fret_no| {
-      let absolute_x = layout.positions[fret_no];
-      let x_pos = layout.absolute_to_viewbox_x(absolute_x);
-      let is_playable = fret_no >= layout.start_fret && fret_no <= layout.end_fret;
-      let color = if is_playable { "#444" } else { "#bbb" };
-      let width = if is_playable { "5" } else { "3" };
-      view! {
-        <line
-          x1=x_pos
-          y1=layout.fret_margin
-          x2=x_pos
-          y2=layout.svg_height - layout.fret_margin
-          stroke=color
-          stroke-width=width
-          opacity=if is_playable { "1.0" } else { "0.6" }
-        />
+  view! {
+    <For each=move || (layout.min_fret..=layout.max_fret) key=|fret_no| *fret_no let(fret_no)>
+      {
+        let layout = layout.clone();
+        move || {
+          let absolute_x = layout.positions[fret_no];
+          let x_pos = layout.absolute_to_viewbox_x(absolute_x);
+          let is_playable = fret_no >= layout.start_fret && fret_no <= layout.end_fret;
+          let color = if is_playable { "#444" } else { "#bbb" };
+          let width = if is_playable { "5" } else { "3" };
+          view! {
+            <line
+              x1=x_pos
+              y1=layout.fret_margin
+              x2=x_pos
+              y2=layout.svg_height - layout.fret_margin
+              stroke=color
+              stroke-width=width
+              opacity=if is_playable { "1.0" } else { "0.6" }
+            />
+          }
+        }
       }
-    })
-    .collect_view()
+    </For>
+  }
 }
 
 /// Renders horizontal string lines
@@ -68,23 +73,25 @@ pub(crate) fn FretboardStrings(
   /// Total viewbox width
   viewbox_width: f64,
 ) -> impl IntoView {
-  (0..num_strings)
-    .map(|i| {
-      let y_pos = (i as f64 + 1.0) * string_spacing;
-      let string_thickness = 1.0 + (i as f64);
+  view! {
+    <For each=move || (0..num_strings) key=|string_no| *string_no let(string_no)>
+      {
+        let y_pos = (string_no as f64 + 1.0) * string_spacing;
+        let string_thickness = 1.0 + (string_no as f64);
 
-      view! {
-        <line
-          x1="0"
-          y1=y_pos
-          x2=viewbox_width
-          y2=y_pos
-          stroke="#888"
-          stroke-width=string_thickness
-        />
+        view! {
+          <line
+            x1="0"
+            y1=y_pos
+            x2=viewbox_width
+            y2=y_pos
+            stroke="#888"
+            stroke-width=string_thickness
+          />
+        }
       }
-    })
-    .collect_view()
+    </For>
+  }
 }
 
 /// Renders fret position markers (dots)
@@ -255,60 +262,59 @@ pub(crate) fn FretboardGrid(
   click_cb: Signal<Option<Callback<FretClickEvent>>>,
 ) -> impl IntoView {
   view! {
-    <g class="interactive-layer">
-      {move || {
-        (layout.get().min_fret..=layout.get().max_fret)
-          .flat_map(|fret_idx| {
-            (0..layout.get().num_strings)
-              .map(move |string_idx| {
-                let coord = FretCoord {
-                  string_idx,
-                  fret_idx: fret_idx as u8,
-                };
-                view! {
-                  <g
-                    class="cell-group"
-                    data-fret=fret_idx
-                    data-string=string_idx
-                    style=format!(
-                      "cursor: {};",
-                      if click_cb.get().is_some() { "pointer" } else { "default" },
-                    )
-                    on:click=move |_| {
-                      if let Some(click_cb) = click_cb.get().as_ref() {
-                        let note = tuning
-                          .get()
-                          .get(string_idx as usize)
-                          .expect("Bounds checking on model construction")
-                          .add_steps(fret_idx);
-                        click_cb.run(FretClickEvent { coord, note });
-                      }
-                    }
-                  >
-                    {move || {
-                      if click_cb.get().is_some() {
-                        Some(view! { <FretboardClickableArea layout=layout.get() coord=coord /> })
-                      } else {
-                        None
-                      }
-                    }}
-                    {move || {
-                      if let Some(state_signal) = fret_states.get().get(&coord).cloned() {
-                        Some(
-                          view! {
-                            <FretboardNote layout=layout.get() coord state=state_signal.into() />
-                          },
-                        )
-                      } else {
-                        None
-                      }
-                    }}
-                  </g>
+    <For
+      each=move || layout.get().min_fret..=layout.get().max_fret
+      key=|fret_idx| *fret_idx
+      let(fret_idx)
+    >
+      <For each=move || (0..layout.get().num_strings) key=|string_idx| *string_idx let(string_idx)>
+        {
+          let coord = FretCoord {
+            string_idx,
+            fret_idx: fret_idx as u8,
+          };
+          let handle_click = move |_| {
+            if let Some(click_cb) = click_cb.get().as_ref() {
+              let note = tuning
+                .get()
+                .get(string_idx as usize)
+                .expect("Bounds checking on model construction")
+                .add_steps(fret_idx);
+              click_cb.run(FretClickEvent { coord, note });
+            }
+          };
+          view! {
+            <g
+              class="cell-group"
+              data-fret=fret_idx
+              data-string=string_idx
+              style=format!(
+                "cursor: {};",
+                if click_cb.get().is_some() { "pointer" } else { "default" },
+              )
+              on:click=handle_click
+            >
+              {move || {
+                if click_cb.get().is_some() {
+                  Some(view! { <FretboardClickableArea layout=layout.get() coord=coord /> })
+                } else {
+                  None
                 }
-              })
-          })
-          .collect_view()
-      }}
-    </g>
+              }}
+              {move || {
+                if let Some(state_signal) = fret_states.get().get(&coord).cloned() {
+                  Some(
+                    view! { <FretboardNote layout=layout.get() coord state=state_signal.into() /> },
+                  )
+                } else {
+                  None
+                }
+              }}
+            </g>
+          }
+        }
+      </For>
+
+    </For>
   }
 }
