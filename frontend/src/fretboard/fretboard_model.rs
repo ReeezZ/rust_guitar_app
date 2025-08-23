@@ -9,7 +9,12 @@ use crate::fretboard::components::{
   visual_config::FretboardVisualConfig,
 };
 
-pub(crate) type FretStateSignals = HashMap<FretCoord, FretState>;
+pub(crate) type FretStateSignals = HashMap<FretCoord, RwSignal<FretState>>;
+
+// Upper bounds used for preallocation; keeps per-cell signals stable (never created inside Effects).
+// Adjust if you need more strings/frets; existing UI sliders should clamp within these maxima.
+pub const MAX_STRINGS: usize = 8; // supports up to 8-string instruments
+pub const MAX_FRETS: usize = 25; // frets 0..=24
 
 #[derive(Clone, Copy, PartialEq, Debug, Eq, Hash)]
 pub struct FretCoord {
@@ -44,18 +49,12 @@ pub fn default_tuning() -> RwSignal<Vec<Note>> {
 
 impl Default for FretboardModel {
   fn default() -> Self {
-    let fret_states = RwSignal::new(FretStateSignals::new());
-    let tuning = default_tuning();
-    let start_fret = 1;
-    let end_fret = 9;
-    Self::ensure_all_fret_states_exist(
-      fret_states,
-      tuning.get_untracked().len(),
-      start_fret,
-      end_fret,
-    );
-
-    Self {
+  let tuning = default_tuning();
+  let start_fret = 1;
+  let end_fret = 9;
+  // Preallocate all possible per-cell signals once in the model's construction scope.
+  let fret_states = RwSignal::new(Self::preallocate_fret_states());
+  Self {
       start_fret: RwSignal::new(start_fret),
       end_fret: RwSignal::new(end_fret),
       tuning: default_tuning(),
@@ -89,14 +88,6 @@ impl FretboardModel {
     self.start_fret.into()
   }
   pub fn set_start_fret(&self, new_start_fret: usize) {
-    Self::ensure_all_fret_states_exist(
-      self.fret_states,
-      self.tuning.get_untracked().len(),
-      new_start_fret
-        .checked_sub(self.config.get_untracked().extra_frets.get())
-        .unwrap_or(0),
-      self.end_fret.get_untracked(),
-    );
     self.start_fret.set(new_start_fret);
   }
 
@@ -104,12 +95,6 @@ impl FretboardModel {
     self.end_fret.into()
   }
   pub fn set_end_fret(&self, new_end_fret: usize) {
-    Self::ensure_all_fret_states_exist(
-      self.fret_states,
-      self.tuning.get_untracked().len(),
-      self.get_min_fret(),
-      new_end_fret + self.config.get_untracked().extra_frets.get(),
-    );
     self.end_fret.set(new_end_fret);
   }
 
@@ -138,15 +123,14 @@ impl FretboardModel {
   }
 
   pub fn set_fret_states(&self, new_states: FretStateSignals) {
-    // TODO the signal is not really required
-    let signal = RwSignal::new(new_states);
-    Self::ensure_all_fret_states_exist(
-      signal,
-      self.tuning.get_untracked().len(),
-      self.get_min_fret(),
-      self.get_max_fret(),
-    );
-    self.fret_states.set(signal.get_untracked());
+    // Merge into existing preallocated signals (no new signal creation during reactive updates).
+    self.fret_states.update(|existing| {
+      for (coord, state_signal) in new_states.into_iter() {
+        if let Some(dest) = existing.get(&coord) {
+          dest.set(state_signal.get_untracked());
+        }
+      }
+    });
   }
 
   fn get_min_fret(&self) -> usize {
@@ -181,35 +165,25 @@ impl FretboardModel {
             FretState::Hidden
           };
           self.fret_states.update(|fret_states| {
-            match fret_states.get_mut(&coord) {
-              Some(existing_signal) => *existing_signal = state,
-              None => {
-                fret_states.insert(coord, state);
-              }
-            };
+            if let Some(sig) = fret_states.get(&coord) {
+              sig.set(state);
+            }
           });
         }
       });
   }
 
-  fn ensure_all_fret_states_exist(
-    fret_states: RwSignal<FretStateSignals>,
-    num_strings: usize,
-    start_fret: usize,
-    end_fret: usize,
-  ) {
-    fret_states.update(|fret_states| {
-      for string_idx in 0..num_strings {
-        for fret_idx in start_fret..=end_fret {
-          let coord = FretCoord {
-            string_idx: string_idx as u8,
-            fret_idx: fret_idx as u8,
-          };
-          if !fret_states.contains_key(&coord) {
-            fret_states.insert(coord, FretState::Hidden);
-          }
-        }
+  fn preallocate_fret_states() -> FretStateSignals {
+    let mut map = FretStateSignals::with_capacity(MAX_STRINGS * MAX_FRETS);
+    for string_idx in 0..MAX_STRINGS {
+      for fret_idx in 0..MAX_FRETS {
+        let coord = FretCoord {
+          string_idx: string_idx as u8,
+          fret_idx: fret_idx as u8,
+        };
+        map.insert(coord, RwSignal::new(FretState::Hidden));
       }
-    });
+    }
+    map
   }
 }

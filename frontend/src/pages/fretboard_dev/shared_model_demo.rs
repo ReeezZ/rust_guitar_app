@@ -30,7 +30,9 @@ pub fn SharedModelDemo() -> impl IntoView {
       } else {
         FretState::Normal(color.get(), label.get())
       };
-      map.insert(coord, state);
+      if let Some(sig) = map.get(&coord) {
+        sig.set(state);
+      }
     });
   });
 
@@ -48,6 +50,7 @@ pub fn SharedModelDemo() -> impl IntoView {
     m.set_on_note_clicked(Some(handle_fret_clicked));
   });
 
+  // Update model when demo fret states change (merge into model's internal signals)
   Effect::new(move || {
     model.update(|m| {
       m.set_fret_states(frets.get());
@@ -62,7 +65,7 @@ pub fn SharedModelDemo() -> impl IntoView {
     <FretsEditor frets label color hidden />
     <div>
       <Fretboard
-        fret_states=frets
+        fret_states=Signal::derive(move || frets.get())
         start_fret=0
         end_fret=12
         tuning=RwSignal::new(vec![Note::E, Note::A, Note::D, Note::G, Note::B, Note::E])

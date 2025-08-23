@@ -293,7 +293,7 @@ fn FretboardNote(
       Some(p) => p,
       None => return None,
     };
-    let current_state = fret_states.with(|m| m.get(&coord).cloned());
+    let current_state = fret_states.with(|m| m.get(&coord).map(|sig| sig.get()));
     let current_state = match current_state {
       Some(s) => s,
       None => return None,

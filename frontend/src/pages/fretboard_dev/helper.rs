@@ -17,40 +17,28 @@ pub(super) fn get_fret_positions() -> FretStateSignals {
         string_idx: s,
         fret_idx: f,
       },
-      FretState::Normal(FretStateColor::Green, format!("{}-{}", f, s)),
+      RwSignal::new(FretState::Normal(FretStateColor::Green, format!("{}-{}", f, s))),
     );
   }
 
   // Colored examples
   fret_positions.insert(
-    FretCoord {
-      string_idx: 4,
-      fret_idx: 8,
-    },
-    FretState::Normal(FretStateColor::Blue, "foo".into()),
+    FretCoord { string_idx: 4, fret_idx: 8 },
+    RwSignal::new(FretState::Normal(FretStateColor::Blue, "foo".into())),
   );
   fret_positions.insert(
-    FretCoord {
-      string_idx: 5,
-      fret_idx: 0,
-    },
-    FretState::Normal(FretStateColor::Red, "foo".into()),
+    FretCoord { string_idx: 5, fret_idx: 0 },
+    RwSignal::new(FretState::Normal(FretStateColor::Red, "foo".into())),
   );
   fret_positions.insert(
-    FretCoord {
-      string_idx: 5,
-      fret_idx: 4,
-    },
-    FretState::Normal(FretStateColor::Red, "loooooooong text".into()),
+    FretCoord { string_idx: 5, fret_idx: 4 },
+    RwSignal::new(FretState::Normal(FretStateColor::Red, "loooooooong text".into())),
   );
 
   // A hidden example (should not render) - included to ensure Hidden is ignored
   fret_positions.insert(
-    FretCoord {
-      string_idx: 2,
-      fret_idx: 9,
-    },
-    FretState::Hidden,
+    FretCoord { string_idx: 2, fret_idx: 9 },
+    RwSignal::new(FretState::Hidden),
   );
 
   fret_positions
