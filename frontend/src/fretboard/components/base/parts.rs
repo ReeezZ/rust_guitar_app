@@ -308,15 +308,16 @@ fn FretboardClickableArea(layout: LayoutSnapshot, coord: FretCoord) -> impl Into
 fn FretboardNote(
   layout: LayoutSnapshot,
   coord: FretCoord,
-  state: Signal<Option<FretState>>,
+  fret_states: Signal<FretStateSignals>,
 ) -> impl IntoView {
   move || {
     let (x, y) = match layout.note_position(coord) {
       Some(p) => p,
       None => return None,
     };
-    let current_state = match state.get() {
-      Some(fret_state) => fret_state,
+    let current_state = fret_states.with(|m| m.get(&coord).cloned());
+    let current_state = match current_state {
+      Some(s) => s,
       None => return None,
     };
 
@@ -344,7 +345,6 @@ fn FretboardNote(
                 font-size="8"
                 font-weight="bold"
               >
-                // style="pointer-events:none;user-select:none;"
                 {text}
               </text>
             }
@@ -380,15 +380,6 @@ pub(crate) fn FretboardGrid(
             string_idx,
             fret_idx: fret_idx as u8,
           };
-          let fret_state = Memo::new(move |_| {
-            fret_states
-              .with(move |fret_states| {
-                match fret_states.get(&coord) {
-                  Some(fret_state) => Some(fret_state.clone()),
-                  None => None,
-                }
-              })
-          });
           let handle_click = move |_| {
             if let Some(click_cb) = click_cb.get().as_ref() {
               let note = tuning
@@ -417,9 +408,7 @@ pub(crate) fn FretboardGrid(
                   None
                 }
               }}
-              {move || {
-                view! { <FretboardNote layout=layout coord=coord state=fret_state.into() /> }
-              }}
+              <FretboardNote layout=layout coord=coord fret_states=fret_states />
             </g>
           }
         }
