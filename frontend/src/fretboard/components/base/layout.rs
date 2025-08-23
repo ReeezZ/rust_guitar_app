@@ -21,8 +21,8 @@ impl LayoutSnapshot {
   #[allow(clippy::too_many_arguments)]
   pub fn new(
     positions: Signal<Vec<f64>>,
-    min_fret: Signal<usize>,
-    max_fret: Signal<usize>,
+    min_visible_fret: Signal<usize>,
+    max_visible_fret: Signal<usize>,
     num_strings: Signal<u8>,
     string_spacing: Signal<f64>,
     svg_width: Signal<f64>,
@@ -30,16 +30,16 @@ impl LayoutSnapshot {
     fret_margin: Signal<f64>,
     nut_width: Signal<f64>,
   ) -> Self {
-    let has_nut = Memo::new(move |_| min_fret.get() == 0);
+    let has_nut = Memo::new(move |_| min_visible_fret.get() == 0);
     let range_start = Memo::new(move |_| {
       if has_nut.get() {
         0.0
       } else {
-        positions.get()[min_fret.get()]
+        positions.get()[min_visible_fret.get()]
       }
     });
     let scale_factor = Memo::new(move |_| {
-      let index_with_selected_range_offset = max_fret.get() - min_fret.get();
+      let index_with_selected_range_offset = max_visible_fret.get() - min_visible_fret.get();
       let range_end = positions.get()[index_with_selected_range_offset];
       let range_width = range_end - range_start.get();
       let available_width = if has_nut.get() {

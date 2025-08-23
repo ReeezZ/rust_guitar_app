@@ -7,8 +7,8 @@ use leptos::prelude::*;
 use shared::Note;
 
 use crate::fretboard::{
-  components::{base::FretboardViewModel, visual_config::FretboardVisualConfig},
-  fretboard_model::{FretClickEvent, FretStateSignals, FretboardModel},
+  components::base::FretboardViewModel,
+  fretboard_model::{FretboardModel, MAX_FRETS, MAX_STRINGS},
 };
 
 #[component]
@@ -178,7 +178,7 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                   <input
                     type="range"
                     min="0"
-                    max="20"
+                    max=move || end_fret.get() - 1
                     class="w-full"
                     prop:value=move || start_fret.get()
                     on:input=move |ev| {
@@ -196,8 +196,8 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                   </label>
                   <input
                     type="range"
-                    min="1"
-                    max="24"
+                    min=move || start_fret.get() + 1
+                    max=MAX_FRETS
                     class="w-full"
                     prop:value=move || end_fret.get()
                     on:input=move |ev| {
@@ -222,8 +222,8 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                   </label>
                   <input
                     type="range"
-                    min="4"
-                    max="8"
+                    min="2"
+                    max=MAX_STRINGS
                     class="w-full"
                     prop:value=move || num_strings.get()
                     on:input=move |ev| {

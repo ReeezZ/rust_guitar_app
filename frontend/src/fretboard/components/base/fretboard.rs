@@ -89,7 +89,22 @@ pub fn Fretboard(
     nut_width.into(),
   );
 
-  let has_nut = Memo::new(move |_| layout.has_nut.get());
+  let has_nut = Signal::derive(move || layout.has_nut.get());
+
+  Effect::new(move || {
+    leptos::logging::log!(
+      "Fretboard Layout Update: SVG {svg_width}x{}, Strings: {}, Frets: {}-{} (visible: {}-{}), Nut: {}, Spacing: {:.2}, Margin: {:.2}",
+      svg_height.get(),
+      num_strings.get(),
+      start_fret.get(),
+      end_fret.get(),
+      min_visible_fret.get(),
+      max_visible_fret.get(),
+      if has_nut.get() { "Yes" } else { "No" },
+      layout.string_spacing.get(),
+      layout.fret_margin.get()
+    );
+  });
 
   view! {
     <div class="flex justify-center items-center w-full">
