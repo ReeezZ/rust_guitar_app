@@ -63,11 +63,11 @@ impl FretboardModel {
   pub fn update_from_scale(&self, scale: Scale) {
     self
       .tuning
-      .get()
+      .get_untracked()
       .iter()
       .enumerate()
       .for_each(|(string_idx, string_note)| {
-        for fret_idx in self.start_fret.get()..=self.end_fret.get() {
+        for fret_idx in self.start_fret.get_untracked()..=self.end_fret.get_untracked() {
           let coord = FretCoord {
             string_idx: string_idx as u8,
             fret_idx: fret_idx as u8,
@@ -81,7 +81,12 @@ impl FretboardModel {
             FretState::Hidden
           };
           self.fret_states.update(|fret_states| {
-            fret_states.insert(coord, RwSignal::new(state));
+            match fret_states.get(&coord) {
+              Some(existing_signal) => existing_signal.set(state),
+              None => {
+                fret_states.insert(coord, RwSignal::new(state));
+              }
+            };
           });
         }
       });

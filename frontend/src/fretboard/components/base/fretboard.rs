@@ -113,23 +113,22 @@ pub fn Fretboard(
     )
   });
 
-  let min_fret = Memo::new(move |_| visible_range.get().min_fret);
-  let max_fret = Memo::new(move |_| visible_range.get().max_fret);
+  let min_visible_fret = Memo::new(move |_| visible_range.get().min_fret);
+  let max_visible_fret = Memo::new(move |_| visible_range.get().max_fret);
 
   let layout = Memo::new(move |_| {
     let svg_height = svg_height.get();
     let fret_margin = fret_margin.get();
     let num_strings = num_strings.get();
     let config = config.get();
+    let string_spacing = calculate_string_spacing(num_strings, svg_height);
 
     LayoutSnapshot::new(
       full_fret_positions.get(),
-      min_fret.get(),
-      max_fret.get(),
-      start_fret.get(),
-      end_fret.get(),
+      min_visible_fret.get(),
+      max_visible_fret.get(),
       num_strings,
-      calculate_string_spacing(num_strings, svg_height),
+      string_spacing,
       svg_width,
       svg_height,
       fret_margin,
@@ -149,13 +148,13 @@ pub fn Fretboard(
       >
         {move || {
           let cfg = config.get();
-          let layout_snap = layout.get();
           let nut_width = cfg.nut_width.get();
           let marker_positions = cfg.marker_positions.get();
           let fret_margin_val = fret_margin.get();
           let svg_h = svg_height.get();
+          // let layout_snap = layout.get();
           view! {
-            {if layout_snap.has_nut {
+            {if layout.get().has_nut {
               Some(
                 view! {
                   <FretboardNut nut_width=nut_width fret_margin=fret_margin_val svg_height=svg_h />
@@ -164,16 +163,35 @@ pub fn Fretboard(
             } else {
               None
             }}
-            <FretboardFrets layout=layout_snap.clone() />
+            <FretboardFrets
+              start_fret
+              end_fret
+              layout=layout.get()
+              min_visible_fret
+              max_visible_fret
+            />
             <FretboardStrings
               num_strings=num_strings.get()
-              string_spacing=layout_snap.string_spacing
+              string_spacing=layout.get().string_spacing
               viewbox_width=svg_width
             />
-            <FretboardMarkers layout=layout_snap.clone() marker_positions=marker_positions />
-            <FretboardOverlays layout=layout_snap.clone() />
+            <FretboardMarkers
+              layout=layout.get()
+              marker_positions
+              min_visible_fret
+              max_visible_fret
+            />
+            <FretboardOverlays
+              layout=layout.get()
+              start_fret=start_fret
+              end_fret=end_fret
+              min_visible_fret
+              max_visible_fret
+            />
             <FretboardGrid
-              layout=layout_snap.clone()
+              layout=layout.get()
+              min_visible_fret
+              max_visible_fret
               tuning=tuning.clone()
               click_cb=on_note_clicked.clone().into()
               fret_states=fret_states

@@ -1,17 +1,11 @@
 use std::sync::Arc;
 
-use leptos::prelude::{Get, RwSignal, Signal};
-
 use crate::fretboard::fretboard_model::FretCoord;
 
 /// Snapshot of fretboard geometry for a render cycle.
 #[derive(Clone, Debug, PartialEq)]
 pub struct LayoutSnapshot {
   pub positions: Arc<Vec<f64>>,
-  pub min_fret: usize,
-  pub max_fret: usize,
-  pub start_fret: usize,
-  pub end_fret: usize,
   pub num_strings: u8,
   pub string_spacing: f64,
   pub svg_width: f64,
@@ -29,8 +23,6 @@ impl LayoutSnapshot {
     positions: Vec<f64>,
     min_fret: usize,
     max_fret: usize,
-    start_fret: usize,
-    end_fret: usize,
     num_strings: u8,
     string_spacing: f64,
     svg_width: f64,
@@ -50,10 +42,6 @@ impl LayoutSnapshot {
     let scale_factor = available_width / range_width;
     Self {
       positions: Arc::new(positions),
-      min_fret,
-      max_fret,
-      start_fret,
-      end_fret,
       num_strings,
       string_spacing,
       svg_width,

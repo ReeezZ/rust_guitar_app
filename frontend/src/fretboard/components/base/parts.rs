@@ -1,9 +1,11 @@
 // (No HashMap needed in per-cell components currently.)
 
 use crate::fretboard::{
-  components::base::{helper::FretState, layout::LayoutSnapshot},
-  fretboard_model::FretCoord,
-  fretboard_model::{FretClickEvent, FretStateSignals},
+  components::base::{
+    helper::FretState,
+    layout::{self, LayoutSnapshot},
+  },
+  fretboard_model::{FretClickEvent, FretCoord, FretStateSignals},
 };
 
 use leptos::prelude::*;
@@ -35,15 +37,25 @@ pub(crate) fn FretboardNut(
 
 /// Renders all fret lines with different styles for playable vs non-playable
 #[component]
-pub(crate) fn FretboardFrets(layout: LayoutSnapshot) -> impl IntoView {
+pub(crate) fn FretboardFrets(
+  layout: LayoutSnapshot,
+  start_fret: Signal<usize>,
+  end_fret: Signal<usize>,
+  #[prop(into)] min_visible_fret: Signal<usize>,
+  #[prop(into)] max_visible_fret: Signal<usize>,
+) -> impl IntoView {
   view! {
-    <For each=move || (layout.min_fret..=layout.max_fret) key=|fret_no| *fret_no let(fret_no)>
+    <For
+      each=move || (min_visible_fret.get()..=max_visible_fret.get())
+      key=|fret_no| *fret_no
+      let(fret_no)
+    >
       {
         let layout = layout.clone();
         move || {
           let absolute_x = layout.positions[fret_no];
           let x_pos = layout.absolute_to_viewbox_x(absolute_x);
-          let is_playable = fret_no >= layout.start_fret && fret_no <= layout.end_fret;
+          let is_playable = fret_no >= start_fret.get() && fret_no <= end_fret.get();
           let color = if is_playable { "#444" } else { "#bbb" };
           let width = if is_playable { "5" } else { "3" };
           view! {
@@ -96,8 +108,13 @@ pub(crate) fn FretboardStrings(
 
 /// Renders fret position markers (dots)
 #[component]
-pub(crate) fn FretboardMarkers(layout: LayoutSnapshot, marker_positions: Vec<u8>) -> impl IntoView {
-  (layout.min_fret..=layout.max_fret)
+pub(crate) fn FretboardMarkers(
+  layout: LayoutSnapshot,
+  marker_positions: Vec<u8>,
+  #[prop(into)] min_visible_fret: Signal<usize>,
+  #[prop(into)] max_visible_fret: Signal<usize>,
+) -> impl IntoView {
+  (min_visible_fret.get()..=max_visible_fret.get())
     .filter(|&fret| marker_positions.contains(&(fret as u8)))
     .map(|fret| {
       let x_prev = layout.positions[(fret - 1).max(0)];
@@ -124,48 +141,67 @@ pub(crate) fn FretboardMarkers(layout: LayoutSnapshot, marker_positions: Vec<u8>
 
 /// Renders semi-transparent overlays for non-playable regions
 #[component]
-pub(crate) fn FretboardOverlays(layout: LayoutSnapshot) -> impl IntoView {
-  let overlay_left = if layout.start_fret > layout.min_fret {
-    let x_prev = if layout.start_fret == 0 {
-      0.0
+pub(crate) fn FretboardOverlays(
+  layout: LayoutSnapshot,
+  start_fret: Signal<usize>,
+  end_fret: Signal<usize>,
+  #[prop(into)] min_visible_fret: Signal<usize>,
+  #[prop(into)] max_visible_fret: Signal<usize>,
+) -> impl IntoView {
+  leptos::logging::log!(
+    "Rendering FretboardOverlays: start_fret={}, end_fret={}, layout={:?}",
+    start_fret.get(),
+    end_fret.get(),
+    layout
+  );
+
+  let layout_clone = layout.clone();
+  let overlay_left = move || {
+    if start_fret.get() > min_visible_fret.get() {
+      let x_prev = if start_fret.get() == 0 {
+        0.0
+      } else {
+        layout.positions[(start_fret.get() - 1).max(0)]
+      };
+      let x_curr = layout.positions[start_fret.get()];
+      let playable_area_start = (x_prev + x_curr) / 2.0 - (x_curr - x_prev) / 4.0;
+      let start_x = layout.absolute_to_viewbox_x(playable_area_start);
+      let width = start_x - layout.effective_nut_width();
+      Some(view! {
+        <rect
+          x=layout.effective_nut_width()
+          y=layout.fret_margin
+          width=width
+          height=layout.svg_height - 2.0 * layout.fret_margin
+          fill="#fff"
+          opacity="0.35"
+          style="pointer-events:none;"
+        />
+      })
     } else {
-      layout.positions[(layout.start_fret - 1).max(0)]
-    };
-    let x_curr = layout.positions[layout.start_fret];
-    let playable_area_start = (x_prev + x_curr) / 2.0 - (x_curr - x_prev) / 4.0;
-    let start_x = layout.absolute_to_viewbox_x(playable_area_start);
-    let width = start_x - layout.effective_nut_width();
-    Some(view! {
-      <rect
-        x=layout.effective_nut_width()
-        y=layout.fret_margin
-        width=width
-        height=layout.svg_height - 2.0 * layout.fret_margin
-        fill="#fff"
-        opacity="0.35"
-        style="pointer-events:none;"
-      />
-    })
-  } else {
-    None
+      None
+    }
   };
 
-  let overlay_right = if layout.end_fret < layout.max_fret {
-    let end_x = layout.absolute_to_viewbox_x(layout.positions[layout.end_fret]);
-    let width = layout.svg_width - end_x;
-    Some(view! {
-      <rect
-        x=end_x
-        y=layout.fret_margin
-        width=width
-        height=layout.svg_height - 2.0 * layout.fret_margin
-        fill="#fff"
-        opacity="0.35"
-        style="pointer-events:none;"
-      />
-    })
-  } else {
-    None
+  let layout = layout_clone;
+  let overlay_right = move || {
+    if end_fret.get() < max_visible_fret.get() {
+      let end_x = layout.absolute_to_viewbox_x(layout.positions[end_fret.get()]);
+      let width = layout.svg_width - end_x;
+      Some(view! {
+        <rect
+          x=end_x
+          y=layout.fret_margin
+          width=width
+          height=layout.svg_height - 2.0 * layout.fret_margin
+          fill="#fff"
+          opacity="0.35"
+          style="pointer-events:none;"
+        />
+      })
+    } else {
+      None
+    }
   };
 
   view! {
@@ -256,6 +292,8 @@ fn FretboardNote(
 #[component]
 pub(crate) fn FretboardGrid(
   #[prop(into)] layout: Signal<LayoutSnapshot>,
+  #[prop(into)] min_visible_fret: Signal<usize>,
+  #[prop(into)] max_visible_fret: Signal<usize>,
   fret_states: Signal<FretStateSignals>,
   tuning: Signal<Vec<Note>>,
   /// Optional callback for fret click events
@@ -263,11 +301,15 @@ pub(crate) fn FretboardGrid(
 ) -> impl IntoView {
   view! {
     <For
-      each=move || layout.get().min_fret..=layout.get().max_fret
+      each=move || min_visible_fret.get()..=max_visible_fret.get()
       key=|fret_idx| *fret_idx
       let(fret_idx)
     >
-      <For each=move || (0..layout.get().num_strings) key=|string_idx| *string_idx let(string_idx)>
+      <For
+        each=move || (0..layout.get().num_strings)
+        key=move |string_idx| (*string_idx as usize, fret_idx)
+        let(string_idx)
+      >
         {
           let coord = FretCoord {
             string_idx,
@@ -302,9 +344,11 @@ pub(crate) fn FretboardGrid(
                 }
               }}
               {move || {
-                if let Some(state_signal) = fret_states.get().get(&coord).cloned() {
+                if let Some(state_signal) = fret_states.get().get(&coord) {
                   Some(
-                    view! { <FretboardNote layout=layout.get() coord state=state_signal.into() /> },
+                    view! {
+                      <FretboardNote layout=layout.get() coord state=(*state_signal).into() />
+                    },
                   )
                 } else {
                   None

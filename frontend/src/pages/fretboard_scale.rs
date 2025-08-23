@@ -22,8 +22,8 @@ use shared::{music::notes::Note, ScaleTrait};
 /// Page demonstrating the SVG fretboard with scale display functionality
 #[component]
 pub fn FretboardScalePage() -> impl IntoView {
-  // Single fret range control (replaces start_fret and end_fret)
-  let fret_range = RwSignal::new(0..=7_usize);
+  let start_fret = RwSignal::new(2_usize);
+  let end_fret = RwSignal::new(7_usize);
 
   // Extra frets for visual context
   let extra_frets = RwSignal::new(2_usize);
@@ -46,24 +46,22 @@ pub fn FretboardScalePage() -> impl IntoView {
     set_clicked_note_event.set(Some(event));
   });
 
-  let model = RwSignal::new(FretboardModel::default());
+  let model = RwSignal::new({
+    FretboardModel {
+      start_fret,
+      end_fret,
+      on_note_clicked: RwSignal::new(Some(on_note_clicked)).into(),
+      config: RwSignal::new(FretboardVisualConfig {
+        extra_frets,
+        ..Default::default()
+      }),
+      ..Default::default()
+    }
+  });
+
   Effect::new(move || {
     model.update(move |model| {
       model.update_from_scale(Scale::new(root_note.get(), scale_type.get()));
-    });
-  });
-
-  Effect::new(move || {
-    model.update(move |model| {
-      model.config.get().extra_frets.set(extra_frets.get());
-    });
-  });
-
-  // TODO when adding this back in it breaks, find out why
-  Effect::new(move || {
-    model.update(move |model| {
-      model.start_fret.set(*fret_range.get().start());
-      model.end_fret.set(*fret_range.get().end());
     });
   });
 
@@ -86,7 +84,7 @@ pub fn FretboardScalePage() -> impl IntoView {
           <p>
             <strong>"Range:"</strong>
             " Frets "
-            {move || format!("{}-{}", fret_range.get().start(), fret_range.get().end())}
+            {move || format!("{}-{}", start_fret.get(), end_fret.get())}
           </p>
         </div>
       </div>
@@ -116,7 +114,8 @@ pub fn FretboardScalePage() -> impl IntoView {
             on:click=move |_| {
               root_note.set(Note::G);
               scale_type.set(ScaleType::Hepatonic(HeptaScaleType::Major));
-              fret_range.set(3..=7);
+              start_fret.set(3);
+              end_fret.set(7);
             }
           >
             "G Major (3-7)"
@@ -126,7 +125,8 @@ pub fn FretboardScalePage() -> impl IntoView {
             on:click=move |_| {
               root_note.set(Note::A);
               scale_type.set(ScaleType::Hepatonic(HeptaScaleType::Minor));
-              fret_range.set(5..=8);
+              start_fret.set(5);
+              end_fret.set(8);
             }
           >
             "A Minor (5-8)"
@@ -136,7 +136,8 @@ pub fn FretboardScalePage() -> impl IntoView {
             on:click=move |_| {
               root_note.set(Note::E);
               scale_type.set(ScaleType::Hepatonic(HeptaScaleType::Minor));
-              fret_range.set(0..=5);
+              start_fret.set(0);
+              end_fret.set(5);
             }
           >
             "E Minor (0-5)"
@@ -146,7 +147,8 @@ pub fn FretboardScalePage() -> impl IntoView {
             on:click=move |_| {
               root_note.set(Note::C);
               scale_type.set(ScaleType::Hepatonic(HeptaScaleType::Major));
-              fret_range.set(7..=10);
+              start_fret.set(7);
+              end_fret.set(10);
             }
           >
             "C Major (7-10)"
@@ -156,7 +158,8 @@ pub fn FretboardScalePage() -> impl IntoView {
             on:click=move |_| {
               root_note.set(Note::A);
               scale_type.set(ScaleType::Hepatonic(HeptaScaleType::Minor));
-              fret_range.set(1..=4);
+              start_fret.set(1);
+              end_fret.set(4);
             }
           >
             "A Minor (1-4, no opens)"
@@ -166,7 +169,8 @@ pub fn FretboardScalePage() -> impl IntoView {
             on:click=move |_| {
               root_note.set(Note::E);
               scale_type.set(ScaleType::Hepatonic(HeptaScaleType::Major));
-              fret_range.set(0..=0);
+              start_fret.set(0);
+              end_fret.set(0);
             }
           >
             "Open strings only"
@@ -190,7 +194,7 @@ pub fn FretboardScalePage() -> impl IntoView {
         <ScaleTypeSelector value=scale_type label="Scale Type" />
 
         // Fret range control with dual sliders
-        <FretRangeSelector value=fret_range label="Playable Range" />
+        <FretRangeSelector start_fret end_fret label="Playable Range" />
 
         // Extra frets control
         <div class="space-y-2">
