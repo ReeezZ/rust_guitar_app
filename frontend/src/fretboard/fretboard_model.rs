@@ -1,6 +1,7 @@
 use std::{collections::HashMap, hash::Hash};
 
 use leptos::prelude::*;
+use serde::de;
 use shared::{Note, Scale, ScaleTrait};
 
 use crate::fretboard::components::{
@@ -43,13 +44,24 @@ pub fn default_tuning() -> RwSignal<Vec<Note>> {
 
 impl Default for FretboardModel {
   fn default() -> Self {
+    let fret_states = RwSignal::new(FretStateSignals::new());
+    let tuning = default_tuning();
+    let start_fret = 1;
+    let end_fret = 9;
+    Self::ensure_all_fret_states_exist(
+      fret_states,
+      tuning.get_untracked().len(),
+      start_fret,
+      end_fret,
+    );
+
     Self {
-      start_fret: RwSignal::new(1),
-      end_fret: RwSignal::new(9),
+      start_fret: RwSignal::new(start_fret),
+      end_fret: RwSignal::new(end_fret),
       tuning: default_tuning(),
       config: RwSignal::new(FretboardVisualConfig::default()),
       on_note_clicked: RwSignal::new(None).into(),
-      fret_states: RwSignal::new(HashMap::new()),
+      fret_states,
     }
   }
 }
@@ -80,7 +92,9 @@ impl FretboardModel {
     Self::ensure_all_fret_states_exist(
       self.fret_states,
       self.tuning.get_untracked().len(),
-      new_start_fret,
+      new_start_fret
+        .checked_sub(self.config.get_untracked().extra_frets.get())
+        .unwrap_or(0),
       self.end_fret.get_untracked(),
     );
     self.start_fret.set(new_start_fret);
@@ -93,8 +107,8 @@ impl FretboardModel {
     Self::ensure_all_fret_states_exist(
       self.fret_states,
       self.tuning.get_untracked().len(),
-      self.start_fret.get_untracked(),
-      new_end_fret,
+      self.get_min_fret(),
+      new_end_fret + self.config.get_untracked().extra_frets.get(),
     );
     self.end_fret.set(new_end_fret);
   }
@@ -129,10 +143,34 @@ impl FretboardModel {
     Self::ensure_all_fret_states_exist(
       signal,
       self.tuning.get_untracked().len(),
-      self.start_fret.get_untracked(),
-      self.end_fret.get_untracked(),
+      self.get_min_fret(),
+      self.get_max_fret(),
     );
-    self.fret_states.set(signal.get());
+
+    signal
+      .get_untracked()
+      .iter()
+      .for_each(|(coord, state_signal)| {
+        self.fret_states.update(|fret_states| {
+          match fret_states.get(coord) {
+            Some(existing_signal) => existing_signal.set(state_signal.get()),
+            None => {
+              fret_states.insert(*coord, RwSignal::new(state_signal.get()));
+            }
+          };
+        });
+      });
+  }
+
+  fn get_min_fret(&self) -> usize {
+    self
+      .start_fret
+      .get_untracked()
+      .saturating_sub(self.config.get_untracked().extra_frets.get())
+  }
+
+  fn get_max_fret(&self) -> usize {
+    self.end_fret.get() + self.config.get_untracked().extra_frets.get()
   }
 
   pub fn update_from_scale(&self, scale: Scale) {
@@ -142,7 +180,7 @@ impl FretboardModel {
       .iter()
       .enumerate()
       .for_each(|(string_idx, string_note)| {
-        for fret_idx in self.start_fret.get_untracked()..=self.end_fret.get_untracked() {
+        for fret_idx in self.get_min_fret()..=self.get_max_fret() {
           let coord = FretCoord {
             string_idx: string_idx as u8,
             fret_idx: fret_idx as u8,

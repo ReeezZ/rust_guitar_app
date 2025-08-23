@@ -46,7 +46,14 @@ pub(crate) fn FretboardFrets(
 ) -> impl IntoView {
   view! {
     <For
-      each=move || (min_visible_fret.get()..=max_visible_fret.get())
+      each=move || {
+        leptos::logging::log!(
+          "Rendering frets: min_visible_fret={}, max_visible_fret={}",
+          min_visible_fret.get(),
+          max_visible_fret.get(),
+        );
+        (min_visible_fret.get()..max_visible_fret.get()).collect::<Vec<_>>()
+      }
       key=move |fret_no| (
         *fret_no,
         min_visible_fret.get(),
@@ -69,15 +76,21 @@ pub(crate) fn FretboardFrets(
             start_fret.get(),
             end_fret.get()
           );
-          if checked_fret_index.is_none() {
+          if let Some(index) = checked_fret_index {
+            if index > max_visible_fret.get() {
+              leptos::logging::log!("weird edge case Fret index {} out of bounds, skipping", index);
+              return None;
+            }
+          } else {
             return None;
-          }
+          };
           let absolute_x = layout.positions.get()[checked_fret_index.unwrap()];
           let x_pos = layout.absolute_to_viewbox_x(absolute_x);
           let is_playable = fret_no >= start_fret.get() && fret_no <= end_fret.get();
           let color = if is_playable { "#444" } else { "#bbb" };
           let width = if is_playable { "5" } else { "3" };
           Some(
+            // return None;
 
             view! {
               <line
@@ -139,31 +152,45 @@ pub(crate) fn FretboardMarkers(
   view! {
     <For
       each=move || {
-        (min_visible_fret.get()..=max_visible_fret.get())
+        (min_visible_fret.get()..max_visible_fret.get())
           .filter(move |fret| marker_positions.get().contains(fret))
       }
       key=|fret| *fret
       let(fret)
     >
       {move || {
-        let x_prev = layout.positions.get()[(fret - 1).max(0)];
-        let x_curr = layout.positions.get()[fret];
+        let checked_fret_index = fret.checked_sub(min_visible_fret.get());
+        leptos::logging::log!(
+          "Rendering fret line: fret_no={}, min_visible_fret={:?}, max_visible_fret={:?}, checked_fret_index={:?}",
+            fret,
+            min_visible_fret.get(),
+            max_visible_fret.get(),
+            checked_fret_index
+        );
+        let fret_index = match checked_fret_index {
+          Some(index) => index,
+          None => return None,
+        };
+        let x_prev = layout.positions.get()[(fret_index - 1).max(0)];
+        let x_curr = layout.positions.get()[fret_index];
         let x_center = (x_prev + x_curr) / 2.0;
         let x = layout.absolute_to_viewbox_x(x_center);
         let y = layout.svg_height.get() / 2.0;
-        let r = if fret == 12 || fret == 24 { 8.0 } else { 6.0 };
+        let r = if fret_index == 12 || fret_index == 24 { 8.0 } else { 6.0 };
         let y_offset = 28.0;
-        let (cy1, cy2, op2) = if fret == 12 || fret == 24 {
+        let (cy1, cy2, op2) = if fret_index == 12 || fret_index == 24 {
           (y - y_offset, y + y_offset, 0.25)
         } else {
           (y, y + y_offset, 0.0)
         };
-        view! {
-          <g>
-            <circle cx=x cy=cy1 r=r fill="#444" opacity="0.25" />
-            <circle cx=x cy=cy2 r=r fill="#444" opacity=op2 />
-          </g>
-        }
+        Some(
+          view! {
+            <g>
+              <circle cx=x cy=cy1 r=r fill="#444" opacity="0.25" />
+              <circle cx=x cy=cy2 r=r fill="#444" opacity=op2 />
+            </g>
+          },
+        )
       }}
     </For>
   }
@@ -380,6 +407,7 @@ pub(crate) fn FretboardGrid(
                 layout=layout
                 coord=coord
                 state=Signal::derive(move || {
+                  leptos::logging::log!("Deriving state for FretboardNote at {:?}", coord);
                   match fret_states.get().get(&coord) {
                     Some(fret_state) => Some(fret_state.get()),
                     None => None,
