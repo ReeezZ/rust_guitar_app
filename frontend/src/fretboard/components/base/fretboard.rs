@@ -77,6 +77,8 @@ pub fn Fretboard(
 
   let nut_width = Memo::new(move |_| config.get().nut_width.get());
 
+  let has_nut = Memo::new(move |_| min_visible_fret.get() == 0);
+
   let layout = LayoutSnapshot::new(
     full_fret_positions.into(),
     min_visible_fret.into(),
@@ -87,13 +89,12 @@ pub fn Fretboard(
     svg_height.into(),
     fret_margin.into(),
     nut_width.into(),
+    has_nut.into(),
   );
-
-  let has_nut = Signal::derive(move || layout.has_nut.get());
 
   Effect::new(move || {
     leptos::logging::log!(
-      "Fretboard Layout Update: SVG {svg_width}x{}, Strings: {}, Frets: {}-{} (visible: {}-{}), Nut: {}, Spacing: {:.2}, Margin: {:.2}",
+      "Fretboard Layout Update: SVG {svg_width}x{}, Strings: {}, Frets: {}-{} (visible: {}-{}), Nut: {}, Spacing: {:.2}, Margin: {:.2}, Visible frets: {}, Full Frets (len: {}): {:?}",
       svg_height.get(),
       num_strings.get(),
       start_fret.get(),
@@ -102,7 +103,10 @@ pub fn Fretboard(
       max_visible_fret.get(),
       if has_nut.get() { "Yes" } else { "No" },
       layout.string_spacing.get(),
-      layout.fret_margin.get()
+      layout.fret_margin.get(),
+      num_visible_frets.get(),
+      full_fret_positions.get().len(),
+      full_fret_positions.get()
     );
   });
 

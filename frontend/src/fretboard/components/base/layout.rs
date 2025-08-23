@@ -29,8 +29,8 @@ impl LayoutSnapshot {
     svg_height: Signal<f64>,
     fret_margin: Signal<f64>,
     nut_width: Signal<f64>,
+    has_nut: Signal<bool>,
   ) -> Self {
-    let has_nut = Memo::new(move |_| min_visible_fret.get() == 0);
     let range_start = Memo::new(move |_| {
       if has_nut.get() {
         0.0
