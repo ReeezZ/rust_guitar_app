@@ -171,7 +171,7 @@ pub(crate) fn FretboardMarkers(
           Some(index) => index,
           None => return None,
         };
-        let x_prev = layout.positions.get()[(fret_index - 1).max(0)];
+        let x_prev = layout.positions.get()[fret_index.checked_sub(1).unwrap_or(0)];
         let x_curr = layout.positions.get()[fret_index];
         let x_center = (x_prev + x_curr) / 2.0;
         let x = layout.absolute_to_viewbox_x(x_center);
@@ -236,7 +236,12 @@ pub(crate) fn FretboardOverlays(
   let layout = layout_clone;
   let overlay_right = move || {
     if end_fret.get() < max_visible_fret.get() {
-      let end_x = layout.absolute_to_viewbox_x(layout.positions.get()[end_fret.get()]);
+      let end_x = layout.absolute_to_viewbox_x(
+        layout.positions.get()[end_fret
+          .get()
+          .checked_sub(min_visible_fret.get())
+          .unwrap_or(0)],
+      );
       let width = layout.svg_width.get() - end_x;
       Some(view! {
         <rect
@@ -361,7 +366,7 @@ pub(crate) fn FretboardGrid(
 ) -> impl IntoView {
   view! {
     <For
-      each=move || min_visible_fret.get()..=max_visible_fret.get()
+      each=move || min_visible_fret.get()..max_visible_fret.get()
       key=|fret_idx| *fret_idx
       let(fret_idx)
     >

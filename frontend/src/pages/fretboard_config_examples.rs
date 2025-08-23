@@ -158,7 +158,7 @@ pub fn FretboardConfigExamples() -> impl IntoView {
       <div class="flex flex-col gap-6 xl:flex-row">
         // Main fretboard display - responsive sizing, not too constrained
         <div class="p-4 bg-blue-50 rounded-lg border-2 border-blue-200 xl:min-w-0 xl:flex-[2]">
-          <FretboardViewModel model=model.get() />
+          <FretboardViewModel model />
 
         </div>
 
