@@ -46,14 +46,7 @@ pub(crate) fn FretboardFrets(
 ) -> impl IntoView {
   view! {
     <For
-      each=move || {
-        leptos::logging::log!(
-          "Rendering frets: min_visible_fret={}, max_visible_fret={}",
-          min_visible_fret.get(),
-          max_visible_fret.get(),
-        );
-        (min_visible_fret.get()..max_visible_fret.get()).collect::<Vec<_>>()
-      }
+      each=move || { min_visible_fret.get()..max_visible_fret.get() }
       key=move |fret_no| (
         *fret_no,
         min_visible_fret.get(),
@@ -67,15 +60,6 @@ pub(crate) fn FretboardFrets(
         let layout = layout.clone();
         move || {
           let checked_fret_index = fret_no.checked_sub(min_visible_fret.get());
-          leptos::logging::log!(
-            "Rendering fret line: fret_no={}, min_visible_fret={:?}, max_visible_fret={:?}, checked_fret_index={:?}, start_fret={:?}, end_fret={:?}",
-            fret_no,
-            min_visible_fret.get(),
-            max_visible_fret.get(),
-            checked_fret_index,
-            start_fret.get(),
-            end_fret.get()
-          );
           if let Some(index) = checked_fret_index {
             if index > max_visible_fret.get() {
               leptos::logging::log!("weird edge case Fret index {} out of bounds, skipping", index);
@@ -160,13 +144,6 @@ pub(crate) fn FretboardMarkers(
     >
       {move || {
         let checked_fret_index = fret.checked_sub(min_visible_fret.get());
-        leptos::logging::log!(
-          "Rendering fret line: fret_no={}, min_visible_fret={:?}, max_visible_fret={:?}, checked_fret_index={:?}",
-            fret,
-            min_visible_fret.get(),
-            max_visible_fret.get(),
-            checked_fret_index
-        );
         let fret_index = match checked_fret_index {
           Some(index) => index,
           None => return None,
@@ -184,6 +161,7 @@ pub(crate) fn FretboardMarkers(
           (y, y + y_offset, 0.0)
         };
         Some(
+
           view! {
             <g>
               <circle cx=x cy=cy1 r=r fill="#444" opacity="0.25" />

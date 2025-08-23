@@ -69,22 +69,8 @@ pub fn Fretboard(
   let max_visible_fret = Signal::derive(move || visible_range.get().max_fret);
   let num_visible_frets = Signal::derive(move || max_visible_fret.get() - (min_visible_fret.get()));
 
-  Effect::new(move || {
-    leptos::logging::log!(
-      "Fretboard Render in effect - start_fret: {}, end_fret: {}, min_visible_fret: {}, max_visible_fret: {}, num_visible_frets: {}",
-      start_fret.get(),
-      end_fret.get(),
-      min_visible_fret.get(),
-      max_visible_fret.get(),
-      num_visible_frets.get(),
-    );
-  });
-
-  let full_fret_positions = Memo::new(move |_| {
-    let positions = calculate_fret_positions(svg_width, num_visible_frets.get() as u8 + 1);
-    leptos::logging::log!("Fret positions calculated: {:?}", positions);
-    positions
-  });
+  let full_fret_positions =
+    Memo::new(move |_| calculate_fret_positions(svg_width, num_visible_frets.get() as u8 + 1));
 
   let string_spacing =
     Memo::new(move |_| calculate_string_spacing(num_strings.get(), svg_height.get()));
