@@ -30,17 +30,17 @@ impl LayoutSnapshot {
     fret_margin: Signal<f64>,
     nut_width: Signal<f64>,
     has_nut: Signal<bool>,
+    num_frets: Signal<usize>,
   ) -> Self {
-    let range_start = Memo::new(move |_| {
+    let range_start = Signal::derive(move || {
       if has_nut.get() {
         0.0
       } else {
-        positions.get()[min_visible_fret.get()]
+        positions.get()[0]
       }
     });
-    let scale_factor = Memo::new(move |_| {
-      let index_with_selected_range_offset = max_visible_fret.get() - min_visible_fret.get();
-      let range_end = positions.get()[index_with_selected_range_offset];
+    let scale_factor = Signal::derive(move || {
+      let range_end = positions.get()[num_frets.get()];
       let range_width = range_end - range_start.get();
       let available_width = if has_nut.get() {
         svg_width.get() - nut_width.get()

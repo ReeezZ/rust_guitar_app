@@ -90,6 +90,7 @@ pub fn Fretboard(
     fret_margin.into(),
     nut_width.into(),
     has_nut.into(),
+    num_visible_frets.into(),
   );
 
   Effect::new(move || {
