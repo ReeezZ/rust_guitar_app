@@ -375,6 +375,15 @@ pub(crate) fn FretboardGrid(
             string_idx,
             fret_idx: fret_idx as u8,
           };
+          let fret_state = Memo::new(move |_| {
+            fret_states
+              .with(move |fret_states| {
+                match fret_states.get(&coord) {
+                  Some(fret_state) => Some(fret_state.clone()),
+                  None => None,
+                }
+              })
+          });
           let handle_click = move |_| {
             if let Some(click_cb) = click_cb.get().as_ref() {
               let note = tuning
@@ -403,17 +412,9 @@ pub(crate) fn FretboardGrid(
                   None
                 }
               }}
-              <FretboardNote
-                layout=layout
-                coord=coord
-                state=Signal::derive(move || {
-                  leptos::logging::log!("Deriving state for FretboardNote at {:?}", coord);
-                  match fret_states.get().get(&coord) {
-                    Some(fret_state) => Some(fret_state.get()),
-                    None => None,
-                  }
-                })
-              />
+              {move || {
+                view! { <FretboardNote layout=layout coord=coord state=fret_state.into() /> }
+              }}
             </g>
           }
         }

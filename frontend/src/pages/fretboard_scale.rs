@@ -8,7 +8,7 @@ use crate::{
   },
   fretboard::{
     components::{
-      base::FretboardViewModel,
+      base::{Fretboard, FretboardViewModel},
       visual_config::{self, FretboardVisualConfig},
     },
     fretboard_model::{default_tuning, FretClickEvent, FretboardModel},
@@ -47,6 +47,8 @@ pub fn FretboardScalePage() -> impl IntoView {
   });
 
   let model = RwSignal::new(FretboardModel::default());
+
+  
 
   Effect::new(move || {
     model.update(move |model| {
@@ -169,7 +171,7 @@ pub fn FretboardScalePage() -> impl IntoView {
 
       // Main fretboard display
       //
-      <FretboardViewModel model=model.get() />
+      <FretboardViewModel model />
       // />
       // Show 2 extra frets beyond the end fret
       <div class="p-4 bg-gray-50 rounded-lg border-2 border-gray-200"></div>

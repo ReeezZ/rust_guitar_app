@@ -30,7 +30,7 @@ pub fn SharedModelDemo() -> impl IntoView {
       } else {
         FretState::Normal(color.get(), label.get())
       };
-      map.insert(coord, RwSignal::new(state).into());
+      map.insert(coord, state);
     });
   });
 

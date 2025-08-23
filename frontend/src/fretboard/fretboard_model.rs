@@ -9,7 +9,7 @@ use crate::fretboard::components::{
   visual_config::FretboardVisualConfig,
 };
 
-pub(crate) type FretStateSignals = HashMap<FretCoord, RwSignal<FretState>>;
+pub(crate) type FretStateSignals = HashMap<FretCoord, FretState>;
 
 #[derive(Clone, Copy, PartialEq, Debug, Eq, Hash)]
 pub struct FretCoord {
@@ -146,20 +146,7 @@ impl FretboardModel {
       self.get_min_fret(),
       self.get_max_fret(),
     );
-
-    signal
-      .get_untracked()
-      .iter()
-      .for_each(|(coord, state_signal)| {
-        self.fret_states.update(|fret_states| {
-          match fret_states.get(coord) {
-            Some(existing_signal) => existing_signal.set(state_signal.get()),
-            None => {
-              fret_states.insert(*coord, RwSignal::new(state_signal.get()));
-            }
-          };
-        });
-      });
+    self.fret_states.set(signal.get_untracked());
   }
 
   fn get_min_fret(&self) -> usize {
@@ -194,10 +181,10 @@ impl FretboardModel {
             FretState::Hidden
           };
           self.fret_states.update(|fret_states| {
-            match fret_states.get(&coord) {
-              Some(existing_signal) => existing_signal.set(state),
+            match fret_states.get_mut(&coord) {
+              Some(existing_signal) => *existing_signal = state,
               None => {
-                fret_states.insert(coord, RwSignal::new(state));
+                fret_states.insert(coord, state);
               }
             };
           });
@@ -219,7 +206,7 @@ impl FretboardModel {
             fret_idx: fret_idx as u8,
           };
           if !fret_states.contains_key(&coord) {
-            fret_states.insert(coord, RwSignal::new(FretState::Hidden));
+            fret_states.insert(coord, FretState::Hidden);
           }
         }
       }

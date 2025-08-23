@@ -17,17 +17,14 @@ use rand::rand_core::le;
 use shared::Note;
 
 #[component]
-pub fn FretboardViewModel(#[prop(into)] model: FretboardModel) -> impl IntoView {
-  view! {
-    <Fretboard
-      start_fret=model.get_start_fret()
-      end_fret=model.get_end_fret()
-      tuning=model.get_tuning()
-      config=model.get_config()
-      on_note_clicked=model.get_on_note_clicked()
-      fret_states=model.get_fret_states()
-    />
-  }
+pub fn FretboardViewModel(#[prop(into)] model: Signal<FretboardModel>) -> impl IntoView {
+  let start_fret = Signal::derive(move || model.with(|m| m.get_start_fret()).get());
+  let end_fret = Signal::derive(move || model.with(|m| m.get_end_fret()).get());
+  let tuning = Signal::derive(move || model.with(|m| m.get_tuning()).get());
+  let config = Signal::derive(move || model.with(|m| m.get_config()).get());
+  let on_note_clicked = Signal::derive(move || model.with(|m| m.get_on_note_clicked()).get());
+  let fret_states = Signal::derive(move || model.with(|m| m.get_fret_states()).get());
+  view! { <Fretboard start_fret end_fret tuning config on_note_clicked fret_states /> }
 }
 
 /// The FretStateSignals have to be carefully managed
