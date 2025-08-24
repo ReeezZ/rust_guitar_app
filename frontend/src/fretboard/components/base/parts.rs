@@ -284,19 +284,23 @@ fn FretboardNote(
       None => return None,
     };
 
-    let (fill_color, radius, label) = match fret_state.get() {
+    let memo = Memo::new(move |_| match fret_state.get() {
       FretState::Hidden => ("transparent".to_string(), 0.0, None),
       FretState::Normal(color, label) => (color.as_str().to_string(), 12.0, Some(label)),
-    };
+    });
+    let fill_color = Signal::derive(move || memo.get().0);
+    let radius = Signal::derive(move || memo.get().1);
+    let label = Signal::derive(move || memo.get().2);
 
     Some(view! {
       <g class="note" data-string=coord.string_idx data-fret=coord.fret_idx>
-        {if radius > 0.0 {
-          Some(view! { <circle cx=x cy=y r=radius fill=fill_color opacity="0.85" /> })
+        {if radius.get() > 0.0 {
+          Some(view! { <circle cx=x cy=y r=radius.get() fill=fill_color.get() opacity="0.85" /> })
         } else {
           None
         }}
         {label
+          .get()
           .map(|text| {
             view! {
               <text
@@ -325,6 +329,7 @@ pub(crate) fn FretboardGrid(
   fret_states: Signal<FretStateSignals>,
   tuning: Signal<Vec<Note>>,
   /// Optional callback for fret click events
+  #[prop(into)]
   click_cb: Signal<Option<Callback<FretClickEvent>>>,
 ) -> impl IntoView {
   view! {

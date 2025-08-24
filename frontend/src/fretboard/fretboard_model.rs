@@ -115,10 +115,12 @@ impl FretboardModel {
 
   pub fn set_fret_states(&self, new_states: FretStateSignals) {
     // Merge into existing preallocated signals (no new signal creation during reactive updates).
-    self.fret_states.update(|existing| {
+    self.fret_states.with(|existing| {
       for (coord, state_signal) in new_states.into_iter() {
         if let Some(dest) = existing.get(&coord) {
-          dest.set(state_signal.get());
+          if dest.get() != state_signal.get() {
+            dest.set(state_signal.get());
+          }
         }
       }
     });
@@ -155,7 +157,7 @@ impl FretboardModel {
           } else {
             FretState::Hidden
           };
-          self.fret_states.update(|fret_states| {
+          self.fret_states.with(|fret_states| {
             if let Some(sig) = fret_states.get(&coord) {
               sig.set(state);
             }

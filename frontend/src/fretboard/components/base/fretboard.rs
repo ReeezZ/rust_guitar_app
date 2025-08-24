@@ -185,8 +185,8 @@ pub fn Fretboard(
           layout=layout
           min_visible_fret
           max_visible_fret
-          tuning=tuning.clone()
-          click_cb=on_note_clicked.clone().into()
+          tuning
+          click_cb=on_note_clicked
           fret_states=fret_states
         />
       </svg>

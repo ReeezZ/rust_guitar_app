@@ -11,7 +11,7 @@ pub fn FretboardDevPage() -> impl IntoView {
   let model = RwSignal::new(FretboardModel::default());
 
   Effect::new(move || {
-    model.update(|model| {
+    model.with(|model| {
       model.update_from_scale(Scale::new(
         Note::C,
         ScaleType::Hepatonic(HeptaScaleType::Major),

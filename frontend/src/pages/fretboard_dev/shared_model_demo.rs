@@ -22,7 +22,7 @@ pub fn SharedModelDemo() -> impl IntoView {
   let hidden = RwSignal::new(false);
 
   let update_fret = Callback::new(move |coord: FretCoord| {
-    frets.update(|map| {
+    frets.with(|map| {
       let state = if hidden.get() {
         FretState::Hidden
       } else {
@@ -49,7 +49,7 @@ pub fn SharedModelDemo() -> impl IntoView {
 
   // Update model when demo fret states change (merge into model's internal signals)
   Effect::new(move || {
-    model.update(|m| {
+    model.with(|m| {
       m.set_fret_states(frets.get());
     });
   });

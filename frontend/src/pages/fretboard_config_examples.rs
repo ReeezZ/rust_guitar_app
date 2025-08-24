@@ -52,22 +52,6 @@ pub fn FretboardConfigExamples() -> impl IntoView {
       .build(),
   );
 
-  // Effect::new(move || {
-  //   model.update(move |m| {
-  //     m.set_end_fret(end_fret.get());
-  //   });
-  // });
-  // Effect::new(move || {
-  //   model.update(move |m| {
-  //     m.set_start_fret(start_fret.get());
-  //   });
-  // });
-  // Effect::new(move || {
-  //   model.update(move |m| {
-  //     m.set_tuning(tuning.get());
-  //   });
-  // });
-
   view! {
     <div class="space-y-3">
       <h2 class="text-2xl font-bold">"Interactive Fretboard Configuration"</h2>
