@@ -191,7 +191,7 @@ pub(crate) fn FretboardOverlays(
         <rect
           x=move || { 0.0 }
           y=layout.fret_margin
-          width=move || { layout.nut_width.get() + viewbox_start_x() }
+          width=viewbox_start_x
           height=move || layout.svg_height.get() - 2.0 * layout.fret_margin.get()
           fill="#fff"
           opacity="0.5"
@@ -211,7 +211,7 @@ pub(crate) fn FretboardOverlays(
       let width = move || layout.svg_width.get() - end_x();
       Some(view! {
         <rect
-          x=move || end_x() - layout.nut_width.get()
+          x=end_x
           y=layout.fret_margin.get()
           width=width
           height=layout.svg_height.get() - 2.0 * layout.fret_margin.get()
