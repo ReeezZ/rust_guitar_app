@@ -54,8 +54,8 @@ pub(crate) fn FretboardFrets(
           return None;
         }
         leptos::logging::log!("Rendering fret line for fret {}", fret_no);
-        let x_pos = Signal::derive(move || viewbox_positions.get()[fret_no]);
-        let is_playable = Signal::derive(move || {
+        let x_pos = Memo::new(move |_| viewbox_positions.get()[fret_no]);
+        let is_playable = Memo::new(move |_| {
           fret_no >= start_fret.get() && fret_no <= end_fret.get()
         });
         let color = Signal::derive(move || if is_playable.get() { "#444" } else { "#bbb" });
@@ -135,7 +135,8 @@ pub(crate) fn FretboardMarkers(
       let(fret)
     >
       {move || {
-        if fret >= viewbox_positions.get().len() {
+        let is_out_of_bounds = Memo::new(move |_| { fret >= viewbox_positions.get().len() });
+        if is_out_of_bounds.get() {
           leptos::logging::warn!("Skipping marker for fret {} as out of bounds", fret);
           return None;
         }
