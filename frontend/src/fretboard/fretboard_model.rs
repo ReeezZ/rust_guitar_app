@@ -10,6 +10,20 @@ use crate::fretboard::components::{
 
 pub(crate) type FretStateSignals = HashMap<FretCoord, RwSignal<FretState>>;
 
+pub fn get_preallocated_fret_states() -> FretStateSignals {
+  let mut map = FretStateSignals::with_capacity(MAX_STRINGS * MAX_FRETS);
+  for string_idx in 0..=MAX_STRINGS {
+    for fret_idx in 0..=MAX_FRETS {
+      let coord = FretCoord {
+        string_idx: string_idx as u8,
+        fret_idx: fret_idx as u8,
+      };
+      map.insert(coord, RwSignal::new(FretState::Hidden));
+    }
+  }
+  map
+}
+
 // Upper bounds used for preallocation; keeps per-cell signals stable (never created inside Effects).
 // Adjust if you need more strings/frets; existing UI sliders should clamp within these maxima.
 pub const MAX_STRINGS: usize = 8; // supports up to 8-string instruments
@@ -51,7 +65,7 @@ impl Default for FretboardModel {
     let start_fret = 1;
     let end_fret = 9;
     // Preallocate all possible per-cell signals once in the model's construction scope.
-    let fret_states = RwSignal::new(Self::preallocate_fret_states());
+    let fret_states = RwSignal::new(get_preallocated_fret_states());
     Self {
       start_fret: RwSignal::new(start_fret),
       end_fret: RwSignal::new(end_fret),
@@ -125,7 +139,7 @@ impl FretboardModel {
     self.fret_states.update(|existing| {
       for (coord, state_signal) in new_states.into_iter() {
         if let Some(dest) = existing.get(&coord) {
-          dest.set(state_signal.get_untracked());
+          dest.set(state_signal.get());
         }
       }
     });
@@ -169,19 +183,5 @@ impl FretboardModel {
           });
         }
       });
-  }
-
-  fn preallocate_fret_states() -> FretStateSignals {
-    let mut map = FretStateSignals::with_capacity(MAX_STRINGS * MAX_FRETS);
-    for string_idx in 0..MAX_STRINGS {
-      for fret_idx in 0..MAX_FRETS {
-        let coord = FretCoord {
-          string_idx: string_idx as u8,
-          fret_idx: fret_idx as u8,
-        };
-        map.insert(coord, RwSignal::new(FretState::Hidden));
-      }
-    }
-    map
   }
 }
