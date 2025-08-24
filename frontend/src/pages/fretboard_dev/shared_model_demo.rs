@@ -77,7 +77,7 @@ pub fn SharedModelDemo() -> impl IntoView {
 
     <div>
       <h1 class="mb-2 text-xl font-bold">"Fretboard (base) from model"</h1>
-      <FretboardViewModel model=model.get() />
+      <FretboardViewModel model=model />
     </div>
 
     <div>
