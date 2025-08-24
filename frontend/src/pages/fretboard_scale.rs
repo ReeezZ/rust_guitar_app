@@ -48,7 +48,23 @@ pub fn FretboardScalePage() -> impl IntoView {
 
   let model = RwSignal::new(FretboardModel::default());
 
-  
+  Effect::new(move || {
+    model.update(move |model| {
+      model.set_end_fret(end_fret.get());
+    });
+  });
+  Effect::new(move || {
+    model.update(move |model| {
+      model.set_start_fret(start_fret.get());
+    });
+  });
+  Effect::new(move || {
+    model.update(move |model| {
+      model.update_visual_config(move |config| {
+        config.extra_frets.set(extra_frets.get());
+      });
+    });
+  });
 
   Effect::new(move || {
     model.update(move |model| {
