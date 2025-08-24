@@ -50,8 +50,7 @@ pub struct FretboardModel {
   /// Tuning of the guitar strings, first index is the lowest string (6th string)
   tuning: Signal<Vec<Note>>,
   /// Visual configuration for fretboard display properties
-  // TODO make Signal
-  config: RwSignal<FretboardVisualConfig>,
+  config: Signal<FretboardVisualConfig>,
   /// States for each fret
   fret_states: RwSignal<FretStateSignals>,
   /// Optional callback for fret click events
@@ -72,7 +71,7 @@ impl FretboardModel {
     start_fret: Signal<usize>,
     end_fret: Signal<usize>,
     tuning: Signal<Vec<Note>>,
-    config: RwSignal<FretboardVisualConfig>,
+    config: Signal<FretboardVisualConfig>,
     on_note_clicked: Signal<Option<Callback<FretClickEvent>>>,
   ) -> Self {
     let fret_states = RwSignal::new(get_preallocated_fret_states());
@@ -112,13 +111,6 @@ impl FretboardModel {
 
   pub fn get_on_note_clicked(&self) -> Signal<Option<Callback<FretClickEvent>>> {
     self.on_note_clicked.into()
-  }
-
-  // TODO remove
-  pub fn update_visual_config(&self, update_fn: impl FnOnce(&mut FretboardVisualConfig)) {
-    self.config.update(|config| {
-      update_fn(config);
-    });
   }
 
   pub fn set_fret_states(&self, new_states: FretStateSignals) {
@@ -177,7 +169,7 @@ pub struct FretboardModelBuilder {
   start_fret: Option<Signal<usize>>,
   end_fret: Option<Signal<usize>>,
   tuning: Option<Signal<Vec<Note>>>,
-  config: Option<RwSignal<FretboardVisualConfig>>,
+  config: Option<Signal<FretboardVisualConfig>>,
   on_note_clicked: Option<Signal<Option<Callback<FretClickEvent>>>>,
 }
 
@@ -207,7 +199,7 @@ impl FretboardModelBuilder {
     self
   }
 
-  pub fn config(mut self, config: RwSignal<FretboardVisualConfig>) -> Self {
+  pub fn config(mut self, config: Signal<FretboardVisualConfig>) -> Self {
     self.config = Some(config);
     self
   }
@@ -224,14 +216,14 @@ impl FretboardModelBuilder {
     start_fret: Option<Signal<usize>>,
     end_fret: Option<Signal<usize>>,
     tuning: Option<Signal<Vec<Note>>>,
-    config: Option<RwSignal<FretboardVisualConfig>>,
+    config: Option<Signal<FretboardVisualConfig>>,
     on_note_clicked: Option<Signal<Option<Callback<FretClickEvent>>>>,
   ) -> FretboardModel {
     FretboardModel::new(
       start_fret.unwrap_or_else(|| Signal::derive(move || 0)),
       end_fret.unwrap_or_else(|| Signal::derive(move || 12)),
       tuning.unwrap_or_else(default_tuning),
-      config.unwrap_or_else(|| RwSignal::new(FretboardVisualConfig::default())),
+      config.unwrap_or_else(|| Signal::derive(move || FretboardVisualConfig::default())),
       on_note_clicked.unwrap_or_else(|| Signal::derive(move || None)),
     )
   }

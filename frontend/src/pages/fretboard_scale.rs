@@ -54,11 +54,11 @@ pub fn FretboardScalePage() -> impl IntoView {
       .start_fret(start_fret.into())
       .end_fret(end_fret.into())
       .tuning(default_tuning().into())
-      .config(RwSignal::new(
+      .config(Signal::derive(move || {
         FretboardVisualConfigBuilder::new()
           .extra_frets(extra_frets.into())
-          .build(),
-      ))
+          .build()
+      }))
       .build(),
   );
 

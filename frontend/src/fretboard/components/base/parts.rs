@@ -1,5 +1,3 @@
-// (No HashMap needed in per-cell components currently.)
-
 use crate::fretboard::{
   components::base::{helper::FretState, layout::LayoutSnapshot},
   fretboard_model::{FretClickEvent, FretCoord, FretStateSignals},

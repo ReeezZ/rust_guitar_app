@@ -40,15 +40,15 @@ pub fn FretboardConfigExamples() -> impl IntoView {
       .start_fret(start_fret.into())
       .end_fret(end_fret.into())
       .tuning(tuning.into())
-      .config(RwSignal::new(
+      .config(Signal::derive(move || {
         FretboardVisualConfigBuilder::new()
           .svg_aspect_ratio(svg_aspect_ratio.into())
           .fret_margin_percentage(fret_margin_percentage.into())
           .nut_width(nut_width.into())
           .extra_frets(extra_frets.into())
           .marker_positions(marker_positions.into())
-          .build(),
-      ))
+          .build()
+      }))
       .build(),
   );
 

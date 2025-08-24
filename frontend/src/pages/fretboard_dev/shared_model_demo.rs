@@ -43,7 +43,7 @@ pub fn SharedModelDemo() -> impl IntoView {
     Signal::derive(move || 0),
     Signal::derive(move || 12),
     Signal::derive(move || vec![Note::E, Note::A, Note::D, Note::G, Note::B, Note::E]),
-    RwSignal::new(FretboardVisualConfig::default()),
+    Signal::derive(move || FretboardVisualConfig::default()),
     Signal::derive(move || Some(handle_note_clicked.clone())),
   ));
 
