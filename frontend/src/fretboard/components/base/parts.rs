@@ -185,21 +185,16 @@ pub(crate) fn FretboardOverlays(
   let layout_clone = layout.clone();
   let overlay_left = move || {
     if start_fret.get() > min_visible_fret.get() {
-      let x_prev = if start_fret.get() == 0 {
-        0.0
-      } else {
-        layout.absolute_positions.get()[(start_fret.get() - 1).max(0)]
-      };
       let x_curr = layout.absolute_positions.get()[start_fret.get()];
-      let playable_area_start = (x_prev + x_curr) / 2.0 - (x_curr - x_prev) / 4.0;
+      let playable_area_start = x_curr;
       let start_x = layout.absolute_to_viewbox_x(playable_area_start);
-      let width = start_x - layout.effective_nut_width();
+      let width = move || start_x - layout.effective_nut_width();
       Some(view! {
         <rect
-          x=layout.effective_nut_width()
-          y=layout.fret_margin.get()
+          x=move || layout.effective_nut_width()
+          y=layout.fret_margin
           width=width
-          height=layout.svg_height.get() - 2.0 * layout.fret_margin.get()
+          height=move || layout.svg_height.get() - 2.0 * layout.fret_margin.get()
           fill="#fff"
           opacity="0.35"
           style="pointer-events:none;"
