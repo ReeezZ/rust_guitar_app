@@ -37,19 +37,20 @@ pub(crate) fn FretboardNut(
 pub(crate) fn FretboardFrets(
   start_fret: Signal<usize>,
   end_fret: Signal<usize>,
-  #[prop(into)] min_visible_fret: Signal<usize>,
-  #[prop(into)] max_visible_fret: Signal<usize>,
-  #[prop(into)] viewbox_positions: Signal<Vec<f64>>,
+  min_visible_fret: usize,
+  max_visible_fret: usize,
+  viewbox_positions: Signal<Vec<f64>>,
   #[prop(into)] fret_margin: Signal<f64>,
   #[prop(into)] svg_height: Signal<f64>,
 ) -> impl IntoView {
   view! {
     <For
-      each=move || { min_visible_fret.get()..max_visible_fret.get() }
-      key=move |fret_no| (*fret_no)
+      each=move || { min_visible_fret..max_visible_fret }
+      key=move |fret_no| (min_visible_fret, max_visible_fret, *fret_no)
       let(fret_no)
     >
       {move || {
+        leptos::logging::log!("Rendering fret {}, viewbox: {:?}", fret_no, viewbox_positions.get());
         let x_pos = viewbox_positions.get()[fret_no];
         let is_playable = fret_no >= start_fret.get() && fret_no <= end_fret.get();
         let color = if is_playable { "#444" } else { "#bbb" };
@@ -112,27 +113,28 @@ pub(crate) fn FretboardStrings(
 /// Renders fret position markers (dots)
 #[component]
 pub(crate) fn FretboardMarkers(
-  #[prop(into)] layout: LayoutSnapshot,
+  #[prop(into)] svg_height: Signal<f64>,
+  #[prop(into)] viewbox_positions: Signal<Vec<f64>>,
   #[prop(into)] marker_positions: Signal<Vec<usize>>,
-  #[prop(into)] min_visible_fret: Signal<usize>,
-  #[prop(into)] max_visible_fret: Signal<usize>,
+  min_visible_fret: usize,
+  max_visible_fret: usize,
 ) -> impl IntoView {
   view! {
     <For
       each=move || {
-        (min_visible_fret.get()..max_visible_fret.get())
+        (min_visible_fret..max_visible_fret)
           .filter(move |fret| marker_positions.get().contains(fret))
       }
-      key=|fret| *fret
+      key=move |fret| (*fret, min_visible_fret, max_visible_fret)
       let(fret)
     >
       {move || {
         let fret_index = fret;
-        let x_prev = layout.absolute_positions.get()[fret_index.checked_sub(1).unwrap_or(0)];
-        let x_curr = layout.absolute_positions.get()[fret_index];
-        let x_center = (x_prev + x_curr) / 2.0;
-        let x = layout.absolute_to_viewbox_x(x_center);
-        let y = layout.svg_height.get() / 2.0;
+        let viewbox_positions = viewbox_positions.get();
+        let x_prev = viewbox_positions[fret_index.checked_sub(1).unwrap_or(0)];
+        let x_curr = viewbox_positions[fret_index];
+        let x = (x_prev + x_curr) / 2.0;
+        let y = svg_height.get() / 2.0;
         let r = if fret_index == 12 || fret_index == 24 { 8.0 } else { 6.0 };
         let y_offset = 28.0;
         let (cy1, cy2, op2) = if fret_index == 12 || fret_index == 24 {

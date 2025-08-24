@@ -115,9 +115,9 @@ pub fn FretboardScalePage() -> impl IntoView {
           <button
             class="py-2 px-4 text-white bg-blue-500 rounded hover:bg-blue-600"
             on:click=move |_| {
-              scale.set(Scale::new(Note::G, ScaleType::Hepatonic(HeptaScaleType::Major)));
               start_fret.set(3);
               end_fret.set(7);
+              scale.set(Scale::new(Note::G, ScaleType::Hepatonic(HeptaScaleType::Major)));
             }
           >
             "G Major (3-7)"
@@ -125,9 +125,9 @@ pub fn FretboardScalePage() -> impl IntoView {
           <button
             class="py-2 px-4 text-white bg-blue-500 rounded hover:bg-blue-600"
             on:click=move |_| {
-              scale.set(Scale::new(Note::A, ScaleType::Hepatonic(HeptaScaleType::Minor)));
               start_fret.set(5);
               end_fret.set(8);
+              scale.set(Scale::new(Note::A, ScaleType::Hepatonic(HeptaScaleType::Minor)));
             }
           >
             "A Minor (5-8)"
@@ -135,9 +135,9 @@ pub fn FretboardScalePage() -> impl IntoView {
           <button
             class="py-2 px-4 text-white bg-blue-500 rounded hover:bg-blue-600"
             on:click=move |_| {
-              scale.set(Scale::new(Note::E, ScaleType::Hepatonic(HeptaScaleType::Minor)));
               start_fret.set(0);
               end_fret.set(5);
+              scale.set(Scale::new(Note::E, ScaleType::Hepatonic(HeptaScaleType::Minor)));
             }
           >
             "E Minor (0-5)"
@@ -167,7 +167,7 @@ pub fn FretboardScalePage() -> impl IntoView {
             on:click=move |_| {
               scale.set(Scale::new(Note::E, ScaleType::Hepatonic(HeptaScaleType::Major)));
               start_fret.set(0);
-              end_fret.set(0);
+              end_fret.set(10);
             }
           >
             "Open strings only"

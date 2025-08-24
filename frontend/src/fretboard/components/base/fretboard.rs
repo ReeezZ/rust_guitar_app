@@ -89,7 +89,7 @@ pub fn Fretboard(
     has_nut.into(),
   );
 
-  let viewbox_positions = Memo::new(move |_| {
+  let viewbox_positions = Signal::derive(move || {
     layout
       .absolute_positions
       .get()
@@ -140,26 +140,35 @@ pub fn Fretboard(
             None
           }
         }}
-        <FretboardFrets
-          start_fret
-          end_fret
-          min_visible_fret
-          max_visible_fret
-          viewbox_positions
-          fret_margin
-          svg_height
-        />
+        {move || {
+          view! {
+            <FretboardFrets
+              start_fret
+              end_fret
+              min_visible_fret=min_visible_fret.get()
+              max_visible_fret=max_visible_fret.get()
+              viewbox_positions
+              fret_margin
+              svg_height
+            />
+          }
+        }}
         <FretboardStrings
           num_strings=num_strings
           string_spacing=string_spacing
           viewbox_width=svg_width
         />
-        <FretboardMarkers
-          layout=layout.clone()
-          marker_positions=marker_positions
-          min_visible_fret
-          max_visible_fret
-        />
+        {move || {
+          view! {
+            <FretboardMarkers
+              svg_height
+              viewbox_positions
+              marker_positions
+              min_visible_fret=min_visible_fret.get()
+              max_visible_fret=max_visible_fret.get()
+            />
+          }
+        }}
 
         <FretboardOverlays
           layout=layout.clone()
