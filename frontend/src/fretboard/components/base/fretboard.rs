@@ -94,7 +94,7 @@ pub fn Fretboard(
       .absolute_positions
       .get()
       .iter()
-      .map(|&x| layout.absolute_to_viewbox_x(x))
+      .map(|&x| layout.abs_to_viewbox_x(x))
       .collect::<Vec<f64>>()
   });
 

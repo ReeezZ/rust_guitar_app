@@ -2,7 +2,7 @@ use leptos::prelude::*;
 
 use crate::fretboard::fretboard_model::FretCoord;
 
-/// Snapshot of fretboard geometry for a render cycle.
+/// Struct containing all kinds of signals that are interesting for rendering
 #[derive(Clone, Debug, PartialEq, Copy)]
 pub struct LayoutSnapshot {
   pub absolute_positions: Signal<Vec<f64>>,
@@ -22,8 +22,6 @@ impl LayoutSnapshot {
   #[allow(clippy::too_many_arguments)]
   pub fn new(
     absolute_positions: Signal<Vec<f64>>,
-    // start_fret: Signal<usize>,
-    // end_fret: Signal<usize>,
     min_visible_fret: Signal<usize>,
     max_visible_fret: Signal<usize>,
     num_strings: Signal<u8>,
@@ -66,7 +64,9 @@ impl LayoutSnapshot {
     }
   }
 
-  fn abs_to_viewbox_x(&self, absolute_x: f64) -> f64 {
+  // Transform an absolute (unscaled) x coordinate into the current viewbox space
+  // For the "zoomed in" functionality
+  pub fn abs_to_viewbox_x(&self, absolute_x: f64) -> f64 {
     let offset = if self.has_nut.get() {
       self.nut_width.get()
     } else {
@@ -74,22 +74,6 @@ impl LayoutSnapshot {
     };
     offset + (absolute_x - self.range_start.get()) * self.scale_factor.get()
   }
-
-  /// Transform an absolute (unscaled) x coordinate into the current viewbox space
-  pub fn absolute_to_viewbox_x(&self, absolute_x: f64) -> f64 {
-    self.abs_to_viewbox_x(absolute_x)
-  }
-
-  /// Effective nut width (0 if nut not visible)
-  pub fn effective_nut_width(&self) -> f64 {
-    if self.has_nut.get() {
-      self.nut_width.get()
-    } else {
-      0.0
-    }
-  }
-
-  // Removed unused fret_line_x helper (can be reinstated if needed later)
 
   pub fn fret_center_x(&self, fret: usize) -> Option<f64> {
     if fret == 0 {

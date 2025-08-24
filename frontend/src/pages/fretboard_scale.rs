@@ -1,23 +1,17 @@
-// Currently refactoring fretboard base
-// TODO reenable warnings
-#![allow(warnings)]
 use crate::{
   components::{
     fret_range_selector::FretRangeSelector,
     music_selectors::{NoteSelector, ScaleTypeSelector},
   },
   fretboard::{
-    components::{
-      base::{Fretboard, FretboardViewModel},
-      visual_config::{self, FretboardVisualConfig, FretboardVisualConfigBuilder},
-    },
-    fretboard_model::{default_tuning, FretClickEvent, FretboardModel, FretboardModelBuilder},
+    components::{base::FretboardViewModel, visual_config::FretboardVisualConfigBuilder},
+    fretboard_model::{default_tuning, FretClickEvent, FretboardModelBuilder},
   },
 };
 use leptos::{logging::log, prelude::*, wasm_bindgen::JsCast};
+use shared::music::notes::Note;
 use shared::music::scales::ScaleType;
 use shared::{music::heptatonic_scales::HeptaScaleType, Scale};
-use shared::{music::notes::Note, ScaleTrait};
 
 /// Page demonstrating the SVG fretboard with scale display functionality
 #[component]
@@ -59,6 +53,7 @@ pub fn FretboardScalePage() -> impl IntoView {
           .extra_frets(extra_frets.into())
           .build()
       }))
+      .on_note_clicked(on_note_clicked.into())
       .build(),
   );
 
@@ -70,10 +65,6 @@ pub fn FretboardScalePage() -> impl IntoView {
 
   let scale = Signal::derive(move || {
     let scale = scale.get();
-    // let scale_clone = scale.clone();
-    // model.with(move |model| {
-    //   model.update_from_scale(scale_clone);
-    // });
     scale
   });
 

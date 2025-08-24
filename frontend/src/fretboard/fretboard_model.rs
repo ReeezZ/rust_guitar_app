@@ -57,7 +57,7 @@ pub struct FretboardModel {
   on_note_clicked: Signal<Option<Callback<FretClickEvent>>>,
 }
 pub fn default_tuning() -> Signal<Vec<Note>> {
-  Signal::derive(move || vec![Note::E, Note::A, Note::D, Note::G, Note::B, Note::E])
+  Signal::derive(move || vec![Note::E, Note::B, Note::G, Note::D, Note::A, Note::E])
 }
 
 impl Default for FretboardModel {
@@ -126,34 +126,47 @@ impl FretboardModel {
     });
   }
 
-  fn get_min_fret(&self) -> usize {
-    self
-      .start_fret
-      .get_untracked()
-      .saturating_sub(self.config.get_untracked().extra_frets.get())
+  fn get_min_fret(&self) -> Signal<usize> {
+    let start_fret = self.start_fret.clone();
+    let config = self.config.clone();
+
+    Signal::derive(move || {
+      start_fret
+        .get_untracked()
+        .saturating_sub(config.get_untracked().extra_frets.get())
+    })
   }
 
-  fn get_max_fret(&self) -> usize {
-    self.end_fret.get() + self.config.get_untracked().extra_frets.get()
+  fn get_max_fret(&self) -> Signal<usize> {
+    let end_fret = self.end_fret.clone();
+    let config = self.config.clone();
+    let extra_frets = Signal::derive(move || config.get().extra_frets.get());
+
+    Signal::derive(move || end_fret.get() + extra_frets.get())
   }
 
   pub fn update_from_scale(&self, scale: Scale) {
     self
       .tuning
-      .get_untracked()
+      .get()
       .iter()
       .enumerate()
       .for_each(|(string_idx, string_note)| {
-        for fret_idx in self.get_min_fret()..=self.get_max_fret() {
+        for fret_idx in self.get_min_fret().get()..=self.get_max_fret().get() {
           let coord = FretCoord {
             string_idx: string_idx as u8,
             fret_idx: fret_idx as u8,
           };
-          let note_at_fret = string_note.add_steps(fret_idx);
-          let state = if scale.root_note() == Some(note_at_fret) {
-            FretState::Normal(FretStateColor::Green, note_at_fret.to_string())
-          } else if scale.contains_note(note_at_fret) {
-            FretState::Normal(FretStateColor::Blue, note_at_fret.to_string())
+          let state = if fret_idx >= self.start_fret.get() && fret_idx <= self.end_fret.get() {
+            let note_at_fret = string_note.add_steps(fret_idx);
+            let state = if scale.root_note() == Some(note_at_fret) {
+              FretState::Normal(FretStateColor::Green, note_at_fret.to_string())
+            } else if scale.contains_note(note_at_fret) {
+              FretState::Normal(FretStateColor::Blue, note_at_fret.to_string())
+            } else {
+              FretState::Hidden
+            };
+            state
           } else {
             FretState::Hidden
           };

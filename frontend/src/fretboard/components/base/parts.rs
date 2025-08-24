@@ -186,7 +186,7 @@ pub(crate) fn FretboardOverlays(
   let overlay_left = move || {
     if start_fret.get() > min_visible_fret.get() {
       let playable_area_start = layout.absolute_positions.get()[start_fret.get().saturating_sub(1)];
-      let viewbox_start_x = move || layout.absolute_to_viewbox_x(playable_area_start);
+      let viewbox_start_x = move || layout.abs_to_viewbox_x(playable_area_start);
       Some(view! {
         <rect
           x=move || { 0.0 }
@@ -207,7 +207,7 @@ pub(crate) fn FretboardOverlays(
   let overlay_right = move || {
     if end_fret.get() < max_visible_fret.get() {
       let end_x =
-        move || layout.absolute_to_viewbox_x(layout.absolute_positions.get()[end_fret.get()]);
+        move || layout.abs_to_viewbox_x(layout.absolute_positions.get()[end_fret.get()]);
       let width = move || layout.svg_width.get() - end_x();
       Some(view! {
         <rect
@@ -246,8 +246,8 @@ fn FretboardClickableArea(layout: LayoutSnapshot, coord: FretCoord) -> impl Into
     } else {
       let prev = layout.absolute_positions.get()[(coord.fret_idx as usize - 1).max(0)];
       let curr = layout.absolute_positions.get()[coord.fret_idx as usize];
-      let start = layout.absolute_to_viewbox_x((prev + curr) / 2.0 - (curr - prev) / 4.0);
-      let end = layout.absolute_to_viewbox_x((prev + curr) / 2.0 + (curr - prev) / 4.0);
+      let start = layout.abs_to_viewbox_x((prev + curr) / 2.0 - (curr - prev) / 4.0);
+      let end = layout.abs_to_viewbox_x((prev + curr) / 2.0 + (curr - prev) / 4.0);
       (start, end - start)
     }
   });
