@@ -243,7 +243,15 @@ fn FretboardClickableArea(layout: LayoutSnapshot, coord: FretCoord) -> impl Into
         (0.0, 0.0)
       }
     } else {
-      let prev = layout.absolute_positions.get()[(coord.fret_idx as usize - 1).max(0)];
+      if coord.fret_idx as usize >= layout.absolute_positions.get().len() {
+        leptos::logging::warn!(
+          "FretboardClickableArea: Fret index {} out of bounds (len {})",
+          coord.fret_idx,
+          layout.absolute_positions.get().len()
+        );
+        return (0.0, 0.0);
+      }
+      let prev = layout.absolute_positions.get()[(coord.fret_idx.saturating_sub(1)) as usize];
       let curr = layout.absolute_positions.get()[coord.fret_idx as usize];
       let start = layout.abs_to_viewbox_x((prev + curr) / 2.0 - (curr - prev) / 4.0);
       let end = layout.abs_to_viewbox_x((prev + curr) / 2.0 + (curr - prev) / 4.0);
