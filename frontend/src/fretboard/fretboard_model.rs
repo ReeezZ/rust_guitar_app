@@ -44,77 +44,66 @@ pub struct FretClickEvent {
 #[derive(Clone, Debug, PartialEq)]
 pub struct FretboardModel {
   /// First fret in the active/playable range
-  start_fret: RwSignal<usize>,
+  start_fret: Signal<usize>,
   /// Last fret in the active/playable range
-  end_fret: RwSignal<usize>,
+  end_fret: Signal<usize>,
   /// Tuning of the guitar strings, first index is the lowest string (6th string)
-  tuning: RwSignal<Vec<Note>>,
+  tuning: Signal<Vec<Note>>,
   /// Visual configuration for fretboard display properties
+  // TODO make Signal
   config: RwSignal<FretboardVisualConfig>,
   /// States for each fret
   fret_states: RwSignal<FretStateSignals>,
   /// Optional callback for fret click events
-  on_note_clicked: RwSignal<Option<Callback<FretClickEvent>>>,
+  on_note_clicked: Signal<Option<Callback<FretClickEvent>>>,
 }
-pub fn default_tuning() -> RwSignal<Vec<Note>> {
-  RwSignal::new(vec![Note::E, Note::A, Note::D, Note::G, Note::B, Note::E])
+pub fn default_tuning() -> Signal<Vec<Note>> {
+  Signal::derive(move || vec![Note::E, Note::A, Note::D, Note::G, Note::B, Note::E])
 }
 
 impl Default for FretboardModel {
   fn default() -> Self {
-    let start_fret = 1;
-    let end_fret = 9;
-    // Preallocate all possible per-cell signals once in the model's construction scope.
-    let fret_states = RwSignal::new(get_preallocated_fret_states());
-    Self {
-      start_fret: RwSignal::new(start_fret),
-      end_fret: RwSignal::new(end_fret),
-      tuning: default_tuning(),
-      config: RwSignal::new(FretboardVisualConfig::default()),
-      on_note_clicked: RwSignal::new(None).into(),
-      fret_states,
-    }
+    FretboardModelBuilder::new().build()
   }
 }
 
 impl FretboardModel {
-  // pub fn get_num_frets(self) -> Signal<usize> {
-  //   Signal::derive(move || self.end_fret.get() - self.start_fret.get() + 1)
-  // }
+  pub fn new(
+    start_fret: Signal<usize>,
+    end_fret: Signal<usize>,
+    tuning: Signal<Vec<Note>>,
+    config: RwSignal<FretboardVisualConfig>,
+    on_note_clicked: Signal<Option<Callback<FretClickEvent>>>,
+  ) -> Self {
+    let fret_states = RwSignal::new(get_preallocated_fret_states());
+    Self {
+      start_fret,
+      end_fret,
+      tuning,
+      config,
+      on_note_clicked,
+      fret_states,
+    }
+  }
+
   pub fn get_num_frets_untracked(&self) -> usize {
     self.end_fret.get_untracked() - self.start_fret.get_untracked() + 1
   }
-  // pub fn get_tuning_untracked(&self) -> Vec<Note> {
-  //   self.tuning.get_untracked().clone()
-  // }
 
   pub fn get_tuning(&self) -> Signal<Vec<Note>> {
     self.tuning.into()
-  }
-  pub fn set_tuning(&self, new_tuning: Vec<Note>) {
-    // todo handle fret states when new tuning has more strings
-    self.tuning.set(new_tuning);
   }
 
   pub fn get_start_fret(&self) -> Signal<usize> {
     self.start_fret.into()
   }
-  pub fn set_start_fret(&self, new_start_fret: usize) {
-    self.start_fret.set(new_start_fret);
-  }
 
   pub fn get_end_fret(&self) -> Signal<usize> {
     self.end_fret.into()
   }
-  pub fn set_end_fret(&self, new_end_fret: usize) {
-    self.end_fret.set(new_end_fret);
-  }
 
   pub fn get_config(&self) -> Signal<FretboardVisualConfig> {
     self.config.into()
-  }
-  pub fn set_config(&self, new_config: FretboardVisualConfig) {
-    self.config.set(new_config);
   }
 
   pub fn get_fret_states(&self) -> Signal<FretStateSignals> {
@@ -124,10 +113,8 @@ impl FretboardModel {
   pub fn get_on_note_clicked(&self) -> Signal<Option<Callback<FretClickEvent>>> {
     self.on_note_clicked.into()
   }
-  pub fn set_on_note_clicked(&self, callback: Option<Callback<FretClickEvent>>) {
-    self.on_note_clicked.set(callback);
-  }
 
+  // TODO remove
   pub fn update_visual_config(&self, update_fn: impl FnOnce(&mut FretboardVisualConfig)) {
     self.config.update(|config| {
       update_fn(config);
@@ -183,5 +170,79 @@ impl FretboardModel {
           });
         }
       });
+  }
+}
+
+pub struct FretboardModelBuilder {
+  start_fret: Option<Signal<usize>>,
+  end_fret: Option<Signal<usize>>,
+  tuning: Option<Signal<Vec<Note>>>,
+  config: Option<RwSignal<FretboardVisualConfig>>,
+  on_note_clicked: Option<Signal<Option<Callback<FretClickEvent>>>>,
+}
+
+impl FretboardModelBuilder {
+  pub fn new() -> Self {
+    Self {
+      start_fret: None,
+      end_fret: None,
+      tuning: None,
+      config: None,
+      on_note_clicked: None,
+    }
+  }
+
+  pub fn start_fret(mut self, start_fret: Signal<usize>) -> Self {
+    self.start_fret = Some(start_fret);
+    self
+  }
+
+  pub fn end_fret(mut self, end_fret: Signal<usize>) -> Self {
+    self.end_fret = Some(end_fret);
+    self
+  }
+
+  pub fn tuning(mut self, tuning: Signal<Vec<Note>>) -> Self {
+    self.tuning = Some(tuning);
+    self
+  }
+
+  pub fn config(mut self, config: RwSignal<FretboardVisualConfig>) -> Self {
+    self.config = Some(config);
+    self
+  }
+
+  pub fn on_note_clicked(
+    mut self,
+    on_note_clicked: Signal<Option<Callback<FretClickEvent>>>,
+  ) -> Self {
+    self.on_note_clicked = Some(on_note_clicked);
+    self
+  }
+
+  pub fn from_options(
+    start_fret: Option<Signal<usize>>,
+    end_fret: Option<Signal<usize>>,
+    tuning: Option<Signal<Vec<Note>>>,
+    config: Option<RwSignal<FretboardVisualConfig>>,
+    on_note_clicked: Option<Signal<Option<Callback<FretClickEvent>>>>,
+  ) -> FretboardModel {
+    FretboardModel::new(
+      start_fret.unwrap_or_else(|| Signal::derive(move || 0)),
+      end_fret.unwrap_or_else(|| Signal::derive(move || 12)),
+      tuning.unwrap_or_else(default_tuning),
+      config.unwrap_or_else(|| RwSignal::new(FretboardVisualConfig::default())),
+      on_note_clicked.unwrap_or_else(|| Signal::derive(move || None)),
+    )
+  }
+
+  pub fn build(self) -> FretboardModel {
+    Self::from_options(
+      self.start_fret,
+      self.end_fret,
+      self.tuning,
+      self.config,
+      self.on_note_clicked,
+    )
   }
 }

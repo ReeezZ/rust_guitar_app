@@ -1,75 +1,98 @@
-use leptos::prelude::RwSignal;
+use leptos::prelude::*;
 
-/// Configuration struct for visual fretboard properties shared across all fretboard components.
-///
-/// This consolidates the common visual configuration that controls the appearance
-/// and layout of fretboard components. It handles display properties like dimensions,
-/// spacing, and visual markers, but not musical properties like tuning or scales.
-///
-/// # Basic Usage
-/// ```rust
-/// use frontend::components::fretboard::visual_config::FretboardVisualConfig;
-///
-/// // Use defaults (6-string guitar, 22 frets, 3:1 aspect ratio)
-/// let config = FretboardVisualConfig::default();
-///
-/// // Or customize with builder pattern
-/// let custom_config = FretboardVisualConfig::default()
-///   .with_num_strings(7)  // 7-string guitar
-///   .with_max_frets(24)   // 24 frets
-///   .with_aspect_ratio(4.0); // Wider display
-/// ```
-///
-/// # Preset Configurations
-/// ```rust
-/// use frontend::components::fretboard::visual_config::FretboardVisualConfig;
-///
-/// // Bass guitar (4 strings)
-/// let bass_config = FretboardVisualConfig::bass_guitar();
-///
-/// // 7-string guitar
-/// let seven_string_config = FretboardVisualConfig::seven_string();
-///
-/// // Wide aspect ratio for larger displays
-/// let wide_config = FretboardVisualConfig::wide_aspect();
-///
-/// // Chain presets with customizations
-/// let custom_bass = FretboardVisualConfig::bass_guitar()
-///   .with_max_frets(20)
-///   .with_fret_margin(0.08);
-/// ```
-///
-/// # Advanced Customization
-/// ```rust
-/// use frontend::components::fretboard::visual_config::FretboardVisualConfig;
-///
-/// let advanced_config = FretboardVisualConfig::default()
-///   .with_marker_positions(vec![3, 5, 7, 9, 12, 15, 17]) // Custom fret markers
-///   .with_nut_width(16.0)    // Wider nut
-///   .with_extra_frets(2);    // Show 2 extra frets for context
-/// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct FretboardVisualConfig {
   /// Width-to-height aspect ratio (default: 3.0)
-  pub svg_aspect_ratio: RwSignal<f64>,
+  pub svg_aspect_ratio: Signal<f64>,
   /// Percentage of SVG height used as margin (default: 0.05)
-  pub fret_margin_percentage: RwSignal<f64>,
+  pub fret_margin_percentage: Signal<f64>,
   /// Width of the nut in SVG units (default: 14.0)
-  pub nut_width: RwSignal<f64>,
+  pub nut_width: Signal<f64>,
   /// Number of extra frets to show for context (default: 1)
-  pub extra_frets: RwSignal<usize>,
+  pub extra_frets: Signal<usize>,
   /// Fret positions where markers should be displayed
-  pub marker_positions: RwSignal<Vec<usize>>,
+  pub marker_positions: Signal<Vec<usize>>,
 }
 
 impl Default for FretboardVisualConfig {
   fn default() -> Self {
+    FretboardVisualConfigBuilder::new().build()
+  }
+}
+
+impl FretboardVisualConfig {}
+
+pub struct FretboardVisualConfigBuilder {
+  svg_aspect_ratio: Option<Signal<f64>>,
+  fret_margin_percentage: Option<Signal<f64>>,
+  nut_width: Option<Signal<f64>>,
+  extra_frets: Option<Signal<usize>>,
+  marker_positions: Option<Signal<Vec<usize>>>,
+}
+
+impl FretboardVisualConfigBuilder {
+  pub fn new() -> Self {
     Self {
-      svg_aspect_ratio: RwSignal::new(3.0),
-      fret_margin_percentage: RwSignal::new(0.05),
-      nut_width: RwSignal::new(14.0),
-      extra_frets: RwSignal::new(1),
-      marker_positions: RwSignal::new(vec![3, 5, 7, 9, 12, 15, 17, 19, 21, 24]),
+      svg_aspect_ratio: None,
+      fret_margin_percentage: None,
+      nut_width: None,
+      extra_frets: None,
+      marker_positions: None,
+    }
+  }
+
+  pub fn svg_aspect_ratio(mut self, ratio: Signal<f64>) -> Self {
+    self.svg_aspect_ratio = Some(ratio);
+    self
+  }
+
+  pub fn fret_margin_percentage(mut self, percentage: Signal<f64>) -> Self {
+    self.fret_margin_percentage = Some(percentage);
+    self
+  }
+
+  pub fn nut_width(mut self, width: Signal<f64>) -> Self {
+    self.nut_width = Some(width);
+    self
+  }
+
+  pub fn extra_frets(mut self, extra: Signal<usize>) -> Self {
+    self.extra_frets = Some(extra);
+    self
+  }
+
+  pub fn marker_positions(mut self, positions: Signal<Vec<usize>>) -> Self {
+    self.marker_positions = Some(positions);
+    self
+  }
+
+  pub fn build(self) -> FretboardVisualConfig {
+    let svg_aspect_ratio = self
+      .svg_aspect_ratio
+      .unwrap_or_else(|| Signal::derive(move || 3.0));
+
+    let fret_margin_percentage = self
+      .fret_margin_percentage
+      .unwrap_or_else(|| Signal::derive(move || 0.05));
+
+    let nut_width = self
+      .nut_width
+      .unwrap_or_else(|| Signal::derive(move || 14.0));
+
+    let extra_frets = self
+      .extra_frets
+      .unwrap_or_else(|| Signal::derive(move || 1));
+
+    let marker_positions = self
+      .marker_positions
+      .unwrap_or_else(|| Signal::derive(move || vec![3, 5, 7, 9, 12, 15, 17, 19, 21, 24]));
+
+    FretboardVisualConfig {
+      svg_aspect_ratio,
+      fret_margin_percentage,
+      nut_width,
+      extra_frets,
+      marker_positions,
     }
   }
 }

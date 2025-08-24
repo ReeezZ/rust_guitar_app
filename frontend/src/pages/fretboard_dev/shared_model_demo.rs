@@ -15,8 +15,6 @@ use crate::{
 
 #[component]
 pub fn SharedModelDemo() -> impl IntoView {
-  let model = RwSignal::new(FretboardModel::default());
-
   let frets = RwSignal::new(get_fret_positions());
 
   let label = RwSignal::new(String::from("foobar"));
@@ -41,14 +39,13 @@ pub fn SharedModelDemo() -> impl IntoView {
     update_fret.run(coord.coord);
   });
 
-  let handle_fret_clicked = Callback::new(move |coord: FretClickEvent| {
-    leptos::logging::log!("{:?}", coord);
-    update_fret.run(coord.coord);
-  });
-
-  model.update(|m| {
-    m.set_on_note_clicked(Some(handle_fret_clicked));
-  });
+  let model = RwSignal::new(FretboardModel::new(
+    Signal::derive(move || 0),
+    Signal::derive(move || 12),
+    Signal::derive(move || vec![Note::E, Note::A, Note::D, Note::G, Note::B, Note::E]),
+    RwSignal::new(FretboardVisualConfig::default()),
+    Signal::derive(move || Some(handle_note_clicked.clone())),
+  ));
 
   // Update model when demo fret states change (merge into model's internal signals)
   Effect::new(move || {

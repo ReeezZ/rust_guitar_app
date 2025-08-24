@@ -7,8 +7,8 @@ use leptos::prelude::*;
 use shared::Note;
 
 use crate::fretboard::{
-  components::base::FretboardViewModel,
-  fretboard_model::{FretboardModel, MAX_FRETS, MAX_STRINGS},
+  components::{base::FretboardViewModel, visual_config::FretboardVisualConfigBuilder},
+  fretboard_model::{FretboardModelBuilder, MAX_FRETS, MAX_STRINGS},
 };
 
 #[component]
@@ -35,61 +35,38 @@ pub fn FretboardConfigExamples() -> impl IntoView {
     _ => vec![3, 5, 7, 9, 12, 15, 17, 19, 21, 24],
   });
 
-  let model = RwSignal::new(FretboardModel::default());
+  let model = RwSignal::new(
+    FretboardModelBuilder::new()
+      .start_fret(start_fret.into())
+      .end_fret(end_fret.into())
+      .tuning(tuning.into())
+      .config(RwSignal::new(
+        FretboardVisualConfigBuilder::new()
+          .svg_aspect_ratio(svg_aspect_ratio.into())
+          .fret_margin_percentage(fret_margin_percentage.into())
+          .nut_width(nut_width.into())
+          .extra_frets(extra_frets.into())
+          .marker_positions(marker_positions.into())
+          .build(),
+      ))
+      .build(),
+  );
 
-  Effect::new(move || {
-    model.update(move |model| {
-      model.update_visual_config(|config| {
-        config.extra_frets.set(extra_frets.get());
-      });
-    });
-  });
-  Effect::new(move || {
-    model.update(move |model| {
-      model.update_visual_config(|config| {
-        config.marker_positions.set(marker_positions.get());
-      });
-    });
-  });
-  Effect::new(move || {
-    model.update(move |model| {
-      model.update_visual_config(|config| {
-        config.svg_aspect_ratio.set(svg_aspect_ratio.get());
-      });
-    });
-  });
-  Effect::new(move || {
-    model.update(move |model| {
-      model.update_visual_config(|config| {
-        config
-          .fret_margin_percentage
-          .set(fret_margin_percentage.get());
-      });
-    });
-  });
-  Effect::new(move || {
-    model.update(move |model| {
-      model.update_visual_config(|config| {
-        config.nut_width.set(nut_width.get());
-      });
-    });
-  });
-
-  Effect::new(move || {
-    model.update(move |m| {
-      m.set_end_fret(end_fret.get());
-    });
-  });
-  Effect::new(move || {
-    model.update(move |m| {
-      m.set_start_fret(start_fret.get());
-    });
-  });
-  Effect::new(move || {
-    model.update(move |m| {
-      m.set_tuning(tuning.get());
-    });
-  });
+  // Effect::new(move || {
+  //   model.update(move |m| {
+  //     m.set_end_fret(end_fret.get());
+  //   });
+  // });
+  // Effect::new(move || {
+  //   model.update(move |m| {
+  //     m.set_start_fret(start_fret.get());
+  //   });
+  // });
+  // Effect::new(move || {
+  //   model.update(move |m| {
+  //     m.set_tuning(tuning.get());
+  //   });
+  // });
 
   view! {
     <div class="space-y-3">

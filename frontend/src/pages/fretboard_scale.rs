@@ -9,9 +9,9 @@ use crate::{
   fretboard::{
     components::{
       base::{Fretboard, FretboardViewModel},
-      visual_config::{self, FretboardVisualConfig},
+      visual_config::{self, FretboardVisualConfig, FretboardVisualConfigBuilder},
     },
-    fretboard_model::{default_tuning, FretClickEvent, FretboardModel},
+    fretboard_model::{default_tuning, FretClickEvent, FretboardModel, FretboardModelBuilder},
   },
 };
 use leptos::{logging::log, prelude::*, wasm_bindgen::JsCast};
@@ -46,25 +46,18 @@ pub fn FretboardScalePage() -> impl IntoView {
     set_clicked_note_event.set(Some(event));
   });
 
-  let model = RwSignal::new(FretboardModel::default());
-
-  Effect::new(move || {
-    model.update(move |model| {
-      model.set_end_fret(end_fret.get());
-    });
-  });
-  Effect::new(move || {
-    model.update(move |model| {
-      model.set_start_fret(start_fret.get());
-    });
-  });
-  Effect::new(move || {
-    model.update(move |model| {
-      model.update_visual_config(move |config| {
-        config.extra_frets.set(extra_frets.get());
-      });
-    });
-  });
+  let model = RwSignal::new(
+    FretboardModelBuilder::new()
+      .start_fret(start_fret.into())
+      .end_fret(end_fret.into())
+      .tuning(default_tuning().into())
+      .config(RwSignal::new(
+        FretboardVisualConfigBuilder::new()
+          .extra_frets(extra_frets.into())
+          .build(),
+      ))
+      .build(),
+  );
 
   Effect::new(move || {
     model.update(move |model| {
@@ -152,10 +145,10 @@ pub fn FretboardScalePage() -> impl IntoView {
           <button
             class="py-2 px-4 text-white bg-blue-500 rounded hover:bg-blue-600"
             on:click=move |_| {
-              root_note.set(Note::C);
-              scale_type.set(ScaleType::Hepatonic(HeptaScaleType::Major));
               start_fret.set(7);
               end_fret.set(10);
+              root_note.set(Note::C);
+              scale_type.set(ScaleType::Hepatonic(HeptaScaleType::Major));
             }
           >
             "C Major (7-10)"
@@ -163,10 +156,10 @@ pub fn FretboardScalePage() -> impl IntoView {
           <button
             class="py-2 px-4 text-white bg-green-500 rounded hover:bg-green-600"
             on:click=move |_| {
-              root_note.set(Note::A);
-              scale_type.set(ScaleType::Hepatonic(HeptaScaleType::Minor));
               start_fret.set(1);
               end_fret.set(4);
+              root_note.set(Note::A);
+              scale_type.set(ScaleType::Hepatonic(HeptaScaleType::Minor));
             }
           >
             "A Minor (1-4, no opens)"
