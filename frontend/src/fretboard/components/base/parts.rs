@@ -56,7 +56,7 @@ pub(crate) fn FretboardFrets(
         leptos::logging::log!("Rendering fret line for fret {}", fret_no);
         let x_pos = Memo::new(move |_| viewbox_positions.get()[fret_no]);
         let is_playable = Memo::new(move |_| {
-          fret_no >= start_fret.get() && fret_no <= end_fret.get()
+          fret_no >= start_fret.get().saturating_sub(1) && fret_no <= end_fret.get()
         });
         let color = Signal::derive(move || if is_playable.get() { "#444" } else { "#bbb" });
         let width = Signal::derive(move || if is_playable.get() { "5" } else { "3" });
@@ -196,7 +196,7 @@ pub(crate) fn FretboardOverlays(
           width=width
           height=move || layout.svg_height.get() - 2.0 * layout.fret_margin.get()
           fill="#fff"
-          opacity="0.35"
+          opacity="0.5"
           style="pointer-events:none;"
         />
       })
@@ -208,8 +208,9 @@ pub(crate) fn FretboardOverlays(
   let layout = layout_clone;
   let overlay_right = move || {
     if end_fret.get() < max_visible_fret.get() {
-      let end_x = layout.absolute_to_viewbox_x(layout.absolute_positions.get()[end_fret.get()]);
-      let width = layout.svg_width.get() - end_x;
+      let end_x =
+        move || layout.absolute_to_viewbox_x(layout.absolute_positions.get()[end_fret.get()]);
+      let width = move || layout.svg_width.get() - end_x();
       Some(view! {
         <rect
           x=end_x
@@ -217,7 +218,7 @@ pub(crate) fn FretboardOverlays(
           width=width
           height=layout.svg_height.get() - 2.0 * layout.fret_margin.get()
           fill="#fff"
-          opacity="0.35"
+          opacity="0.5"
           style="pointer-events:none;"
         />
       })
