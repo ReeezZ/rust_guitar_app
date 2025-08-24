@@ -2,6 +2,8 @@ use leptos::prelude::*;
 use rand::seq::IteratorRandom;
 use strum::IntoEnumIterator;
 
+use crate::components::fretboard::trainer::FretboardTrainer;
+use crate::components::fretboard::FretState;
 use crate::models::fretboard_model::{FretClickEvent, FretboardModel};
 // use crate::components::fretboard::trainer::FretboardTrainer;
 use crate::models::fretboard_model::FretCoord;
@@ -35,10 +37,8 @@ pub fn FretboardTrainerPage() -> impl IntoView {
   let (error_text, set_error_text) = signal("".to_string());
 
   // Visual state for SVG overlays
-  let (reference_note_coord, set_reference_note_coord) = signal(None::<FretCoord>);
-  let (reference_note_name, set_reference_note_name) = signal(None::<Note>);
-  let (error_coords, set_error_coords) = signal(Vec::<FretCoord>::new());
-  let (error_note_names, set_error_note_names) = signal(Vec::<Note>::new());
+  let (reference_note_coord, set_reference_note_coord) = signal(None::<(FretCoord, FretState)>);
+  let (error_coords, set_error_coords) = signal(Vec::<(FretCoord, FretState)>::new());
 
   // Initialize with first question
   Effect::new(move |_| {
@@ -47,7 +47,7 @@ pub fn FretboardTrainerPage() -> impl IntoView {
       let note = model.note_from_fret(random_fret);
       set_current_note.set(note);
       set_reference_note_coord.set(Some(random_fret));
-      set_reference_note_name.set(Some(note));
+      set_error_coords.set(Some(note));
     });
   });
 
@@ -116,13 +116,13 @@ pub fn FretboardTrainerPage() -> impl IntoView {
         <p>"Train intervals of notes"</p>
       </div>
 
-      // <FretboardTrainer
-      // reference_note=reference_note_coord.into()
-      // reference_note_name=reference_note_name.into()
-      // error_notes=error_coords.into()
-      // error_note_names=error_note_names.into()
-      // on_note_clicked=on_note_clicked
-      // />
+      <FretboardTrainer
+        model=fretboard_model
+        reference_note=reference_note_coord.into()
+        reference_note_name=reference_note_name.into()
+        error_notes=error_coords.into()
+        on_note_clicked=on_note_clicked
+      />
 
       <div class="text-center">
         <p class="text-lg">
