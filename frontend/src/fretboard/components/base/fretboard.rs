@@ -57,6 +57,7 @@ pub fn Fretboard(
   let svg_height = Memo::new(move |_| svg_width / config.get().svg_aspect_ratio.get());
   let fret_margin =
     Memo::new(move |_| svg_height.get() * config.get().fret_margin_percentage.get());
+  let marker_positions = Signal::derive(move || config.get().marker_positions.get());
 
   let extra_frets = Signal::derive(move || config.get().extra_frets.get());
 
@@ -88,22 +89,31 @@ pub fn Fretboard(
     has_nut.into(),
   );
 
-  Effect::new(move || {
-    leptos::logging::log!(
-      "Fretboard Layout Update: SVG {svg_width}x{}, Strings: {}, Frets: {}-{} (visible: {}-{}), Nut: {}, Spacing: {:.2}, Margin: {:.2}, Full Frets (len: {}): {:?}",
-      svg_height.get(),
-      num_strings.get(),
-      start_fret.get(),
-      end_fret.get(),
-      min_visible_fret.get(),
-      max_visible_fret.get(),
-      if has_nut.get() { "Yes" } else { "No" },
-      layout.string_spacing.get(),
-      layout.fret_margin.get(),
-      full_fret_positions.get().len(),
-      full_fret_positions.get()
-    );
+  let viewbox_positions = Memo::new(move |_| {
+    layout
+      .absolute_positions
+      .get()
+      .iter()
+      .map(|&x| layout.absolute_to_viewbox_x(x))
+      .collect::<Vec<f64>>()
   });
+
+  // Effect::new(move || {
+  //   leptos::logging::log!(
+  //     "Fretboard Layout Update: SVG {svg_width}x{}, Strings: {}, Frets: {}-{} (visible: {}-{}), Nut: {}, Spacing: {:.2}, Margin: {:.2}, Full Frets (len: {}): {:?}",
+  //     svg_height.get(),
+  //     num_strings.get(),
+  //     start_fret.get(),
+  //     end_fret.get(),
+  //     min_visible_fret.get(),
+  //     max_visible_fret.get(),
+  //     if has_nut.get() { "Yes" } else { "No" },
+  //     layout.string_spacing.get(),
+  //     layout.fret_margin.get(),
+  //     full_fret_positions.get().len(),
+  //     full_fret_positions.get()
+  //   );
+  // });
 
   view! {
     <div class="flex justify-center items-center w-full">
@@ -115,58 +125,55 @@ pub fn Fretboard(
         class="w-full max-w-full h-auto fretboard-svg"
         style="background: linear-gradient(90deg, #deb887 0%, #f5deb3 100%); border-radius: 8px; box-shadow: 0 2px 8px #0002; border: 1px solid #c00;"
       >
-        {move || {
-          let cfg = config.get();
-          let nut_width = cfg.nut_width.get();
-          let fret_margin_val = fret_margin.get();
-          let svg_h = svg_height.get();
-          // let layout_snap = layout.get();
-          view! {
-            {if has_nut.get() {
-              Some(
-                view! {
-                  <FretboardNut nut_width=nut_width fret_margin=fret_margin_val svg_height=svg_h />
-                },
-              )
-            } else {
-              None
-            }}
-            <FretboardFrets
-              start_fret
-              end_fret
-              layout=layout.clone()
-              min_visible_fret
-              max_visible_fret
-            />
-            <FretboardStrings
-              num_strings=num_strings.get()
-              string_spacing=layout.string_spacing.get()
-              viewbox_width=svg_width
-            />
-            <FretboardMarkers
-              layout=layout.clone()
-              marker_positions=cfg.marker_positions.get()
-              min_visible_fret
-              max_visible_fret
-            />
-
-            <FretboardOverlays
-              layout=layout.clone()
-              start_fret=start_fret
-              end_fret=end_fret
-              min_visible_fret
-              max_visible_fret
-            />
-            <FretboardGrid
-              layout=layout
-              min_visible_fret
-              max_visible_fret
-              tuning=tuning.clone()
-              click_cb=on_note_clicked.clone().into()
-              fret_states=fret_states
-            />
-          }
+        {if has_nut.get() {
+          Some(
+            view! {
+              <FretboardNut
+                nut_width=nut_width.get()
+                fret_margin=fret_margin.get()
+                svg_height=svg_height.get()
+              />
+            },
+          )
+        } else {
+          None
         }}
+        <FretboardFrets
+          start_fret
+          end_fret
+          min_visible_fret
+          max_visible_fret
+          viewbox_positions
+          fret_margin
+          svg_height
+        />
+        <FretboardStrings
+          num_strings=num_strings
+          string_spacing=string_spacing
+          viewbox_width=svg_width
+        />
+        <FretboardMarkers
+          layout=layout.clone()
+          marker_positions=marker_positions.get()
+          min_visible_fret
+          max_visible_fret
+        />
+
+        <FretboardOverlays
+          layout=layout.clone()
+          start_fret=start_fret
+          end_fret=end_fret
+          min_visible_fret
+          max_visible_fret
+        />
+        <FretboardGrid
+          layout=layout
+          min_visible_fret
+          max_visible_fret
+          tuning=tuning.clone()
+          click_cb=on_note_clicked.clone().into()
+          fret_states=fret_states
+        />
       </svg>
     </div>
   }

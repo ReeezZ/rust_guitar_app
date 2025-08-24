@@ -5,7 +5,8 @@ use crate::fretboard::fretboard_model::FretCoord;
 /// Snapshot of fretboard geometry for a render cycle.
 #[derive(Clone, Debug, PartialEq, Copy)]
 pub struct LayoutSnapshot {
-  pub positions: Signal<Vec<f64>>,
+  pub absolute_positions: Signal<Vec<f64>>,
+  // pub viewbox_positions: Signal<Vec<f64>>,
   pub num_strings: Signal<u8>,
   pub string_spacing: Signal<f64>,
   pub svg_width: Signal<f64>,
@@ -20,7 +21,7 @@ pub struct LayoutSnapshot {
 impl LayoutSnapshot {
   #[allow(clippy::too_many_arguments)]
   pub fn new(
-    positions: Signal<Vec<f64>>,
+    absolute_positions: Signal<Vec<f64>>,
     // start_fret: Signal<usize>,
     // end_fret: Signal<usize>,
     min_visible_fret: Signal<usize>,
@@ -37,11 +38,11 @@ impl LayoutSnapshot {
       if has_nut.get() {
         0.0
       } else {
-        positions.get()[min_visible_fret.get()]
+        absolute_positions.get()[min_visible_fret.get()]
       }
     });
     let scale_factor = Signal::derive(move || {
-      let range_end = positions.get()[max_visible_fret.get()];
+      let range_end = absolute_positions.get()[max_visible_fret.get()];
       let range_width = range_end - range_start.get();
       let available_width = if has_nut.get() {
         svg_width.get() - nut_width.get()
@@ -52,7 +53,7 @@ impl LayoutSnapshot {
     });
 
     Self {
-      positions: positions,
+      absolute_positions,
       num_strings,
       string_spacing,
       svg_width,
@@ -98,9 +99,9 @@ impl LayoutSnapshot {
         None
       };
     }
-    if fret < self.positions.get().len() {
-      let prev = self.positions.get()[fret - 1];
-      let curr = self.positions.get()[fret];
+    if fret < self.absolute_positions.get().len() {
+      let prev = self.absolute_positions.get()[fret - 1];
+      let curr = self.absolute_positions.get()[fret];
       Some(self.abs_to_viewbox_x((prev + curr) / 2.0))
     } else {
       None
