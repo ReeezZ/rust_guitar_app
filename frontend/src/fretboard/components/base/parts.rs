@@ -1,10 +1,7 @@
 // (No HashMap needed in per-cell components currently.)
 
 use crate::fretboard::{
-  components::base::{
-    helper::FretState,
-    layout::{self, LayoutSnapshot},
-  },
+  components::base::{helper::FretState, layout::LayoutSnapshot},
   fretboard_model::{FretClickEvent, FretCoord, FretStateSignals},
 };
 
@@ -59,21 +56,21 @@ pub(crate) fn FretboardFrets(
       {
         let layout = layout.clone();
         move || {
-          let checked_fret_index = fret_no.checked_sub(min_visible_fret.get());
-          if let Some(index) = checked_fret_index {
-            if index > max_visible_fret.get() {
-              leptos::logging::log!("weird edge case Fret index {} out of bounds, skipping", index);
-              return None;
-            }
-          } else {
-            return None;
-          };
-          let absolute_x = layout.positions.get()[checked_fret_index.unwrap()];
+          let absolute_x = layout.positions.get()[fret_no];
           let x_pos = layout.absolute_to_viewbox_x(absolute_x);
           let is_playable = fret_no >= start_fret.get() && fret_no <= end_fret.get();
           let color = if is_playable { "#444" } else { "#bbb" };
           let width = if is_playable { "5" } else { "3" };
           Some(
+            // let checked_fret_index = fret_no.checked_sub(min_visible_fret.get());
+            // if let Some(index) = checked_fret_index {
+            // if index > max_visible_fret.get() {
+            // leptos::logging::log!("weird edge case Fret index {} out of bounds, skipping", index);
+            // return None;
+            // }
+            // } else {
+            // return None;
+            // };
             // return None;
 
             view! {
@@ -143,11 +140,7 @@ pub(crate) fn FretboardMarkers(
       let(fret)
     >
       {move || {
-        let checked_fret_index = fret.checked_sub(min_visible_fret.get());
-        let fret_index = match checked_fret_index {
-          Some(index) => index,
-          None => return None,
-        };
+        let fret_index = fret;
         let x_prev = layout.positions.get()[fret_index.checked_sub(1).unwrap_or(0)];
         let x_curr = layout.positions.get()[fret_index];
         let x_center = (x_prev + x_curr) / 2.0;
@@ -161,6 +154,11 @@ pub(crate) fn FretboardMarkers(
           (y, y + y_offset, 0.0)
         };
         Some(
+          // let checked_fret_index = fret.checked_sub(min_visible_fret.get());
+          // let fret_index = match checked_fret_index {
+          // Some(index) => index,
+          // None => return None,
+          // };
 
           view! {
             <g>
@@ -214,12 +212,7 @@ pub(crate) fn FretboardOverlays(
   let layout = layout_clone;
   let overlay_right = move || {
     if end_fret.get() < max_visible_fret.get() {
-      let end_x = layout.absolute_to_viewbox_x(
-        layout.positions.get()[end_fret
-          .get()
-          .checked_sub(min_visible_fret.get())
-          .unwrap_or(0)],
-      );
+      let end_x = layout.absolute_to_viewbox_x(layout.positions.get()[end_fret.get()]);
       let width = layout.svg_width.get() - end_x;
       Some(view! {
         <rect

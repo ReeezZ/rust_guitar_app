@@ -1,7 +1,6 @@
 use std::{collections::HashMap, hash::Hash};
 
 use leptos::prelude::*;
-use serde::de;
 use shared::{Note, Scale, ScaleTrait};
 
 use crate::fretboard::components::{
@@ -49,12 +48,11 @@ pub fn default_tuning() -> RwSignal<Vec<Note>> {
 
 impl Default for FretboardModel {
   fn default() -> Self {
-  let tuning = default_tuning();
-  let start_fret = 1;
-  let end_fret = 9;
-  // Preallocate all possible per-cell signals once in the model's construction scope.
-  let fret_states = RwSignal::new(Self::preallocate_fret_states());
-  Self {
+    let start_fret = 1;
+    let end_fret = 9;
+    // Preallocate all possible per-cell signals once in the model's construction scope.
+    let fret_states = RwSignal::new(Self::preallocate_fret_states());
+    Self {
       start_fret: RwSignal::new(start_fret),
       end_fret: RwSignal::new(end_fret),
       tuning: default_tuning(),
@@ -66,15 +64,15 @@ impl Default for FretboardModel {
 }
 
 impl FretboardModel {
-  pub fn get_num_frets(self) -> Signal<usize> {
-    Signal::derive(move || self.end_fret.get() - self.start_fret.get() + 1)
-  }
+  // pub fn get_num_frets(self) -> Signal<usize> {
+  //   Signal::derive(move || self.end_fret.get() - self.start_fret.get() + 1)
+  // }
   pub fn get_num_frets_untracked(&self) -> usize {
     self.end_fret.get_untracked() - self.start_fret.get_untracked() + 1
   }
-  pub fn get_tuning_untracked(&self) -> Vec<Note> {
-    self.tuning.get_untracked().clone()
-  }
+  // pub fn get_tuning_untracked(&self) -> Vec<Note> {
+  //   self.tuning.get_untracked().clone()
+  // }
 
   pub fn get_tuning(&self) -> Signal<Vec<Note>> {
     self.tuning.into()
