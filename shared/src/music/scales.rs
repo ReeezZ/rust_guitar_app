@@ -53,12 +53,6 @@ pub enum Scale {
   // blues (8 notes)
 }
 
-pub trait ScaleTrait: ToString {
-  fn contains_note(&self, note: Note) -> bool;
-  fn root_note(&self) -> Option<Note>;
-  fn new(root_note: Note, scale_type: ScaleType) -> Self;
-}
-
 impl fmt::Display for Scale {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     match self {
@@ -68,15 +62,22 @@ impl fmt::Display for Scale {
   }
 }
 
-impl ScaleTrait for Scale {
-  fn contains_note(&self, note: Note) -> bool {
+pub trait ScaleTrait: ToString {
+  fn contains_note(&self, note: Note) -> bool;
+  fn root_note(&self) -> Option<Note>;
+  fn new(root_note: Note, scale_type: ScaleType) -> Self;
+  fn scale_type(&self) -> ScaleType;
+}
+
+impl Scale {
+  pub fn contains_note(&self, note: Note) -> bool {
     match self {
       Scale::Heptatonic(scale) => scale.contains_note(note),
       Scale::Chromatic => true,
     }
   }
 
-  fn root_note(&self) -> Option<Note> {
+  pub fn root_note(&self) -> Option<Note> {
     match self {
       Scale::Heptatonic(scale) => Some(scale.root_note()),
       // chromatic does not really have a root note, so we just return C
@@ -84,7 +85,7 @@ impl ScaleTrait for Scale {
     }
   }
 
-  fn new(root_note: Note, scale_type: ScaleType) -> Scale {
+  pub fn new(root_note: Note, scale_type: ScaleType) -> Scale {
     match scale_type {
       ScaleType::Hepatonic(hepta_scale_type) => {
         let scale = HeptaScaleImpl::new(root_note, hepta_scale_type);
@@ -92,5 +93,30 @@ impl ScaleTrait for Scale {
       }
       ScaleType::Chromatic => Scale::Chromatic,
     }
+  }
+
+  pub fn scale_type(&self) -> ScaleType {
+    match self {
+      Scale::Heptatonic(scale) => ScaleType::Hepatonic(scale.scale_type()),
+      Scale::Chromatic => ScaleType::Chromatic,
+    }
+  }
+}
+
+impl ScaleTrait for Scale {
+  fn contains_note(&self, note: Note) -> bool {
+    self.contains_note(note)
+  }
+
+  fn root_note(&self) -> Option<Note> {
+    self.root_note()
+  }
+
+  fn new(root_note: Note, scale_type: ScaleType) -> Self {
+    Scale::new(root_note, scale_type)
+  }
+
+  fn scale_type(&self) -> ScaleType {
+    self.scale_type()
   }
 }

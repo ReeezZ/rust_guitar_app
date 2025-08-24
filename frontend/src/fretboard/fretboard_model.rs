@@ -1,7 +1,7 @@
 use std::{collections::HashMap, hash::Hash};
 
 use leptos::prelude::*;
-use shared::{Note, Scale, ScaleTrait};
+use shared::{Note, Scale};
 
 use crate::fretboard::components::{
   base::{FretState, FretStateColor},

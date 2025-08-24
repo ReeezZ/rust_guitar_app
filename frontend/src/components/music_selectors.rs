@@ -30,10 +30,11 @@ fn event_target_value(ev: &leptos::ev::Event) -> String {
 #[component]
 pub fn NoteSelector(
   /// The reactive signal containing the selected note
-  value: RwSignal<Note>,
+  value: Signal<Note>,
   /// Optional label for the selector (defaults to "Note")
-  #[prop(optional)]
-  label: Option<&'static str>,
+  #[prop(into, optional)]
+  on_note_changed: Option<Callback<Note>>,
+  #[prop(optional)] label: Option<&'static str>,
   /// Optional CSS classes for styling
   #[prop(optional, into)]
   class: Option<String>,
@@ -49,7 +50,9 @@ pub fn NoteSelector(
         on:change=move |ev| {
           let note_str = event_target_value(&ev);
           if let Ok(note) = note_str.parse::<Note>() {
-            value.set(note);
+            if let Some(callback) = on_note_changed {
+              callback.run(note);
+            }
           }
         }
       >
@@ -79,10 +82,11 @@ pub fn NoteSelector(
 #[component]
 pub fn ScaleTypeSelector(
   /// The reactive signal containing the selected scale type
-  value: RwSignal<ScaleType>,
+  value: Signal<ScaleType>,
   /// Optional label for the selector (defaults to "Scale Type")
-  #[prop(optional)]
-  label: Option<&'static str>,
+  #[prop(into)]
+  on_scale_changed: Callback<ScaleType>,
+  #[prop(optional)] label: Option<&'static str>,
   /// Optional CSS classes for styling
   #[prop(optional, into)]
   class: Option<String>,
@@ -114,9 +118,9 @@ pub fn ScaleTypeSelector(
         on:change=move |ev| {
           let scale_str = event_target_value(&ev);
           match scale_str.as_str() {
-            "Major" => value.set(ScaleType::Hepatonic(HeptaScaleType::Major)),
-            "Minor" => value.set(ScaleType::Hepatonic(HeptaScaleType::Minor)),
-            "Chromatic" => value.set(ScaleType::Chromatic),
+            "Major" => on_scale_changed.run(ScaleType::Hepatonic(HeptaScaleType::Major)),
+            "Minor" => on_scale_changed.run(ScaleType::Hepatonic(HeptaScaleType::Minor)),
+            "Chromatic" => on_scale_changed.run(ScaleType::Chromatic),
             _ => {}
           }
         }
@@ -132,13 +136,18 @@ pub fn ScaleTypeSelector(
               <option
                 value=option_val
                 selected=move || {
-                  matches!((value.get(), current_scale_type), (
+                  matches!(
+                    (value.get(), current_scale_type),
+                    (
                       ScaleType::Hepatonic(HeptaScaleType::Major),
                       ScaleType::Hepatonic(HeptaScaleType::Major),
-                    ) | (
+                    )
+                    | (
                       ScaleType::Hepatonic(HeptaScaleType::Minor),
                       ScaleType::Hepatonic(HeptaScaleType::Minor),
-                    ) | (ScaleType::Chromatic, ScaleType::Chromatic))
+                    )
+                    | (ScaleType::Chromatic, ScaleType::Chromatic)
+                  )
                 }
               >
                 {display_txt}

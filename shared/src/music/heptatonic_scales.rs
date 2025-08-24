@@ -64,6 +64,10 @@ impl HeptaScaleImpl {
     HeptaScaleImpl { notes, scale_type }
   }
 
+  pub fn scale_type(&self) -> HeptaScaleType {
+    self.scale_type
+  }
+
   pub fn get_note_by_degree(&self, degree: HeptaScaleDegree) -> &Note {
     match degree {
       HeptaScaleDegree::First => &self.notes[0],
