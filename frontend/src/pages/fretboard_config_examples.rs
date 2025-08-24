@@ -6,10 +6,9 @@
 use leptos::prelude::*;
 use shared::Note;
 
-use crate::fretboard::{
-  components::{base::FretboardViewModel, visual_config::FretboardVisualConfigBuilder},
-  fretboard_model::{FretboardModelBuilder, MAX_FRETS, MAX_STRINGS},
-};
+use crate::components::fretboard::base::FretboardViewModel;
+use crate::components::fretboard::visual_config::FretboardVisualConfigBuilder;
+use crate::models::fretboard_model::{FretboardModelBuilder, MAX_FRETS, MAX_STRINGS};
 
 #[component]
 pub fn FretboardConfigExamples() -> impl IntoView {

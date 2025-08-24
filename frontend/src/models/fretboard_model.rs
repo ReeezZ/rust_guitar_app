@@ -3,12 +3,11 @@ use std::{collections::HashMap, hash::Hash};
 use leptos::prelude::*;
 use shared::{Note, Scale};
 
-use crate::fretboard::components::{
-  base::{FretState, FretStateColor},
-  visual_config::FretboardVisualConfig,
+use crate::components::fretboard::{
+  visual_config::FretboardVisualConfig, FretState, FretStateColor,
 };
 
-pub(crate) type FretStateSignals = HashMap<FretCoord, RwSignal<FretState>>;
+pub type FretStateSignals = HashMap<FretCoord, RwSignal<FretState>>;
 
 pub fn get_preallocated_fret_states() -> FretStateSignals {
   let mut map = FretStateSignals::with_capacity(MAX_STRINGS * MAX_FRETS);

@@ -1,12 +1,10 @@
 use crate::{
+  components::fretboard::{base::FretboardViewModel, visual_config::FretboardVisualConfigBuilder},
   components::{
     fret_range_selector::FretRangeSelector,
     music_selectors::{NoteSelector, ScaleTypeSelector},
   },
-  fretboard::{
-    components::{base::FretboardViewModel, visual_config::FretboardVisualConfigBuilder},
-    fretboard_model::{default_tuning, FretClickEvent, FretboardModelBuilder},
-  },
+  models::fretboard_model::{default_tuning, FretClickEvent, FretboardModelBuilder},
 };
 use leptos::{logging::log, prelude::*, wasm_bindgen::JsCast};
 use shared::music::notes::Note;

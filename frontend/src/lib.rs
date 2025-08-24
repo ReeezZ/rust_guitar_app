@@ -1,7 +1,6 @@
 pub mod app;
 pub mod audio;
 pub mod components;
-mod fretboard;
 pub mod models;
 pub(crate) mod pages;
 

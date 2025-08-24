@@ -1,10 +1,10 @@
-use crate::fretboard::{
-  components::base::{helper::FretState, layout::LayoutSnapshot},
-  fretboard_model::{FretClickEvent, FretCoord, FretStateSignals},
-};
-
 use leptos::prelude::*;
 use shared::Note;
+
+use crate::{
+  components::fretboard::{base::layout::LayoutSnapshot, FretState},
+  models::fretboard_model::{FretClickEvent, FretCoord, FretStateSignals},
+};
 
 /// Renders the nut (zero fret) when visible
 #[component]
@@ -206,8 +206,7 @@ pub(crate) fn FretboardOverlays(
   let layout = layout_clone;
   let overlay_right = move || {
     if end_fret.get() < max_visible_fret.get() {
-      let end_x =
-        move || layout.abs_to_viewbox_x(layout.absolute_positions.get()[end_fret.get()]);
+      let end_x = move || layout.abs_to_viewbox_x(layout.absolute_positions.get()[end_fret.get()]);
       let width = move || layout.svg_width.get() - end_x();
       Some(view! {
         <rect

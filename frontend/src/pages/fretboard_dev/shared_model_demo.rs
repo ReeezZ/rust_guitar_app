@@ -2,14 +2,11 @@ use leptos::prelude::*;
 use shared::Note;
 
 use crate::{
-  fretboard::{
-    components::{
-      base::{FretState, FretStateColor, Fretboard, FretboardViewModel},
-      visual_config::FretboardVisualConfig,
-    },
-    fretboard_model::{FretClickEvent, FretboardModel},
-    FretCoord,
+  components::fretboard::{
+    base::Fretboard, visual_config::FretboardVisualConfig, FretState, FretStateColor,
+    FretboardViewModel,
   },
+  models::fretboard_model::{FretClickEvent, FretCoord, FretboardModel},
   pages::fretboard_dev::{frets_editor::FretsEditor, helper::get_fret_positions},
 };
 

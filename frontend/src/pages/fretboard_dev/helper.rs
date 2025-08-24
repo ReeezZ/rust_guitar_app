@@ -1,10 +1,7 @@
 use leptos::prelude::*;
 
-use crate::fretboard::{
-  components::base::{FretState, FretStateColor},
-  fretboard_model::{get_preallocated_fret_states, FretStateSignals},
-  FretCoord,
-};
+use crate::components::fretboard::base::{FretState, FretStateColor};
+use crate::models::fretboard_model::{get_preallocated_fret_states, FretCoord, FretStateSignals};
 
 pub(super) fn get_fret_positions() -> FretStateSignals {
   // Build a sample set of fret states to visualize different cases

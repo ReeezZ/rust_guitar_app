@@ -2,9 +2,9 @@ use leptos::prelude::*;
 use rand::seq::IteratorRandom;
 use strum::IntoEnumIterator;
 
-use crate::fretboard::fretboard_model::{FretClickEvent, FretboardModel};
+use crate::models::fretboard_model::{FretClickEvent, FretboardModel};
 // use crate::components::fretboard::trainer::FretboardTrainer;
-use crate::fretboard::FretCoord;
+use crate::models::fretboard_model::FretCoord;
 use crate::models::fretboard_trainer::FretboardTrainerTrait;
 use shared::music::intervals::Interval;
 use shared::music::notes::Note;

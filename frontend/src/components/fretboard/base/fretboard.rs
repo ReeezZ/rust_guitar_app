@@ -1,17 +1,16 @@
-use crate::fretboard::{
-  components::{
-    base::{
-      helper::{calculate_fret_positions, calculate_string_spacing},
-      layout::LayoutSnapshot,
-      parts::{
-        FretboardFrets, FretboardGrid, FretboardMarkers, FretboardNut, FretboardOverlays,
-        FretboardStrings,
-      },
+use crate::components::fretboard::{
+  base::{
+    helper::{calculate_fret_positions, calculate_string_spacing},
+    layout::LayoutSnapshot,
+    parts::{
+      FretboardFrets, FretboardGrid, FretboardMarkers, FretboardNut, FretboardOverlays,
+      FretboardStrings,
     },
-    visual_config::FretboardVisualConfig,
   },
-  fretboard_model::{FretClickEvent, FretStateSignals, FretboardModel},
+  visual_config::FretboardVisualConfig,
 };
+use crate::models::fretboard_model::{FretClickEvent, FretStateSignals, FretboardModel};
+
 use leptos::prelude::*;
 use shared::Note;
 
