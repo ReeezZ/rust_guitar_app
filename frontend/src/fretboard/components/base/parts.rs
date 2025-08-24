@@ -51,13 +51,18 @@ pub(crate) fn FretboardFrets(
     >
       {move || {
         leptos::logging::log!(
-          "Rendering fret {}, start_fret: {}, end_fret: {}, viewbox: {:?}", fret_no, start_fret.get(), end_fret.get(), viewbox_positions.get()
+          "Rendering fret {}, viewbox (len: {}): {:?}", fret_no, viewbox_positions.get().len(), viewbox_positions.get()
         );
+        if fret_no >= viewbox_positions.get().len() {
+          leptos::logging::warn!("Skipping fret {} as out of bounds", fret_no);
+          return None;
+        }
         let x_pos = viewbox_positions.get()[fret_no];
         let is_playable = fret_no >= start_fret.get() && fret_no <= end_fret.get();
         let color = if is_playable { "#444" } else { "#bbb" };
         let width = if is_playable { "5" } else { "3" };
         Some(
+
           view! {
             <line
               x1=x_pos
@@ -131,15 +136,18 @@ pub(crate) fn FretboardMarkers(
       let(fret)
     >
       {move || {
-        let fret_index = fret;
+        if fret >= viewbox_positions.get().len() {
+          leptos::logging::warn!("Skipping marker for fret {} as out of bounds", fret);
+          return None;
+        }
         let viewbox_positions = viewbox_positions.get();
-        let x_prev = viewbox_positions[fret_index.checked_sub(1).unwrap_or(0)];
-        let x_curr = viewbox_positions[fret_index];
+        let x_prev = viewbox_positions[fret.checked_sub(1).unwrap_or(0)];
+        let x_curr = viewbox_positions[fret];
         let x = (x_prev + x_curr) / 2.0;
         let y = svg_height.get() / 2.0;
-        let r = if fret_index == 12 || fret_index == 24 { 8.0 } else { 6.0 };
+        let r = if fret == 12 || fret == 24 { 8.0 } else { 6.0 };
         let y_offset = 28.0;
-        let (cy1, cy2, op2) = if fret_index == 12 || fret_index == 24 {
+        let (cy1, cy2, op2) = if fret == 12 || fret == 24 {
           (y - y_offset, y + y_offset, 0.25)
         } else {
           (y, y + y_offset, 0.0)
