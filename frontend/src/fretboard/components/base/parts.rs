@@ -50,7 +50,9 @@ pub(crate) fn FretboardFrets(
       let(fret_no)
     >
       {move || {
-        leptos::logging::log!("Rendering fret {}, viewbox: {:?}", fret_no, viewbox_positions.get());
+        leptos::logging::log!(
+          "Rendering fret {}, start_fret: {}, end_fret: {}, viewbox: {:?}", fret_no, start_fret.get(), end_fret.get(), viewbox_positions.get()
+        );
         let x_pos = viewbox_positions.get()[fret_no];
         let is_playable = fret_no >= start_fret.get() && fret_no <= end_fret.get();
         let color = if is_playable { "#444" } else { "#bbb" };
