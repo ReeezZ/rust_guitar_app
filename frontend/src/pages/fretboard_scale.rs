@@ -28,7 +28,7 @@ pub fn FretboardScalePage() -> impl IntoView {
   // Extra frets for visual context
   let extra_frets = RwSignal::new(2_usize);
 
-  let scale = RwSignal::new(Scale::new(
+  let (scale, set_scale) = signal(Scale::new(
     Note::C,
     ScaleType::Hepatonic(HeptaScaleType::Major),
   ));
@@ -66,6 +66,15 @@ pub fn FretboardScalePage() -> impl IntoView {
     model.update(move |model| {
       model.update_from_scale(scale.get());
     });
+  });
+
+  let scale = Signal::derive(move || {
+    let scale = scale.get();
+    let scale_clone = scale.clone();
+    model.update(move |model| {
+      model.update_from_scale(scale);
+    });
+    scale_clone
   });
 
   view! {
@@ -117,7 +126,7 @@ pub fn FretboardScalePage() -> impl IntoView {
             on:click=move |_| {
               start_fret.set(3);
               end_fret.set(7);
-              scale.set(Scale::new(Note::G, ScaleType::Hepatonic(HeptaScaleType::Major)));
+              set_scale.set(Scale::new(Note::G, ScaleType::Hepatonic(HeptaScaleType::Major)));
             }
           >
             "G Major (3-7)"
@@ -127,7 +136,7 @@ pub fn FretboardScalePage() -> impl IntoView {
             on:click=move |_| {
               start_fret.set(5);
               end_fret.set(8);
-              scale.set(Scale::new(Note::A, ScaleType::Hepatonic(HeptaScaleType::Minor)));
+              set_scale.set(Scale::new(Note::A, ScaleType::Hepatonic(HeptaScaleType::Minor)));
             }
           >
             "A Minor (5-8)"
@@ -137,7 +146,7 @@ pub fn FretboardScalePage() -> impl IntoView {
             on:click=move |_| {
               start_fret.set(0);
               end_fret.set(5);
-              scale.set(Scale::new(Note::E, ScaleType::Hepatonic(HeptaScaleType::Minor)));
+              set_scale.set(Scale::new(Note::E, ScaleType::Hepatonic(HeptaScaleType::Minor)));
             }
           >
             "E Minor (0-5)"
@@ -147,7 +156,7 @@ pub fn FretboardScalePage() -> impl IntoView {
             on:click=move |_| {
               start_fret.set(7);
               end_fret.set(10);
-              scale.set(Scale::new(Note::C, ScaleType::Hepatonic(HeptaScaleType::Major)));
+              set_scale.set(Scale::new(Note::C, ScaleType::Hepatonic(HeptaScaleType::Major)));
             }
           >
             "C Major (7-10)"
@@ -157,7 +166,7 @@ pub fn FretboardScalePage() -> impl IntoView {
             on:click=move |_| {
               start_fret.set(1);
               end_fret.set(4);
-              scale.set(Scale::new(Note::D, ScaleType::Hepatonic(HeptaScaleType::Minor)));
+              set_scale.set(Scale::new(Note::D, ScaleType::Hepatonic(HeptaScaleType::Minor)));
             }
           >
             "A Minor (1-4, no opens)"
@@ -165,7 +174,7 @@ pub fn FretboardScalePage() -> impl IntoView {
           <button
             class="py-2 px-4 text-white bg-purple-500 rounded hover:bg-purple-600"
             on:click=move |_| {
-              scale.set(Scale::new(Note::E, ScaleType::Hepatonic(HeptaScaleType::Major)));
+              set_scale.set(Scale::new(Note::E, ScaleType::Hepatonic(HeptaScaleType::Major)));
               start_fret.set(0);
               end_fret.set(10);
             }
@@ -188,7 +197,7 @@ pub fn FretboardScalePage() -> impl IntoView {
         <NoteSelector
           value=root_note.into()
           on_note_changed=Callback::new(move |note| {
-            scale.set(Scale::new(note, scale.get_untracked().scale_type()));
+            set_scale.set(Scale::new(note, scale.get_untracked().scale_type()));
           })
           label="Root Note"
         />
@@ -197,7 +206,7 @@ pub fn FretboardScalePage() -> impl IntoView {
         <ScaleTypeSelector
           value=Signal::derive(move || scale.get().scale_type())
           on_scale_changed=Callback::new(move |scale_type| {
-            scale.set(Scale::new(root_note.get_untracked(), scale_type));
+            set_scale.set(Scale::new(root_note.get_untracked(), scale_type));
           })
           label="Scale Type"
         />
