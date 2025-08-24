@@ -266,20 +266,15 @@ fn FretboardClickableArea(layout: LayoutSnapshot, coord: FretCoord) -> impl Into
 fn FretboardNote(
   layout: LayoutSnapshot,
   coord: FretCoord,
-  fret_states: Signal<FretStateSignals>,
+  #[prop(into)] fret_state: Signal<FretState>,
 ) -> impl IntoView {
   move || {
     let (x, y) = match layout.note_position(coord) {
       Some(p) => p,
       None => return None,
     };
-    let current_state = fret_states.with(|m| m.get(&coord).map(|sig| sig.get()));
-    let current_state = match current_state {
-      Some(s) => s,
-      None => return None,
-    };
 
-    let (fill_color, radius, label) = match current_state {
+    let (fill_color, radius, label) = match fret_state.get() {
       FretState::Hidden => ("transparent".to_string(), 0.0, None),
       FretState::Normal(color, label) => (color.as_str().to_string(), 12.0, Some(label)),
     };
@@ -338,6 +333,16 @@ pub(crate) fn FretboardGrid(
             string_idx,
             fret_idx: fret_idx as u8,
           };
+          let fret_state = fret_states
+            .with_untracked(|borrowed| {
+              borrowed
+                .get(&coord)
+                .expect(
+                  format!("Preallocated signals for all coordinates. Tried accessing {:?}", coord)
+                    .as_str(),
+                )
+                .clone()
+            });
           let handle_click = move |_| {
             if let Some(click_cb) = click_cb.get().as_ref() {
               let note = tuning
@@ -366,7 +371,7 @@ pub(crate) fn FretboardGrid(
                   None
                 }
               }}
-              <FretboardNote layout=layout coord=coord fret_states=fret_states />
+              <FretboardNote layout=layout coord=coord fret_state />
             </g>
           }
         }
