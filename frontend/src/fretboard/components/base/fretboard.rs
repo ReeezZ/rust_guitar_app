@@ -61,9 +61,8 @@ pub fn Fretboard(
 
   let extra_frets = Signal::derive(move || config.get().extra_frets.get());
 
-  let min_visible_fret =
-    Signal::derive(move || start_fret.get().saturating_sub(extra_frets.get() + 1));
-  let max_visible_fret = Signal::derive(move || end_fret.get() + extra_frets.get());
+  let min_visible_fret = Memo::new(move |_| start_fret.get().saturating_sub(extra_frets.get() + 1));
+  let max_visible_fret = Memo::new(move |_| end_fret.get() + extra_frets.get());
 
   let full_fret_positions =
     Memo::new(move |_| calculate_fret_positions(svg_width, max_visible_fret.get() as u8 + 2));
@@ -141,7 +140,7 @@ pub fn Fretboard(
             None
           }
         }}
-        
+
         <FretboardFrets
           start_fret
           end_fret

@@ -35,8 +35,8 @@ pub(crate) fn FretboardNut(
 pub(crate) fn FretboardFrets(
   start_fret: Signal<usize>,
   end_fret: Signal<usize>,
-  min_visible_fret: Signal<usize>,
-  max_visible_fret: Signal<usize>,
+  #[prop(into)] min_visible_fret: Signal<usize>,
+  #[prop(into)] max_visible_fret: Signal<usize>,
   viewbox_positions: Signal<Vec<f64>>,
   #[prop(into)] fret_margin: Signal<f64>,
   #[prop(into)] svg_height: Signal<f64>,
@@ -140,24 +140,26 @@ pub(crate) fn FretboardMarkers(
           leptos::logging::warn!("Skipping marker for fret {} as out of bounds", fret);
           return None;
         }
-        let viewbox_positions = viewbox_positions.get();
-        let x_prev = viewbox_positions[fret.checked_sub(1).unwrap_or(0)];
-        let x_curr = viewbox_positions[fret];
-        let x = (x_prev + x_curr) / 2.0;
-        let y = svg_height.get() / 2.0;
+        let x = Memo::new(move |_| {
+          let viewbox_positions = viewbox_positions.get();
+          let x_prev = viewbox_positions[fret.checked_sub(1).unwrap_or(0)];
+          let x_curr = viewbox_positions[fret];
+          (x_prev + x_curr) / 2.0
+        });
         let r = if fret == 12 || fret == 24 { 8.0 } else { 6.0 };
-        let y_offset = 28.0;
-        let (cy1, cy2, op2) = if fret == 12 || fret == 24 {
-          (y - y_offset, y + y_offset, 0.25)
-        } else {
-          (y, y + y_offset, 0.0)
-        };
+        let y_coords_and_opacity = Signal::derive(move || {
+          let y = svg_height.get() / 2.0;
+          let y_offset = 28.0;
+          if fret == 12 || fret == 24 {
+            (y - y_offset, y + y_offset, 0.25)
+          } else {
+            (y, y + y_offset, 0.0)
+          }
+        });
+        let cy1 = Signal::derive(move || y_coords_and_opacity.get().0);
+        let cy2 = Signal::derive(move || y_coords_and_opacity.get().1);
+        let op2 = Signal::derive(move || y_coords_and_opacity.get().2);
         Some(
-          // let checked_fret_index = fret.checked_sub(min_visible_fret.get());
-          // let fret_index = match checked_fret_index {
-          // Some(index) => index,
-          // None => return None,
-          // };
 
           view! {
             <g>
