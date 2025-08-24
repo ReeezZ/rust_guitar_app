@@ -125,18 +125,20 @@ pub fn Fretboard(
         class="w-full max-w-full h-auto fretboard-svg"
         style="background: linear-gradient(90deg, #deb887 0%, #f5deb3 100%); border-radius: 8px; box-shadow: 0 2px 8px #0002; border: 1px solid #c00;"
       >
-        {if has_nut.get() {
-          Some(
-            view! {
-              <FretboardNut
-                nut_width=nut_width.get()
-                fret_margin=fret_margin.get()
-                svg_height=svg_height.get()
-              />
-            },
-          )
-        } else {
-          None
+        {move || {
+          if has_nut.get() {
+            Some(
+              view! {
+                <FretboardNut
+                  nut_width=nut_width.get()
+                  fret_margin=fret_margin.get()
+                  svg_height=svg_height.get()
+                />
+              },
+            )
+          } else {
+            None
+          }
         }}
         <FretboardFrets
           start_fret
@@ -154,7 +156,7 @@ pub fn Fretboard(
         />
         <FretboardMarkers
           layout=layout.clone()
-          marker_positions=marker_positions.get()
+          marker_positions=marker_positions
           min_visible_fret
           max_visible_fret
         />
