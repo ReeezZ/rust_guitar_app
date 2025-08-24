@@ -156,9 +156,9 @@ pub(crate) fn FretboardMarkers(
             (y, y + y_offset, 0.0)
           }
         });
-        let cy1 = Signal::derive(move || y_coords_and_opacity.get().0);
-        let cy2 = Signal::derive(move || y_coords_and_opacity.get().1);
-        let op2 = Signal::derive(move || y_coords_and_opacity.get().2);
+        let cy1 = move || y_coords_and_opacity.get().0;
+        let cy2 = move || y_coords_and_opacity.get().1;
+        let op2 = move || y_coords_and_opacity.get().2;
         Some(
 
           view! {
@@ -185,15 +185,13 @@ pub(crate) fn FretboardOverlays(
   let layout_clone = layout.clone();
   let overlay_left = move || {
     if start_fret.get() > min_visible_fret.get() {
-      let x_curr = layout.absolute_positions.get()[start_fret.get()];
-      let playable_area_start = x_curr;
-      let start_x = layout.absolute_to_viewbox_x(playable_area_start);
-      let width = move || start_x - layout.effective_nut_width();
+      let playable_area_start = layout.absolute_positions.get()[start_fret.get().saturating_sub(1)];
+      let viewbox_start_x = move || layout.absolute_to_viewbox_x(playable_area_start);
       Some(view! {
         <rect
-          x=move || layout.effective_nut_width()
+          x=move || { 0.0 }
           y=layout.fret_margin
-          width=width
+          width=move || { layout.nut_width.get() + viewbox_start_x() }
           height=move || layout.svg_height.get() - 2.0 * layout.fret_margin.get()
           fill="#fff"
           opacity="0.5"
@@ -213,7 +211,7 @@ pub(crate) fn FretboardOverlays(
       let width = move || layout.svg_width.get() - end_x();
       Some(view! {
         <rect
-          x=end_x
+          x=move || end_x() - layout.nut_width.get()
           y=layout.fret_margin.get()
           width=width
           height=layout.svg_height.get() - 2.0 * layout.fret_margin.get()
