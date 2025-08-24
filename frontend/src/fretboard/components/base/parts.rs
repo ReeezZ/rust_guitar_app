@@ -35,41 +35,42 @@ pub(crate) fn FretboardNut(
 pub(crate) fn FretboardFrets(
   start_fret: Signal<usize>,
   end_fret: Signal<usize>,
-  min_visible_fret: usize,
-  max_visible_fret: usize,
+  min_visible_fret: Signal<usize>,
+  max_visible_fret: Signal<usize>,
   viewbox_positions: Signal<Vec<f64>>,
   #[prop(into)] fret_margin: Signal<f64>,
   #[prop(into)] svg_height: Signal<f64>,
 ) -> impl IntoView {
   view! {
     <For
-      each=move || { min_visible_fret..max_visible_fret }
-      key=move |fret_no| (min_visible_fret, max_visible_fret, *fret_no)
+      each=move || { min_visible_fret.get()..max_visible_fret.get() }
+      key=move |fret_no| (*fret_no)
       let(fret_no)
     >
       {move || {
-        leptos::logging::log!(
-          "Rendering fret {}, viewbox (len: {}): {:?}", fret_no, viewbox_positions.get().len(), viewbox_positions.get()
-        );
-        if fret_no >= viewbox_positions.get().len() {
-          leptos::logging::warn!("Skipping fret {} as out of bounds", fret_no);
+        let is_out_of_bounds = Memo::new(move |_| { fret_no >= viewbox_positions.get().len() });
+        if is_out_of_bounds.get() {
+          leptos::logging::warn!("Skipping fret line for fret {} as out of bounds", fret_no);
           return None;
         }
-        let x_pos = viewbox_positions.get()[fret_no];
-        let is_playable = fret_no >= start_fret.get() && fret_no <= end_fret.get();
-        let color = if is_playable { "#444" } else { "#bbb" };
-        let width = if is_playable { "5" } else { "3" };
+        leptos::logging::log!("Rendering fret line for fret {}", fret_no);
+        let x_pos = Signal::derive(move || viewbox_positions.get()[fret_no]);
+        let is_playable = Signal::derive(move || {
+          fret_no >= start_fret.get() && fret_no <= end_fret.get()
+        });
+        let color = Signal::derive(move || if is_playable.get() { "#444" } else { "#bbb" });
+        let width = Signal::derive(move || if is_playable.get() { "5" } else { "3" });
         Some(
 
           view! {
             <line
               x1=x_pos
-              y1=fret_margin.get()
+              y1=fret_margin
               x2=x_pos
-              y2=svg_height.get() - fret_margin.get()
+              y2=move || svg_height.get() - fret_margin.get()
               stroke=color
               stroke-width=width
-              opacity=if is_playable { "1.0" } else { "0.6" }
+              opacity=move || if is_playable.get() { "1.0" } else { "0.6" }
             />
           },
         )

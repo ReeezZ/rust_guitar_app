@@ -70,11 +70,11 @@ pub fn FretboardScalePage() -> impl IntoView {
 
   let scale = Signal::derive(move || {
     let scale = scale.get();
-    let scale_clone = scale.clone();
-    model.with(move |model| {
-      model.update_from_scale(scale);
-    });
-    scale_clone
+    // let scale_clone = scale.clone();
+    // model.with(move |model| {
+    //   model.update_from_scale(scale_clone);
+    // });
+    scale
   });
 
   view! {

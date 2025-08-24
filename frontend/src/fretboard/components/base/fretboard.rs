@@ -141,22 +141,17 @@ pub fn Fretboard(
             None
           }
         }}
-        {move || {
-          leptos::logging::log!(
-            "Rendering frets for visible range {}-{}", min_visible_fret.get(), max_visible_fret.get()
-          );
-          view! {
-            <FretboardFrets
-              start_fret
-              end_fret
-              min_visible_fret=min_visible_fret.get()
-              max_visible_fret=max_visible_fret.get()
-              viewbox_positions
-              fret_margin
-              svg_height
-            />
-          }
-        }}
+        
+        <FretboardFrets
+          start_fret
+          end_fret
+          min_visible_fret
+          max_visible_fret
+          viewbox_positions
+          fret_margin
+          svg_height
+        />
+
         <FretboardStrings
           num_strings=num_strings
           string_spacing=string_spacing
