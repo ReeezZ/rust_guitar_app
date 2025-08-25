@@ -10,12 +10,9 @@ pub fn FretboardTrainer(
   /// The reference note coordinate to highlight in green (None = no highlight)
   #[prop(into)]
   reference_note: Signal<Option<FretCoord>>,
-  /// The note at the reference coordinate (for display)
-  #[prop(into)]
-  reference_note_name: Signal<Option<Note>>,
   /// Coordinates of incorrect guesses to highlight in red
   #[prop(into)]
-  error_notes: Signal<Vec<(FretCoord, FretState)>>,
+  error_notes: Signal<Vec<FretCoord>>,
 
   #[prop(into)] model: Signal<FretboardModel>,
 ) -> impl IntoView {

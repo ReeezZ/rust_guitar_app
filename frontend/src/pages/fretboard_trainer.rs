@@ -3,7 +3,7 @@ use rand::seq::IteratorRandom;
 use strum::IntoEnumIterator;
 
 use crate::components::fretboard::trainer::FretboardTrainer;
-use crate::components::fretboard::FretState;
+use crate::components::fretboard::{FretState, FretStateColor};
 use crate::models::fretboard_model::{FretClickEvent, FretboardModel};
 // use crate::components::fretboard::trainer::FretboardTrainer;
 use crate::models::fretboard_model::FretCoord;
@@ -37,18 +37,15 @@ pub fn FretboardTrainerPage() -> impl IntoView {
   let (error_text, set_error_text) = signal("".to_string());
 
   // Visual state for SVG overlays
-  let (reference_note_coord, set_reference_note_coord) = signal(None::<(FretCoord, FretState)>);
-  let (error_coords, set_error_coords) = signal(Vec::<(FretCoord, FretState)>::new());
+  let (reference_note_coord, set_reference_note_coord) = signal(None::<FretCoord>);
+  let (error_coords, set_error_coords) = signal(Vec::<FretCoord>::new());
 
-  // Initialize with first question
-  Effect::new(move |_| {
-    fretboard_model.with(|model| {
-      let random_fret = model.get_random_fret();
-      let note = model.note_from_fret(random_fret);
-      set_current_note.set(note);
-      set_reference_note_coord.set(Some(random_fret));
-      set_error_coords.set(Some(note));
-    });
+  fretboard_model.with(|model| {
+    let random_fret = model.get_random_fret();
+    let note = model.note_from_fret(random_fret);
+    set_current_note.set(note);
+    set_reference_note_coord.set(Some(random_fret));
+    set_error_coords.set(vec![]);
   });
 
   // Handle fret clicks
@@ -65,12 +62,10 @@ pub fn FretboardTrainerPage() -> impl IntoView {
 
         // Clear error highlights and set new reference note
         set_error_coords.set(vec![]);
-        set_error_note_names.set(vec![]);
         let new_fret = model.get_random_fret();
         let new_note = model.note_from_fret(new_fret);
         set_current_note.set(new_note);
         set_reference_note_coord.set(Some(new_fret));
-        set_reference_note_name.set(Some(new_note));
       } else {
         // Incorrect answer
         if error_text.get().is_empty() {
@@ -78,22 +73,20 @@ pub fn FretboardTrainerPage() -> impl IntoView {
         }
         set_num_incorrect.update(|n| *n += 1);
 
-        // Add to error highlights
-        set_error_coords.update(|coords| {
-          if !coords.contains(&evt.coord) {
+        if !error_coords.get().contains(&evt.coord) {
+          // Add to error highlights
+          set_error_coords.update(|coords| {
             coords.push(evt.coord);
-          }
-        });
-        set_error_note_names.update(|names| {
-          // Only add the note name if we added a new coordinate
-          let coords = error_coords.get_untracked();
-          if coords.len() > names.len() {
-            names.push(clicked_note);
-          }
-        });
+          });
+        }
       }
     });
   });
+
+  // TODO hmm i think the problem is that we need the model for the note specific logic to avoid this self referential loop
+  // fretboard_model.with(|m| {
+  //   m.set_on_note_clicked(Some(on_note_clicked));
+  // });
 
   // Computed strings for display
   let interval_str = move || current_interval.get().to_string();
@@ -118,10 +111,8 @@ pub fn FretboardTrainerPage() -> impl IntoView {
 
       <FretboardTrainer
         model=fretboard_model
-        reference_note=reference_note_coord.into()
-        reference_note_name=reference_note_name.into()
-        error_notes=error_coords.into()
-        on_note_clicked=on_note_clicked
+        reference_note=reference_note_coord
+        error_notes=error_coords
       />
 
       <div class="text-center">
