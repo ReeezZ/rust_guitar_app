@@ -69,7 +69,7 @@ impl FretboardModelBuilder {
       start_fret.unwrap_or_else(|| Signal::derive(move || 0)),
       end_fret.unwrap_or_else(|| Signal::derive(move || 12)),
       tuning.unwrap_or_else(default_tuning),
-      config.unwrap_or_else(|| Signal::derive(move || FretboardVisualConfig::default())),
+      config.unwrap_or_else(|| Signal::derive(FretboardVisualConfig::default)),
       fret_states,
     )
   }
@@ -82,5 +82,11 @@ impl FretboardModelBuilder {
       self.config,
       self.fret_states,
     )
+  }
+}
+
+impl Default for FretboardModelBuilder {
+  fn default() -> Self {
+    Self::new()
   }
 }

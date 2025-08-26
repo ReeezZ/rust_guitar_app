@@ -142,14 +142,14 @@ pub fn Fretboard(
         }}
 
         <FretboardOverlays
-          layout=layout.clone()
+          layout
           start_fret=start_fret
           end_fret=end_fret
           min_visible_fret
           max_visible_fret
         />
         <FretboardGrid
-          layout=layout
+          layout
           min_visible_fret
           max_visible_fret
           tuning

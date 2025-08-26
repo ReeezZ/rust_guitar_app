@@ -40,7 +40,7 @@ pub fn FretboardConfigExamples() -> impl IntoView {
     FretboardModelBuilder::new()
       .start_fret(start_fret.into())
       .end_fret(end_fret.into())
-      .tuning(tuning.into())
+      .tuning(tuning)
       .config(Signal::derive(move || {
         FretboardVisualConfigBuilder::new()
           .svg_aspect_ratio(svg_aspect_ratio.into())

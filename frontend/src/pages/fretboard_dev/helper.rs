@@ -14,10 +14,7 @@ pub(super) fn get_fret_positions() -> FretStateSignals {
         string_idx: s,
         fret_idx: f,
       },
-      RwSignal::new(FretState::Normal(
-        FretStateColor::Green,
-        format!("{}-{}", f, s),
-      )),
+      RwSignal::new(FretState::Normal(FretStateColor::Green, format!("{f}-{s}"))),
     );
   }
 

@@ -21,7 +21,7 @@ pub trait FretboardModelExt {
 impl FretboardModelExt for FretboardModel {
   fn update_from_scale(&self, scale: Scale) {
     self
-      .tuning
+      .get_tuning()
       .get()
       .iter()
       .enumerate()
@@ -31,20 +31,20 @@ impl FretboardModelExt for FretboardModel {
             string_idx: string_idx as u8,
             fret_idx: fret_idx as u8,
           };
-          let state = if fret_idx >= self.start_fret.get() && fret_idx <= self.end_fret.get() {
-            let note_at_fret = string_note.add_steps(fret_idx);
-            let state = if scale.root_note() == Some(note_at_fret) {
-              FretState::Normal(FretStateColor::Green, note_at_fret.to_string())
-            } else if scale.contains_note(note_at_fret) {
-              FretState::Normal(FretStateColor::Blue, note_at_fret.to_string())
+          let state =
+            if fret_idx >= self.get_start_fret().get() && fret_idx <= self.get_end_fret().get() {
+              let note_at_fret = string_note.add_steps(fret_idx);
+              if scale.root_note() == Some(note_at_fret) {
+                FretState::Normal(FretStateColor::Green, note_at_fret.to_string())
+              } else if scale.contains_note(note_at_fret) {
+                FretState::Normal(FretStateColor::Blue, note_at_fret.to_string())
+              } else {
+                FretState::Hidden
+              }
             } else {
               FretState::Hidden
             };
-            state
-          } else {
-            FretState::Hidden
-          };
-          self.fret_states.with(|fret_states| {
+          self.get_fret_states().with_untracked(|fret_states| {
             if let Some(sig) = fret_states.get(&coord) {
               sig.set(state);
             }
@@ -58,9 +58,9 @@ impl FretboardModelExt for FretboardModel {
     use rand::Rng;
     let mut rng = rand::rng();
 
-    let start = self.start_fret.get_untracked();
-    let end = self.end_fret.get_untracked();
-    let num_strings = self.tuning.get_untracked().len();
+    let start = self.get_start_fret().get_untracked();
+    let end = self.get_end_fret().get_untracked();
+    let num_strings = self.get_tuning().get_untracked().len();
 
     FretCoord {
       string_idx: rng.random_range(0..num_strings) as u8,
@@ -82,7 +82,7 @@ impl FretboardModelExt for FretboardModel {
   }
 
   fn hide_all_frets(&self) {
-    self.fret_states.with_untracked(|fret_states| {
+    self.get_fret_states().with_untracked(|fret_states| {
       fret_states.iter().for_each(|(_, sig)| {
         if sig.get_untracked() != FretState::Hidden {
           sig.set(FretState::Hidden);

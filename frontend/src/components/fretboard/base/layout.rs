@@ -58,9 +58,9 @@ impl LayoutSnapshot {
       svg_height,
       fret_margin,
       nut_width,
-      has_nut: has_nut.into(),
-      range_start: range_start,
-      scale_factor: scale_factor.into(),
+      has_nut,
+      range_start,
+      scale_factor,
     }
   }
 

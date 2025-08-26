@@ -57,7 +57,7 @@ pub fn FretRangeSelector(
             if start_fret == 0 {
               " (open strings only)".to_string()
             } else {
-              format!(" (fret {start_fret} only)", start_fret = start_fret)
+              format!(" (fret {start_fret} only)")
             }
           } else if start_fret == 0 {
             " (includes open strings)".to_string()

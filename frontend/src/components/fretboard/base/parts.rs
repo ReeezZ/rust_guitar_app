@@ -140,7 +140,7 @@ pub(crate) fn FretboardMarkers(
         }
         let x = Memo::new(move |_| {
           let viewbox_positions = viewbox_positions.get();
-          let x_prev = viewbox_positions[fret.checked_sub(1).unwrap_or(0)];
+          let x_prev = viewbox_positions[fret.saturating_sub(1)];
           let x_curr = viewbox_positions[fret];
           (x_prev + x_curr) / 2.0
         });
@@ -180,7 +180,6 @@ pub(crate) fn FretboardOverlays(
   #[prop(into)] min_visible_fret: Signal<usize>,
   #[prop(into)] max_visible_fret: Signal<usize>,
 ) -> impl IntoView {
-  let layout_clone = layout.clone();
   let overlay_left = move || {
     if start_fret.get() > min_visible_fret.get() {
       let playable_area_start = layout.absolute_positions.get()[start_fret.get().saturating_sub(1)];
@@ -201,7 +200,6 @@ pub(crate) fn FretboardOverlays(
     }
   };
 
-  let layout = layout_clone;
   let overlay_right = move || {
     if end_fret.get() < max_visible_fret.get() {
       let end_x = move || layout.abs_to_viewbox_x(layout.absolute_positions.get()[end_fret.get()]);
@@ -355,10 +353,9 @@ pub(crate) fn FretboardGrid(
             .with_untracked(|borrowed| {
               *borrowed
                 .get(&coord)
-                .expect(
-                  format!("Preallocated signals for all coordinates. Tried accessing {:?}", coord)
-                    .as_str(),
-                )
+                .unwrap_or_else(|| {
+                  panic!("Preallocated signals for all coordinates. Tried accessing {coord:?}");
+                })
             });
           let handle_click = move |_| {
             if let Some(click_cb) = click_cb.get().as_ref() {

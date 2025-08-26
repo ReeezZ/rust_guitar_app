@@ -45,7 +45,7 @@ pub fn FretboardScalePage() -> impl IntoView {
     FretboardModelBuilder::new()
       .start_fret(start_fret.into())
       .end_fret(end_fret.into())
-      .tuning(default_tuning().into())
+      .tuning(default_tuning())
       .config(Signal::derive(move || {
         FretboardVisualConfigBuilder::new()
           .extra_frets(extra_frets.into())
@@ -58,11 +58,6 @@ pub fn FretboardScalePage() -> impl IntoView {
     model.with(move |model| {
       model.update_from_scale(scale.get());
     });
-  });
-
-  let scale = Signal::derive(move || {
-    let scale = scale.get();
-    scale
   });
 
   view! {

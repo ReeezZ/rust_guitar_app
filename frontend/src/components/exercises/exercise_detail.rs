@@ -238,14 +238,14 @@ fn Title(
         scale_type,
         ..
       } => {
-        format!("{} {} Scale", root_note, scale_type)
+        format!("{root_note} {scale_type} Scale")
       }
       ExerciseType::Triad {
         root_note,
         scale_type,
         ..
       } => {
-        format!("{} {} Triad", root_note, scale_type)
+        format!("{root_note} {scale_type} Triad")
       }
       _ => "Exercise".to_string(),
     }
@@ -297,10 +297,7 @@ fn Title(
                       view! {
                         <button
                           class="py-1 px-3 text-sm text-blue-600 rounded border border-blue-600 hover:bg-blue-50"
-                          on:click={
-                            let generate_title = generate_title.clone();
-                            move |_| generate_title()
-                          }
+                          on:click=move |_| generate_title()
                           title="Generate title from exercise details"
                         >
                           "Generate"

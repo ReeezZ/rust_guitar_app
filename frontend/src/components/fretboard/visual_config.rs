@@ -20,8 +20,6 @@ impl Default for FretboardVisualConfig {
   }
 }
 
-impl FretboardVisualConfig {}
-
 pub struct FretboardVisualConfigBuilder {
   svg_aspect_ratio: Option<Signal<f64>>,
   fret_margin_percentage: Option<Signal<f64>>,
@@ -94,5 +92,11 @@ impl FretboardVisualConfigBuilder {
       extra_frets,
       marker_positions,
     }
+  }
+}
+
+impl Default for FretboardVisualConfigBuilder {
+  fn default() -> Self {
+    Self::new()
   }
 }

@@ -7,15 +7,15 @@ use crate::models::fretboard::model_builder::FretboardModelBuilder;
 #[derive(Clone, Debug, PartialEq)]
 pub struct FretboardModel {
   /// First fret in the active/playable range
-  pub start_fret: Signal<usize>,
+  start_fret: Signal<usize>,
   /// Last fret in the active/playable range
-  pub end_fret: Signal<usize>,
+  end_fret: Signal<usize>,
   /// Tuning of the guitar strings, first index is the lowest string (6th string)
-  pub tuning: Signal<Vec<Note>>,
+  tuning: Signal<Vec<Note>>,
   /// Visual configuration for fretboard display properties
-  pub config: Signal<FretboardVisualConfig>,
+  config: Signal<FretboardVisualConfig>,
   /// States for each fret
-  pub fret_states: Signal<FretStateSignals>,
+  fret_states: Signal<FretStateSignals>,
 }
 
 impl Default for FretboardModel {
@@ -46,23 +46,23 @@ impl FretboardModel {
   }
 
   pub fn get_tuning(&self) -> Signal<Vec<Note>> {
-    self.tuning.into()
+    self.tuning
   }
 
   pub fn get_start_fret(&self) -> Signal<usize> {
-    self.start_fret.into()
+    self.start_fret
   }
 
   pub fn get_end_fret(&self) -> Signal<usize> {
-    self.end_fret.into()
+    self.end_fret
   }
 
   pub fn get_config(&self) -> Signal<FretboardVisualConfig> {
-    self.config.into()
+    self.config
   }
 
   pub fn get_fret_states(&self) -> Signal<FretStateSignals> {
-    self.fret_states.into()
+    self.fret_states
   }
 
   /// Update the fret states by merging new states into existing preallocated signals
@@ -99,8 +99,8 @@ impl FretboardModel {
   }
 
   pub fn get_min_fret(&self) -> Signal<usize> {
-    let start_fret = self.start_fret.clone();
-    let config = self.config.clone();
+    let start_fret = self.start_fret;
+    let config = self.config;
 
     Signal::derive(move || {
       start_fret

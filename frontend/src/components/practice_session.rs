@@ -43,7 +43,7 @@ pub fn PracticeSession(
 
   // Create update handler for root note changes - use the passed exercise directly
   let handle_root_note_update = {
-    let callback = on_exercise_update.clone();
+    let callback = on_exercise_update;
     let ex_ref = exercise.clone();
 
     Callback::new(move |new_note: Note| {
@@ -485,8 +485,7 @@ pub fn PracticeSession(
                   {move || {
                     if show_fretboard.get() {
                       view! {
-                        <div class="p-4 bg-gray-50 rounded-lg">
-                        // <FretboardScaleDisplay
+                        <div class="p-4 bg-gray-50 rounded-lg">// <FretboardScaleDisplay
                         // fret_range=Signal::derive(move || {
                         // fret_range.0 as usize..=fret_range.1 as usize
                         // })

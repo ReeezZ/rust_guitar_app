@@ -45,8 +45,8 @@ pub fn SharedModelDemo() -> impl IntoView {
       .tuning(Signal::derive(move || {
         vec![Note::E, Note::A, Note::D, Note::G, Note::B, Note::E]
       }))
-      .config(Signal::derive(move || FretboardVisualConfig::default()))
-      .fret_states(Signal::derive(move || frets.get()))
+      .config(Signal::derive(FretboardVisualConfig::default))
+      .fret_states(frets.into())
       .build(),
   );
 

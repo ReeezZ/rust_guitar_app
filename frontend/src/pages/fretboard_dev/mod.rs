@@ -1,6 +1,6 @@
-pub mod fretboard_dev;
+pub mod dev_page;
 pub mod frets_editor;
 pub mod helper;
 pub mod shared_model_demo;
 
-pub use fretboard_dev::FretboardDevPage;
+pub use dev_page::FretboardDevPage;
