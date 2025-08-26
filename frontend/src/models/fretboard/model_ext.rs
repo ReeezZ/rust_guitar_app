@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-use shared::Scale;
+use shared::{music::intervals::Interval, Scale};
 
 use crate::{
   components::fretboard::{FretCoord, FretState, FretStateColor},
@@ -9,6 +9,12 @@ use crate::{
 pub trait FretboardModelExt {
   fn update_from_scale(&self, scale: Scale);
   fn get_random_fret(&self) -> FretCoord;
+  fn is_interval_of(
+    &self,
+    coord_left: FretCoord,
+    coord_right: FretCoord,
+    interval: Interval,
+  ) -> bool;
 }
 
 impl FretboardModelExt for FretboardModel {
@@ -59,5 +65,18 @@ impl FretboardModelExt for FretboardModel {
       string_idx: rng.random_range(0..num_strings) as u8,
       fret_idx: rng.random_range(start..=end) as u8,
     }
+  }
+
+  fn is_interval_of(
+    &self,
+    coord_left: FretCoord,
+    coord_right: FretCoord,
+    interval: Interval,
+  ) -> bool {
+    let note_left = self.note_from_fret(coord_left);
+    let note_right = self.note_from_fret(coord_right);
+    let left_note_plus_interval = interval.of(note_left);
+
+    note_right == left_note_plus_interval
   }
 }
