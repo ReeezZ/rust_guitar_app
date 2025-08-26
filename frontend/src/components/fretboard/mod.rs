@@ -1,6 +1,10 @@
 pub mod base;
-pub mod config_examples;
-pub mod scale_display;
-pub mod trainer;
-pub mod visual_config;
-pub mod with_notes;
+pub(crate) mod visual_config;
+
+mod model_adapter;
+
+pub use base::{FretClickEvent, FretCoord, FretState, FretStateColor, FretStateSignals, Fretboard};
+
+pub use base::definitions;
+pub use model_adapter::FretboardModelAdapter;
+pub use visual_config::{FretboardVisualConfig, FretboardVisualConfigBuilder};

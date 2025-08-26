@@ -3,7 +3,7 @@ use std::ops::Index;
 use super::intervals::Interval;
 use std::fmt;
 
-use super::scales::ScaleTrait;
+use super::scales::ScaleExt;
 use crate::music::notes::Note;
 
 #[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -48,7 +48,7 @@ impl fmt::Display for HeptaScaleType {
   }
 }
 
-pub trait HeptaScale: Index<HeptaScaleDegree> + ScaleTrait {
+pub trait HeptaScale: Index<HeptaScaleDegree> + ScaleExt {
   fn get_note_by_degree(&self, degree: HeptaScaleDegree) -> Note;
 }
 
@@ -62,6 +62,10 @@ impl HeptaScaleImpl {
   pub fn new(root_note: Note, scale_type: HeptaScaleType) -> HeptaScaleImpl {
     let notes = Self::get_notes(root_note, scale_type);
     HeptaScaleImpl { notes, scale_type }
+  }
+
+  pub fn scale_type(&self) -> HeptaScaleType {
+    self.scale_type
   }
 
   pub fn get_note_by_degree(&self, degree: HeptaScaleDegree) -> &Note {

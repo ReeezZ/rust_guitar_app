@@ -5,7 +5,9 @@ use leptos::wasm_bindgen::JsCast;
 #[component]
 pub fn FretRangeSelector(
   /// The range signal to update
-  value: RwSignal<std::ops::RangeInclusive<usize>>,
+  #[prop(into)]
+  start_fret: RwSignal<usize>,
+  end_fret: RwSignal<usize>,
   /// Label for the control
   label: &'static str,
   /// Minimum possible fret value
@@ -18,24 +20,20 @@ pub fn FretRangeSelector(
   let min_fret = min.unwrap_or(0);
   let max_fret = max.unwrap_or(22);
 
-  // Extract start and end from the range for individual sliders
-  let start_fret = RwSignal::new(*value.get_untracked().start());
-  let end_fret = RwSignal::new(*value.get_untracked().end());
-
   // Update the range when either slider changes
   let update_range = move || {
     let start = start_fret.get();
     let end = end_fret.get();
     if start <= end {
-      value.set(start..=end);
+      start_fret.set(start);
+      end_fret.set(end);
     }
   };
 
   // Sync individual signals with the range signal changes from outside
   Effect::new(move |_| {
-    let range = value.get();
-    let new_start = *range.start();
-    let new_end = *range.end();
+    let new_start = start_fret.get();
+    let new_end = end_fret.get();
 
     if start_fret.get_untracked() != new_start {
       start_fret.set(new_start);
@@ -51,17 +49,17 @@ pub fn FretRangeSelector(
 
       // Current range display
       <div class="text-sm text-gray-600">
-        "Range: "
-        {move || format!("{}-{}", start_fret.get(), end_fret.get())}
+        "Range: " {move || format!("{}-{}", start_fret.get(), end_fret.get())}
         {move || {
-          let range = value.get();
-          if range.start() == range.end() {
-            if *range.start() == 0 {
+          let start_fret = start_fret.get();
+          let end_fret = end_fret.get();
+          if start_fret == end_fret {
+            if start_fret == 0 {
               " (open strings only)".to_string()
             } else {
-              format!(" (fret {start} only)", start = range.start())
+              format!(" (fret {start_fret} only)")
             }
-          } else if *range.start() == 0 {
+          } else if start_fret == 0 {
             " (includes open strings)".to_string()
           } else {
             " (excludes open strings)".to_string()

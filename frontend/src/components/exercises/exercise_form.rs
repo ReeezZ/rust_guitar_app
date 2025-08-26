@@ -235,106 +235,113 @@ pub fn ExerciseForm(
   };
 
   view! {
-      <div class="bg-white p-6 rounded-lg border border-gray-200">
-          <h3 class="text-lg font-semibold text-gray-800 mb-4">{form_title}</h3>
+    <div class="p-6 bg-white rounded-lg border border-gray-200">
+      <h3 class="mb-4 text-lg font-semibold text-gray-800">{form_title}</h3>
 
-          // Error display
-          {move || {
-              let errors = errors.get();
-              if errors.is_empty() {
-                  view! { <div></div> }.into_any()
-              } else {
-                  view! {
-                      <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded">
-                          {errors.into_iter().map(|error| {
-                              view! { <div class="text-red-700 text-sm">{error}</div> }
-                          }).collect::<Vec<_>>()}
-                      </div>
-                  }.into_any()
-              }
-          }}
+      // Error display
+      {move || {
+        let errors = errors.get();
+        if errors.is_empty() {
+          view! { <div></div> }.into_any()
+        } else {
+          view! {
+            <div class="p-3 mb-4 bg-red-50 rounded border border-red-200">
+              {errors
+                .into_iter()
+                .map(|error| {
+                  view! { <div class="text-sm text-red-700">{error}</div> }
+                })
+                .collect::<Vec<_>>()}
+            </div>
+          }
+            .into_any()
+        }
+      }}
 
-          <div class="space-y-4">
-              // Basic form fields - inline (simple enough to not need separate component)
-              <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                  <input
-                      type="text"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      prop:value={move || name.get()}
-                      on:input=move |e| set_name.set(event_target_value(&e))
-                      placeholder="Enter exercise name"
-                  />
-              </div>
-
-              <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                  <textarea
-                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      prop:value={move || description.get()}
-                      on:input=move |e| set_description.set(event_target_value(&e))
-                      placeholder="Enter exercise description (optional)"
-                      rows="3"
-                  />
-              </div>
-
-              <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Exercise Type</label>
-                  <select
-                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      on:change=move |e| handle_type_change(event_target_value(&e))
-                  >
-                      <option value={TECHNIQUE_TYPE} selected=move || exercise_type_str.get() == TECHNIQUE_TYPE>
-                          Technique
-                      </option>
-                      <option value={SCALE_TYPE} selected=move || exercise_type_str.get() == SCALE_TYPE>
-                          Scale
-                      </option>
-                      <option value={TRIAD_TYPE} selected=move || exercise_type_str.get() == TRIAD_TYPE>
-                          Triad
-                      </option>
-                      <option value={SONG_TYPE} selected=move || exercise_type_str.get() == SONG_TYPE>
-                          Song
-                      </option>
-                  </select>
-              </div>
-
-              // Type-specific fields - kept as separate component (complex conditional logic)
-              <ExerciseTypeSpecificFields
-                  exercise_type={exercise_type_str}
-                  root_note={root_note}
-                  on_root_note_change={Callback::new(move |note| set_root_note.set(note))}
-                  scale_type={scale_type}
-                  on_scale_type_change={Callback::new(move |scale| set_scale_type.set(scale))}
-                  min_fret={min_fret}
-                  on_min_fret_change={Callback::new(move |fret| set_min_fret.set(fret))}
-                  max_fret={max_fret}
-                  on_max_fret_change={Callback::new(move |fret| set_max_fret.set(fret))}
-              />
-          </div>
-
-          // Action buttons - inline (just 2 buttons, simpler than separate component)
-          <div class="flex justify-end space-x-3 mt-6">
-              <button
-                  class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
-                  on:click=handle_cancel
-              >
-                  Cancel
-              </button>
-              <button
-                  class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                  on:click=handle_save
-              >
-                  {match mode_for_button { FormMode::Create => "Create", FormMode::Edit(_) => "Update" }}
-              </button>
-          </div>
-
-          // Type change confirmation dialog - extracted to component
-          <ExerciseTypeChangeConfirmation
-              show={show_type_change_warning}
-              on_confirm={Callback::new(move |_| confirm_type_change())}
-              on_cancel={Callback::new(move |_| cancel_type_change())}
+      <div class="space-y-4">
+        // Basic form fields - inline (simple enough to not need separate component)
+        <div>
+          <label class="block mb-1 text-sm font-medium text-gray-700">Name</label>
+          <input
+            type="text"
+            class="py-2 px-3 w-full rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            prop:value=move || name.get()
+            on:input=move |e| set_name.set(event_target_value(&e))
+            placeholder="Enter exercise name"
           />
+        </div>
+
+        <div>
+          <label class="block mb-1 text-sm font-medium text-gray-700">Description</label>
+          <textarea
+            class="py-2 px-3 w-full rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            prop:value=move || description.get()
+            on:input=move |e| set_description.set(event_target_value(&e))
+            placeholder="Enter exercise description (optional)"
+            rows="3"
+          />
+        </div>
+
+        <div>
+          <label class="block mb-1 text-sm font-medium text-gray-700">Exercise Type</label>
+          <select
+            class="py-2 px-3 w-full rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            on:change=move |e| handle_type_change(event_target_value(&e))
+          >
+            <option value=TECHNIQUE_TYPE selected=move || exercise_type_str.get() == TECHNIQUE_TYPE>
+              Technique
+            </option>
+            <option value=SCALE_TYPE selected=move || exercise_type_str.get() == SCALE_TYPE>
+              Scale
+            </option>
+            <option value=TRIAD_TYPE selected=move || exercise_type_str.get() == TRIAD_TYPE>
+              Triad
+            </option>
+            <option value=SONG_TYPE selected=move || exercise_type_str.get() == SONG_TYPE>
+              Song
+            </option>
+          </select>
+        </div>
+
+        // Type-specific fields - kept as separate component (complex conditional logic)
+        <ExerciseTypeSpecificFields
+          exercise_type=exercise_type_str
+          root_note=root_note
+          on_root_note_change=Callback::new(move |note| set_root_note.set(note))
+          scale_type=scale_type
+          on_scale_type_change=Callback::new(move |scale| set_scale_type.set(scale))
+          min_fret=min_fret
+          on_min_fret_change=Callback::new(move |fret| set_min_fret.set(fret))
+          max_fret=max_fret
+          on_max_fret_change=Callback::new(move |fret| set_max_fret.set(fret))
+        />
       </div>
+
+      // Action buttons - inline (just 2 buttons, simpler than separate component)
+      <div class="flex justify-end mt-6 space-x-3">
+        <button
+          class="py-2 px-4 text-gray-600 rounded-md border border-gray-300 hover:bg-gray-50"
+          on:click=handle_cancel
+        >
+          Cancel
+        </button>
+        <button
+          class="py-2 px-4 text-white bg-blue-500 rounded-md hover:bg-blue-600"
+          on:click=handle_save
+        >
+          {match mode_for_button {
+            FormMode::Create => "Create",
+            FormMode::Edit(_) => "Update",
+          }}
+        </button>
+      </div>
+
+      // Type change confirmation dialog - extracted to component
+      <ExerciseTypeChangeConfirmation
+        show=show_type_change_warning
+        on_confirm=Callback::new(move |_| confirm_type_change())
+        on_cancel=Callback::new(move |_| cancel_type_change())
+      />
+    </div>
   }
 }

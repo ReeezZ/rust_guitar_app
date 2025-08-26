@@ -1,6 +1,6 @@
 use crate::music::{
   notes::Note,
-  scales::{Scale, ScaleTrait, ScaleType},
+  scales::{Scale, ScaleType},
 };
 
 use crate::generate_id;

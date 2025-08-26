@@ -1,5 +1,8 @@
+use crate::{
+  components::fretboard::FretboardModelAdapter, models::fretboard::FretboardModelBuilder,
+};
+
 use super::{constants::*, PositionPresetButtons};
-use crate::components::fretboard::scale_display::FretboardScaleDisplay;
 use leptos::prelude::*;
 use shared::music::{heptatonic_scales::HeptaScaleType, notes::Note, scales::ScaleType};
 
@@ -75,14 +78,20 @@ pub fn ExerciseTypeSpecificFields(
                     }
                   }
                 >
-                  <option value="Major" selected=move || {
-                    matches!(scale_type.get(), ScaleType::Hepatonic(HeptaScaleType::Major))
-                  }>
+                  <option
+                    value="Major"
+                    selected=move || {
+                      matches!(scale_type.get(), ScaleType::Hepatonic(HeptaScaleType::Major))
+                    }
+                  >
                     Major
                   </option>
-                  <option value="Minor" selected=move || {
-                    matches!(scale_type.get(), ScaleType::Hepatonic(HeptaScaleType::Minor))
-                  }>
+                  <option
+                    value="Minor"
+                    selected=move || {
+                      matches!(scale_type.get(), ScaleType::Hepatonic(HeptaScaleType::Minor))
+                    }
+                  >
                     Natural Minor
                   </option>
                 </select>
@@ -129,14 +138,14 @@ pub fn ExerciseTypeSpecificFields(
             // Fretboard preview for scales
             <div>
               <label class="block mb-2 text-sm font-medium text-gray-700">Preview</label>
+              //
               <div class="p-4 mx-auto max-w-2xl bg-gray-50 rounded-lg">
-                <FretboardScaleDisplay
-                  fret_range=Signal::derive(move || {
-                    min_fret.get() as usize..=max_fret.get() as usize
-                  })
-                  root_note=Signal::derive(move || root_note.get())
-                  scale_type=Signal::derive(move || scale_type.get())
-                />
+                <FretboardModelAdapter model=Signal::derive(move || {
+                  FretboardModelBuilder::new()
+                    .start_fret(Signal::derive(move || min_fret.get() as usize))
+                    .end_fret(Signal::derive(move || max_fret.get() as usize))
+                    .build()
+                }) />
               </div>
             </div>
           </div>

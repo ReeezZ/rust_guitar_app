@@ -59,7 +59,7 @@ pub fn Metronome(
 
   // Start/stop metronome
   let toggle_metronome = move |_| {
-    match metronome_state.get() {
+    match metronome_state.get_untracked() {
       MetronomeState::Stopped => {
         set_current_beat.set(1);
         set_metronome_state.set(MetronomeState::Running);
@@ -100,7 +100,7 @@ pub fn Metronome(
             "−"
           </button>
 
-          <div class="flex-1 text-center mx-4">
+          <div class="flex-1 mx-4 text-center">
             <div class="text-2xl font-bold text-gray-800">{move || bpm.get().to_string()}</div>
             <div class="text-xs text-gray-500">"BPM"</div>
           </div>

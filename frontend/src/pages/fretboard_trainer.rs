@@ -2,10 +2,11 @@ use leptos::prelude::*;
 use rand::seq::IteratorRandom;
 use strum::IntoEnumIterator;
 
-use crate::components::fretboard::trainer::FretboardTrainer;
-use crate::components::fretboard::with_notes::FretClickEventWithNote;
-use crate::models::fretboard_model::{FretCoord, FretboardModel};
-use crate::models::fretboard_trainer::FretboardTrainerTrait;
+use crate::components::fretboard::{
+  FretClickEvent, FretCoord, FretState, FretStateColor, FretboardModelAdapter,
+};
+use crate::models::fretboard::model::FretboardModel;
+use crate::models::fretboard::FretboardModelExt;
 use shared::music::intervals::Interval;
 use shared::music::notes::Note;
 
@@ -24,8 +25,8 @@ fn random_interval() -> Interval {
 /// clean separation between game logic and visual presentation.
 #[component]
 pub fn FretboardTrainerPage() -> impl IntoView {
-  // Initialize fretboard model for note calculations
-  let fretboard_model = RwSignal::new(FretboardModel::new(6, 5, FretboardModel::standard_tuning()));
+  // Initialize fretboard model for note calculations (pure data, no callbacks)
+  let fretboard_model = RwSignal::new(FretboardModel::default());
 
   // Game state
   let (num_correct, set_num_correct) = signal(0);
@@ -35,27 +36,24 @@ pub fn FretboardTrainerPage() -> impl IntoView {
   let (error_text, set_error_text) = signal("".to_string());
 
   // Visual state for SVG overlays
-  let (reference_note_coord, set_reference_note_coord) = signal(None::<FretCoord>);
-  let (reference_note_name, set_reference_note_name) = signal(None::<Note>);
   let (error_coords, set_error_coords) = signal(Vec::<FretCoord>::new());
-  let (error_note_names, set_error_note_names) = signal(Vec::<Note>::new());
 
-  // Initialize with first question
-  Effect::new(move |_| {
-    fretboard_model.with(|model| {
-      let random_fret = model.get_random_fret();
-      let note = model.note_from_fret(random_fret);
-      set_current_note.set(note);
-      set_reference_note_coord.set(Some(random_fret));
-      set_reference_note_name.set(Some(note));
-    });
-  });
-
-  // Handle fret clicks
-  let on_fret_clicked = Callback::new(move |evt: FretClickEventWithNote| {
-    fretboard_model.with(|model| {
+  // Handle fret clicks - this is pure UI logic, not mixed with data model
+  let on_note_clicked = Callback::new(move |evt: FretClickEvent| {
+    fretboard_model.with_untracked(move |model| {
       let clicked_note = model.note_from_fret(evt.coord);
-      let target_note = current_interval.get().of(current_note.get());
+      let target_note = current_interval
+        .get_untracked()
+        .of(current_note.get_untracked());
+
+      leptos::logging::log!(
+        "coord {:?} - target note: {:?} - clicked note: {} - expected interval: {}, got interval: {:?}",
+        evt.coord,
+        target_note,
+        clicked_note,
+        current_interval.get_untracked(),
+        Interval::from_notes(current_note.get_untracked(), clicked_note)
+      );
 
       if clicked_note == target_note {
         // Correct answer!
@@ -65,34 +63,47 @@ pub fn FretboardTrainerPage() -> impl IntoView {
 
         // Clear error highlights and set new reference note
         set_error_coords.set(vec![]);
-        set_error_note_names.set(vec![]);
         let new_fret = model.get_random_fret();
         let new_note = model.note_from_fret(new_fret);
         set_current_note.set(new_note);
-        set_reference_note_coord.set(Some(new_fret));
-        set_reference_note_name.set(Some(new_note));
+        model.hide_all_frets();
+        model.set_fret_state(
+          new_fret,
+          FretState::Normal(FretStateColor::Green, new_note.to_string()),
+        );
       } else {
         // Incorrect answer
-        if error_text.get().is_empty() {
+        if error_text.get_untracked().is_empty() {
           set_error_text.set("Incorrect!".to_string());
         }
         set_num_incorrect.update(|n| *n += 1);
 
-        // Add to error highlights
-        set_error_coords.update(|coords| {
-          if !coords.contains(&evt.coord) {
+        if !error_coords.get_untracked().contains(&evt.coord) {
+          // Add to error highlights
+          set_error_coords.update(|coords| {
             coords.push(evt.coord);
-          }
-        });
-        set_error_note_names.update(|names| {
-          // Only add the note name if we added a new coordinate
-          let coords = error_coords.get_untracked();
-          if coords.len() > names.len() {
-            names.push(clicked_note);
-          }
-        });
+          });
+        }
+
+        model.set_fret_state(
+          evt.coord,
+          FretState::Normal(FretStateColor::Red, clicked_note.to_string()),
+        );
       }
     });
+  });
+
+  // Initialize the first question
+  fretboard_model.with_untracked(move |model| {
+    let random_fret = model.get_random_fret();
+    let note = model.note_from_fret(random_fret);
+    set_current_note.set(note);
+    set_error_coords.set(vec![]);
+    leptos::logging::log!("Initial note: {} at {:?}", note, random_fret);
+    model.set_fret_state(
+      random_fret,
+      FretState::Normal(FretStateColor::Green, note.to_string()),
+    );
   });
 
   // Computed strings for display
@@ -116,13 +127,7 @@ pub fn FretboardTrainerPage() -> impl IntoView {
         <p>"Train intervals of notes"</p>
       </div>
 
-      <FretboardTrainer
-        reference_note=reference_note_coord.into()
-        reference_note_name=reference_note_name.into()
-        error_notes=error_coords.into()
-        error_note_names=error_note_names.into()
-        on_fret_clicked=on_fret_clicked
-      />
+      <FretboardModelAdapter model=fretboard_model on_note_clicked=on_note_clicked />
 
       <div class="text-center">
         <p class="text-lg">

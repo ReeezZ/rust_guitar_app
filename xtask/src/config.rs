@@ -2,7 +2,7 @@
 pub const FRONTEND_PORT: u16 = 3010;
 pub const BACKEND_PORT: u16 = 8080;
 pub const BACKEND_STARTUP_DELAY_MS: u64 = 2000;
-pub const RUSTFLAGS_WASM: &str = "--cfg getrandom_backend=\"wasm_js\"";
+pub const RUSTFLAGS_WASM: &str = "--cfg getrandom_backend=\"wasm_js\" --cfg erase_components";
 
 /// Generate URL for a given port
 pub fn url(port: u16) -> String {

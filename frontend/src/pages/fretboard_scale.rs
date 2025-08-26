@@ -1,31 +1,36 @@
-use crate::components::{
-  fret_range_selector::FretRangeSelector,
-  fretboard::{scale_display::FretboardScaleDisplay, with_notes::FretClickEventWithNote},
-  music_selectors::{NoteSelector, ScaleTypeSelector},
-  musical_fretboard_config::MusicalFretboardConfig,
+use crate::{
+  components::{
+    fret_range_selector::FretRangeSelector,
+    fretboard::{FretClickEvent, FretboardModelAdapter, FretboardVisualConfigBuilder},
+    music_selectors::{NoteSelector, ScaleTypeSelector},
+  },
+  models::fretboard::{default_tuning, FretboardModelBuilder, FretboardModelExt},
 };
 use leptos::{logging::log, prelude::*, wasm_bindgen::JsCast};
-use shared::music::heptatonic_scales::HeptaScaleType;
 use shared::music::notes::Note;
 use shared::music::scales::ScaleType;
+use shared::{music::heptatonic_scales::HeptaScaleType, Scale};
 
 /// Page demonstrating the SVG fretboard with scale display functionality
 #[component]
 pub fn FretboardScalePage() -> impl IntoView {
-  // Single fret range control (replaces start_fret and end_fret)
-  let fret_range = RwSignal::new(0..=7_usize);
+  let start_fret = RwSignal::new(2_usize);
+  let end_fret = RwSignal::new(7_usize);
 
   // Extra frets for visual context
   let extra_frets = RwSignal::new(2_usize);
 
-  // Scale configuration
-  let root_note = RwSignal::new(Note::C);
-  let scale_type = RwSignal::new(ScaleType::Hepatonic(HeptaScaleType::Major));
+  let (scale, set_scale) = signal(Scale::new(
+    Note::C,
+    ScaleType::Hepatonic(HeptaScaleType::Major),
+  ));
+
+  let root_note = Memo::new(move |_| scale.get().root_note().unwrap_or(Note::C));
 
   // Track clicked note for testing
-  let (clicked_note_event, set_clicked_note_event) = signal::<Option<FretClickEventWithNote>>(None);
+  let (clicked_note_event, set_clicked_note_event) = signal::<Option<FretClickEvent>>(None);
 
-  let on_note_clicked = Callback::new(move |event: FretClickEventWithNote| {
+  let on_note_clicked = Callback::new(move |event: FretClickEvent| {
     log!(
       "🎵 Scale Display - Note: {}, String: {} (1-indexed: {}), Fret: {}",
       event.note,
@@ -34,6 +39,25 @@ pub fn FretboardScalePage() -> impl IntoView {
       event.coord.fret_idx
     );
     set_clicked_note_event.set(Some(event));
+  });
+
+  let model = RwSignal::new(
+    FretboardModelBuilder::new()
+      .start_fret(start_fret.into())
+      .end_fret(end_fret.into())
+      .tuning(default_tuning())
+      .config(Signal::derive(move || {
+        FretboardVisualConfigBuilder::new()
+          .extra_frets(extra_frets.into())
+          .build()
+      }))
+      .build(),
+  );
+
+  Effect::new(move || {
+    model.with(move |model| {
+      model.update_from_scale(scale.get());
+    });
   });
 
   view! {
@@ -50,12 +74,12 @@ pub fn FretboardScalePage() -> impl IntoView {
           </p>
           <p>
             <strong>"Scale:"</strong>
-            {move || format!("{:?}", scale_type.get())}
+            {move || format!("{:?}", scale.get())}
           </p>
           <p>
             <strong>"Range:"</strong>
             " Frets "
-            {move || format!("{}-{}", fret_range.get().start(), fret_range.get().end())}
+            {move || format!("{}-{}", start_fret.get(), end_fret.get())}
           </p>
         </div>
       </div>
@@ -83,9 +107,9 @@ pub fn FretboardScalePage() -> impl IntoView {
           <button
             class="py-2 px-4 text-white bg-blue-500 rounded hover:bg-blue-600"
             on:click=move |_| {
-              root_note.set(Note::G);
-              scale_type.set(ScaleType::Hepatonic(HeptaScaleType::Major));
-              fret_range.set(3..=7);
+              start_fret.set(3);
+              end_fret.set(7);
+              set_scale.set(Scale::new(Note::G, ScaleType::Hepatonic(HeptaScaleType::Major)));
             }
           >
             "G Major (3-7)"
@@ -93,9 +117,9 @@ pub fn FretboardScalePage() -> impl IntoView {
           <button
             class="py-2 px-4 text-white bg-blue-500 rounded hover:bg-blue-600"
             on:click=move |_| {
-              root_note.set(Note::A);
-              scale_type.set(ScaleType::Hepatonic(HeptaScaleType::Minor));
-              fret_range.set(5..=8);
+              start_fret.set(5);
+              end_fret.set(8);
+              set_scale.set(Scale::new(Note::A, ScaleType::Hepatonic(HeptaScaleType::Minor)));
             }
           >
             "A Minor (5-8)"
@@ -103,9 +127,9 @@ pub fn FretboardScalePage() -> impl IntoView {
           <button
             class="py-2 px-4 text-white bg-blue-500 rounded hover:bg-blue-600"
             on:click=move |_| {
-              root_note.set(Note::E);
-              scale_type.set(ScaleType::Hepatonic(HeptaScaleType::Minor));
-              fret_range.set(0..=5);
+              start_fret.set(0);
+              end_fret.set(5);
+              set_scale.set(Scale::new(Note::E, ScaleType::Hepatonic(HeptaScaleType::Minor)));
             }
           >
             "E Minor (0-5)"
@@ -113,9 +137,9 @@ pub fn FretboardScalePage() -> impl IntoView {
           <button
             class="py-2 px-4 text-white bg-blue-500 rounded hover:bg-blue-600"
             on:click=move |_| {
-              root_note.set(Note::C);
-              scale_type.set(ScaleType::Hepatonic(HeptaScaleType::Major));
-              fret_range.set(7..=10);
+              start_fret.set(7);
+              end_fret.set(10);
+              set_scale.set(Scale::new(Note::C, ScaleType::Hepatonic(HeptaScaleType::Major)));
             }
           >
             "C Major (7-10)"
@@ -123,9 +147,9 @@ pub fn FretboardScalePage() -> impl IntoView {
           <button
             class="py-2 px-4 text-white bg-green-500 rounded hover:bg-green-600"
             on:click=move |_| {
-              root_note.set(Note::A);
-              scale_type.set(ScaleType::Hepatonic(HeptaScaleType::Minor));
-              fret_range.set(1..=4);
+              start_fret.set(1);
+              end_fret.set(4);
+              set_scale.set(Scale::new(Note::D, ScaleType::Hepatonic(HeptaScaleType::Minor)));
             }
           >
             "A Minor (1-4, no opens)"
@@ -133,9 +157,9 @@ pub fn FretboardScalePage() -> impl IntoView {
           <button
             class="py-2 px-4 text-white bg-purple-500 rounded hover:bg-purple-600"
             on:click=move |_| {
-              root_note.set(Note::E);
-              scale_type.set(ScaleType::Hepatonic(HeptaScaleType::Major));
-              fret_range.set(0..=0);
+              set_scale.set(Scale::new(Note::E, ScaleType::Hepatonic(HeptaScaleType::Major)));
+              start_fret.set(0);
+              end_fret.set(10);
             }
           >
             "Open strings only"
@@ -144,28 +168,34 @@ pub fn FretboardScalePage() -> impl IntoView {
       </div>
 
       // Main fretboard display
-      <div class="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
-        <FretboardScaleDisplay
-          fret_range=fret_range.read_only().into()
-          root_note=root_note.read_only().into()
-          scale_type=scale_type.read_only().into()
-          extra_frets=extra_frets.read_only()
-          on_note_clicked=on_note_clicked
-          config=MusicalFretboardConfig::default()
-        />
+      //
+      <FretboardModelAdapter model on_note_clicked=on_note_clicked />
+      // />
       // Show 2 extra frets beyond the end fret
-      </div>
+      <div class="p-4 bg-gray-50 rounded-lg border-2 border-gray-200"></div>
 
       // Scale configuration controls
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         // Root note selector
-        <NoteSelector value=root_note label="Root Note" />
+        <NoteSelector
+          value=root_note.into()
+          on_note_changed=Callback::new(move |note| {
+            set_scale.set(Scale::new(note, scale.get_untracked().scale_type()));
+          })
+          label="Root Note"
+        />
 
         // Scale type selector
-        <ScaleTypeSelector value=scale_type label="Scale Type" />
+        <ScaleTypeSelector
+          value=Signal::derive(move || scale.get().scale_type())
+          on_scale_changed=Callback::new(move |scale_type| {
+            set_scale.set(Scale::new(root_note.get_untracked(), scale_type));
+          })
+          label="Scale Type"
+        />
 
         // Fret range control with dual sliders
-        <FretRangeSelector value=fret_range label="Playable Range" />
+        <FretRangeSelector start_fret end_fret label="Playable Range" />
 
         // Extra frets control
         <div class="space-y-2">

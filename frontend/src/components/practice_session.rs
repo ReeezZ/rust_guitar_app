@@ -1,9 +1,11 @@
 use leptos::prelude::*;
 use leptos_use::use_interval_fn;
+use shared::Scale;
 use std::time::Duration;
 
-use crate::components::fretboard::scale_display::FretboardScaleDisplay;
+use crate::components::fretboard::FretboardModelAdapter;
 use crate::components::metronome::Metronome;
+use crate::models::fretboard::{FretboardModelBuilder, FretboardModelExt};
 use shared::models::exercise::{Exercise, ExerciseType};
 use shared::music::notes::{Note, NoteExt};
 
@@ -43,7 +45,7 @@ pub fn PracticeSession(
 
   // Create update handler for root note changes - use the passed exercise directly
   let handle_root_note_update = {
-    let callback = on_exercise_update.clone();
+    let callback = on_exercise_update;
     let ex_ref = exercise.clone();
 
     Callback::new(move |new_note: Note| {
@@ -198,9 +200,7 @@ pub fn PracticeSession(
                           // Root note dropdown
                           <Show when=move || show_root_note_modal.get()>
                             <div class="absolute left-1/2 top-full z-10 mt-1 w-32 bg-white rounded-lg border border-gray-300 shadow-lg transform -translate-x-1/2">
-                              <h4 class="mb-1 text-xs font-semibold text-center">
-                                "Root Note"
-                              </h4>
+                              <h4 class="mb-1 text-xs font-semibold text-center">"Root Note"</h4>
                               <div class="flex flex-col">
                                 {move || {
                                   Note::all_notes()
@@ -488,17 +488,26 @@ pub fn PracticeSession(
                     if show_fretboard.get() {
                       view! {
                         <div class="p-4 bg-gray-50 rounded-lg">
-                          <FretboardScaleDisplay
-                            fret_range=Signal::derive(move || {
-                              fret_range.0 as usize..=fret_range.1 as usize
-                            })
-                            root_note=Signal::derive(move || root_note)
-                            scale_type=Signal::derive(move || scale_type)
-                          />
+                          <FretboardModelAdapter model=Signal::derive(move || {
+                            let model = FretboardModelBuilder::new()
+                              .start_fret_val(fret_range.0 as usize)
+                              .end_fret_val(fret_range.1 as usize)
+                              .build();
+                            model.update_from_scale(Scale::new(root_note, scale_type));
+                            model
+                          }) />
                         </div>
                       }
                         .into_any()
                     } else {
+
+                      // <FretboardScaleDisplay
+                      // fret_range=Signal::derive(move || {
+                      // fret_range.0 as usize..=fret_range.1 as usize
+                      // })
+                      // root_note=Signal::derive(move || root_note)
+                      // scale_type=Signal::derive(move || scale_type)
+                      // />
                       view! {
                         <div class="py-8 text-center text-gray-500">
                           <p class="text-sm">"Fretboard hidden"</p>

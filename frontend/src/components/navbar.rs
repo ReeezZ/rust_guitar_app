@@ -36,9 +36,7 @@ pub fn NavbarLinks() -> impl IntoView {
       <li>
         <a
           href="/exercises"
-          class=move || {
-            if pathname() == "/exercises" { "nav-link active" } else { "nav-link" }
-          }
+          class=move || { if pathname() == "/exercises" { "nav-link active" } else { "nav-link" } }
         >
           <span>Exercises</span>
         </a>
@@ -55,22 +53,32 @@ pub fn NavbarLinks() -> impl IntoView {
       </li>
       <li>
         <a
-          href="/svg_fretboard"
+          href="/fretboard_dev"
           class=move || {
-            if pathname() == "/svg_fretboard" { "nav-link active" } else { "nav-link" }
+            if pathname() == "/fretboard_dev" { "nav-link active" } else { "nav-link" }
           }
         >
-          <span>SVG Fretboard</span>
+          <span>Fretboard Dev</span>
         </a>
       </li>
       <li>
         <a
-          href="/svg_fretboard_scale"
+          href="/fretboard_scale"
           class=move || {
-            if pathname() == "/svg_fretboard_scale" { "nav-link active" } else { "nav-link" }
+            if pathname() == "/fretboard_scale" { "nav-link active" } else { "nav-link" }
           }
         >
-          <span>SVG Scale Display</span>
+          <span>Scale Display</span>
+        </a>
+      </li>
+      <li>
+        <a
+          href="/fretboard_config_examples"
+          class=move || {
+            if pathname() == "/fretboard_config_examples" { "nav-link active" } else { "nav-link" }
+          }
+        >
+          <span>Fretboard Config Examples</span>
         </a>
       </li>
       <li>
