@@ -6,9 +6,11 @@ use crate::{
     base::Fretboard, FretClickEvent, FretCoord, FretState, FretStateColor, FretboardModelAdapter,
     FretboardVisualConfig,
   },
-  models::fretboard_model::{FretboardModel, FretboardModelBuilder},
-  pages::fretboard_dev::{frets_editor::FretsEditor, helper::get_fret_positions},
+  models::fretboard::{FretboardModel, FretboardModelBuilder},
 };
+
+use super::frets_editor::FretsEditor;
+use super::helper::get_fret_positions;
 
 #[component]
 pub fn SharedModelDemo() -> impl IntoView {
@@ -51,7 +53,7 @@ pub fn SharedModelDemo() -> impl IntoView {
   // Update model when demo fret states change (merge into model's internal signals)
   Effect::new(move || {
     model.with(|m| {
-      m.set_fret_states(frets.get());
+      m.update_fret_states(frets.get());
     });
   });
 

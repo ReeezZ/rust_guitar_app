@@ -5,7 +5,8 @@ use strum::IntoEnumIterator;
 use crate::components::fretboard::{
   FretClickEvent, FretCoord, FretState, FretStateColor, FretboardModelAdapter,
 };
-use crate::models::fretboard_model::FretboardModel;
+use crate::models::fretboard::model::FretboardModel;
+use crate::models::fretboard::FretboardModelExt;
 use shared::music::intervals::Interval;
 use shared::music::notes::Note;
 

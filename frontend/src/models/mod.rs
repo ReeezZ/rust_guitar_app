@@ -1,5 +1,4 @@
-pub mod fretboard_model;
-pub mod fretboard_trainer;
+pub mod fretboard;
 pub mod repository;
 pub mod storage;
 

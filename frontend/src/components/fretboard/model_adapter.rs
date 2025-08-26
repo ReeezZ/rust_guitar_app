@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 
 use super::{FretClickEvent, Fretboard};
-use crate::models::fretboard_model::FretboardModel;
+use crate::models::fretboard::model::FretboardModel;
 
 #[component]
 pub fn FretboardModelAdapter(

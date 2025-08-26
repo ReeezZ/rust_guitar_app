@@ -7,8 +7,10 @@ use leptos::prelude::*;
 use shared::Note;
 
 use crate::components::fretboard::FretboardModelAdapter;
-use crate::components::fretboard::{FretboardVisualConfigBuilder, definitions::MAX_FRETS, definitions::MAX_STRINGS};
-use crate::models::fretboard_model::FretboardModelBuilder;
+use crate::components::fretboard::{
+  definitions::MAX_FRETS, definitions::MAX_STRINGS, FretboardVisualConfigBuilder,
+};
+use crate::models::fretboard::model_builder::FretboardModelBuilder;
 
 #[component]
 pub fn FretboardConfigExamples() -> impl IntoView {
