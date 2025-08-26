@@ -35,9 +35,17 @@ impl FretboardModelBuilder {
     self.start_fret = Some(start_fret);
     self
   }
+  pub fn start_fret_val(mut self, start_fret: usize) -> Self {
+    self.start_fret = Some(Signal::derive(move || start_fret));
+    self
+  }
 
   pub fn end_fret(mut self, end_fret: Signal<usize>) -> Self {
     self.end_fret = Some(end_fret);
+    self
+  }
+  pub fn end_fret_val(mut self, end_fret: usize) -> Self {
+    self.end_fret = Some(Signal::derive(move || end_fret));
     self
   }
 

@@ -1,9 +1,11 @@
 use leptos::prelude::*;
 use leptos_use::use_interval_fn;
+use shared::Scale;
 use std::time::Duration;
 
-// use crate::components::fretboard::scale_display::FretboardScaleDisplay;
+use crate::components::fretboard::FretboardModelAdapter;
 use crate::components::metronome::Metronome;
+use crate::models::fretboard::{FretboardModelBuilder, FretboardModelExt};
 use shared::models::exercise::{Exercise, ExerciseType};
 use shared::music::notes::{Note, NoteExt};
 
@@ -485,7 +487,17 @@ pub fn PracticeSession(
                   {move || {
                     if show_fretboard.get() {
                       view! {
-                        <div class="p-4 bg-gray-50 rounded-lg">// <FretboardScaleDisplay
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                          <FretboardModelAdapter model=Signal::derive(move || {
+                            let model = FretboardModelBuilder::new()
+                              .start_fret_val(fret_range.0 as usize)
+                              .end_fret_val(fret_range.1 as usize)
+                              .build();
+                            model.update_from_scale(Scale::new(root_note, scale_type));
+                            model
+                          }) />
+
+                        // <FretboardScaleDisplay
                         // fret_range=Signal::derive(move || {
                         // fret_range.0 as usize..=fret_range.1 as usize
                         // })
@@ -496,6 +508,14 @@ pub fn PracticeSession(
                       }
                         .into_any()
                     } else {
+
+                      // <FretboardScaleDisplay
+                      // fret_range=Signal::derive(move || {
+                      // fret_range.0 as usize..=fret_range.1 as usize
+                      // })
+                      // root_note=Signal::derive(move || root_note)
+                      // scale_type=Signal::derive(move || scale_type)
+                      // />
                       view! {
                         <div class="py-8 text-center text-gray-500">
                           <p class="text-sm">"Fretboard hidden"</p>

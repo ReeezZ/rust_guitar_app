@@ -62,7 +62,7 @@ impl fmt::Display for Scale {
   }
 }
 
-pub trait ScaleTrait: ToString {
+pub trait ScaleExt: ToString {
   fn contains_note(&self, note: Note) -> bool;
   fn root_note(&self) -> Option<Note>;
   fn new(root_note: Note, scale_type: ScaleType) -> Self;
@@ -103,7 +103,7 @@ impl Scale {
   }
 }
 
-impl ScaleTrait for Scale {
+impl ScaleExt for Scale {
   fn contains_note(&self, note: Note) -> bool {
     self.contains_note(note)
   }
