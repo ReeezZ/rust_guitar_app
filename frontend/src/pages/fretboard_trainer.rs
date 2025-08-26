@@ -57,11 +57,11 @@ pub fn FretboardTrainerPage() -> impl IntoView {
         let new_note = model.note_from_fret(new_fret);
         set_current_note.set(new_note);
         set_reference_note_coord.set(Some(new_fret));
+        model.hide_all_frets();
         model.set_fret_state(
           evt.coord,
           FretState::Normal(FretStateColor::Green, new_note.to_string()),
         );
-        leptos::logging::log!("Correct! New note: {} at {:?}", new_note, new_fret);
       } else {
         // Incorrect answer
         if error_text.get().is_empty() {
@@ -76,11 +76,6 @@ pub fn FretboardTrainerPage() -> impl IntoView {
           });
         }
 
-        leptos::logging::log!(
-          "Incorrect: clicked {}, target {}",
-          clicked_note,
-          target_note
-        );
         model.set_fret_state(
           evt.coord,
           FretState::Normal(FretStateColor::Red, clicked_note.to_string()),

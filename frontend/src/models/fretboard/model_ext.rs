@@ -15,6 +15,7 @@ pub trait FretboardModelExt {
     coord_right: FretCoord,
     interval: Interval,
   ) -> bool;
+  fn hide_all_frets(&self);
 }
 
 impl FretboardModelExt for FretboardModel {
@@ -78,5 +79,15 @@ impl FretboardModelExt for FretboardModel {
     let left_note_plus_interval = interval.of(note_left);
 
     note_right == left_note_plus_interval
+  }
+
+  fn hide_all_frets(&self) {
+    self.fret_states.with(|fret_states| {
+      fret_states.iter().for_each(|(_, sig)| {
+        if sig.get_untracked() != FretState::Hidden {
+          sig.set(FretState::Hidden);
+        }
+      });
+    });
   }
 }
