@@ -41,9 +41,20 @@ pub fn FretboardTrainerPage() -> impl IntoView {
 
   // Handle fret clicks - this is pure UI logic, not mixed with data model
   let on_note_clicked = Callback::new(move |evt: FretClickEvent| {
-    fretboard_model.with(|model| {
+    fretboard_model.with_untracked(move |model| {
       let clicked_note = model.note_from_fret(evt.coord);
-      let target_note = current_interval.get().of(current_note.get());
+      let target_note = current_interval
+        .get_untracked()
+        .of(current_note.get_untracked());
+
+      leptos::logging::log!(
+        "coord {:?} - target note: {:?} - clicked note: {} - expected interval: {}, got interval: {:?}",
+        evt.coord,
+        target_note,
+        clicked_note,
+        current_interval.get_untracked(),
+        Interval::from_notes(current_note.get_untracked(), clicked_note)
+      );
 
       if clicked_note == target_note {
         // Correct answer!
@@ -56,7 +67,6 @@ pub fn FretboardTrainerPage() -> impl IntoView {
         let new_fret = model.get_random_fret();
         let new_note = model.note_from_fret(new_fret);
         set_current_note.set(new_note);
-        set_reference_note_coord.set(Some(new_fret));
         model.hide_all_frets();
         model.set_fret_state(
           evt.coord,
@@ -64,12 +74,12 @@ pub fn FretboardTrainerPage() -> impl IntoView {
         );
       } else {
         // Incorrect answer
-        if error_text.get().is_empty() {
+        if error_text.get_untracked().is_empty() {
           set_error_text.set("Incorrect!".to_string());
         }
         set_num_incorrect.update(|n| *n += 1);
 
-        if !error_coords.get().contains(&evt.coord) {
+        if !error_coords.get_untracked().contains(&evt.coord) {
           // Add to error highlights
           set_error_coords.update(|coords| {
             coords.push(evt.coord);
@@ -85,7 +95,7 @@ pub fn FretboardTrainerPage() -> impl IntoView {
   });
 
   // Initialize the first question
-  fretboard_model.with_untracked(|model| {
+  fretboard_model.with_untracked(move |model| {
     let random_fret = model.get_random_fret();
     let note = model.note_from_fret(random_fret);
     set_current_note.set(note);
