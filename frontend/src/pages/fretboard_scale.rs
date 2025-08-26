@@ -1,10 +1,10 @@
 use crate::{
-  components::fretboard::{base::FretboardViewModel, visual_config::FretboardVisualConfigBuilder},
+  components::fretboard::{FretClickEvent, FretboardModelAdapter, FretboardVisualConfigBuilder},
   components::{
     fret_range_selector::FretRangeSelector,
     music_selectors::{NoteSelector, ScaleTypeSelector},
   },
-  models::fretboard_model::{default_tuning, FretClickEvent, FretboardModelBuilder},
+  models::fretboard_model::{default_tuning, FretboardModelBuilder},
 };
 use leptos::{logging::log, prelude::*, wasm_bindgen::JsCast};
 use shared::music::notes::Note;
@@ -51,7 +51,6 @@ pub fn FretboardScalePage() -> impl IntoView {
           .extra_frets(extra_frets.into())
           .build()
       }))
-      .on_note_clicked(on_note_clicked.into())
       .build(),
   );
 
@@ -175,7 +174,7 @@ pub fn FretboardScalePage() -> impl IntoView {
 
       // Main fretboard display
       //
-      <FretboardViewModel model />
+      <FretboardModelAdapter model on_note_clicked=on_note_clicked />
       // />
       // Show 2 extra frets beyond the end fret
       <div class="p-4 bg-gray-50 rounded-lg border-2 border-gray-200"></div>

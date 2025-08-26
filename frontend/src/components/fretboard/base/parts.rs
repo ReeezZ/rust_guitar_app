@@ -1,10 +1,9 @@
 use leptos::prelude::*;
 use shared::Note;
 
-use crate::{
-  components::fretboard::{base::layout::LayoutSnapshot, FretState},
-  models::fretboard_model::{FretClickEvent, FretCoord, FretStateSignals},
-};
+use crate::components::fretboard::base::layout::LayoutSnapshot;
+
+use super::{FretClickEvent, FretCoord, FretState, FretStateSignals};
 
 /// Renders the nut (zero fret) when visible
 #[component]
@@ -297,6 +296,14 @@ fn FretboardNote(
     let radius = Signal::derive(move || memo.get().1);
     let label = Signal::derive(move || memo.get().2);
 
+    leptos::logging::log!(
+      "Rendering note at {:?}: color {}, radius {}, label {:?}",
+      coord,
+      fill_color.get(),
+      radius.get(),
+      label.get()
+    );
+
     Some(view! {
       <g class="note" data-string=coord.string_idx data-fret=coord.fret_idx>
         {if radius.get() > 0.0 {
@@ -355,13 +362,12 @@ pub(crate) fn FretboardGrid(
           };
           let fret_state = fret_states
             .with_untracked(|borrowed| {
-              borrowed
+              *borrowed
                 .get(&coord)
                 .expect(
                   format!("Preallocated signals for all coordinates. Tried accessing {:?}", coord)
                     .as_str(),
                 )
-                .clone()
             });
           let handle_click = move |_| {
             if let Some(click_cb) = click_cb.get().as_ref() {

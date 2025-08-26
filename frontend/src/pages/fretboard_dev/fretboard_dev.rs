@@ -2,7 +2,7 @@ use leptos::prelude::*;
 use shared::{music::heptatonic_scales::HeptaScaleType, Note, Scale, ScaleType};
 
 use crate::{
-  components::fretboard::FretboardViewModel, models::fretboard_model::FretboardModel,
+  components::fretboard::FretboardModelAdapter, models::fretboard_model::FretboardModel,
   pages::fretboard_dev::shared_model_demo::SharedModelDemo,
 };
 
@@ -20,7 +20,7 @@ pub fn FretboardDevPage() -> impl IntoView {
   });
   view! {
     <>
-      <FretboardViewModel model=model />
+      <FretboardModelAdapter model=model />
       <SharedModelDemo />
     </>
   }

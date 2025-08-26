@@ -6,9 +6,9 @@
 use leptos::prelude::*;
 use shared::Note;
 
-use crate::components::fretboard::base::FretboardViewModel;
-use crate::components::fretboard::visual_config::FretboardVisualConfigBuilder;
-use crate::models::fretboard_model::{FretboardModelBuilder, MAX_FRETS, MAX_STRINGS};
+use crate::components::fretboard::FretboardModelAdapter;
+use crate::components::fretboard::{FretboardVisualConfigBuilder, definitions::MAX_FRETS, definitions::MAX_STRINGS};
+use crate::models::fretboard_model::FretboardModelBuilder;
 
 #[component]
 pub fn FretboardConfigExamples() -> impl IntoView {
@@ -118,7 +118,7 @@ pub fn FretboardConfigExamples() -> impl IntoView {
       <div class="flex flex-col gap-6 xl:flex-row">
         // Main fretboard display - responsive sizing, not too constrained
         <div class="p-4 bg-blue-50 rounded-lg border-2 border-blue-200 xl:min-w-0 xl:flex-[2]">
-          <FretboardViewModel model />
+          <FretboardModelAdapter model />
 
         </div>
 

@@ -1,44 +1,10 @@
-use std::{collections::HashMap, hash::Hash};
-
 use leptos::prelude::*;
 use shared::{Note, Scale};
 
 use crate::components::fretboard::{
-  visual_config::FretboardVisualConfig, FretState, FretStateColor,
+  base::get_preallocated_fret_states, FretCoord, FretState, FretStateColor, FretStateSignals,
+  FretboardVisualConfig,
 };
-
-pub type FretStateSignals = HashMap<FretCoord, RwSignal<FretState>>;
-
-pub fn get_preallocated_fret_states() -> FretStateSignals {
-  let mut map = FretStateSignals::with_capacity(MAX_STRINGS * MAX_FRETS);
-  for string_idx in 0..=MAX_STRINGS {
-    for fret_idx in 0..=MAX_FRETS {
-      let coord = FretCoord {
-        string_idx: string_idx as u8,
-        fret_idx: fret_idx as u8,
-      };
-      map.insert(coord, RwSignal::new(FretState::Hidden));
-    }
-  }
-  map
-}
-
-// Upper bounds used for preallocation; keeps per-cell signals stable (never created inside Effects).
-// Adjust if you need more strings/frets; existing UI sliders should clamp within these maxima.
-pub const MAX_STRINGS: usize = 8; // supports up to 8-string instruments
-pub const MAX_FRETS: usize = 25; // frets 0..=24
-
-#[derive(Clone, Copy, PartialEq, Debug, Eq, Hash)]
-pub struct FretCoord {
-  pub string_idx: u8,
-  pub fret_idx: u8,
-}
-
-#[derive(Clone, Copy, Debug)]
-pub struct FretClickEvent {
-  pub note: Note,
-  pub coord: FretCoord,
-}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct FretboardModel {
@@ -51,9 +17,7 @@ pub struct FretboardModel {
   /// Visual configuration for fretboard display properties
   config: Signal<FretboardVisualConfig>,
   /// States for each fret
-  fret_states: RwSignal<FretStateSignals>,
-  /// Optional callback for fret click events
-  on_note_clicked: Signal<Option<Callback<FretClickEvent>>>,
+  fret_states: Signal<FretStateSignals>,
 }
 pub fn default_tuning() -> Signal<Vec<Note>> {
   Signal::derive(move || vec![Note::E, Note::B, Note::G, Note::D, Note::A, Note::E])
@@ -71,15 +35,13 @@ impl FretboardModel {
     end_fret: Signal<usize>,
     tuning: Signal<Vec<Note>>,
     config: Signal<FretboardVisualConfig>,
-    on_note_clicked: Signal<Option<Callback<FretClickEvent>>>,
+    fret_states: Signal<FretStateSignals>,
   ) -> Self {
-    let fret_states = RwSignal::new(get_preallocated_fret_states());
     Self {
       start_fret,
       end_fret,
       tuning,
       config,
-      on_note_clicked,
       fret_states,
     }
   }
@@ -108,10 +70,6 @@ impl FretboardModel {
     self.fret_states.into()
   }
 
-  pub fn get_on_note_clicked(&self) -> Signal<Option<Callback<FretClickEvent>>> {
-    self.on_note_clicked.into()
-  }
-
   pub fn set_fret_states(&self, new_states: FretStateSignals) {
     // Merge into existing preallocated signals (no new signal creation during reactive updates).
     self.fret_states.with(|existing| {
@@ -123,6 +81,40 @@ impl FretboardModel {
         }
       }
     });
+  }
+
+  /// Calculate the note at a specific fret position
+  pub fn note_from_fret(&self, coord: FretCoord) -> Note {
+    self.tuning.with(|tuning| {
+      if let Some(string_note) = tuning.get(coord.string_idx as usize) {
+        string_note.add_steps(coord.fret_idx as usize)
+      } else {
+        Note::C // Fallback for invalid string
+      }
+    })
+  }
+
+  pub fn set_fret_state(&self, coord: FretCoord, state: FretState) {
+    self.fret_states.with(|fret_states| {
+      if let Some(sig) = fret_states.get(&coord) {
+        sig.set(state);
+      }
+    });
+  }
+
+  /// Get a random fret within the active range
+  pub fn get_random_fret(&self) -> FretCoord {
+    use rand::Rng;
+    let mut rng = rand::rng();
+
+    let start = self.start_fret.get_untracked();
+    let end = self.end_fret.get_untracked();
+    let num_strings = self.tuning.get_untracked().len();
+
+    FretCoord {
+      string_idx: rng.random_range(0..num_strings) as u8,
+      fret_idx: rng.random_range(start..=end) as u8,
+    }
   }
 
   fn get_min_fret(&self) -> Signal<usize> {
@@ -184,7 +176,7 @@ pub struct FretboardModelBuilder {
   end_fret: Option<Signal<usize>>,
   tuning: Option<Signal<Vec<Note>>>,
   config: Option<Signal<FretboardVisualConfig>>,
-  on_note_clicked: Option<Signal<Option<Callback<FretClickEvent>>>>,
+  fret_states: Option<Signal<FretStateSignals>>,
 }
 
 impl FretboardModelBuilder {
@@ -194,7 +186,7 @@ impl FretboardModelBuilder {
       end_fret: None,
       tuning: None,
       config: None,
-      on_note_clicked: None,
+      fret_states: None,
     }
   }
 
@@ -218,11 +210,8 @@ impl FretboardModelBuilder {
     self
   }
 
-  pub fn on_note_clicked(
-    mut self,
-    on_note_clicked: Signal<Option<Callback<FretClickEvent>>>,
-  ) -> Self {
-    self.on_note_clicked = Some(on_note_clicked);
+  pub fn fret_states(mut self, fret_states: Signal<FretStateSignals>) -> Self {
+    self.fret_states = Some(fret_states);
     self
   }
 
@@ -231,14 +220,16 @@ impl FretboardModelBuilder {
     end_fret: Option<Signal<usize>>,
     tuning: Option<Signal<Vec<Note>>>,
     config: Option<Signal<FretboardVisualConfig>>,
-    on_note_clicked: Option<Signal<Option<Callback<FretClickEvent>>>>,
+    fret_states: Option<Signal<FretStateSignals>>,
   ) -> FretboardModel {
+    let fret_states =
+      fret_states.unwrap_or_else(|| RwSignal::new(get_preallocated_fret_states()).into());
     FretboardModel::new(
       start_fret.unwrap_or_else(|| Signal::derive(move || 0)),
       end_fret.unwrap_or_else(|| Signal::derive(move || 12)),
       tuning.unwrap_or_else(default_tuning),
       config.unwrap_or_else(|| Signal::derive(move || FretboardVisualConfig::default())),
-      on_note_clicked.unwrap_or_else(|| Signal::derive(move || None)),
+      fret_states,
     )
   }
 
@@ -248,7 +239,7 @@ impl FretboardModelBuilder {
       self.end_fret,
       self.tuning,
       self.config,
-      self.on_note_clicked,
+      self.fret_states,
     )
   }
 }

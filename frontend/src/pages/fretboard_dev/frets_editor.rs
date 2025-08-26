@@ -1,9 +1,7 @@
 use leptos::prelude::*;
 
-use crate::{
-  components::fretboard::base::FretStateColor, models::fretboard_model::FretStateSignals,
-  pages::fretboard_dev::helper::get_fret_positions,
-};
+use super::helper::get_fret_positions;
+use crate::components::fretboard::{FretStateColor, FretStateSignals};
 
 #[component]
 pub(super) fn FretsEditor(

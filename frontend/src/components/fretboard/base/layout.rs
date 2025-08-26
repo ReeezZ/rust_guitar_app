@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 
-use crate::models::fretboard_model::FretCoord;
+use super::definitions::FretCoord;
 
 /// Struct containing all kinds of signals that are interesting for rendering
 #[derive(Clone, Debug, PartialEq, Copy)]

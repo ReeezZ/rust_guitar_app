@@ -2,12 +2,10 @@ use leptos::prelude::*;
 use rand::seq::IteratorRandom;
 use strum::IntoEnumIterator;
 
-use crate::components::fretboard::trainer::FretboardTrainer;
-use crate::components::fretboard::{FretState, FretStateColor};
-use crate::models::fretboard_model::{FretClickEvent, FretboardModel};
-// use crate::components::fretboard::trainer::FretboardTrainer;
-use crate::models::fretboard_model::FretCoord;
-use crate::models::fretboard_trainer::FretboardTrainerTrait;
+use crate::components::fretboard::{
+  FretClickEvent, FretCoord, FretState, FretStateColor, FretboardModelAdapter,
+};
+use crate::models::fretboard_model::FretboardModel;
 use shared::music::intervals::Interval;
 use shared::music::notes::Note;
 
@@ -26,7 +24,7 @@ fn random_interval() -> Interval {
 /// clean separation between game logic and visual presentation.
 #[component]
 pub fn FretboardTrainerPage() -> impl IntoView {
-  // Initialize fretboard model for note calculations
+  // Initialize fretboard model for note calculations (pure data, no callbacks)
   let fretboard_model = RwSignal::new(FretboardModel::default());
 
   // Game state
@@ -40,15 +38,7 @@ pub fn FretboardTrainerPage() -> impl IntoView {
   let (reference_note_coord, set_reference_note_coord) = signal(None::<FretCoord>);
   let (error_coords, set_error_coords) = signal(Vec::<FretCoord>::new());
 
-  fretboard_model.with(|model| {
-    let random_fret = model.get_random_fret();
-    let note = model.note_from_fret(random_fret);
-    set_current_note.set(note);
-    set_reference_note_coord.set(Some(random_fret));
-    set_error_coords.set(vec![]);
-  });
-
-  // Handle fret clicks
+  // Handle fret clicks - this is pure UI logic, not mixed with data model
   let on_note_clicked = Callback::new(move |evt: FretClickEvent| {
     fretboard_model.with(|model| {
       let clicked_note = model.note_from_fret(evt.coord);
@@ -66,6 +56,11 @@ pub fn FretboardTrainerPage() -> impl IntoView {
         let new_note = model.note_from_fret(new_fret);
         set_current_note.set(new_note);
         set_reference_note_coord.set(Some(new_fret));
+        model.set_fret_state(
+          evt.coord,
+          FretState::Normal(FretStateColor::Green, new_note.to_string()),
+        );
+        leptos::logging::log!("Correct! New note: {} at {:?}", new_note, new_fret);
       } else {
         // Incorrect answer
         if error_text.get().is_empty() {
@@ -79,14 +74,33 @@ pub fn FretboardTrainerPage() -> impl IntoView {
             coords.push(evt.coord);
           });
         }
+
+        leptos::logging::log!(
+          "Incorrect: clicked {}, target {}",
+          clicked_note,
+          target_note
+        );
+        model.set_fret_state(
+          evt.coord,
+          FretState::Normal(FretStateColor::Red, clicked_note.to_string()),
+        );
       }
     });
   });
 
-  // TODO hmm i think the problem is that we need the model for the note specific logic to avoid this self referential loop
-  // fretboard_model.with(|m| {
-  //   m.set_on_note_clicked(Some(on_note_clicked));
-  // });
+  // Initialize the first question
+  fretboard_model.with_untracked(|model| {
+    let random_fret = model.get_random_fret();
+    let note = model.note_from_fret(random_fret);
+    set_current_note.set(note);
+    set_reference_note_coord.set(Some(random_fret));
+    set_error_coords.set(vec![]);
+    leptos::logging::log!("Initial note: {} at {:?}", note, random_fret);
+    model.set_fret_state(
+      random_fret,
+      FretState::Normal(FretStateColor::Green, note.to_string()),
+    );
+  });
 
   // Computed strings for display
   let interval_str = move || current_interval.get().to_string();
@@ -109,11 +123,7 @@ pub fn FretboardTrainerPage() -> impl IntoView {
         <p>"Train intervals of notes"</p>
       </div>
 
-      <FretboardTrainer
-        model=fretboard_model
-        reference_note=reference_note_coord
-        error_notes=error_coords
-      />
+      <FretboardModelAdapter model=fretboard_model on_note_clicked=on_note_clicked />
 
       <div class="text-center">
         <p class="text-lg">

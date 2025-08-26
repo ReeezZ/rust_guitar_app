@@ -9,21 +9,10 @@ use crate::components::fretboard::{
   },
   visual_config::FretboardVisualConfig,
 };
-use crate::models::fretboard_model::{FretClickEvent, FretStateSignals, FretboardModel};
 
+use super::{FretClickEvent, FretStateSignals};
 use leptos::prelude::*;
 use shared::Note;
-
-#[component]
-pub fn FretboardViewModel(#[prop(into)] model: Signal<FretboardModel>) -> impl IntoView {
-  let start_fret = Signal::derive(move || model.with(|m| m.get_start_fret()).get());
-  let end_fret = Signal::derive(move || model.with(|m| m.get_end_fret()).get());
-  let tuning = Signal::derive(move || model.with(|m| m.get_tuning()).get());
-  let config = Signal::derive(move || model.with(|m| m.get_config()).get());
-  let on_note_clicked = Signal::derive(move || model.with(|m| m.get_on_note_clicked()).get());
-  let fret_states = Signal::derive(move || model.with(|m| m.get_fret_states()).get());
-  view! { <Fretboard start_fret end_fret tuning config on_note_clicked fret_states /> }
-}
 
 /// The FretStateSignals have to be carefully managed
 /// Use FretboardViewModel by passing a FretboardModel to ensure proper updates
@@ -45,7 +34,9 @@ pub fn Fretboard(
   #[prop(into)]
   on_note_clicked: Signal<Option<Callback<FretClickEvent>>>,
 
-  #[prop(into)] fret_states: Signal<FretStateSignals>,
+  /// The fret states must be prallocated. Use [`crate::models::fretboard_model::get_preallocated_fret_states()`] to create initial fret_states
+  #[prop(into)]
+  fret_states: Signal<FretStateSignals>,
 ) -> impl IntoView {
   // Create reactive signals from config values - using clone since Signal is Copy
 
@@ -96,23 +87,6 @@ pub fn Fretboard(
       .map(|&x| layout.abs_to_viewbox_x(x))
       .collect::<Vec<f64>>()
   });
-
-  // Effect::new(move || {
-  //   leptos::logging::log!(
-  //     "Fretboard Layout Update: SVG {svg_width}x{}, Strings: {}, Frets: {}-{} (visible: {}-{}), Nut: {}, Spacing: {:.2}, Margin: {:.2}, Full Frets (len: {}): {:?}",
-  //     svg_height.get(),
-  //     num_strings.get(),
-  //     start_fret.get(),
-  //     end_fret.get(),
-  //     min_visible_fret.get(),
-  //     max_visible_fret.get(),
-  //     if has_nut.get() { "Yes" } else { "No" },
-  //     layout.string_spacing.get(),
-  //     layout.fret_margin.get(),
-  //     full_fret_positions.get().len(),
-  //     full_fret_positions.get()
-  //   );
-  // });
 
   view! {
     <div class="flex justify-center items-center w-full">

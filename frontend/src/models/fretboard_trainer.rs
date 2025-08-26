@@ -4,7 +4,8 @@ use leptos::prelude::*;
 use rand::{seq::IteratorRandom, Rng};
 use strum::IntoEnumIterator;
 
-use crate::models::fretboard_model::{FretCoord, FretboardModel};
+use crate::components::fretboard::FretCoord;
+use crate::models::fretboard_model::FretboardModel;
 
 pub trait FretboardTrainerTrait {
   fn note_from_fret(&self, coord: FretCoord) -> Note;
