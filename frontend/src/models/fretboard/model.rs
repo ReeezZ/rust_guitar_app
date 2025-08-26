@@ -81,7 +81,7 @@ impl FretboardModel {
 
   /// Calculate the note at a specific fret position
   pub fn note_from_fret(&self, coord: FretCoord) -> Note {
-    self.tuning.with(|tuning| {
+    self.tuning.with_untracked(|tuning| {
       if let Some(string_note) = tuning.get(coord.string_idx as usize) {
         string_note.add_steps(coord.fret_idx as usize)
       } else {
@@ -91,7 +91,7 @@ impl FretboardModel {
   }
 
   pub fn set_fret_state(&self, coord: FretCoord, state: FretState) {
-    self.fret_states.with(|fret_states| {
+    self.fret_states.with_untracked(|fret_states| {
       if let Some(sig) = fret_states.get(&coord) {
         sig.set(state);
       }

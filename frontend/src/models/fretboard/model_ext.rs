@@ -82,7 +82,7 @@ impl FretboardModelExt for FretboardModel {
   }
 
   fn hide_all_frets(&self) {
-    self.fret_states.with(|fret_states| {
+    self.fret_states.with_untracked(|fret_states| {
       fret_states.iter().for_each(|(_, sig)| {
         if sig.get_untracked() != FretState::Hidden {
           sig.set(FretState::Hidden);
