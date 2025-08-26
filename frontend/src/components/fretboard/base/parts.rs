@@ -52,7 +52,6 @@ pub(crate) fn FretboardFrets(
           leptos::logging::warn!("Skipping fret line for fret {} as out of bounds", fret_no);
           return None;
         }
-        leptos::logging::log!("Rendering fret line for fret {}", fret_no);
         let x_pos = Memo::new(move |_| viewbox_positions.get()[fret_no]);
         let is_playable = Memo::new(move |_| {
           fret_no >= start_fret.get().saturating_sub(1) && fret_no <= end_fret.get()
@@ -295,14 +294,6 @@ fn FretboardNote(
     let fill_color = Signal::derive(move || memo.get().0);
     let radius = Signal::derive(move || memo.get().1);
     let label = Signal::derive(move || memo.get().2);
-
-    leptos::logging::log!(
-      "Rendering note at {:?}: color {}, radius {}, label {:?}",
-      coord,
-      fill_color.get(),
-      radius.get(),
-      label.get()
-    );
 
     Some(view! {
       <g class="note" data-string=coord.string_idx data-fret=coord.fret_idx>
