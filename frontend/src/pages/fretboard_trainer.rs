@@ -36,7 +36,6 @@ pub fn FretboardTrainerPage() -> impl IntoView {
   let (error_text, set_error_text) = signal("".to_string());
 
   // Visual state for SVG overlays
-  let (reference_note_coord, set_reference_note_coord) = signal(None::<FretCoord>);
   let (error_coords, set_error_coords) = signal(Vec::<FretCoord>::new());
 
   // Handle fret clicks - this is pure UI logic, not mixed with data model
@@ -69,7 +68,7 @@ pub fn FretboardTrainerPage() -> impl IntoView {
         set_current_note.set(new_note);
         model.hide_all_frets();
         model.set_fret_state(
-          evt.coord,
+          new_fret,
           FretState::Normal(FretStateColor::Green, new_note.to_string()),
         );
       } else {
@@ -99,7 +98,6 @@ pub fn FretboardTrainerPage() -> impl IntoView {
     let random_fret = model.get_random_fret();
     let note = model.note_from_fret(random_fret);
     set_current_note.set(note);
-    set_reference_note_coord.set(Some(random_fret));
     set_error_coords.set(vec![]);
     leptos::logging::log!("Initial note: {} at {:?}", note, random_fret);
     model.set_fret_state(
