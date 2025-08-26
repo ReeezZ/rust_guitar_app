@@ -496,14 +496,6 @@ pub fn PracticeSession(
                             model.update_from_scale(Scale::new(root_note, scale_type));
                             model
                           }) />
-
-                        // <FretboardScaleDisplay
-                        // fret_range=Signal::derive(move || {
-                        // fret_range.0 as usize..=fret_range.1 as usize
-                        // })
-                        // root_note=Signal::derive(move || root_note)
-                        // scale_type=Signal::derive(move || scale_type)
-                        // />
                         </div>
                       }
                         .into_any()

@@ -22,29 +22,32 @@ impl FretboardModelExt for FretboardModel {
   fn update_from_scale(&self, scale: Scale) {
     self
       .get_tuning()
-      .get()
+      .get_untracked()
       .iter()
       .enumerate()
-      .for_each(|(string_idx, string_note)| {
-        for fret_idx in self.get_min_fret().get()..=self.get_max_visible_fret().get() {
+      .for_each(move |(string_idx, string_note)| {
+        for fret_idx in
+          self.get_min_fret().get_untracked()..=self.get_max_visible_fret().get_untracked()
+        {
           let coord = FretCoord {
             string_idx: string_idx as u8,
             fret_idx: fret_idx as u8,
           };
-          let state =
-            if fret_idx >= self.get_start_fret().get() && fret_idx <= self.get_end_fret().get() {
-              let note_at_fret = string_note.add_steps(fret_idx);
-              if scale.root_note() == Some(note_at_fret) {
-                FretState::Normal(FretStateColor::Green, note_at_fret.to_string())
-              } else if scale.contains_note(note_at_fret) {
-                FretState::Normal(FretStateColor::Blue, note_at_fret.to_string())
-              } else {
-                FretState::Hidden
-              }
+          let state = if fret_idx >= self.get_start_fret().get_untracked()
+            && fret_idx <= self.get_end_fret().get_untracked()
+          {
+            let note_at_fret = string_note.add_steps(fret_idx);
+            if scale.root_note() == Some(note_at_fret) {
+              FretState::Normal(FretStateColor::Green, note_at_fret.to_string())
+            } else if scale.contains_note(note_at_fret) {
+              FretState::Normal(FretStateColor::Blue, note_at_fret.to_string())
             } else {
               FretState::Hidden
-            };
-          self.get_fret_states().with_untracked(|fret_states| {
+            }
+          } else {
+            FretState::Hidden
+          };
+          self.get_fret_states().with_untracked(move |fret_states| {
             if let Some(sig) = fret_states.get(&coord) {
               sig.set(state);
             }

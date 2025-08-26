@@ -4,18 +4,15 @@ use leptos::prelude::*;
 use shared::models::exercise::{Exercise, ExerciseType};
 
 #[component]
-pub fn ExerciseDetail(#[prop(into)] exercise_id: String) -> impl IntoView {
+pub fn ExerciseDetail(#[prop(into)] exercise_id: Signal<String>) -> impl IntoView {
   // Exercise state - using signal to track changes
   let (exercise, set_exercise) = signal(None::<Exercise>);
 
-  leptos::logging::log!("Loading exercise with ID: {}", &exercise_id);
-
   // Load exercise on component mount
   Effect::new(move |_| {
-    let id = exercise_id.clone();
-    if !id.is_empty() {
+    if !exercise_id.get().is_empty() {
       let repo = get_exercise_repository();
-      if let Ok(Some(ex)) = repo.find_by_id(&id) {
+      if let Ok(Some(ex)) = repo.find_by_id(&exercise_id.get()) {
         set_exercise.set(Some(ex));
       }
     }
@@ -87,7 +84,7 @@ fn ExerciseDetailChecked(
   };
 
   let handle_title_change = Callback::new(move |new_title: String| {
-    let mut ex = exercise.get();
+    let mut ex = exercise.get_untracked();
     ex.name = new_title;
     let repo = get_exercise_repository();
     if let Ok(()) = repo.update(&ex) {
@@ -276,82 +273,84 @@ fn Title(
   };
 
   view! {
-    {if is_editing_title.get() {
-      view! {
-        <div class="space-y-2">
-          <input
-            type="text"
-            class="w-full text-3xl font-bold bg-transparent border-b-2 border-blue-500 focus:outline-none"
-            prop:value=move || title_edit_value.get()
-            on:input=move |e| { set_title_edit_value.set(event_target_value(&e)) }
-            placeholder="Enter exercise title"
-          />
-          <div class="flex justify-between items-center">
-            <div class="flex space-x-2">
-              {
-                let exercise_type = exercise.get().exercise_type.clone();
-                move || {
-                  match exercise_type {
-                    ExerciseType::Scale { .. } | ExerciseType::Triad { .. } => {
-                      // Only show generate button for Scale and Triad types
-                      view! {
-                        <button
-                          class="py-1 px-3 text-sm text-blue-600 rounded border border-blue-600 hover:bg-blue-50"
-                          on:click=move |_| generate_title()
-                          title="Generate title from exercise details"
-                        >
-                          "Generate"
-                        </button>
+    {move || {
+      if is_editing_title.get() {
+        view! {
+          <div class="space-y-2">
+            <input
+              type="text"
+              class="w-full text-3xl font-bold bg-transparent border-b-2 border-blue-500 focus:outline-none"
+              prop:value=title_edit_value
+              on:input=move |e| { set_title_edit_value.set(event_target_value(&e)) }
+              placeholder="Enter exercise title"
+            />
+            <div class="flex justify-between items-center">
+              <div class="flex space-x-2">
+                {
+                  let exercise_type = exercise.get().exercise_type.clone();
+                  move || {
+                    match exercise_type {
+                      ExerciseType::Scale { .. } | ExerciseType::Triad { .. } => {
+                        // Only show generate button for Scale and Triad types
+                        view! {
+                          <button
+                            class="py-1 px-3 text-sm text-blue-600 rounded border border-blue-600 hover:bg-blue-50"
+                            on:click=move |_| generate_title()
+                            title="Generate title from exercise details"
+                          >
+                            "Generate"
+                          </button>
+                        }
+                          .into_any()
                       }
-                        .into_any()
+                      _ => view! { <div></div> }.into_any(),
                     }
-                    _ => view! { <div></div> }.into_any(),
                   }
                 }
-              }
-            </div>
-            <div class="flex space-x-2">
-              <button
-                class="py-1 px-3 text-sm text-gray-600 rounded border border-gray-300 hover:bg-gray-50"
-                on:click=move |_| cancel_title_edit()
-              >
-                "Cancel"
-              </button>
-              <button
-                class="py-1 px-3 text-sm text-white bg-blue-500 rounded hover:bg-blue-600"
-                on:click=move |_| save_title_edit()
-              >
-                "Save"
-              </button>
+              </div>
+              <div class="flex space-x-2">
+                <button
+                  class="py-1 px-3 text-sm text-gray-600 rounded border border-gray-300 hover:bg-gray-50"
+                  on:click=move |_| cancel_title_edit()
+                >
+                  "Cancel"
+                </button>
+                <button
+                  class="py-1 px-3 text-sm text-white bg-blue-500 rounded hover:bg-blue-600"
+                  on:click=move |_| save_title_edit()
+                >
+                  "Save"
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      }
-        .into_any()
-    } else {
-      view! {
-        <h1
-          class="relative text-3xl font-bold transition-colors duration-200 cursor-pointer hover:text-blue-600 group"
-          on:click=move |_| start_title_edit(exercise.get().name)
-          title="Click to edit title"
-        >
-          {move || exercise.get().name}
-          <svg
-            class="inline-block ml-2 w-5 h-5 text-gray-400 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        }
+          .into_any()
+      } else {
+        view! {
+          <h1
+            class="relative text-3xl font-bold transition-colors duration-200 cursor-pointer hover:text-blue-600 group"
+            on:click=move |_| start_title_edit(exercise.get_untracked().name)
+            title="Click to edit title"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-            />
-          </svg>
-        </h1>
+            {move || exercise.get().name}
+            <svg
+              class="inline-block ml-2 w-5 h-5 text-gray-400 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+              />
+            </svg>
+          </h1>
+        }
+          .into_any()
       }
-        .into_any()
     }}
   }
 }
