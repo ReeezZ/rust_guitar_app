@@ -46,51 +46,15 @@ pub fn ConfigurationHeader(
             }
               .into_any()
           }
-          _ => {
-
-            view! { <div></div> }
-              .into_any()
-          }
+          _ => ().into_any(),
         }}
 
-        {exercise
-          .get()
-          .exercise_type
-          .get_fret_range()
-          .map(|(min, max)| {
-            view! {
-              <div class="flex relative gap-2 items-center">
-                <span class="font-medium text-gray-700">"Frets:"</span>
-                <button
-                  class="py-1 px-2 text-xs font-medium text-orange-800 bg-orange-100 rounded transition-colors cursor-pointer hover:bg-orange-200"
-                  on:click=move |_| {
-                    show_root_note_modal.set(false);
-                    show_scale_type_modal.set(false);
-                    show_fret_range_modal.set(!show_fret_range_modal.get());
-                  }
-                  title="Click to change fret range"
-                >
-                  {format!("{min}-{max}")}
-                </button>
-
-                // Fret range dropdown
-                <Show when=move || show_fret_range_modal.get()>
-                  <div class="absolute left-0 top-full z-10 p-4 mt-1 bg-white rounded-lg border border-gray-300 shadow-lg min-w-[200px]">
-                    <h4 class="mb-2 text-sm font-semibold">"Set Fret Range"</h4>
-                    <p class="mb-3 text-xs text-gray-600">
-                      "Fret range selection - functionality coming soon"
-                    </p>
-                    <button
-                      class="py-1 px-3 text-xs text-gray-600 bg-gray-200 rounded hover:bg-gray-300"
-                      on:click=move |_| show_fret_range_modal.set(false)
-                    >
-                      "Close"
-                    </button>
-                  </div>
-                </Show>
-              </div>
-            }
-          })}
+        <FretRangeSelection
+          exercise
+          show_fret_range_modal
+          show_root_note_modal
+          show_scale_type_modal
+        />
 
         <div class="flex gap-2 items-center">
           <span class="font-medium text-gray-700">"Details:"</span>
@@ -238,5 +202,54 @@ fn ScaleSelection(
         </div>
       </Show>
     </div>
+  }
+}
+
+#[component]
+fn FretRangeSelection(
+  exercise: Signal<Exercise>,
+  show_fret_range_modal: RwSignal<bool>,
+  show_root_note_modal: RwSignal<bool>,
+  show_scale_type_modal: RwSignal<bool>,
+) -> impl IntoView {
+  view! {
+    {exercise
+      .get()
+      .exercise_type
+      .get_fret_range()
+      .map(|(min, max)| {
+        view! {
+          <div class="flex relative gap-2 items-center">
+            <span class="font-medium text-gray-700">"Frets:"</span>
+            <button
+              class="py-1 px-2 text-xs font-medium text-orange-800 bg-orange-100 rounded transition-colors cursor-pointer hover:bg-orange-200"
+              on:click=move |_| {
+                show_root_note_modal.set(false);
+                show_scale_type_modal.set(false);
+                show_fret_range_modal.set(!show_fret_range_modal.get());
+              }
+              title="Click to change fret range"
+            >
+              {format!("{min}-{max}")}
+            </button>
+
+            // Fret range dropdown
+            <Show when=move || show_fret_range_modal.get()>
+              <div class="absolute left-0 top-full z-10 p-4 mt-1 bg-white rounded-lg border border-gray-300 shadow-lg min-w-[200px]">
+                <h4 class="mb-2 text-sm font-semibold">"Set Fret Range"</h4>
+                <p class="mb-3 text-xs text-gray-600">
+                  "Fret range selection - functionality coming soon"
+                </p>
+                <button
+                  class="py-1 px-3 text-xs text-gray-600 bg-gray-200 rounded hover:bg-gray-300"
+                  on:click=move |_| show_fret_range_modal.set(false)
+                >
+                  "Close"
+                </button>
+              </div>
+            </Show>
+          </div>
+        }
+      })}
   }
 }
