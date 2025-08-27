@@ -11,6 +11,8 @@ Build a **personal guitar practice tracker** that makes it easy to log practice 
 
 ### ✅ Completed
 - **Exercise Management** - Create, edit, delete exercises (scales, triads, techniques, songs)
+  - This will be changed again, things like scales and triads dont have to be created individually, then can just be selected
+  - 
 - **Practice Timer** - Count-up timer with target time and visual feedback  
 - **Metronome** - Adjustable BPM (30-250), 4/4 time, accent on beat 1, reactive updates
 - **Practice Session** - Combined timer + metronome with show/hide toggle
@@ -24,6 +26,8 @@ Build a **personal guitar practice tracker** that makes it easy to log practice 
 - **Session History** - View past practice sessions chronologically
 
 ### 🔮 Future Ideas
+- Setting goals
+   - Choose a set of exercises as goals
 - **Enhanced Metronome** - Multiple sounds, time signatures, volume control
 - **Fretboard Integration** - Visual exercise display during practice
 - **Backend & Analytics** - Data sync, progress tracking, charts

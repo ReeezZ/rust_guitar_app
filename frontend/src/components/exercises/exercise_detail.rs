@@ -1,4 +1,4 @@
-use crate::components::PracticeSession;
+use super::practice_session::PracticeSession;
 use crate::models::repository::{get_exercise_repository, ExerciseRepository};
 use leptos::prelude::*;
 use shared::models::exercise::{Exercise, ExerciseType};

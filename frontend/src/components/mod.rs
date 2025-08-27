@@ -5,7 +5,3 @@ pub mod fretboard;
 pub mod metronome;
 pub mod music_selectors;
 pub mod navbar;
-pub mod practice_session;
-pub mod practice_timer;
-
-pub use practice_session::PracticeSession;
