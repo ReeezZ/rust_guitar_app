@@ -463,28 +463,25 @@ pub fn PracticeSession(
 
                 {move || {
                   if show_fretboard.get() {
+                    let fretboard_model = Memo::new(move |_| {
+                      let model = FretboardModelBuilder::new()
+                        .start_fret_val(fret_range.0 as usize)
+                        .end_fret_val(fret_range.1 as usize)
+                        .build();
+                      let current_scale = Scale::new(root_note, scale_type);
+                      model.update_from_scale(current_scale);
+                      model
+                    });
+
+                    // Apply scale immediately during creation
+
                     view! {
                       <div class="p-4 bg-gray-50 rounded-lg">
-                        <FretboardModelAdapter model=Signal::derive(move || {
-                          let model = FretboardModelBuilder::new()
-                            .start_fret_val(fret_range.0 as usize)
-                            .end_fret_val(fret_range.1 as usize)
-                            .build();
-                          model.update_from_scale(Scale::new(root_note, scale_type));
-                          model
-                        }) />
+                        <FretboardModelAdapter model=fretboard_model />
                       </div>
                     }
                       .into_any()
                   } else {
-
-                    // <FretboardScaleDisplay
-                    // fret_range=Signal::derive(move || {
-                    // fret_range.0 as usize..=fret_range.1 as usize
-                    // })
-                    // root_note=Signal::derive(move || root_note)
-                    // scale_type=Signal::derive(move || scale_type)
-                    // />
                     view! {
                       <div class="py-8 text-center text-gray-500">
                         <p class="text-sm">"Fretboard hidden"</p>

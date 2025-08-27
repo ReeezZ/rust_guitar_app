@@ -4,7 +4,7 @@ use shared::Note;
 use crate::components::fretboard::{FretCoord, FretState, FretStateSignals, FretboardVisualConfig};
 use crate::models::fretboard::model_builder::FretboardModelBuilder;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Copy)]
 pub struct FretboardModel {
   /// First fret in the active/playable range
   start_fret: Signal<usize>,
