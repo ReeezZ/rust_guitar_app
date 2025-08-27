@@ -9,18 +9,21 @@ use super::{FretClickEvent, FretCoord, FretState, FretStateSignals};
 #[component]
 pub(crate) fn FretboardNut(
   /// Width of the nut in SVG units
-  nut_width: f64,
+  #[prop(into)]
+  nut_width: Signal<f64>,
   /// Top margin for the nut
-  fret_margin: f64,
+  #[prop(into)]
+  fret_margin: Signal<f64>,
   /// Total SVG height (needed for nut rect height calculation)
-  svg_height: f64,
+  #[prop(into)]
+  svg_height: Signal<f64>,
 ) -> impl IntoView {
   view! {
     <rect
       x="0"
       y=fret_margin
       width=nut_width
-      height=svg_height - 2.0 * fret_margin
+      height=move || svg_height.get() - 2.0 * fret_margin.get()
       fill="#f8f8f8"
       stroke="#222"
       stroke-width="5"
@@ -120,16 +123,16 @@ pub(crate) fn FretboardMarkers(
   #[prop(into)] svg_height: Signal<f64>,
   #[prop(into)] viewbox_positions: Signal<Vec<f64>>,
   #[prop(into)] marker_positions: Signal<Vec<usize>>,
-  min_visible_fret: usize,
-  max_visible_fret: usize,
+  #[prop(into)] min_visible_fret: Signal<usize>,
+  #[prop(into)] max_visible_fret: Signal<usize>,
 ) -> impl IntoView {
   view! {
     <For
       each=move || {
-        (min_visible_fret..max_visible_fret)
+        (min_visible_fret.get()..=max_visible_fret.get())
           .filter(move |fret| marker_positions.get().contains(fret))
       }
-      key=move |fret| (*fret, min_visible_fret, max_visible_fret)
+      key=move |fret| (*fret)
       let(fret)
     >
       {move || {
@@ -254,10 +257,10 @@ fn FretboardClickableArea(layout: LayoutSnapshot, coord: FretCoord) -> impl Into
       (start, end - start)
     }
   });
-  let x = Memo::new(move |_| x_and_width.get().0);
-  let width = Memo::new(move |_| x_and_width.get().1);
-  let height = Memo::new(move |_| layout.string_spacing.get() * 0.8);
-  let y = Memo::new(move |_| string_y.get() - layout.string_spacing.get() * 0.4);
+  let x = move || x_and_width.get().0;
+  let width = move || x_and_width.get().1;
+  let height = move || layout.string_spacing.get() * 0.8;
+  let y = move || string_y.get() - layout.string_spacing.get() * 0.4;
   view! {
     <rect
       x=x
@@ -289,20 +292,19 @@ fn FretboardNote(
       FretState::Hidden => ("transparent".to_string(), 0.0, None),
       FretState::Normal(color, label) => (color.as_str().to_string(), 12.0, Some(label)),
     });
-    let fill_color = Signal::derive(move || memo.get().0);
-    let radius = Signal::derive(move || memo.get().1);
-    let label = Signal::derive(move || memo.get().2);
+    let fill_color = move || memo.get().0;
+    let radius = move || memo.get().1;
+    let label = move || memo.get().2;
 
     Some(view! {
       <g class="note" data-string=coord.string_idx data-fret=coord.fret_idx>
-        {if radius.get() > 0.0 {
-          Some(view! { <circle cx=x cy=y r=radius.get() fill=fill_color.get() opacity="0.85" /> })
+        {if radius() > 0.0 {
+          Some(view! { <circle cx=x cy=y r=radius fill=fill_color opacity="0.85" /> })
         } else {
           None
         }}
-        {label
-          .get()
-          .map(|text| {
+        {label()
+          .map(move |text| {
             view! {
               <text
                 x=x

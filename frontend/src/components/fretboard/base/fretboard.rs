@@ -98,21 +98,9 @@ pub fn Fretboard(
         class="w-full max-w-full h-auto fretboard-svg"
         style="background: linear-gradient(90deg, #deb887 0%, #f5deb3 100%); border-radius: 8px; box-shadow: 0 2px 8px #0002; border: 1px solid #c00;"
       >
-        {move || {
-          if has_nut.get() {
-            Some(
-              view! {
-                <FretboardNut
-                  nut_width=nut_width.get()
-                  fret_margin=fret_margin.get()
-                  svg_height=svg_height.get()
-                />
-              },
-            )
-          } else {
-            None
-          }
-        }}
+        <Show when=move || has_nut.get()>
+          <FretboardNut nut_width fret_margin svg_height />
+        </Show>
 
         <FretboardFrets
           start_fret
@@ -124,37 +112,23 @@ pub fn Fretboard(
           svg_height
         />
 
-        <FretboardStrings
-          num_strings=num_strings
-          string_spacing=string_spacing
-          viewbox_width=svg_width
-        />
-        {move || {
-          view! {
-            <FretboardMarkers
-              svg_height
-              viewbox_positions
-              marker_positions
-              min_visible_fret=min_visible_fret.get()
-              max_visible_fret=max_visible_fret.get()
-            />
-          }
-        }}
-
-        <FretboardOverlays
-          layout
-          start_fret=start_fret
-          end_fret=end_fret
+        <FretboardStrings num_strings string_spacing viewbox_width=svg_width />
+        <FretboardMarkers
+          svg_height
+          viewbox_positions
+          marker_positions
           min_visible_fret
           max_visible_fret
         />
+
+        <FretboardOverlays layout start_fret end_fret min_visible_fret max_visible_fret />
         <FretboardGrid
           layout
           min_visible_fret
           max_visible_fret
           tuning
           click_cb=on_note_clicked
-          fret_states=fret_states
+          fret_states
         />
       </svg>
     </div>
