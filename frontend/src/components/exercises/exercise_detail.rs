@@ -95,9 +95,6 @@ fn ExerciseDetailChecked(
   view! {
     <div class="container py-8 px-4 mx-auto">
       {move || {
-        let ex_for_description = exercise.get();
-        let ex_for_practice = exercise.get();
-
         view! {
           <div>
             <div class="mb-8">
@@ -111,7 +108,6 @@ fn ExerciseDetailChecked(
               // Description section with inline editing
               <div class="mb-4">
                 {move || {
-                  let ex_desc = ex_for_description.clone();
                   if is_editing_description.get() {
                     // Edit mode - show textarea and buttons
                     view! {
@@ -143,7 +139,7 @@ fn ExerciseDetailChecked(
                     }
                       .into_any()
                   } else {
-                    match ex_desc.description.as_ref() {
+                    match exercise.get().description.as_ref() {
                       Some(desc) => {
                         let desc_for_edit = desc.clone();
                         // Display mode - show description or placeholder with edit button
@@ -200,7 +196,7 @@ fn ExerciseDetailChecked(
             <div class="p-6 bg-gray-50 rounded-lg">
               <PracticeSession
                 target_time=std::time::Duration::from_secs(15 * 60)
-                exercise=ex_for_practice
+                exercise=exercise
                 on_exercise_update=Callback::new(move |updated_exercise: Exercise| {
                   let repo = get_exercise_repository();
                   if let Err(e) = repo.update(&updated_exercise) {
