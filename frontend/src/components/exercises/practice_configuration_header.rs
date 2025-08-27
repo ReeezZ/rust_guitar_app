@@ -36,6 +36,7 @@ pub fn ConfigurationHeader(
                   on_exercise_update
                 />
                 <ScaleSelection
+                  exercise
                   scale_type
                   show_fret_range_modal
                   show_root_note_modal
@@ -165,12 +166,15 @@ fn RootNoteSelection(
 
 #[component]
 fn ScaleSelection(
+  exercise: Signal<Exercise>,
   show_root_note_modal: RwSignal<bool>,
   show_fret_range_modal: RwSignal<bool>,
   show_scale_type_modal: RwSignal<bool>,
   on_exercise_update: Callback<Exercise>,
   scale_type: ScaleType,
 ) -> impl IntoView {
+  let temporary_selected_scale = RwSignal::new(scale_type);
+
   view! {
     <div class="flex relative gap-2 items-center">
       <span class="font-medium text-gray-700">"Scale:"</span>
@@ -190,9 +194,42 @@ fn ScaleSelection(
       <Show when=move || show_scale_type_modal.get()>
         <div class="absolute left-0 top-full z-10 p-4 mt-1 bg-white rounded-lg border border-gray-300 shadow-lg min-w-[200px]">
           <h4 class="mb-2 text-sm font-semibold">"Select Scale Type"</h4>
+          <For
+            each=move || ScaleType::all_scale_types()
+            key=|scale_type| scale_type.to_string()
+            let(button_scale_type)
+          >
+            <button
+              class=move || {
+                if button_scale_type == scale_type {
+                  "my-1 text-xs font-bold rounded border-2 border-purple-600 bg-purple-600 text-white transition-colors"
+                } else if button_scale_type == temporary_selected_scale.get() {
+                  "my-1 text-xs font-bold rounded border-2 border-blue-600 bg-blue-600 text-white transition-colors"
+                } else {
+                  "my-1 text-xs font-medium rounded border border-gray-300 bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+                }
+              }
+              on:click=move |_| {
+                temporary_selected_scale.set(button_scale_type);
+              }
+            >
+              {button_scale_type.to_string()}
+            </button>
+          </For>
           <p class="mb-3 text-xs text-gray-600">
             "Scale type selection - functionality coming soon"
           </p>
+          <button
+            class="py-1 px-3 text-xs text-white bg-blue-600 rounded hover:bg-blue-700"
+            on:click=move |_| {
+              let mut exercise = exercise.get().clone();
+              exercise.exercise_type.set_scale_type(temporary_selected_scale.get());
+              show_scale_type_modal.set(false);
+              on_exercise_update.run(exercise);
+            }
+          >
+            "OK"
+          </button>
           <button
             class="py-1 px-3 text-xs text-gray-600 bg-gray-200 rounded hover:bg-gray-300"
             on:click=move |_| show_scale_type_modal.set(false)

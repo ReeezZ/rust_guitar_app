@@ -71,6 +71,15 @@ impl ExerciseType {
       ExerciseType::Technique | ExerciseType::Song => {}
     }
   }
+
+  // todo could return bool to indicate if there was a change made
+  pub fn set_scale_type(&mut self, new_scale_type: ScaleType) {
+    match self {
+      ExerciseType::Scale { scale_type, .. } => *scale_type = new_scale_type,
+      ExerciseType::Triad { scale_type, .. } => *scale_type = new_scale_type,
+      ExerciseType::Technique | ExerciseType::Song => {}
+    }
+  }
 }
 
 impl std::fmt::Display for ExerciseType {
