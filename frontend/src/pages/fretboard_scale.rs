@@ -1,12 +1,12 @@
 use crate::{
   components::{
     fret_range_selector::FretRangeSelector,
-    fretboard::{FretClickEvent, FretboardModelAdapter, FretboardVisualConfigBuilder},
+    fretboard::{FretboardModelAdapter, FretboardVisualConfigBuilder},
     music_selectors::{NoteSelector, ScaleTypeSelector},
   },
   models::fretboard::{default_tuning, FretboardModelBuilder, FretboardModelExt},
 };
-use leptos::{logging::log, prelude::*, wasm_bindgen::JsCast};
+use leptos::{prelude::*, wasm_bindgen::JsCast};
 use shared::music::notes::Note;
 use shared::music::scales::ScaleType;
 use shared::{music::heptatonic_scales::HeptaScaleType, Scale};
@@ -27,20 +27,6 @@ pub fn FretboardScalePage() -> impl IntoView {
 
   let root_note = Memo::new(move |_| scale.get().root_note().unwrap_or(Note::C));
 
-  // Track clicked note for testing
-  let (clicked_note_event, set_clicked_note_event) = signal::<Option<FretClickEvent>>(None);
-
-  let on_note_clicked = Callback::new(move |event: FretClickEvent| {
-    log!(
-      "🎵 Scale Display - Note: {}, String: {} (1-indexed: {}), Fret: {}",
-      event.note,
-      event.coord.string_idx,
-      event.coord.string_idx + 1,
-      event.coord.fret_idx
-    );
-    set_clicked_note_event.set(Some(event));
-  });
-
   let model = RwSignal::new(
     FretboardModelBuilder::new()
       .start_fret(start_fret.into())
@@ -54,11 +40,16 @@ pub fn FretboardScalePage() -> impl IntoView {
       .build(),
   );
 
-  Effect::new(move || {
-    model.with(move |model| {
-      model.update_from_scale(scale.get());
-    });
+  model.with_untracked(move |model| {
+    model.update_from_scale(scale.get_untracked());
   });
+
+  let update_scale = move |scale: Scale| {
+    model.with_untracked(move |model| {
+      model.update_from_scale(scale);
+    });
+    set_scale.set(scale);
+  };
 
   view! {
     <div class="p-6 space-y-6">
@@ -84,22 +75,6 @@ pub fn FretboardScalePage() -> impl IntoView {
         </div>
       </div>
 
-      // Click feedback
-      <div class="p-4 bg-green-50 rounded-lg border-2 border-green-200">
-        <strong>"Clicked Note: "</strong>
-        {move || match clicked_note_event.get() {
-          Some(event) => {
-            format!(
-              "{} - String {} - Fret {}",
-              event.note,
-              event.coord.string_idx + 1,
-              event.coord.fret_idx,
-            )
-          }
-          None => "Click on the fretboard to test interaction".to_string(),
-        }}
-      </div>
-
       // Quick scale presets
       <div class="p-4 bg-yellow-50 rounded-lg border-2 border-yellow-200">
         <h3 class="mb-3 text-lg font-semibold">"Quick Presets"</h3>
@@ -109,7 +84,7 @@ pub fn FretboardScalePage() -> impl IntoView {
             on:click=move |_| {
               start_fret.set(3);
               end_fret.set(7);
-              set_scale.set(Scale::new(Note::G, ScaleType::Hepatonic(HeptaScaleType::Major)));
+              update_scale(Scale::new(Note::G, ScaleType::Hepatonic(HeptaScaleType::Major)));
             }
           >
             "G Major (3-7)"
@@ -119,7 +94,7 @@ pub fn FretboardScalePage() -> impl IntoView {
             on:click=move |_| {
               start_fret.set(5);
               end_fret.set(8);
-              set_scale.set(Scale::new(Note::A, ScaleType::Hepatonic(HeptaScaleType::Minor)));
+              update_scale(Scale::new(Note::A, ScaleType::Hepatonic(HeptaScaleType::Minor)));
             }
           >
             "A Minor (5-8)"
@@ -129,7 +104,7 @@ pub fn FretboardScalePage() -> impl IntoView {
             on:click=move |_| {
               start_fret.set(0);
               end_fret.set(5);
-              set_scale.set(Scale::new(Note::E, ScaleType::Hepatonic(HeptaScaleType::Minor)));
+              update_scale(Scale::new(Note::E, ScaleType::Hepatonic(HeptaScaleType::Minor)));
             }
           >
             "E Minor (0-5)"
@@ -139,7 +114,7 @@ pub fn FretboardScalePage() -> impl IntoView {
             on:click=move |_| {
               start_fret.set(7);
               end_fret.set(10);
-              set_scale.set(Scale::new(Note::C, ScaleType::Hepatonic(HeptaScaleType::Major)));
+              update_scale(Scale::new(Note::C, ScaleType::Hepatonic(HeptaScaleType::Major)));
             }
           >
             "C Major (7-10)"
@@ -149,7 +124,7 @@ pub fn FretboardScalePage() -> impl IntoView {
             on:click=move |_| {
               start_fret.set(1);
               end_fret.set(4);
-              set_scale.set(Scale::new(Note::D, ScaleType::Hepatonic(HeptaScaleType::Minor)));
+              update_scale(Scale::new(Note::D, ScaleType::Hepatonic(HeptaScaleType::Minor)));
             }
           >
             "A Minor (1-4, no opens)"
@@ -157,7 +132,7 @@ pub fn FretboardScalePage() -> impl IntoView {
           <button
             class="py-2 px-4 text-white bg-purple-500 rounded hover:bg-purple-600"
             on:click=move |_| {
-              set_scale.set(Scale::new(Note::E, ScaleType::Hepatonic(HeptaScaleType::Major)));
+              update_scale(Scale::new(Note::E, ScaleType::Hepatonic(HeptaScaleType::Major)));
               start_fret.set(0);
               end_fret.set(10);
             }
@@ -169,7 +144,7 @@ pub fn FretboardScalePage() -> impl IntoView {
 
       // Main fretboard display
       //
-      <FretboardModelAdapter model on_note_clicked=on_note_clicked />
+      <FretboardModelAdapter model />
       // />
       // Show 2 extra frets beyond the end fret
       <div class="p-4 bg-gray-50 rounded-lg border-2 border-gray-200"></div>
@@ -180,7 +155,7 @@ pub fn FretboardScalePage() -> impl IntoView {
         <NoteSelector
           value=root_note.into()
           on_note_changed=Callback::new(move |note| {
-            set_scale.set(Scale::new(note, scale.get_untracked().scale_type()));
+            update_scale(Scale::new(note, scale.get_untracked().scale_type()));
           })
           label="Root Note"
         />
@@ -189,7 +164,7 @@ pub fn FretboardScalePage() -> impl IntoView {
         <ScaleTypeSelector
           value=Signal::derive(move || scale.get().scale_type())
           on_scale_changed=Callback::new(move |scale_type| {
-            set_scale.set(Scale::new(root_note.get_untracked(), scale_type));
+            update_scale(Scale::new(root_note.get_untracked(), scale_type));
           })
           label="Scale Type"
         />

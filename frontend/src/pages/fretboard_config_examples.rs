@@ -135,14 +135,14 @@ pub fn FretboardConfigExamples() -> impl IntoView {
               <div class="grid grid-cols-2 gap-3">
                 <div>
                   <label class="block mb-1 text-xs font-medium">
-                    "Start: " <span class="font-bold">{move || start_fret.get()}</span>
+                    "Start: " <span class="font-bold">{start_fret}</span>
                   </label>
                   <input
                     type="range"
                     min="0"
                     max=move || end_fret.get() - 1
                     class="w-full"
-                    prop:value=move || start_fret.get()
+                    prop:value=start_fret
                     on:input=move |ev| {
                       if let Ok(val) = event_target_value(&ev).parse::<usize>() {
                         if val < end_fret.get() {
@@ -161,7 +161,7 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                     min=move || start_fret.get() + 1
                     max=MAX_FRETS
                     class="w-full"
-                    prop:value=move || end_fret.get()
+                    prop:value=end_fret
                     on:input=move |ev| {
                       if let Ok(val) = event_target_value(&ev).parse::<usize>() {
                         if val > start_fret.get() {
@@ -180,14 +180,14 @@ pub fn FretboardConfigExamples() -> impl IntoView {
               <div class="grid grid-cols-2 gap-3">
                 <div>
                   <label class="block mb-1 text-xs font-medium">
-                    "Strings: " <span class="font-bold">{move || num_strings.get()}</span>
+                    "Strings: " <span class="font-bold">{num_strings}</span>
                   </label>
                   <input
                     type="range"
                     min="2"
                     max=MAX_STRINGS
                     class="w-full"
-                    prop:value=move || num_strings.get()
+                    prop:value=num_strings
                     on:input=move |ev| {
                       if let Ok(val) = event_target_value(&ev).parse::<u8>() {
                         num_strings.set(val);
@@ -224,7 +224,7 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                     max="6.0"
                     step="0.1"
                     class="w-full"
-                    prop:value=move || svg_aspect_ratio.get()
+                    prop:value=svg_aspect_ratio
                     on:input=move |ev| {
                       if let Ok(val) = event_target_value(&ev).parse::<f64>() {
                         svg_aspect_ratio.set(val);
@@ -256,7 +256,7 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                     max="0.15"
                     step="0.01"
                     class="w-full"
-                    prop:value=move || fret_margin_percentage.get()
+                    prop:value=fret_margin_percentage
                     on:input=move |ev| {
                       if let Ok(val) = event_target_value(&ev).parse::<f64>() {
                         fret_margin_percentage.set(val);
@@ -276,7 +276,7 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                     min="8"
                     max="25"
                     class="w-full"
-                    prop:value=move || nut_width.get()
+                    prop:value=nut_width
                     on:input=move |ev| {
                       if let Ok(val) = event_target_value(&ev).parse::<f64>() {
                         nut_width.set(val);
@@ -286,14 +286,14 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                 </div>
                 <div>
                   <label class="block mb-1 text-xs font-medium">
-                    "Extra Frets: " <span class="font-bold">{move || extra_frets.get()}</span>
+                    "Extra Frets: " <span class="font-bold">{extra_frets}</span>
                   </label>
                   <input
                     type="range"
                     min="0"
                     max="5"
                     class="w-full"
-                    prop:value=move || extra_frets.get()
+                    prop:value=extra_frets
                     on:input=move |ev| {
                       if let Ok(val) = event_target_value(&ev).parse::<usize>() {
                         extra_frets.set(val);

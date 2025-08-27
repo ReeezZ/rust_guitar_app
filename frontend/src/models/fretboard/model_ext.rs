@@ -26,9 +26,7 @@ impl FretboardModelExt for FretboardModel {
       .iter()
       .enumerate()
       .for_each(move |(string_idx, string_note)| {
-        for fret_idx in
-          self.get_min_fret().get_untracked()..=self.get_max_visible_fret().get_untracked()
-        {
+        for fret_idx in self.get_min_fret_untracked()..=self.get_max_visible_fret_untracked() {
           let coord = FretCoord {
             string_idx: string_idx as u8,
             fret_idx: fret_idx as u8,

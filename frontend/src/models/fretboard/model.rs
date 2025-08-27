@@ -104,9 +104,15 @@ impl FretboardModel {
 
     Signal::derive(move || {
       start_fret
-        .get_untracked()
+        .get()
         .saturating_sub(config.get_untracked().extra_frets.get())
     })
+  }
+
+  pub fn get_min_fret_untracked(&self) -> usize {
+    let start_fret = self.start_fret.get_untracked();
+    let extra_frets = self.config.get_untracked().extra_frets.get_untracked();
+    start_fret.saturating_sub(extra_frets)
   }
 
   pub fn get_max_visible_fret(&self) -> Signal<usize> {
@@ -115,5 +121,11 @@ impl FretboardModel {
     let extra_frets = Signal::derive(move || config.get().extra_frets.get());
 
     Signal::derive(move || end_fret.get() + extra_frets.get())
+  }
+
+  pub fn get_max_visible_fret_untracked(&self) -> usize {
+    let end_fret = self.end_fret.get_untracked();
+    let extra_frets = self.config.get_untracked().extra_frets.get_untracked();
+    end_fret + extra_frets
   }
 }

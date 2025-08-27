@@ -14,7 +14,8 @@ pub enum ExerciseType {
     scale_type: ScaleType,
     fret_range: (u8, u8), // (min_fret, max_fret)
   },
-  /// Triad practice with specific scale and fret range
+  // TODO we should change this so we can select a scale and from that scale select the scale degrees
+  // Also for triads it would make sense to define string sets: (1,2,3), (2,3,4), (3,4,5), (4,5,6)
   Triad {
     root_note: Note,
     scale_type: ScaleType,
