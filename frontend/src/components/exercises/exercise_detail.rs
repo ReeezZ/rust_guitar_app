@@ -74,8 +74,8 @@ fn ExerciseDetailChecked(
     // Update in storage
     let repo = get_exercise_repository();
     if let Ok(()) = repo.update(&ex) {
-      on_exercise_change.run(ex);
       set_is_editing_description.set(false);
+      on_exercise_change.run(ex);
     }
   };
 
