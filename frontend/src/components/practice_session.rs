@@ -32,23 +32,12 @@ pub fn PracticeSession(
   let elapsed_seconds = RwSignal::new(0u64);
   let timer_state = RwSignal::new(TimerState::Stopped);
 
-  // Modal states for exercise configuration
-  let (show_root_note_modal, set_show_root_note_modal) = signal(false);
-  let (show_scale_type_modal, set_show_scale_type_modal) = signal(false);
-  let (show_fret_range_modal, set_show_fret_range_modal) = signal(false);
-
   view! {
     <div class="p-6 bg-white rounded-lg border border-gray-200">
       <h3 class="mb-4 text-lg font-semibold text-gray-800">"Practice Session"</h3>
 
       <ConfigurationHeader
         exercise
-        set_show_root_note_modal
-        set_show_scale_type_modal
-        set_show_fret_range_modal
-        show_fret_range_modal
-        show_root_note_modal
-        show_scale_type_modal
         on_exercise_update=on_exercise_update.unwrap_or_else(|| Callback::new(|_| {}))
       />
 
@@ -66,16 +55,15 @@ pub fn PracticeSession(
 #[component]
 fn ConfigurationHeader(
   exercise: Signal<Exercise>,
-  set_show_scale_type_modal: WriteSignal<bool>,
-  set_show_fret_range_modal: WriteSignal<bool>,
-  show_fret_range_modal: ReadSignal<bool>,
-  set_show_root_note_modal: WriteSignal<bool>,
-  show_root_note_modal: ReadSignal<bool>,
-  show_scale_type_modal: ReadSignal<bool>,
   on_exercise_update: Callback<Exercise>,
 ) -> impl IntoView {
   // Temporary selection state for root note modal
-  let (temp_selected_note, set_temp_selected_note) = signal(None::<Note>);
+  let temp_selected_note = RwSignal::new(None::<Note>);
+
+  // Modal states for exercise configuration
+  let show_root_note_modal = RwSignal::new(false);
+  let show_scale_type_modal = RwSignal::new(false);
+  let show_fret_range_modal = RwSignal::new(false);
 
   view! {
     <div class="p-3 mb-6 bg-gray-50 rounded-lg">
@@ -97,10 +85,10 @@ fn ConfigurationHeader(
                   <button
                     class="py-1 px-2 text-xs font-medium text-indigo-800 bg-indigo-100 rounded transition-colors cursor-pointer hover:bg-indigo-200"
                     on:click=move |_| {
-                      set_show_scale_type_modal.set(false);
-                      set_show_fret_range_modal.set(false);
-                      set_temp_selected_note.set(None);
-                      set_show_root_note_modal.set(!show_root_note_modal.get());
+                      show_scale_type_modal.set(false);
+                      show_fret_range_modal.set(false);
+                      temp_selected_note.set(None);
+                      show_root_note_modal.set(!show_root_note_modal.get());
                     }
                     title="Click to change root note"
                   >
@@ -131,7 +119,7 @@ fn ConfigurationHeader(
                                     "my-1 text-xs font-medium rounded border border-gray-300 bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
                                   }
                                   on:click=move |_| {
-                                    set_temp_selected_note.set(Some(note));
+                                    temp_selected_note.set(Some(note));
                                   }
                                 >
                                   {note_str}
@@ -147,8 +135,8 @@ fn ConfigurationHeader(
                         <button
                           class="px-1 my-1 text-sm text-gray-800 bg-red-100 rounded transition-colors hover:bg-red-300"
                           on:click=move |_| {
-                            set_temp_selected_note.set(None);
-                            set_show_root_note_modal.set(false);
+                            temp_selected_note.set(None);
+                            show_root_note_modal.set(false);
                           }
                         >
                           "Cancel"
@@ -158,8 +146,8 @@ fn ConfigurationHeader(
                           disabled=move || temp_selected_note.get().is_none()
                           on:click=move |_| {
                             if let Some(selected_note) = temp_selected_note.get() {
-                              set_temp_selected_note.set(Some(selected_note));
-                              set_show_root_note_modal.set(false);
+                              temp_selected_note.set(Some(selected_note));
+                              show_root_note_modal.set(false);
                               on_exercise_update
                                 .run(Exercise {
                                   id: exercise.get().id.clone(),
@@ -202,9 +190,9 @@ fn ConfigurationHeader(
                   <button
                     class="py-1 px-2 text-xs font-medium text-purple-800 bg-purple-100 rounded transition-colors cursor-pointer hover:bg-purple-200"
                     on:click=move |_| {
-                      set_show_root_note_modal.set(false);
-                      set_show_fret_range_modal.set(false);
-                      set_show_scale_type_modal.set(!show_scale_type_modal.get());
+                      show_root_note_modal.set(false);
+                      show_fret_range_modal.set(false);
+                      show_scale_type_modal.set(!show_scale_type_modal.get());
                     }
                     title="Click to change scale type"
                   >
@@ -220,7 +208,7 @@ fn ConfigurationHeader(
                       </p>
                       <button
                         class="py-1 px-3 text-xs text-gray-600 bg-gray-200 rounded hover:bg-gray-300"
-                        on:click=move |_| set_show_scale_type_modal.set(false)
+                        on:click=move |_| show_scale_type_modal.set(false)
                       >
                         "Close"
                       </button>
@@ -245,9 +233,9 @@ fn ConfigurationHeader(
                 <button
                   class="py-1 px-2 text-xs font-medium text-orange-800 bg-orange-100 rounded transition-colors cursor-pointer hover:bg-orange-200"
                   on:click=move |_| {
-                    set_show_root_note_modal.set(false);
-                    set_show_scale_type_modal.set(false);
-                    set_show_fret_range_modal.set(!show_fret_range_modal.get());
+                    show_root_note_modal.set(false);
+                    show_scale_type_modal.set(false);
+                    show_fret_range_modal.set(!show_fret_range_modal.get());
                   }
                   title="Click to change fret range"
                 >
@@ -263,7 +251,7 @@ fn ConfigurationHeader(
                     </p>
                     <button
                       class="py-1 px-3 text-xs text-gray-600 bg-gray-200 rounded hover:bg-gray-300"
-                      on:click=move |_| set_show_fret_range_modal.set(false)
+                      on:click=move |_| show_fret_range_modal.set(false)
                     >
                       "Close"
                     </button>
