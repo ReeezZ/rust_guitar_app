@@ -262,10 +262,6 @@ fn FretboardSection(exercise: Signal<Exercise>) -> impl IntoView {
           scale_type,
           fret_range,
         } => {
-          let root_note = root_note;
-          let scale_type = scale_type;
-          let fret_range = fret_range;
-
           view! {
             <div class="mt-6">
               // Toggle fretboard visibility
@@ -299,14 +295,14 @@ fn FretboardSection(exercise: Signal<Exercise>) -> impl IntoView {
                   }
                     .into_any()
                 } else {
-                  view! { <></> }.into_any()
+                  ().into_any()
                 }
               }}
             </div>
           }
           .into_any()
         }
-        _ => view! { <div></div> }.into_any(),
+        _ => ().into_any(),
       }
     }
   }
