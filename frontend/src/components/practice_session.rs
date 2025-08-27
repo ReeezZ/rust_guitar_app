@@ -65,6 +65,41 @@ fn ConfigurationHeader(
   let show_scale_type_modal = RwSignal::new(false);
   let show_fret_range_modal = RwSignal::new(false);
 
+  let on_confirm_note_change = move || {
+    if let Some(selected_note) = temp_selected_note.get() {
+      temp_selected_note.set(Some(selected_note));
+      show_root_note_modal.set(false);
+      on_exercise_update.run(Exercise {
+        id: exercise.get().id.clone(),
+        name: exercise.get().name.clone(),
+        description: exercise.get().description.clone(),
+        exercise_type: match exercise.get().exercise_type {
+          ExerciseType::Scale {
+            scale_type,
+            fret_range,
+            ..
+          } => ExerciseType::Scale {
+            root_note: selected_note,
+            scale_type,
+            fret_range,
+          },
+          ExerciseType::Triad {
+            scale_type,
+            fret_range,
+            ..
+          } => ExerciseType::Triad {
+            root_note: selected_note,
+            scale_type,
+            fret_range,
+          },
+          _ => {
+            panic!("Should not be able to change root note for non-scale/triad exercises",)
+          }
+        },
+      })
+    }
+  };
+
   view! {
     <div class="p-3 mb-6 bg-gray-50 rounded-lg">
       <div class="flex flex-wrap gap-4 items-center text-sm">
@@ -144,39 +179,7 @@ fn ConfigurationHeader(
                         <button
                           class="px-1 my-1 text-sm text-white bg-blue-600 rounded transition-colors hover:bg-blue-700 disabled:bg-gray-400"
                           disabled=move || temp_selected_note.get().is_none()
-                          on:click=move |_| {
-                            if let Some(selected_note) = temp_selected_note.get() {
-                              temp_selected_note.set(Some(selected_note));
-                              show_root_note_modal.set(false);
-                              on_exercise_update
-                                .run(Exercise {
-                                  id: exercise.get().id.clone(),
-                                  name: exercise.get().name.clone(),
-                                  description: exercise.get().description.clone(),
-                                  exercise_type: match exercise.get().exercise_type {
-                                    ExerciseType::Scale { scale_type, fret_range, .. } => {
-                                      ExerciseType::Scale {
-                                        root_note: selected_note,
-                                        scale_type,
-                                        fret_range,
-                                      }
-                                    }
-                                    ExerciseType::Triad { scale_type, fret_range, .. } => {
-                                      ExerciseType::Triad {
-                                        root_note: selected_note,
-                                        scale_type,
-                                        fret_range,
-                                      }
-                                    }
-                                    _ => {
-                                      panic!(
-                                        "Should not be able to change root note for non-scale/triad exercises",
-                                      )
-                                    }
-                                  },
-                                })
-                            }
-                          }
+                          on:click=move |_| { on_confirm_note_change() }
                         >
                           "OK"
                         </button>
