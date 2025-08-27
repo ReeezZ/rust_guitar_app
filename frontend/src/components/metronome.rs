@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-use leptos_use::use_interval_fn;
+use leptos_use::{use_interval_fn, utils::Pausable};
 use web_sys::{AudioContext, OscillatorType};
 
 use crate::audio::AudioManager;
@@ -55,7 +55,11 @@ pub fn Metronome(
   };
 
   // Set up reactive interval for metronome ticking that updates with BPM
-  let metronome_interval = use_interval_fn(tick, interval_signal);
+  let Pausable {
+    pause,
+    resume,
+    is_active: _,
+  } = use_interval_fn(tick, interval_signal);
 
   // Start/stop metronome
   let toggle_metronome = move |_| {
@@ -69,11 +73,11 @@ pub fn Metronome(
         if let Some(ctx) = AudioManager::get_context() {
           play_click_with_context(&ctx, true); // Beat 1 is always the accent
         }
-        (metronome_interval.resume)();
+        resume();
       }
       MetronomeState::Running => {
         set_metronome_state.set(MetronomeState::Stopped);
-        (metronome_interval.pause)();
+        pause();
       }
     }
   };

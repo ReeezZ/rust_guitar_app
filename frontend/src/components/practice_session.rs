@@ -1,5 +1,6 @@
 use leptos::prelude::*;
 use leptos_use::use_interval_fn;
+use leptos_use::utils::Pausable;
 use shared::Scale;
 use std::time::Duration;
 
@@ -43,7 +44,11 @@ pub fn PracticeSession(
   let (temp_selected_note, set_temp_selected_note) = signal(None::<Note>);
 
   // Set up interval for timer ticking
-  let interval_controls = use_interval_fn(
+  let Pausable {
+    pause,
+    resume,
+    is_active: _,
+  } = use_interval_fn(
     move || {
       if timer_state.get() == TimerState::Running {
         set_elapsed_seconds.update(|t| *t += 1);
@@ -51,6 +56,8 @@ pub fn PracticeSession(
     },
     1000, // 1 second interval
   );
+
+  let pause_clone = pause.clone();
 
   // Format elapsed time as MM:SS
   let formatted_time = move || {
@@ -70,8 +77,6 @@ pub fn PracticeSession(
   };
 
   let start_timer = {
-    let pause = interval_controls.pause.clone();
-    let resume = interval_controls.resume.clone();
     move |_| {
       match timer_state.get() {
         TimerState::Stopped => {
@@ -92,11 +97,10 @@ pub fn PracticeSession(
   };
 
   let stop_timer = {
-    let pause = interval_controls.pause.clone();
     move |_| {
       set_timer_state.set(TimerState::Stopped);
       set_elapsed_seconds.set(0);
-      pause(); // Stop the interval
+      pause_clone(); // Stop the interval
     }
   };
 
