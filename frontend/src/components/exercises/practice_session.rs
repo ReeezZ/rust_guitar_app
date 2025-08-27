@@ -69,34 +69,9 @@ fn ConfigurationHeader(
     if let Some(selected_note) = temp_selected_note.get() {
       temp_selected_note.set(Some(selected_note));
       show_root_note_modal.set(false);
-      on_exercise_update.run(Exercise {
-        id: exercise.get().id.clone(),
-        name: exercise.get().name.clone(),
-        description: exercise.get().description.clone(),
-        exercise_type: match exercise.get().exercise_type {
-          ExerciseType::Scale {
-            scale_type,
-            fret_range,
-            ..
-          } => ExerciseType::Scale {
-            root_note: selected_note,
-            scale_type,
-            fret_range,
-          },
-          ExerciseType::Triad {
-            scale_type,
-            fret_range,
-            ..
-          } => ExerciseType::Triad {
-            root_note: selected_note,
-            scale_type,
-            fret_range,
-          },
-          _ => {
-            panic!("Should not be able to change root note for non-scale/triad exercises",)
-          }
-        },
-      })
+      let mut exercise = exercise.get().clone();
+      exercise.exercise_type.set_root_note(selected_note);
+      on_exercise_update.run(exercise);
     }
   };
 

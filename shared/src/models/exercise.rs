@@ -63,6 +63,14 @@ impl ExerciseType {
       ExerciseType::Song => "Song",
     }
   }
+
+  pub fn set_root_note(&mut self, new_root: Note) {
+    match self {
+      ExerciseType::Scale { root_note, .. } => *root_note = new_root,
+      ExerciseType::Triad { root_note, .. } => *root_note = new_root,
+      ExerciseType::Technique | ExerciseType::Song => {}
+    }
+  }
 }
 
 impl std::fmt::Display for ExerciseType {
