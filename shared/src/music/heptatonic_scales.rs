@@ -52,7 +52,7 @@ pub trait HeptaScale: Index<HeptaScaleDegree> + ScaleExt {
   fn get_note_by_degree(&self, degree: HeptaScaleDegree) -> Note;
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Copy)]
 pub struct HeptaScaleImpl {
   notes: [Note; 7],
   scale_type: HeptaScaleType,

@@ -44,7 +44,7 @@ impl fmt::Display for ScaleType {
   }
 }
 
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug, Copy)]
 pub enum Scale {
   Heptatonic(HeptaScaleImpl),
   Chromatic,
