@@ -1,6 +1,6 @@
 # 🎸 Rust Guitar Practice App
 
-A comprehensive guitar learning companion built with **Rust**, **Leptos**, and **Axum**. Features interactive SVG fretboard visualization, practice exercises, session tracking, and full-stack architecture.
+A guitar learning companion built with **Rust**, **Leptos**, and **Axum** (to be implemented). Features interactive SVG fretboard visualization, practice exercises (working PoC), session tracking (in development).
 
 ## 🚀 Quick Start
 
@@ -43,23 +43,6 @@ The `./x` script makes development easy:
 - **Scale Visualization** - Display scales with different note highlighting  
 - **Configurable** - Support for different instruments and fret ranges
 
-### SVG FretboardArchitecture
-
-The SVG fretboard system is built in layers:
-
-```mermaid
-graph TB
-    A["FretboardScaleDisplay<br/>(Musical Scale visualization)"] --> B["FretboardWithNotes<br/>(Note-aware fretboard)"]
-    B --> C["Fretboard<br/>(Base visual component)"]
-    
-    style A fill:#e1f5fe
-    style B fill:#f3e5f5  
-    style C fill:#fff3e0
-```
-
-Each layer adds functionality while maintaining the same visual output.
-
-> **Documentation Note:** Consider using the [simple-mermaid](https://docs.rs/simple-mermaid/latest/simple_mermaid/) crate for adding [Mermaid](https://mermaid-js.github.io/mermaid/#/) diagrams to Rust docs for better architectural overviews.
 
 
 ## 🎯 What's Next
