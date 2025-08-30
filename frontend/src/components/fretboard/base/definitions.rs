@@ -8,6 +8,7 @@ use shared::Note;
 pub const MAX_STRINGS: usize = 8; // supports up to 8-string instruments
 pub const MAX_FRETS: usize = 25; // frets 0..=24
 
+// todo consider performance
 pub type FretStateSignals = HashMap<FretCoord, RwSignal<FretState>>;
 
 #[derive(Clone, Copy, PartialEq, Debug, Eq, Hash)]

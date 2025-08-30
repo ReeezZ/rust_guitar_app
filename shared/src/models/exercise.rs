@@ -80,6 +80,14 @@ impl ExerciseType {
       ExerciseType::Technique | ExerciseType::Song => {}
     }
   }
+
+  pub fn set_fret_range(&mut self, new_range: (u8, u8)) {
+    match self {
+      ExerciseType::Scale { fret_range, .. } => *fret_range = new_range,
+      ExerciseType::Triad { fret_range, .. } => *fret_range = new_range,
+      ExerciseType::Technique | ExerciseType::Song => {}
+    }
+  }
 }
 
 impl std::fmt::Display for ExerciseType {

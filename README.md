@@ -146,6 +146,7 @@ rust_guitar_app/
 - [Leptos Book](https://leptos.dev/) - Reactive web framework
 - [Axum Documentation](https://docs.rs/axum/) - Web application framework
 - [SVG Guitar Tutorials](https://www.youtube.com/watch?v=C6VLedW5Dwk) - Fretboard visualization
+- [guitar scientist](https://www.editor.guitarscientist.com/new)
 
 **Tech stack ideas**
 - [tailwindcss-animated](https://github.com/new-data-services/tailwindcss-animated) - for enhanced animations
