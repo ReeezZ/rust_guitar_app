@@ -26,8 +26,8 @@ pub fn ConfigurationHeader(
         </div>
 
         {match exercise.get().exercise_type {
-          ExerciseType::Scale { root_note, scale_type, .. }
-          | ExerciseType::Triad { root_note, scale_type, .. } => {
+          ExerciseType::Scale { root_note, scale_type, fret_range }
+          | ExerciseType::Triad { root_note, scale_type, fret_range } => {
             view! {
               <>
                 <RootNoteSelection
@@ -46,21 +46,21 @@ pub fn ConfigurationHeader(
                   show_scale_type_modal
                   on_exercise_update
                 />
+                <FretRangeSelection
+                  exercise
+                  show_fret_range_modal
+                  show_root_note_modal
+                  show_scale_type_modal
+                  on_exercise_update
+                  active_min_fret=fret_range.0
+                  active_max_fret=fret_range.1
+                />
               </>
             }
               .into_any()
           }
           _ => ().into_any(),
         }}
-
-        // TODO
-        <FretRangeSelection
-          exercise
-          show_fret_range_modal
-          show_root_note_modal
-          show_scale_type_modal
-          on_exercise_update
-        />
 
         <div class="flex gap-2 items-center">
           <span class="font-medium text-gray-700">"Details:"</span>
@@ -252,85 +252,85 @@ fn FretRangeSelection(
   show_fret_range_modal: RwSignal<bool>,
   show_root_note_modal: RwSignal<bool>,
   show_scale_type_modal: RwSignal<bool>,
+  active_min_fret: u8,
+  active_max_fret: u8,
   on_exercise_update: Callback<Exercise>,
 ) -> impl IntoView {
   view! {
-    {exercise
-      .get()
-      .exercise_type
-      .get_fret_range()
-      .map(|(min, max)| {
-        let fret_range = RwSignal::new((min, max));
-        let min_fret = move || fret_range.get().0;
-        let max_fret = move || fret_range.get().1;
+    <div class="flex relative gap-2 items-center">
+      <span class="font-medium text-gray-700">"Frets:"</span>
+      <button
+        class="py-1 px-2 text-xs font-medium text-orange-800 bg-orange-100 rounded transition-colors cursor-pointer hover:bg-orange-200"
+        on:click=move |_| {
+          show_root_note_modal.set(false);
+          show_scale_type_modal.set(false);
+          show_fret_range_modal.set(!show_fret_range_modal.get());
+        }
+        title="Click to change fret range"
+      >
+        {active_min_fret}
+        {"-"}
+        {active_max_fret}
+      </button>
 
-        view! {
-          <div class="flex relative gap-2 items-center">
-            <span class="font-medium text-gray-700">"Frets:"</span>
-            <button
-              class="py-1 px-2 text-xs font-medium text-orange-800 bg-orange-100 rounded transition-colors cursor-pointer hover:bg-orange-200"
-              on:click=move |_| {
-                show_root_note_modal.set(false);
-                show_scale_type_modal.set(false);
-                show_fret_range_modal.set(!show_fret_range_modal.get());
-              }
-              title="Click to change fret range"
-            >
-              {format!("{min}-{max}")}
-            </button>
+      // Fret range dropdown
+      <Show when=move || {
+        show_fret_range_modal.get()
+      }>
+        {
+          let fret_range = RwSignal::new((active_min_fret, active_max_fret));
+          let min_fret = move || fret_range.get().0;
+          let max_fret = move || fret_range.get().1;
+          view! {
+            <div class="absolute left-0 top-full z-10 p-2 mt-1 bg-white rounded-lg border border-gray-300 shadow-lg min-w-[200px]">
+              <h4 class="text-sm font-semibold">"Set Fret Range"</h4>
 
-            // Fret range dropdown
-            <Show when=move || show_fret_range_modal.get()>
-              <div class="absolute left-0 top-full z-10 p-4 mt-1 bg-white rounded-lg border border-gray-300 shadow-lg min-w-[200px]">
-                <h4 class="mb-2 text-sm font-semibold">"Set Fret Range"</h4>
-
-                // Fret range
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div>
-                    <label class="block mb-1 text-sm font-medium text-gray-700">Min Fret</label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="24"
-                      class="py-2 px-3 w-full rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                      prop:value=move || min_fret().to_string()
-                      on:input=move |e| {
-                        if let Ok(val) = event_target_value(&e).parse::<u8>() {
-                          fret_range.set((val, max_fret()));
-                        }
+              // Fret range
+              <div class="flex flex-row gap-2 justify-center items-center">
+                <div>
+                  <label class="block mx-1 mb-1 text-sm font-medium text-gray-700">Min Fret</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="24"
+                    class="rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    prop:value=move || min_fret().to_string()
+                    on:input=move |e| {
+                      if let Ok(val) = event_target_value(&e).parse::<u8>() {
+                        fret_range.set((val, max_fret()));
                       }
-                    />
-                  </div>
-                  <div>
-                    <label class="block mb-1 text-sm font-medium text-gray-700">Max Fret</label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="24"
-                      class="py-2 px-3 w-full rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                      prop:value=move || max_fret().to_string()
-                      on:input=move |e| {
-                        if let Ok(val) = event_target_value(&e).parse::<u8>() {
-                          fret_range.set((min_fret(), val.min(MAX_FRETS as u8)));
-                        }
-                      }
-                    />
-                  </div>
+                    }
+                  />
                 </div>
+                <div>
+                  <label class="block mx-1 mb-1 text-sm font-medium text-gray-700">Max Fret</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="24"
+                    class="rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    prop:value=move || max_fret().to_string()
+                    on:input=move |e| {
+                      if let Ok(val) = event_target_value(&e).parse::<u8>() {
+                        fret_range.set((min_fret(), val.min(MAX_FRETS as u8)));
+                      }
+                    }
+                  />
+                </div>
+              </div>
 
+              <div>
                 <PositionPresetButtons on_preset_select=move |min, max| {
                   fret_range.set((min, max));
                 } />
+              </div>
+              <div class="flex justify-center items-center">
                 <button
                   class="py-1 px-3 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700"
                   on:click=move |_| {
-                    on_exercise_update
-                      .run({
-                        let mut exercise = exercise.get().clone();
-                        exercise.exercise_type.set_fret_range(fret_range.get());
-                        exercise
-                      });
-                    show_fret_range_modal.set(false);
+                    let mut exercise = exercise.get().clone();
+                    exercise.exercise_type.set_fret_range(fret_range.get());
+                    on_exercise_update.run(exercise);
                   }
                 >
                   "Apply"
@@ -342,9 +342,10 @@ fn FretRangeSelection(
                   "Close"
                 </button>
               </div>
-            </Show>
-          </div>
+            </div>
+          }
         }
-      })}
+      </Show>
+    </div>
   }
 }
