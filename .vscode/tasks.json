@@ -2,10 +2,12 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "🎸 Dev: Start Both (Frontend + Backend)",
+			"label": "🎸 Dev: Start dev server",
 			"type": "shell",
-			"command": "./x",
-			"args": ["dev"],
+			"command": "./dev",
+			"args": [
+				"dev"
+			],
 			"group": {
 				"kind": "build",
 				"isDefault": true
@@ -21,42 +23,12 @@
 			}
 		},
 		{
-			"label": "🎨 Frontend: Start Dev Server",
-			"type": "shell",
-			"command": "./x",
-			"args": ["frontend"],
-			"group": "build",
-			"isBackground": true,
-			"presentation": {
-				"echo": true,
-				"reveal": "always",
-				"focus": false,
-				"panel": "dedicated",
-				"showReuseMessage": true,
-				"clear": false
-			}
-		},
-		{
-			"label": "🔧 Backend: Start API Server",
-			"type": "shell",
-			"command": "./x",
-			"args": ["backend"],
-			"group": "build",
-			"isBackground": true,
-			"presentation": {
-				"echo": true,
-				"reveal": "always",
-				"focus": false,
-				"panel": "dedicated",
-				"showReuseMessage": true,
-				"clear": false
-			}
-		},
-		{
 			"label": "🧪 Test: All Workspaces",
 			"type": "shell",
-			"command": "./x",
-			"args": ["test"],
+			"command": "cargo",
+			"args": [
+				"test"
+			],
 			"group": "test",
 			"presentation": {
 				"echo": true,
@@ -70,8 +42,10 @@
 		{
 			"label": "🔍 Check: All Workspaces",
 			"type": "shell",
-			"command": "./x",
-			"args": ["check"],
+			"command": "cargo",
+			"args": [
+				"check"
+			],
 			"group": "build",
 			"presentation": {
 				"echo": true,
@@ -85,8 +59,10 @@
 		{
 			"label": "🔍 Lint: All Workspaces (Clippy)",
 			"type": "shell",
-			"command": "./x",
-			"args": ["lint"],
+			"command": "cargo",
+			"args": [
+				"clippy"
+			],
 			"group": "build",
 			"presentation": {
 				"echo": true,
@@ -100,8 +76,10 @@
 		{
 			"label": "🏗️ Build: Frontend Production",
 			"type": "shell",
-			"command": "./x",
-			"args": ["build"],
+			"command": "cargo",
+			"args": [
+				"build"
+			],
 			"group": "build",
 			"presentation": {
 				"echo": true,
