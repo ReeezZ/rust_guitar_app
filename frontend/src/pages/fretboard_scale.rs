@@ -132,9 +132,9 @@ pub fn FretboardScalePage() -> impl IntoView {
           <button
             class="py-2 px-4 text-white bg-purple-500 rounded hover:bg-purple-600"
             on:click=move |_| {
-              update_scale(Scale::new(Note::E, ScaleType::Hepatonic(HeptaScaleType::Major)));
               start_fret.set(0);
               end_fret.set(10);
+              update_scale(Scale::new(Note::E, ScaleType::Hepatonic(HeptaScaleType::Major)));
             }
           >
             "Open strings only"
