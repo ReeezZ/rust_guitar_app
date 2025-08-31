@@ -1,24 +1,9 @@
-[package]
-name = "rust_guitar_app"
-version = "0.1.0"
-edition = "2021"
+[workspace]
+members = ["shared", "backend", "frontend", "xtask"]
+resolver = "2"
 
-[target.wasm32-unknown-unknown]
-rustflags = "--cfg getrandom_backend=\"wasm_js\""
-
-[dependencies]
-console_error_panic_hook = "0.1.7"
-web-sys = { version = "0.3", features = ["console"] }
-leptos = { version = "0.7.7", features = ["csr"] }
-leptos_meta = { version = "0.7" }
-leptos_router = { version = "0.7" }
-leptos-use = "0.15.6"
-codee = "0.2.0"
-rand = "0.9.0"
-getrandom = { version = "0.3.1", features = ["wasm_js"] }
-strum = "0.27.1"
-strum_macros = "0.27.1"
-
-[[example]]
-name = "playground"
-path = "example/playground.rs"
+[workspace.dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.10", features = ["v4", "serde", "js"] }
+tokio = { version = "1.0", features = ["full"] }

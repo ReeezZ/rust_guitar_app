@@ -14,17 +14,14 @@ RUN apt-get update && apt-get install -y \
 # Update Rust to latest stable version
 RUN rustup update stable && rustup default stable
 
-# Install rustfmt for code formatting
-RUN rustup component add rustfmt rust-src
+# Install rustfmt for code formatting and clippy for linting
+RUN rustup component add rustfmt rust-src clippy
 
 # Install Rust WASM target
 RUN rustup target add wasm32-unknown-unknown
 
 # Install Trunk (WASM bundler), Leptosfmt (for formatting Leptos macros), and wasm-bindgen-cli
 RUN cargo install trunk leptosfmt wasm-bindgen-cli
-
-# Install Tailwind CSS IntelliSense (optional, for VS Code support)
-RUN npm install -g tailwindcss
 
 # Install Gemini CLI for AI assistance during development
 # NOTE: This is a dev container only - production builds use separate processes

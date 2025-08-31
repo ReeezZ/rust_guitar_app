@@ -21,7 +21,7 @@
 	],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "rustc --version && cargo --version && trunk --version",
+	"postCreateCommand": "rustc --version && cargo --version && trunk --version && npm install",
 
 	// Configure tool-specific properties.
 	"customizations": {
@@ -35,7 +35,8 @@
 				"GitHub.copilot-chat",
 				"tamasfe.even-better-toml",
 				"mhutchie.git-graph",
-				"donjayamanne.githistory"
+				"donjayamanne.githistory",
+				"GitHub.vscode-pull-request-github"
 			]
 		}
 	},

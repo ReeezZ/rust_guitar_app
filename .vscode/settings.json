@@ -28,4 +28,31 @@
     "strings": true
   },
   "css.validate": false,
+  "chat.tools.terminal.autoApprove": {
+    "del": false,
+    "eval": false,
+    "chmod": false,
+    "chown": false,
+    "rmdir": false,
+    "/^Remove-Item\\b/i": false, // PowerShell remove alias
+    // --- External network commands denied ---
+    "curl": false,
+    "wget": false,
+    // --- Approved Commands (using more specific strings and cleaner regex) ---
+    "kill": true,
+    "rm": true,
+    "cd": true, // Use simple string for higher priority
+    "mv": true,
+    "cp": true,
+    "ls": true,
+    "cat": true,
+    "find": true,
+    "cargo check": true,
+    "cargo run": true,
+    "cargo build": true,
+    // --- Use a single regex for related, safe commands ---
+    "/^git (status|diff|show|log)/": true,
+    "/^cargo (test|clippy|check)/": true,
+    "./x": true
+  }
 }

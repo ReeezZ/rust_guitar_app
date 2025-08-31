@@ -1,0 +1,35 @@
+[package]
+name = "frontend"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+shared = { path = "../shared", features = ["wasm", "leptos"] }
+
+console_error_panic_hook = "0.1.7"
+web-sys = { version = "0.3", features = [
+  "console", 
+  "Storage", 
+  "Window",
+  "AudioContext",
+  "AudioContextState",
+  "OscillatorNode",
+  "GainNode",
+  "AudioNode",
+  "AudioParam",
+  "AudioDestinationNode",
+  "OscillatorType"
+] }
+js-sys = "0.3"
+leptos = { version = "0.7.7", features = ["csr"] }
+leptos_meta = { version = "0.7" }
+leptos_router = { version = "0.7" }
+leptos-use = "0.15.10"
+codee = "0.3.2"
+rand = "0.9.0"
+getrandom = { version = "0.3.1", features = ["wasm_js"] }
+strum = "0.27.1"
+strum_macros = "0.27.1"
+wasm-bindgen = "0.2"
+serde = { workspace = true }
+serde_json = { workspace = true }
