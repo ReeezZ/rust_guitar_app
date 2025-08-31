@@ -4,10 +4,8 @@ use leptos::wasm_bindgen::JsCast;
 /// Component for selecting a fret range with two sliders
 #[component]
 pub fn FretRangeSelector(
-  /// The range signal to update
-  #[prop(into)]
-  start_fret: RwSignal<usize>,
-  end_fret: RwSignal<usize>,
+  #[prop(into)] start_fret: Signal<usize>,
+  #[prop(into)] end_fret: Signal<usize>,
   /// Label for the control
   label: &'static str,
   /// Minimum possible fret value
@@ -16,19 +14,11 @@ pub fn FretRangeSelector(
   /// Maximum possible fret value  
   #[prop(optional)]
   max: Option<usize>,
+  #[prop(into)] on_start_fret_change: Callback<usize>,
+  #[prop(into)] on_end_fret_change: Callback<usize>,
 ) -> impl IntoView {
   let min_fret = min.unwrap_or(0);
   let max_fret = max.unwrap_or(22);
-
-  // Update the range when either slider changes
-  let update_range = move || {
-    let start = start_fret.get();
-    let end = end_fret.get();
-    if start <= end {
-      start_fret.set(start);
-      end_fret.set(end);
-    }
-  };
 
   // Sync individual signals with the range signal changes from outside
   Effect::new(move |_| {
@@ -36,10 +26,10 @@ pub fn FretRangeSelector(
     let new_end = end_fret.get();
 
     if start_fret.get_untracked() != new_start {
-      start_fret.set(new_start);
+      on_start_fret_change.run(new_start);
     }
     if end_fret.get_untracked() != new_end {
-      end_fret.set(new_end);
+      on_end_fret_change.run(new_end);
     }
   });
 
@@ -80,8 +70,7 @@ pub fn FretRangeSelector(
             let input: web_sys::HtmlInputElement = target.dyn_into().unwrap();
             if let Ok(val) = input.value().parse::<usize>() {
               if val <= end_fret.get_untracked() {
-                start_fret.set(val);
-                update_range();
+                on_start_fret_change.run(val);
               }
             }
           }
@@ -102,8 +91,7 @@ pub fn FretRangeSelector(
             let input: web_sys::HtmlInputElement = target.dyn_into().unwrap();
             if let Ok(val) = input.value().parse::<usize>() {
               if val >= start_fret.get_untracked() {
-                end_fret.set(val);
-                update_range();
+                on_end_fret_change.run(val);
               }
             }
           }
