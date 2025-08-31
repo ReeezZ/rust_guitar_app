@@ -28,17 +28,20 @@ The `./x` script makes development easy:
 
 **VS Code Integration:** Use `Ctrl+Shift+P` → "Tasks: Run Task" → pick a task
 
-## 🏗️ Architecture
+## Folder structure
 
 **4-crate workspace** with clean separation:
 - `shared/` - Domain models (exercises, music theory)
-- `backend/` - Axum REST API with CRUD endpoints  
+- `backend/` - Axum REST API with CRUD endpoints
+  - Mostly a placeholder for now
 - `frontend/` - Leptos WASM app with SVG fretboard
 - `xtask/` - Cross-platform development automation
 
 ### Current Features
 
 - **Exercise Management** - Create, edit, and organize practice exercises
+  - To be changed, exercises like scales should not need to created manually
+  - Maybe something like generate the exercise id of those from their configuration
 - **SVG Fretboard System** - Scalable and interactive fretboard display
 - **Scale Visualization** - Display scales with different note highlighting  
 - **Configurable** - Support for different instruments and fret ranges
@@ -48,9 +51,8 @@ The `./x` script makes development easy:
 ## 🎯 What's Next
 
 **Frontend ↔ Backend Integration**
-- HTTP client integration
-- Seamless API communication with localStorage fallback
-- Real-time exercise synchronization
+
+- Read how to do this properly in the [Leptos Book](https://book.leptos.dev/ssr/21_cargo_leptos.html).
 
 
 ### Future Ideas
@@ -101,6 +103,8 @@ cd rust_guitar_app
 
 ## How xtask Works
 
+TODO: we should probably change this. There is `cargo-leptos` [book](https://book.leptos.dev/ssr/21_cargo_leptos.html) which seems to do exactly what our build tool is supposed to do.
+
 The `./x` script is a simple wrapper around our custom xtask runner:
 
 ```bash
@@ -108,16 +112,10 @@ The `./x` script is a simple wrapper around our custom xtask runner:
 ./x dev  →  cargo run --package xtask -- dev
 ```
 
-**Benefits:**
-- ✅ **Cross-platform** - Works on Windows, Linux, macOS
-- ✅ **Type-safe** - Written in Rust, fully debuggable  
-- ✅ **Coordinated startup** - Backend starts first, then frontend
-- ✅ **Proper cleanup** - Ctrl+C stops both services cleanly
-
 **Architecture:**
 - `xtask/` crate handles all development automation
 - Services coordinate startup timing and shutdown
-- VS Code tasks integrate seamlessly
+- VS Code tasks for calling xtask
 - No shell script brittleness
 
 **Development Workflow:**
@@ -127,6 +125,10 @@ The `./x` script is a simple wrapper around our custom xtask runner:
 - Use `cargo clippy` for linting
 
 **Project Structure:**
+
+This is likely to be changed. I should read further into [leptos server side rendering](https://book.leptos.dev/ssr/21_cargo_leptos.html) and then choose a structure.
+
+
 ```
 rust_guitar_app/
 ├── shared/      # Domain models & music theory
