@@ -96,7 +96,7 @@ pub fn NavbarLinks() -> impl IntoView {
 #[component]
 pub fn Navbar() -> impl IntoView {
   view! {
-    <div class="navbar">
+    <div class="z-50 navbar">
       <NavbarLinks />
       <ThemeToggle />
     </div>
