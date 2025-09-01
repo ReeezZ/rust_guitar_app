@@ -21,7 +21,7 @@ RUN rustup component add rustfmt rust-src clippy
 RUN rustup target add wasm32-unknown-unknown
 
 # Install Trunk (WASM bundler), Leptosfmt (for formatting Leptos macros), and wasm-bindgen-cli
-RUN cargo install trunk leptosfmt wasm-bindgen-cli
+RUN cargo install cargo-leptos trunk leptosfmt wasm-bindgen-cli
 
 # Install Gemini CLI for AI assistance during development
 # NOTE: This is a dev container only - production builds use separate processes
