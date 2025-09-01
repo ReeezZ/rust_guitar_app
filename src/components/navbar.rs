@@ -5,8 +5,24 @@ use leptos_use::storage::use_local_storage;
 
 #[component]
 pub fn ThemeToggle() -> impl IntoView {
-  let (is_dark, set_is_dark, _remove_is_dark) =
-    use_local_storage::<bool, FromToStringCodec>("is_dark");
+  // Create signals that work on both server and client
+  let (is_dark, set_is_dark) = signal(false);
+
+  // Use Effect to access localStorage only on the client
+  Effect::new(move |_| {
+    // This only runs on the client (browser)
+    let (stored_is_dark, set_stored_is_dark, _remove_stored_is_dark) =
+      use_local_storage::<bool, FromToStringCodec>("is_dark");
+
+    // Sync with stored value on initial load
+    set_is_dark.set(stored_is_dark.get_untracked());
+
+    // Create a separate effect to watch for changes and persist them
+    Effect::new(move |_| {
+      let current_dark = is_dark.get();
+      set_stored_is_dark.set(current_dark);
+    });
+  });
 
   view! {
     <label class="switch" style="float: right; margin-right: 1rem">

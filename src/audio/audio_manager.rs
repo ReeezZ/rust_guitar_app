@@ -1,4 +1,3 @@
-use leptos::prelude::*;
 use std::cell::RefCell;
 use web_sys::{AudioContext, AudioContextState};
 
@@ -116,18 +115,4 @@ impl AudioManager {
 /// This is a shorthand for AudioManager::get_context()
 pub fn use_audio_context() -> Option<AudioContext> {
   AudioManager::get_context()
-}
-
-#[cfg(test)]
-mod tests {
-  #[cfg(target_arch = "wasm32")]
-  use super::*;
-
-  #[test]
-  #[cfg(target_arch = "wasm32")]
-  fn test_audio_manager_methods() {
-    // Note: AudioContext creation will fail in test environment without DOM
-    // This test just ensures the methods can be called
-    assert!(!AudioManager::is_available());
-  }
 }

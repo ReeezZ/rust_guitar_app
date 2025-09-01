@@ -11,6 +11,25 @@ use crate::{
     not_found::NotFound,
   },
 };
+
+pub fn shell(options: LeptosOptions) -> impl IntoView {
+  view! {
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <AutoReload options=options.clone() />
+        <HydrationScripts options />
+        <MetaTags />
+      </head>
+      <body>
+        <App />
+      </body>
+    </html>
+  }
+}
+
 #[component]
 pub fn App() -> impl IntoView {
   provide_meta_context();
@@ -18,8 +37,6 @@ pub fn App() -> impl IntoView {
   view! {
     <Html attr:lang="en" attr:dir="ltr" />
     <Title text="♫ Rust Guitar App ♫" />
-
-    <Meta charset="UTF-8" />
     <Meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <Router>
