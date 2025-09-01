@@ -17,8 +17,10 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
     <!DOCTYPE html>
     <html lang="en">
       <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <Stylesheet href="/styles/tailwind.css" />
+        <Link rel="icon" href="/assets/guitar.ico" />
+        <Meta charset="utf-8" />
+        <Meta name="viewport" content="width=device-width, initial-scale=1" />
         <AutoReload options=options.clone() />
         <HydrationScripts options />
         <MetaTags />
@@ -35,11 +37,8 @@ pub fn App() -> impl IntoView {
   provide_meta_context();
 
   view! {
-    <Html attr:lang="en" attr:dir="ltr" />
-    <Title text="♫ Rust Guitar App ♫" />
-    <Meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <Router>
+      <Title text="♫ Rust Guitar App ♫" />
       <Navbar />
       <main>
         <Routes fallback=|| view! { <NotFound /> }>
