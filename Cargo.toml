@@ -124,7 +124,7 @@ lib-profile-release = "wasm-release"
 # The tailwind input file.
 #
 # Optional, Activates the tailwind build
-tailwind-input-file = "public/styles/tailwind.css"
+tailwind-input-file = "input.css"
 
 # The tailwind config file.
 #

@@ -1,4 +1,7 @@
-@tailwind base;
+@import "tailwindcss";
+
+
+/* @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -82,8 +85,6 @@ button {
   text-align: center;
   margin: 2rem;
 }
-
-/* Rounded sliders */
 
 .switch {
   position: relative;
@@ -230,4 +231,5 @@ li {
 
 .trapezoid .tilt:nth-child(6) {
   transform: rotate(0.65deg);
-}
+} 
+*/

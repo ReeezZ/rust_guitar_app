@@ -17,12 +17,12 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
     <!DOCTYPE html>
     <html lang="en">
       <head>
-        <Stylesheet href="/styles/tailwind.css" />
         <Link rel="icon" href="/assets/guitar.ico" />
         <Meta charset="utf-8" />
         <Meta name="viewport" content="width=device-width, initial-scale=1" />
         <AutoReload options=options.clone() />
         <HydrationScripts options />
+        <link rel="stylesheet" id="leptos" href="/styles/output.css" />
         <MetaTags />
       </head>
       <body>
