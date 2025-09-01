@@ -1,3 +1,6 @@
+// TODO ignore warnings in this file until implemented
+#![allow(unused)]
+
 use crate::models::exercise::Exercise;
 
 /// Error types for repository operations
@@ -58,29 +61,35 @@ impl Default for LocalStorageExerciseRepository {
 
 impl ExerciseRepository for LocalStorageExerciseRepository {
   fn save(&self, exercise: &Exercise) -> Result<(), RepositoryError> {
-    crate::models::storage::save_exercise(exercise).map_err(RepositoryError::ValidationError)
+    // crate::models::storage::save_exercise(exercise).map_err(RepositoryError::ValidationError)
+    todo!()
   }
 
   fn update(&self, exercise: &Exercise) -> Result<(), RepositoryError> {
-    crate::models::storage::update_exercise(exercise).map_err(RepositoryError::ValidationError)
+    // crate::models::storage::update_exercise(exercise).map_err(RepositoryError::ValidationError)
+    todo!()
   }
 
   fn delete(&self, id: &str) -> Result<(), RepositoryError> {
-    crate::models::storage::delete_exercise(id).map_err(RepositoryError::ValidationError)
+    // crate::models::storage::delete_exercise(id).map_err(RepositoryError::ValidationError)
+    todo!()
   }
 
   fn find_by_id(&self, id: &str) -> Result<Option<Exercise>, RepositoryError> {
-    Ok(crate::models::storage::load_exercise_by_id(id))
+    // Ok(crate::models::storage::load_exercise_by_id(id))
+    todo!()
   }
 
   fn find_all(&self) -> Result<Vec<Exercise>, RepositoryError> {
-    Ok(crate::models::storage::load_exercises())
+    // Ok(crate::models::storage::load_exercises())
+    todo!()
   }
 
   fn name_exists(&self, name: &str, exclude_id: Option<&str>) -> Result<bool, RepositoryError> {
-    Ok(crate::models::storage::exercise_name_exists(
-      name, exclude_id,
-    ))
+    // Ok(crate::models::storage::exercise_name_exists(
+    //   name, exclude_id,
+    // ))
+    todo!()
   }
 }
 
