@@ -17,7 +17,7 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
     <!DOCTYPE html>
     <html lang="en">
       <head>
-        <Link rel="icon" href="/assets/guitar.ico" />
+        <Link rel="icon" href="/favicon.ico" />
         <Meta charset="utf-8" />
         <Meta name="viewport" content="width=device-width, initial-scale=1" />
         <AutoReload options=options.clone() />
