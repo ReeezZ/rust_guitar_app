@@ -6,14 +6,12 @@ A guitar learning companion built with **Rust**, **Leptos**, and **Axum** (to be
 
 ## 📋 Development Commands
 
-The `./x` script makes development easy:
-
 ```bash
-./dev           # Start dev server
-cargo test      # Run all tests
-cargo check     # Code quality checks
-cargo build     # Production build
-cargo clippy    # linting
+cargo leptos watch  # Start dev server
+cargo test          # Run all tests
+cargo check         # Code quality checks
+cargo build         # Production build
+cargo clippy        # linting
 ```
 
 **VS Code Integration:** Use `Ctrl+Shift+P` → "Tasks: Run Task" → pick a task
@@ -73,19 +71,19 @@ Interactive circle of fifths with drag & drop exercises:
 1. Install VS Code + Docker + Dev Containers extension
 2. Clone repo and open in VS Code
 3. `Ctrl+Shift+P` → "Dev Containers: Rebuild and Reopen in Container"
-4. Run `./x dev`
+4. Run `cargo leptos watch`
 
 ### Option 2: Manual Setup
 ```bash
 # Install Rust + tools
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 rustup target add wasm32-unknown-unknown
-cargo install trunk
+cargo install cargo-leptos
 
 # Clone and run
 git clone https://github.com/ReeezZ/rust_guitar_app.git
 cd rust_guitar_app
-./dev
+cargo leptos watch
 ```
 
 ## 📚 References & Inspiration
