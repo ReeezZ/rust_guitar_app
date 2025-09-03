@@ -6,6 +6,7 @@
       "server"
     ],
   },
+  "rust-analyzer.cargo.features": "all",
   "rust-analyzer.rustfmt.overrideCommand": [
     "leptosfmt",
     "--stdin",
@@ -53,6 +54,5 @@
     // --- Use a single regex for related, safe commands ---
     "/^git (status|diff|show|log)/": true,
     "/^cargo (test|clippy|check)/": true,
-    "./x": true
   }
 }

@@ -1,43 +1,23 @@
 # 🎸 Rust Guitar Practice App
 
-A guitar learning companion built with **Rust**, **Leptos**, and **Axum** (to be implemented). Features interactive SVG fretboard visualization, practice exercises (working PoC), session tracking (in development).
+A guitar learning companion built with **Rust**, **Leptos** (ssr with axum). Features interactive SVG fretboard visualization, practice exercises (working PoC), session tracking (in development).
 
-## 🚀 Quick Start
-
-**One command to rule them all:**
-```bash
-./x dev
-```
-
-That's it! Your app will be running at:
-- 🎨 **Frontend**: http://127.0.0.1:3010  
-- 🔧 **Backend API**: http://127.0.0.1:8080
+## Quick Start
 
 ## 📋 Development Commands
 
-The `./x` script makes development easy:
-
 ```bash
-./x dev       # Start both frontend + backend
-./x frontend  # Frontend only (Leptos/WASM)
-./x backend   # Backend only (Axum API)
-./x test      # Run all tests
-./x check     # Code quality checks
-./x build     # Production build
+cargo leptos watch  # Start dev server
+cargo test          # Run all tests
+cargo check         # Code quality checks
+cargo build         # Production build
+cargo clippy        # linting
 ```
 
 **VS Code Integration:** Use `Ctrl+Shift+P` → "Tasks: Run Task" → pick a task
 
-## Folder structure
 
-**4-crate workspace** with clean separation:
-- `shared/` - Domain models (exercises, music theory)
-- `backend/` - Axum REST API with CRUD endpoints
-  - Mostly a placeholder for now
-- `frontend/` - Leptos WASM app with SVG fretboard
-- `xtask/` - Cross-platform development automation
-
-### Current Features
+## Current Features
 
 - **Exercise Management** - Create, edit, and organize practice exercises
   - To be changed, exercises like scales should not need to created manually
@@ -52,7 +32,28 @@ The `./x` script makes development easy:
 
 **Frontend ↔ Backend Integration**
 
-- Read how to do this properly in the [Leptos Book](https://book.leptos.dev/ssr/21_cargo_leptos.html).
+- Fix the exercises page. The storage currently just panics with a todo.
+- Get exercises tracking working.
+- Change how we select exercises
+  - Scales must not be created, they can just be selected
+  - First goal: support scales and songs for selection and tracking
+  - Get tracking for both working
+  - Song
+    - Title
+    - Maybe features/milestones like
+      - with singing
+      - with backing track or playing alone
+      - freeform or with metronome
+    - as opposed to scales, these things have to be created and saved and then have to be loaded into an exercise
+  - Display previously practiced songs/exercises
+  
+
+
+- For long term mobile compatibility (sending notifications for practice reminder) a pwa should work with ssr (hopefully) 
+  - Should do a more thorough analysis at some point of this
+  - Alternatives are csr with tauri
+    - but then we'd have to switch back to csr :/
+  - or switching entirely to dioxus 
 
 
 ### Future Ideas
@@ -86,56 +87,27 @@ Interactive circle of fifths with drag & drop exercises:
 1. Install VS Code + Docker + Dev Containers extension
 2. Clone repo and open in VS Code
 3. `Ctrl+Shift+P` → "Dev Containers: Rebuild and Reopen in Container"
-4. Run `./x dev`
+4. Run `cargo leptos watch`
 
 ### Option 2: Manual Setup
+
+**Prerequisites**
+
+- Node
+- Rust + Cargo
+
 ```bash
-# Install Rust + tools
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+# Install dependencies
+
+rustup component add rustfmt rust-src clippy
 rustup target add wasm32-unknown-unknown
-cargo install trunk
+# https://book.leptos.dev/ssr/21_cargo_leptos.html
+cargo install --locked cargo-leptos
+# https://book.leptos.dev/getting_started/leptos_dx.html#4-set-up-leptosfmt-optional
+cargo install leptosfmt
 
-# Clone and run
-git clone https://github.com/ReeezZ/rust_guitar_app.git
-cd rust_guitar_app
-./x dev
-```
-
-## How xtask Works
-
-TODO: we should probably change this. There is `cargo-leptos` [book](https://book.leptos.dev/ssr/21_cargo_leptos.html) which seems to do exactly what our build tool is supposed to do.
-
-The `./x` script is a simple wrapper around our custom xtask runner:
-
-```bash
-# What ./x does internally:
-./x dev  →  cargo run --package xtask -- dev
-```
-
-**Architecture:**
-- `xtask/` crate handles all development automation
-- Services coordinate startup timing and shutdown
-- VS Code tasks for calling xtask
-- No shell script brittleness
-
-**Development Workflow:**
-- Make changes → auto-reload in browser
-- Run `./x test` before committing
-- Follow Rust formatting (`cargo fmt`)
-- Use `cargo clippy` for linting
-
-**Project Structure:**
-
-This is likely to be changed. I should read further into [leptos server side rendering](https://book.leptos.dev/ssr/21_cargo_leptos.html) and then choose a structure.
-
-
-```
-rust_guitar_app/
-├── shared/      # Domain models & music theory
-├── backend/     # Axum REST API server
-├── frontend/    # Leptos WASM frontend  
-├── xtask/       # Development automation
-└── x            # Quick command wrapper
+# run
+cargo leptos watch
 ```
 
 ## 📚 References & Inspiration

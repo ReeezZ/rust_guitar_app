@@ -2,115 +2,29 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "🎸 Dev: Start Both (Frontend + Backend)",
+			"label": "🎸 Dev: Start dev server (cargo leptos watch)",
 			"type": "shell",
-			"command": "./x",
-			"args": ["dev"],
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
-			"isBackground": true,
-			"presentation": {
-				"echo": true,
-				"reveal": "always",
-				"focus": false,
-				"panel": "shared",
-				"showReuseMessage": true,
-				"clear": false
-			}
+			"command": "cargo leptos watch",
 		},
 		{
-			"label": "🎨 Frontend: Start Dev Server",
+			"label": "🧪 cargo test",
 			"type": "shell",
-			"command": "./x",
-			"args": ["frontend"],
-			"group": "build",
-			"isBackground": true,
-			"presentation": {
-				"echo": true,
-				"reveal": "always",
-				"focus": false,
-				"panel": "dedicated",
-				"showReuseMessage": true,
-				"clear": false
-			}
+			"command": "cargo test"
 		},
 		{
-			"label": "🔧 Backend: Start API Server",
+			"label": "🔍 cargo check",
 			"type": "shell",
-			"command": "./x",
-			"args": ["backend"],
-			"group": "build",
-			"isBackground": true,
-			"presentation": {
-				"echo": true,
-				"reveal": "always",
-				"focus": false,
-				"panel": "dedicated",
-				"showReuseMessage": true,
-				"clear": false
-			}
+			"command": "cargo check",
 		},
 		{
-			"label": "🧪 Test: All Workspaces",
+			"label": "🔍 Lint: cargo clippy",
 			"type": "shell",
-			"command": "./x",
-			"args": ["test"],
-			"group": "test",
-			"presentation": {
-				"echo": true,
-				"reveal": "always",
-				"focus": false,
-				"panel": "shared",
-				"showReuseMessage": true,
-				"clear": false
-			}
+			"command": "cargo clippy",
 		},
 		{
-			"label": "🔍 Check: All Workspaces",
+			"label": "🏗️ cargo build",
 			"type": "shell",
-			"command": "./x",
-			"args": ["check"],
-			"group": "build",
-			"presentation": {
-				"echo": true,
-				"reveal": "always",
-				"focus": false,
-				"panel": "shared",
-				"showReuseMessage": true,
-				"clear": false
-			}
-		},
-		{
-			"label": "🔍 Lint: All Workspaces (Clippy)",
-			"type": "shell",
-			"command": "./x",
-			"args": ["lint"],
-			"group": "build",
-			"presentation": {
-				"echo": true,
-				"reveal": "always",
-				"focus": false,
-				"panel": "shared",
-				"showReuseMessage": true,
-				"clear": false
-			}
-		},
-		{
-			"label": "🏗️ Build: Frontend Production",
-			"type": "shell",
-			"command": "./x",
-			"args": ["build"],
-			"group": "build",
-			"presentation": {
-				"echo": true,
-				"reveal": "always",
-				"focus": false,
-				"panel": "shared",
-				"showReuseMessage": true,
-				"clear": false
-			}
+			"command": "cargo build",
 		}
 	]
 }

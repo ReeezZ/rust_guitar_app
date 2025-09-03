@@ -1,0 +1,351 @@
+use crate::{
+  components::{exercises::PositionPresetButtons, fretboard::base::MAX_FRETS},
+  models::exercise::Exercise,
+};
+use crate::{models::exercise::ExerciseType, music::notes::NoteExt, music::Note, music::ScaleType};
+use leptos::prelude::*;
+
+#[component]
+pub fn ConfigurationHeader(
+  exercise: Signal<Exercise>,
+  on_exercise_update: Callback<Exercise>,
+) -> impl IntoView {
+  // Modal states for exercise configuration
+  let show_root_note_modal = RwSignal::new(false);
+  let show_scale_type_modal = RwSignal::new(false);
+  let show_fret_range_modal = RwSignal::new(false);
+
+  view! {
+    <div class="p-3 mb-6 bg-gray-50 rounded-lg">
+      <div class="flex flex-wrap gap-4 items-center text-sm">
+        <div class="flex gap-2 items-center">
+          <span class="font-medium text-gray-700">"Type:"</span>
+          <span class="py-1 px-2 text-xs font-medium text-blue-800 bg-blue-100 rounded">
+            {exercise.get().exercise_type.type_name()}
+          </span>
+        </div>
+
+        {match exercise.get().exercise_type {
+          ExerciseType::Scale { root_note, scale_type, fret_range }
+          | ExerciseType::Triad { root_note, scale_type, fret_range } => {
+            view! {
+              <>
+                <RootNoteSelection
+                  root_note
+                  exercise
+                  show_fret_range_modal
+                  show_root_note_modal
+                  show_scale_type_modal
+                  on_exercise_update
+                />
+                <ScaleSelection
+                  exercise
+                  scale_type
+                  show_fret_range_modal
+                  show_root_note_modal
+                  show_scale_type_modal
+                  on_exercise_update
+                />
+                <FretRangeSelection
+                  exercise
+                  show_fret_range_modal
+                  show_root_note_modal
+                  show_scale_type_modal
+                  on_exercise_update
+                  active_min_fret=fret_range.0
+                  active_max_fret=fret_range.1
+                />
+              </>
+            }
+              .into_any()
+          }
+          _ => ().into_any(),
+        }}
+
+        <div class="flex gap-2 items-center">
+          <span class="font-medium text-gray-700">"Details:"</span>
+          <span class="text-xs text-gray-600">{exercise.get().exercise_type.to_string()}</span>
+        </div>
+
+      </div>
+    </div>
+  }
+}
+
+#[component]
+fn RootNoteSelection(
+  exercise: Signal<Exercise>,
+  show_root_note_modal: RwSignal<bool>,
+  show_scale_type_modal: RwSignal<bool>,
+  show_fret_range_modal: RwSignal<bool>,
+  on_exercise_update: Callback<Exercise>,
+  root_note: Note,
+) -> impl IntoView {
+  // Temporary selection state for root note modal
+  let temp_selected_note = RwSignal::new(None::<Note>);
+
+  let on_confirm_note_change = move || {
+    if let Some(selected_note) = temp_selected_note.get() {
+      temp_selected_note.set(Some(selected_note));
+      show_root_note_modal.set(false);
+      let mut exercise = exercise.get().clone();
+      exercise.exercise_type.set_root_note(selected_note);
+      on_exercise_update.run(exercise);
+    }
+  };
+
+  view! {
+    <div class="flex relative gap-2 items-center">
+      <span class="font-medium text-gray-700">"Root:"</span>
+      <button
+        class="py-1 px-2 text-xs font-medium text-indigo-800 bg-indigo-100 rounded transition-colors cursor-pointer hover:bg-indigo-200"
+        on:click=move |_| {
+          show_scale_type_modal.set(false);
+          show_fret_range_modal.set(false);
+          temp_selected_note.set(None);
+          show_root_note_modal.set(!show_root_note_modal.get());
+        }
+        title="Click to change root note"
+      >
+        {root_note.to_string()}
+      </button>
+
+      // Root note dropdown
+      <Show when=move || show_root_note_modal.get()>
+        <div class="absolute left-1/2 top-full z-10 mt-1 w-32 bg-white rounded-lg border border-gray-300 shadow-lg transform -translate-x-1/2">
+          <h4 class="mb-1 text-xs font-semibold text-center">"Root Note"</h4>
+          <div class="flex flex-col">
+            {move || {
+              Note::all_notes()
+                .iter()
+                .map(|&note| {
+                  let note_str = note.to_short_string();
+                  let is_root_note = note == root_note;
+                  let is_current_root = note == temp_selected_note.get().unwrap_or(root_note);
+
+                  view! {
+                    <button
+                      class=if is_current_root {
+                        "my-1 text-xs font-bold rounded border-2 border-indigo-600 bg-indigo-600 text-white transition-colors"
+                      } else if is_root_note {
+                        "my-1 text-xs font-bold rounded border-2 border-green-600 bg-green-600 text-white transition-colors"
+                      } else {
+                        "my-1 text-xs font-medium rounded border border-gray-300 bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+                      }
+                      on:click=move |_| {
+                        temp_selected_note.set(Some(note));
+                      }
+                    >
+                      {note_str}
+                    </button>
+                  }
+                })
+                .collect::<Vec<_>>()
+            }}
+          </div>
+
+          // Action buttons
+          <div class="flex flex-col justify-end mt-2">
+            <button
+              class="px-1 my-1 text-sm text-gray-800 bg-red-100 rounded transition-colors hover:bg-red-300"
+              on:click=move |_| {
+                temp_selected_note.set(None);
+                show_root_note_modal.set(false);
+              }
+            >
+              "Cancel"
+            </button>
+            <button
+              class="px-1 my-1 text-sm text-white bg-blue-600 rounded transition-colors hover:bg-blue-700 disabled:bg-gray-400"
+              disabled=move || temp_selected_note.get().is_none()
+              on:click=move |_| { on_confirm_note_change() }
+            >
+              "OK"
+            </button>
+          </div>
+        </div>
+      </Show>
+    </div>
+  }
+}
+
+#[component]
+fn ScaleSelection(
+  exercise: Signal<Exercise>,
+  show_root_note_modal: RwSignal<bool>,
+  show_fret_range_modal: RwSignal<bool>,
+  show_scale_type_modal: RwSignal<bool>,
+  on_exercise_update: Callback<Exercise>,
+  scale_type: ScaleType,
+) -> impl IntoView {
+  let temporary_selected_scale = RwSignal::new(scale_type);
+
+  view! {
+    <div class="flex relative gap-2 items-center">
+      <span class="font-medium text-gray-700">"Scale:"</span>
+      <button
+        class="py-1 px-2 text-xs font-medium text-purple-800 bg-purple-100 rounded transition-colors cursor-pointer hover:bg-purple-200"
+        on:click=move |_| {
+          show_root_note_modal.set(false);
+          show_fret_range_modal.set(false);
+          show_scale_type_modal.set(!show_scale_type_modal.get());
+        }
+        title="Click to change scale type"
+      >
+        {scale_type.to_string()}
+      </button>
+
+      // Scale type dropdown
+      <Show when=move || show_scale_type_modal.get()>
+        <div class="absolute left-0 top-full z-10 p-4 mt-1 bg-white rounded-lg border border-gray-300 shadow-lg min-w-[200px]">
+          <h4 class="mb-2 text-sm font-semibold">"Select Scale Type"</h4>
+          <For
+            each=move || ScaleType::all_scale_types()
+            key=|scale_type| scale_type.to_string()
+            let(button_scale_type)
+          >
+            <button
+              class=move || {
+                if button_scale_type == scale_type {
+                  "my-1 text-xs font-bold rounded border-2 border-purple-600 bg-purple-600 text-white transition-colors"
+                } else if button_scale_type == temporary_selected_scale.get() {
+                  "my-1 text-xs font-bold rounded border-2 border-blue-600 bg-blue-600 text-white transition-colors"
+                } else {
+                  "my-1 text-xs font-medium rounded border border-gray-300 bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+                }
+              }
+              on:click=move |_| {
+                temporary_selected_scale.set(button_scale_type);
+              }
+            >
+              {button_scale_type.to_string()}
+            </button>
+          </For>
+
+          <button
+            class="py-1 px-3 text-xs text-white bg-blue-600 rounded hover:bg-blue-700"
+            on:click=move |_| {
+              let mut exercise = exercise.get().clone();
+              exercise.exercise_type.set_scale_type(temporary_selected_scale.get());
+              show_scale_type_modal.set(false);
+              on_exercise_update.run(exercise);
+            }
+          >
+            "OK"
+          </button>
+
+          <button
+            class="px-1 my-1 text-sm text-gray-800 bg-red-100 rounded transition-colors hover:bg-red-300"
+            on:click=move |_| show_scale_type_modal.set(false)
+          >
+            "Cancel"
+          </button>
+        </div>
+      </Show>
+    </div>
+  }
+}
+
+#[component]
+fn FretRangeSelection(
+  exercise: Signal<Exercise>,
+  show_fret_range_modal: RwSignal<bool>,
+  show_root_note_modal: RwSignal<bool>,
+  show_scale_type_modal: RwSignal<bool>,
+  active_min_fret: u8,
+  active_max_fret: u8,
+  on_exercise_update: Callback<Exercise>,
+) -> impl IntoView {
+  view! {
+    <div class="flex relative gap-2 items-center">
+      <span class="font-medium text-gray-700">"Frets:"</span>
+      <button
+        class="py-1 px-2 text-xs font-medium text-orange-800 bg-orange-100 rounded transition-colors cursor-pointer hover:bg-orange-200"
+        on:click=move |_| {
+          show_root_note_modal.set(false);
+          show_scale_type_modal.set(false);
+          show_fret_range_modal.set(!show_fret_range_modal.get());
+        }
+        title="Click to change fret range"
+      >
+        {active_min_fret}
+        {"-"}
+        {active_max_fret}
+      </button>
+
+      // Fret range dropdown
+      <Show when=move || {
+        show_fret_range_modal.get()
+      }>
+        {
+          let fret_range = RwSignal::new((active_min_fret, active_max_fret));
+          let min_fret = move || fret_range.get().0;
+          let max_fret = move || fret_range.get().1;
+          view! {
+            <div class="absolute left-0 top-full z-10 p-2 mt-1 bg-white rounded-lg border border-gray-300 shadow-lg min-w-[200px]">
+              <h4 class="text-sm font-semibold">"Set Fret Range"</h4>
+
+              // Fret range
+              <div class="flex flex-row gap-2 justify-center items-center">
+                <div>
+                  <label class="block mx-1 mb-1 text-sm font-medium text-gray-700">Min Fret</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="24"
+                    class="rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    prop:value=move || min_fret().to_string()
+                    on:input=move |e| {
+                      if let Ok(val) = event_target_value(&e).parse::<u8>() {
+                        fret_range.set((val, max_fret()));
+                      }
+                    }
+                  />
+                </div>
+                <div>
+                  <label class="block mx-1 mb-1 text-sm font-medium text-gray-700">Max Fret</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="24"
+                    class="rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    prop:value=move || max_fret().to_string()
+                    on:input=move |e| {
+                      if let Ok(val) = event_target_value(&e).parse::<u8>() {
+                        fret_range.set((min_fret(), val.min(MAX_FRETS as u8)));
+                      }
+                    }
+                  />
+                </div>
+              </div>
+
+              <div>
+                <PositionPresetButtons on_preset_select=move |min, max| {
+                  fret_range.set((min, max));
+                } />
+              </div>
+              <div class="flex justify-center items-center">
+                <button
+                  class="py-1 px-3 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700"
+                  on:click=move |_| {
+                    let mut exercise = exercise.get().clone();
+                    exercise.exercise_type.set_fret_range(fret_range.get());
+                    on_exercise_update.run(exercise);
+                  }
+                >
+                  "Apply"
+                </button>
+                <button
+                  class="py-1 px-3 text-xs text-gray-600 bg-gray-200 rounded hover:bg-gray-300"
+                  on:click=move |_| show_fret_range_modal.set(false)
+                >
+                  "Close"
+                </button>
+              </div>
+            </div>
+          }
+        }
+      </Show>
+    </div>
+  }
+}

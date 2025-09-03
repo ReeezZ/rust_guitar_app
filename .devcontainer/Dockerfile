@@ -1,36 +1,21 @@
-# Use the official Rust devcontainer image as the base
 FROM mcr.microsoft.com/devcontainers/rust:1-1-bullseye
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    curl \
-    build-essential \
-    libssl-dev \
-    pkg-config \
-    nodejs \
-    npm \
-    && apt-get clean
-
-# Update Rust to latest stable version
 RUN rustup update stable && rustup default stable
 
-# Install rustfmt for code formatting and clippy for linting
 RUN rustup component add rustfmt rust-src clippy
 
-# Install Rust WASM target
+# Required for leptos
 RUN rustup target add wasm32-unknown-unknown
 
-# Install Trunk (WASM bundler), Leptosfmt (for formatting Leptos macros), and wasm-bindgen-cli
-RUN cargo install trunk leptosfmt wasm-bindgen-cli
+# Using the --locked flag as shown in the docs
+# https://book.leptos.dev/ssr/21_cargo_leptos.html#introducing-cargo-leptos
+RUN cargo install --locked cargo-leptos
 
-# Install Gemini CLI for AI assistance during development
-# NOTE: This is a dev container only - production builds use separate processes
-RUN npm install -g @google/gemini-cli
+# https://book.leptos.dev/getting_started/leptos_dx.html#4-set-up-leptosfmt-optional
+RUN cargo install leptosfmt
 
-# Fix cargo registry permissions for the vscode user
-# Clear any existing cache first, then set proper ownership
-RUN rm -rf /usr/local/cargo/registry/cache/* && \
-    chown -R vscode:vscode /usr/local/cargo
+# I dont know why yet, but when i start the container i am still logged in as vscode
+# Thats why I require this chown command for leptos watch to work
+RUN chown -R vscode:vscode /usr/local/cargo
 
-# Set the working directory
-WORKDIR /workspaces/leptos_stuff
+WORKDIR /workspaces/rust_guitar_app

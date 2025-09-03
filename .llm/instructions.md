@@ -42,10 +42,6 @@ This is a simple project for a single person for building a small tool and learn
 
 ### Development Commands
 
-**Build and Run:**
-```bash
-RUSTFLAGS='--cfg getrandom_backend="wasm_js"' trunk serve --open
-```
 
 **Run Tests:**
 ```bash
@@ -78,7 +74,6 @@ cargo fmt
 - `src/lib.rs`: Library crate definitions
 - `Cargo.toml`: Dependencies and project configuration
 - `public/styles/tailwind.css`: Styling definitions
-- `Trunk.toml`: Build tool configuration
 - `index.html`: HTML template
 
 ## Music Domain Knowledge

@@ -1,29 +1,17 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/rust
 {
-	"name": "Rust + Leptos Devcontainer",
+	"name": "Rust + Leptos Devcontainer with node for tailwind",
 	"build": {
 		"dockerfile": "Dockerfile",
 		"context": "."
 	},
 	"features": {
+		// Needed for tailwind to work
 		"ghcr.io/devcontainers/features/node:1": {
 			"version": "lts"
 		}
 	},
-
-	// Use 'mounts' to make the cargo cache persistent in a Docker Volume.
-	"mounts": [
-		// Cache for Cargo dependencies
-		"source=devcontainer-cargo-cache,target=/usr/local/cargo,type=volume",
-		// Cache for Rust build artifacts
-		"source=devcontainer-rust-target,target=/workspaces/leptos_stuff/target,type=volume"
-	],
-
-	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "rustc --version && cargo --version && trunk --version && npm install",
-
-	// Configure tool-specific properties.
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -40,7 +28,8 @@
 			]
 		}
 	},
-
+	"postCreateCommand": "npm i"
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	"remoteUser": "vscode"
+	// For some reason, the container still starts with the vscode user, even though this is commented out
+	// "remoteUser": "vscode"
 }
