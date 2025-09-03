@@ -1,6 +1,6 @@
 # 🎸 Rust Guitar Practice App
 
-A guitar learning companion built with **Rust**, **Leptos**, and **Axum** (to be implemented). Features interactive SVG fretboard visualization, practice exercises (working PoC), session tracking (in development).
+A guitar learning companion built with **Rust**, **Leptos** (ssr with axum). Features interactive SVG fretboard visualization, practice exercises (working PoC), session tracking (in development).
 
 ## Quick Start
 
@@ -32,11 +32,27 @@ cargo clippy        # linting
 
 **Frontend ↔ Backend Integration**
 
-- Read how to do this properly in the [Leptos Book](https://book.leptos.dev/ssr/21_cargo_leptos.html)
-- Convert project to ssr application
-  - For long term mobile compatibility (sending notifications for practice reminder) a pwa should work with ssr 
-    - Should do a more thorough analysis at some point of this
+- Fix the exercises page. The storage currently just panics with a todo.
+- Get exercises tracking working.
+- Change how we select exercises
+  - Scales must not be created, they can just be selected
+  - First goal: support scales and songs for selection and tracking
+  - Get tracking for both working
+  - Song
+    - Title
+    - Maybe features/milestones like
+      - with singing
+      - with backing track or playing alone
+      - freeform or with metronome
+    - as opposed to scales, these things have to be created and saved and then have to be loaded into an exercise
+  - Display previously practiced songs/exercises
+  
+
+
+- For long term mobile compatibility (sending notifications for practice reminder) a pwa should work with ssr (hopefully) 
+  - Should do a more thorough analysis at some point of this
   - Alternatives are csr with tauri
+    - but then we'd have to switch back to csr :/
   - or switching entirely to dioxus 
 
 
@@ -74,15 +90,23 @@ Interactive circle of fifths with drag & drop exercises:
 4. Run `cargo leptos watch`
 
 ### Option 2: Manual Setup
-```bash
-# Install Rust + tools
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-rustup target add wasm32-unknown-unknown
-cargo install cargo-leptos
 
-# Clone and run
-git clone https://github.com/ReeezZ/rust_guitar_app.git
-cd rust_guitar_app
+**Prerequisites**
+
+- Node
+- Rust + Cargo
+
+```bash
+# Install dependencies
+
+rustup component add rustfmt rust-src clippy
+rustup target add wasm32-unknown-unknown
+# https://book.leptos.dev/ssr/21_cargo_leptos.html
+cargo install --locked cargo-leptos
+# https://book.leptos.dev/getting_started/leptos_dx.html#4-set-up-leptosfmt-optional
+cargo install leptosfmt
+
+# run
 cargo leptos watch
 ```
 
