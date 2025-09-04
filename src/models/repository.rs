@@ -1,7 +1,10 @@
 // TODO ignore warnings in this file until implemented
 #![allow(unused)]
 
-use crate::models::exercise::Exercise;
+use crate::{
+  models::exercise::{Exercise, ExerciseType},
+  music::{heptatonic_scales::HeptaScaleType, Note, Scale, ScaleExt, ScaleType},
+};
 
 /// Error types for repository operations
 #[derive(Debug, Clone)]
@@ -35,7 +38,7 @@ pub trait ExerciseRepository {
   fn delete(&self, id: &str) -> Result<(), RepositoryError>;
 
   /// Find an exercise by ID
-  fn find_by_id(&self, id: &str) -> Result<Option<Exercise>, RepositoryError>;
+  fn find_by_id(&self, id: &str) -> Result<Exercise, RepositoryError>;
 
   /// Find all exercises
   fn find_all(&self) -> Result<Vec<Exercise>, RepositoryError>;
@@ -62,34 +65,49 @@ impl Default for LocalStorageExerciseRepository {
 impl ExerciseRepository for LocalStorageExerciseRepository {
   fn save(&self, exercise: &Exercise) -> Result<(), RepositoryError> {
     // crate::models::storage::save_exercise(exercise).map_err(RepositoryError::ValidationError)
-    todo!()
+    // todo!()
+    Ok(())
   }
 
   fn update(&self, exercise: &Exercise) -> Result<(), RepositoryError> {
     // crate::models::storage::update_exercise(exercise).map_err(RepositoryError::ValidationError)
-    todo!()
+    // todo!()
+    Ok(())
   }
 
   fn delete(&self, id: &str) -> Result<(), RepositoryError> {
     // crate::models::storage::delete_exercise(id).map_err(RepositoryError::ValidationError)
-    todo!()
+    // todo!()
+    Ok(())
   }
 
-  fn find_by_id(&self, id: &str) -> Result<Option<Exercise>, RepositoryError> {
+  fn find_by_id(&self, id: &str) -> Result<Exercise, RepositoryError> {
     // Ok(crate::models::storage::load_exercise_by_id(id))
-    todo!()
+    // todo!()
+    Ok(Exercise {
+      name: "Sample Exercise".to_string(),
+      description: Some("This is a sample exercise.".to_string()),
+      id: "sample-id".to_string(),
+      exercise_type: ExerciseType::Scale {
+        root_note: Note::E,
+        scale_type: ScaleType::Hepatonic(HeptaScaleType::Major),
+        fret_range: (1, 5),
+      },
+    })
   }
 
   fn find_all(&self) -> Result<Vec<Exercise>, RepositoryError> {
     // Ok(crate::models::storage::load_exercises())
-    todo!()
+    // todo!()
+    Ok(Vec::new())
   }
 
   fn name_exists(&self, name: &str, exclude_id: Option<&str>) -> Result<bool, RepositoryError> {
     // Ok(crate::models::storage::exercise_name_exists(
     //   name, exclude_id,
     // ))
-    todo!()
+    // todo!()
+    Ok(false)
   }
 }
 

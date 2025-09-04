@@ -12,7 +12,7 @@ pub fn ExerciseDetail(#[prop(into)] exercise_id: Signal<String>) -> impl IntoVie
   Effect::new(move |_| {
     if !exercise_id.get().is_empty() {
       let repo = get_exercise_repository();
-      if let Ok(Some(ex)) = repo.find_by_id(&exercise_id.get()) {
+      if let Ok(ex) = repo.find_by_id(&exercise_id.get()) {
         set_exercise.set(Some(ex));
       }
     }

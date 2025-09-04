@@ -4,4 +4,4 @@ pub mod notes;
 pub mod scales;
 
 pub use notes::{Note, NoteExt};
-pub use scales::{Scale, ScaleType};
+pub use scales::{Scale, ScaleExt, ScaleType};
