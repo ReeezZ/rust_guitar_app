@@ -1,3 +1,5 @@
+use crate::components::ui::button::ButtonVariant;
+use crate::components::ui::Button;
 use crate::music::notes::Note;
 use crate::music::scales::ScaleType;
 use crate::music::{heptatonic_scales::HeptaScaleType, Scale};
@@ -79,46 +81,47 @@ pub fn FretboardScalePage() -> impl IntoView {
       <div class="p-4 bg-yellow-50 rounded-lg border-2 border-yellow-200">
         <h3 class="mb-3 text-lg font-semibold">"Quick Presets"</h3>
         <div class="flex flex-wrap gap-2">
-          <button
-            class="py-2 px-4 text-white bg-blue-500 rounded hover:bg-blue-600"
-            on:click=move |_| {
+          <Button
+            variant=ButtonVariant::Primary
+            on_click=move || {
               start_fret.set(3);
               end_fret.set(7);
               update_scale(Scale::new(Note::G, ScaleType::Hepatonic(HeptaScaleType::Major)));
             }
           >
             "G Major (3-7)"
-          </button>
-          <button
-            class="py-2 px-4 text-white bg-blue-500 rounded hover:bg-blue-600"
-            on:click=move |_| {
+          </Button>
+
+          <Button
+            variant=ButtonVariant::Primary
+            on_click=move || {
               start_fret.set(5);
               end_fret.set(8);
               update_scale(Scale::new(Note::A, ScaleType::Hepatonic(HeptaScaleType::Minor)));
             }
           >
             "A Minor (5-8)"
-          </button>
-          <button
-            class="py-2 px-4 text-white bg-blue-500 rounded hover:bg-blue-600"
-            on:click=move |_| {
+          </Button>
+          <Button
+            variant=ButtonVariant::Primary
+            on_click=move || {
               start_fret.set(0);
               end_fret.set(5);
               update_scale(Scale::new(Note::E, ScaleType::Hepatonic(HeptaScaleType::Minor)));
             }
           >
             "E Minor (0-5)"
-          </button>
-          <button
-            class="py-2 px-4 text-white bg-blue-500 rounded hover:bg-blue-600"
-            on:click=move |_| {
+          </Button>
+          <Button
+            variant=ButtonVariant::Primary
+            on_click=move || {
               start_fret.set(7);
               end_fret.set(10);
               update_scale(Scale::new(Note::C, ScaleType::Hepatonic(HeptaScaleType::Major)));
             }
           >
             "C Major (7-10)"
-          </button>
+          </Button>
           <button
             class="py-2 px-4 text-white bg-green-500 rounded hover:bg-green-600"
             on:click=move |_| {
