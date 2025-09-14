@@ -1,3 +1,4 @@
+use crate::components::fret_range_selector::FretRangeSelector;
 use crate::music::Note;
 /// Interactive fretboard configuration playground
 ///
@@ -128,51 +129,13 @@ pub fn FretboardConfigExamples() -> impl IntoView {
         <div class="xl:flex-1 xl:max-w-lg">
           // Configuration controls organized in compact sections
           <div class="space-y-4">
-
-            // Fret Range Controls - compact horizontal layout
-            <div class="p-1 rounded-lg border">
-              <h3 class="mb-3 text-base font-semibold">"🎯 Fret Range"</h3>
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="block mb-1 text-xs font-medium">
-                    "Start: " <span class="font-bold">{start_fret}</span>
-                  </label>
-                  <input
-                    type="range"
-                    min="0"
-                    max=move || end_fret.get() - 1
-                    class="w-full"
-                    prop:value=start_fret
-                    on:input=move |ev| {
-                      if let Ok(val) = event_target_value(&ev).parse::<usize>() {
-                        if val < end_fret.get() {
-                          start_fret.set(val);
-                        }
-                      }
-                    }
-                  />
-                </div>
-                <div>
-                  <label class="block mb-1 text-xs font-medium">
-                    "End: " <span class="font-bold">{move || end_fret.get()}</span>
-                  </label>
-                  <input
-                    type="range"
-                    min=move || start_fret.get() + 1
-                    max=MAX_FRETS
-                    class="w-full"
-                    prop:value=end_fret
-                    on:input=move |ev| {
-                      if let Ok(val) = event_target_value(&ev).parse::<usize>() {
-                        if val > start_fret.get() {
-                          end_fret.set(val);
-                        }
-                      }
-                    }
-                  />
-                </div>
-              </div>
-            </div>
+            <FretRangeSelector
+              start_fret
+              end_fret
+              label="Fret range"
+              on_start_fret_change=Callback::new(move |new_start| start_fret.set(new_start))
+              on_end_fret_change=Callback::new(move |new_end| end_fret.set(new_end))
+            />
 
             // Instrument Configuration - compact horizontal layout
             <div class="p-1 rounded-lg border">
