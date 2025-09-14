@@ -43,7 +43,7 @@ pub fn NavbarLinks() -> impl IntoView {
   let pathname = move || location.pathname.get();
 
   view! {
-    <ul>
+    <ul class="flex items-center">
       <li>
         <a href="/" class=move || if pathname() == "/" { "nav-link active" } else { "nav-link" }>
           Home
@@ -112,7 +112,7 @@ pub fn NavbarLinks() -> impl IntoView {
 #[component]
 pub fn Navbar() -> impl IntoView {
   view! {
-    <div class="z-50 navbar">
+    <div class="flex z-50 p-4 grow h-fit navbar">
       <NavbarLinks />
       <ThemeToggle />
     </div>
