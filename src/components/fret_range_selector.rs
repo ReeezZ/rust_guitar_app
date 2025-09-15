@@ -2,14 +2,13 @@ use leptos::prelude::*;
 use leptos::wasm_bindgen::JsCast;
 
 /// Component for selecting a fret range with two sliders
+/// Checks that start_fret <= end_fret
 #[component]
 pub fn FretRangeSelector(
-  #[prop(into)] start_fret: Signal<usize>,
-  #[prop(into)] end_fret: Signal<usize>,
+  #[prop(into)] start_fret: RwSignal<usize>,
+  #[prop(into)] end_fret: RwSignal<usize>,
   /// Label for the control
   label: &'static str,
-  #[prop(into)] on_start_fret_change: Callback<usize>,
-  #[prop(into)] on_end_fret_change: Callback<usize>,
   /// Minimum possible fret value
   #[prop(optional)]
   min: Option<usize>,
@@ -19,19 +18,6 @@ pub fn FretRangeSelector(
 ) -> impl IntoView {
   let min_fret = min.unwrap_or(0);
   let max_fret = max.unwrap_or(22);
-
-  // Sync individual signals with the range signal changes from outside
-  Effect::new(move |_| {
-    let new_start = start_fret.get();
-    let new_end = end_fret.get();
-
-    if start_fret.get_untracked() != new_start {
-      on_start_fret_change.run(new_start);
-    }
-    if end_fret.get_untracked() != new_end {
-      on_end_fret_change.run(new_end);
-    }
-  });
 
   view! {
     <div class="space-y-2">
@@ -70,7 +56,7 @@ pub fn FretRangeSelector(
             let input: web_sys::HtmlInputElement = target.dyn_into().unwrap();
             if let Ok(val) = input.value().parse::<usize>() {
               if val <= end_fret.get_untracked() {
-                on_start_fret_change.run(val);
+                start_fret.set(val);
               }
             }
           }
@@ -91,7 +77,7 @@ pub fn FretRangeSelector(
             let input: web_sys::HtmlInputElement = target.dyn_into().unwrap();
             if let Ok(val) = input.value().parse::<usize>() {
               if val >= start_fret.get_untracked() {
-                on_end_fret_change.run(val);
+                end_fret.set(val);
               }
             }
           }
