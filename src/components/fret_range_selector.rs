@@ -8,14 +8,14 @@ pub fn FretRangeSelector(
   #[prop(into)] end_fret: Signal<usize>,
   /// Label for the control
   label: &'static str,
+  #[prop(into)] on_start_fret_change: Callback<usize>,
+  #[prop(into)] on_end_fret_change: Callback<usize>,
   /// Minimum possible fret value
   #[prop(optional)]
   min: Option<usize>,
   /// Maximum possible fret value  
   #[prop(optional)]
   max: Option<usize>,
-  #[prop(into)] on_start_fret_change: Callback<usize>,
-  #[prop(into)] on_end_fret_change: Callback<usize>,
 ) -> impl IntoView {
   let min_fret = min.unwrap_or(0);
   let max_fret = max.unwrap_or(22);
