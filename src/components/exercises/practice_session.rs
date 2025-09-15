@@ -279,8 +279,8 @@ fn FretboardSection(exercise: Signal<Exercise>) -> impl IntoView {
                 if show_fretboard.get() {
                   let fretboard_model = Memo::new(move |_| {
                     let model = FretboardModelBuilder::new()
-                      .start_fret_val(fret_range.0 as usize)
-                      .end_fret_val(fret_range.1 as usize)
+                      .start_fret_val(fret_range.0)
+                      .end_fret_val(fret_range.1)
                       .build();
                     let current_scale = Scale::new(root_note, scale_type);
                     model.update_from_scale(current_scale);

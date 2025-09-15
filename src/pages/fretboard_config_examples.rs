@@ -1,4 +1,4 @@
-use crate::components::fret_range_selector::FretRangeSelector;
+use crate::components::ui::FretRangeSelector;
 use crate::music::Note;
 /// Interactive fretboard configuration playground
 ///
@@ -8,16 +8,16 @@ use crate::music::Note;
 use leptos::prelude::*;
 
 use crate::components::fretboard::FretboardModelAdapter;
-use crate::components::fretboard::{
-  definitions::MAX_FRETS, definitions::MAX_STRINGS, FretboardVisualConfigBuilder,
+use crate::{
+  components::fretboard::{definitions::MAX_STRINGS, FretboardVisualConfigBuilder},
+  models::fretboard::model_builder::FretboardModelBuilder,
 };
-use crate::models::fretboard::model_builder::FretboardModelBuilder;
 
 #[component]
 pub fn FretboardConfigExamples() -> impl IntoView {
   // Fret range controls
-  let start_fret = RwSignal::new(3_usize);
-  let end_fret = RwSignal::new(7_usize);
+  let start_fret = RwSignal::new(3_u8);
+  let end_fret = RwSignal::new(7_u8);
 
   // Configuration controls
   let num_strings = RwSignal::new(6_u8);
@@ -25,7 +25,7 @@ pub fn FretboardConfigExamples() -> impl IntoView {
   let svg_aspect_ratio = RwSignal::new(3.0_f64);
   let fret_margin_percentage = RwSignal::new(0.05_f64);
   let nut_width = RwSignal::new(14.0_f64);
-  let extra_frets = RwSignal::new(1_usize);
+  let extra_frets = RwSignal::new(1_u8);
   let marker_preset = RwSignal::new("standard".to_string());
 
   // Convert marker preset to actual marker positions
@@ -252,7 +252,7 @@ pub fn FretboardConfigExamples() -> impl IntoView {
                     class="w-full"
                     prop:value=extra_frets
                     on:input=move |ev| {
-                      if let Ok(val) = event_target_value(&ev).parse::<usize>() {
+                      if let Ok(val) = event_target_value(&ev).parse::<u8>() {
                         extra_frets.set(val);
                       }
                     }

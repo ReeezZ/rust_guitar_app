@@ -13,8 +13,8 @@ pub fn default_tuning() -> Signal<Vec<Note>> {
 }
 
 pub struct FretboardModelBuilder {
-  start_fret: Option<Signal<usize>>,
-  end_fret: Option<Signal<usize>>,
+  start_fret: Option<Signal<u8>>,
+  end_fret: Option<Signal<u8>>,
   tuning: Option<Signal<Vec<Note>>>,
   config: Option<Signal<FretboardVisualConfig>>,
   fret_states: Option<Signal<FretStateSignals>>,
@@ -31,20 +31,20 @@ impl FretboardModelBuilder {
     }
   }
 
-  pub fn start_fret(mut self, start_fret: Signal<usize>) -> Self {
+  pub fn start_fret(mut self, start_fret: Signal<u8>) -> Self {
     self.start_fret = Some(start_fret);
     self
   }
-  pub fn start_fret_val(mut self, start_fret: usize) -> Self {
+  pub fn start_fret_val(mut self, start_fret: u8) -> Self {
     self.start_fret = Some(Signal::derive(move || start_fret));
     self
   }
 
-  pub fn end_fret(mut self, end_fret: Signal<usize>) -> Self {
+  pub fn end_fret(mut self, end_fret: Signal<u8>) -> Self {
     self.end_fret = Some(end_fret);
     self
   }
-  pub fn end_fret_val(mut self, end_fret: usize) -> Self {
+  pub fn end_fret_val(mut self, end_fret: u8) -> Self {
     self.end_fret = Some(Signal::derive(move || end_fret));
     self
   }
@@ -65,8 +65,8 @@ impl FretboardModelBuilder {
   }
 
   pub fn from_options(
-    start_fret: Option<Signal<usize>>,
-    end_fret: Option<Signal<usize>>,
+    start_fret: Option<Signal<u8>>,
+    end_fret: Option<Signal<u8>>,
     tuning: Option<Signal<Vec<Note>>>,
     config: Option<Signal<FretboardVisualConfig>>,
     fret_states: Option<Signal<FretStateSignals>>,

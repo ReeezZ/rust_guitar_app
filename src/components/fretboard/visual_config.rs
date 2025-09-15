@@ -9,9 +9,9 @@ pub struct FretboardVisualConfig {
   /// Width of the nut in SVG units (default: 14.0)
   pub nut_width: Signal<f64>,
   /// Number of extra frets to show for context (default: 1)
-  pub extra_frets: Signal<usize>,
+  pub extra_frets: Signal<u8>,
   /// Fret positions where markers should be displayed
-  pub marker_positions: Signal<Vec<usize>>,
+  pub marker_positions: Signal<Vec<u8>>,
 }
 
 impl Default for FretboardVisualConfig {
@@ -24,8 +24,8 @@ pub struct FretboardVisualConfigBuilder {
   svg_aspect_ratio: Option<Signal<f64>>,
   fret_margin_percentage: Option<Signal<f64>>,
   nut_width: Option<Signal<f64>>,
-  extra_frets: Option<Signal<usize>>,
-  marker_positions: Option<Signal<Vec<usize>>>,
+  extra_frets: Option<Signal<u8>>,
+  marker_positions: Option<Signal<Vec<u8>>>,
 }
 
 impl FretboardVisualConfigBuilder {
@@ -54,12 +54,12 @@ impl FretboardVisualConfigBuilder {
     self
   }
 
-  pub fn extra_frets(mut self, extra: Signal<usize>) -> Self {
+  pub fn extra_frets(mut self, extra: Signal<u8>) -> Self {
     self.extra_frets = Some(extra);
     self
   }
 
-  pub fn marker_positions(mut self, positions: Signal<Vec<usize>>) -> Self {
+  pub fn marker_positions(mut self, positions: Signal<Vec<u8>>) -> Self {
     self.marker_positions = Some(positions);
     self
   }

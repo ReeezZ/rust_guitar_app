@@ -35,10 +35,10 @@ pub(crate) fn FretboardNut(
 /// Renders all fret lines with different styles for playable vs non-playable
 #[component]
 pub(crate) fn FretboardFrets(
-  start_fret: Signal<usize>,
-  end_fret: Signal<usize>,
-  #[prop(into)] min_visible_fret: Signal<usize>,
-  #[prop(into)] max_visible_fret: Signal<usize>,
+  start_fret: Signal<u8>,
+  end_fret: Signal<u8>,
+  #[prop(into)] min_visible_fret: Signal<u8>,
+  #[prop(into)] max_visible_fret: Signal<u8>,
   viewbox_positions: Signal<Vec<f64>>,
   #[prop(into)] fret_margin: Signal<f64>,
   #[prop(into)] svg_height: Signal<f64>,
@@ -50,12 +50,14 @@ pub(crate) fn FretboardFrets(
       let(fret_no)
     >
       {move || {
-        let is_out_of_bounds = Memo::new(move |_| { fret_no >= viewbox_positions.get().len() });
+        let is_out_of_bounds = Memo::new(move |_| {
+          (fret_no as usize) >= viewbox_positions.get().len()
+        });
         if is_out_of_bounds.get() {
           leptos::logging::warn!("Skipping fret line for fret {} as out of bounds", fret_no);
           return None;
         }
-        let x_pos = Memo::new(move |_| viewbox_positions.get()[fret_no]);
+        let x_pos = Memo::new(move |_| viewbox_positions.get()[fret_no as usize]);
         let is_playable = Memo::new(move |_| {
           fret_no >= start_fret.get().saturating_sub(1) && fret_no <= end_fret.get()
         });
@@ -122,9 +124,9 @@ pub(crate) fn FretboardStrings(
 pub(crate) fn FretboardMarkers(
   #[prop(into)] svg_height: Signal<f64>,
   #[prop(into)] viewbox_positions: Signal<Vec<f64>>,
-  #[prop(into)] marker_positions: Signal<Vec<usize>>,
-  #[prop(into)] min_visible_fret: Signal<usize>,
-  #[prop(into)] max_visible_fret: Signal<usize>,
+  #[prop(into)] marker_positions: Signal<Vec<u8>>,
+  #[prop(into)] min_visible_fret: Signal<u8>,
+  #[prop(into)] max_visible_fret: Signal<u8>,
 ) -> impl IntoView {
   view! {
     <For
@@ -136,15 +138,17 @@ pub(crate) fn FretboardMarkers(
       let(fret)
     >
       {move || {
-        let is_out_of_bounds = Memo::new(move |_| { fret >= viewbox_positions.get().len() });
+        let is_out_of_bounds = Memo::new(move |_| {
+          (fret as usize) >= viewbox_positions.get().len()
+        });
         if is_out_of_bounds.get() {
           leptos::logging::warn!("Skipping marker for fret {} as out of bounds", fret);
           return None;
         }
         let x = Memo::new(move |_| {
           let viewbox_positions = viewbox_positions.get();
-          let x_prev = viewbox_positions[fret.saturating_sub(1)];
-          let x_curr = viewbox_positions[fret];
+          let x_prev = viewbox_positions[fret.saturating_sub(1) as usize];
+          let x_curr = viewbox_positions[fret as usize];
           (x_prev + x_curr) / 2.0
         });
         let r = if fret == 12 || fret == 24 { 8.0 } else { 6.0 };
@@ -178,14 +182,15 @@ pub(crate) fn FretboardMarkers(
 #[component]
 pub(crate) fn FretboardOverlays(
   layout: LayoutSnapshot,
-  start_fret: Signal<usize>,
-  end_fret: Signal<usize>,
-  #[prop(into)] min_visible_fret: Signal<usize>,
-  #[prop(into)] max_visible_fret: Signal<usize>,
+  start_fret: Signal<u8>,
+  end_fret: Signal<u8>,
+  #[prop(into)] min_visible_fret: Signal<u8>,
+  #[prop(into)] max_visible_fret: Signal<u8>,
 ) -> impl IntoView {
   let overlay_left = move || {
     if start_fret.get() > min_visible_fret.get() {
-      let playable_area_start = layout.absolute_positions.get()[start_fret.get().saturating_sub(1)];
+      let playable_area_start =
+        layout.absolute_positions.get()[start_fret.get().saturating_sub(1) as usize];
       let viewbox_start_x = move || layout.abs_to_viewbox_x(playable_area_start);
       Some(view! {
         <rect
@@ -205,7 +210,8 @@ pub(crate) fn FretboardOverlays(
 
   let overlay_right = move || {
     if end_fret.get() < max_visible_fret.get() {
-      let end_x = move || layout.abs_to_viewbox_x(layout.absolute_positions.get()[end_fret.get()]);
+      let end_x =
+        move || layout.abs_to_viewbox_x(layout.absolute_positions.get()[end_fret.get() as usize]);
       let width = move || layout.svg_width.get() - end_x();
       Some(view! {
         <rect
@@ -327,8 +333,8 @@ fn FretboardNote(
 #[component]
 pub(crate) fn FretboardGrid(
   #[prop(into)] layout: LayoutSnapshot,
-  #[prop(into)] min_visible_fret: Signal<usize>,
-  #[prop(into)] max_visible_fret: Signal<usize>,
+  #[prop(into)] min_visible_fret: Signal<u8>,
+  #[prop(into)] max_visible_fret: Signal<u8>,
   fret_states: Signal<FretStateSignals>,
   tuning: Signal<Vec<Note>>,
   /// Optional callback for fret click events
@@ -347,10 +353,7 @@ pub(crate) fn FretboardGrid(
         let(string_idx)
       >
         {
-          let coord = FretCoord {
-            string_idx,
-            fret_idx: fret_idx as u8,
-          };
+          let coord = FretCoord { string_idx, fret_idx };
           let fret_state = fret_states
             .with_untracked(|borrowed| {
               *borrowed
@@ -365,7 +368,7 @@ pub(crate) fn FretboardGrid(
                 .get()
                 .get(string_idx as usize)
                 .expect("Bounds checking on model construction")
-                .add_steps(fret_idx);
+                .add_steps(fret_idx as usize);
               click_cb.run(FretClickEvent { coord, note });
             }
           };

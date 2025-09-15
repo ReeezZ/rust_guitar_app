@@ -29,12 +29,12 @@ impl FretboardModelExt for FretboardModel {
         for fret_idx in self.get_min_fret_untracked()..=self.get_max_visible_fret_untracked() {
           let coord = FretCoord {
             string_idx: string_idx as u8,
-            fret_idx: fret_idx as u8,
+            fret_idx,
           };
           let state = if fret_idx >= self.get_start_fret().get_untracked()
             && fret_idx <= self.get_end_fret().get_untracked()
           {
-            let note_at_fret = string_note.add_steps(fret_idx);
+            let note_at_fret = string_note.add_steps(fret_idx as usize);
             if scale.root_note() == Some(note_at_fret) {
               FretState::Normal(FretStateColor::Green, note_at_fret.to_string())
             } else if scale.contains_note(note_at_fret) {

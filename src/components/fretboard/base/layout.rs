@@ -22,8 +22,8 @@ impl LayoutSnapshot {
   #[allow(clippy::too_many_arguments)]
   pub fn new(
     absolute_positions: Signal<Vec<f64>>,
-    min_visible_fret: Signal<usize>,
-    max_visible_fret: Signal<usize>,
+    min_visible_fret: Signal<u8>,
+    max_visible_fret: Signal<u8>,
     num_strings: Signal<u8>,
     string_spacing: Signal<f64>,
     svg_width: Signal<f64>,
@@ -36,11 +36,11 @@ impl LayoutSnapshot {
       if has_nut.get() {
         0.0
       } else {
-        absolute_positions.get()[min_visible_fret.get()]
+        absolute_positions.get()[min_visible_fret.get() as usize]
       }
     });
     let scale_factor = Signal::derive(move || {
-      let range_end = absolute_positions.get()[max_visible_fret.get()];
+      let range_end = absolute_positions.get()[max_visible_fret.get() as usize];
       let range_width = range_end - range_start.get();
       let available_width = if has_nut.get() {
         svg_width.get() - nut_width.get()
@@ -75,7 +75,7 @@ impl LayoutSnapshot {
     offset + (absolute_x - self.range_start.get()) * self.scale_factor.get()
   }
 
-  pub fn fret_center_x(&self, fret: usize) -> Option<f64> {
+  pub fn fret_center_x(&self, fret: u8) -> Option<f64> {
     if fret == 0 {
       return if self.has_nut.get() {
         Some(self.nut_width.get() / 2.0)
@@ -83,9 +83,9 @@ impl LayoutSnapshot {
         None
       };
     }
-    if fret < self.absolute_positions.get().len() {
-      let prev = self.absolute_positions.get()[fret - 1];
-      let curr = self.absolute_positions.get()[fret];
+    if (fret as usize) < self.absolute_positions.get().len() {
+      let prev = self.absolute_positions.get()[fret as usize - 1];
+      let curr = self.absolute_positions.get()[fret as usize];
       Some(self.abs_to_viewbox_x((prev + curr) / 2.0))
     } else {
       None
@@ -97,7 +97,7 @@ impl LayoutSnapshot {
   }
 
   pub fn note_position(&self, coord: FretCoord) -> Option<(f64, f64)> {
-    let x = self.fret_center_x(coord.fret_idx as usize)?;
+    let x = self.fret_center_x(coord.fret_idx)?;
     let y = self.string_y(coord.string_idx);
     Some((x, y))
   }

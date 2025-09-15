@@ -7,9 +7,9 @@ use crate::models::fretboard::model_builder::FretboardModelBuilder;
 #[derive(Clone, Debug, PartialEq, Copy)]
 pub struct FretboardModel {
   /// First fret in the active/playable range
-  start_fret: Signal<usize>,
+  start_fret: Signal<u8>,
   /// Last fret in the active/playable range
-  end_fret: Signal<usize>,
+  end_fret: Signal<u8>,
   /// Tuning of the guitar strings, first index is the lowest string (6th string)
   tuning: Signal<Vec<Note>>,
   /// Visual configuration for fretboard display properties
@@ -26,8 +26,8 @@ impl Default for FretboardModel {
 
 impl FretboardModel {
   pub fn new(
-    start_fret: Signal<usize>,
-    end_fret: Signal<usize>,
+    start_fret: Signal<u8>,
+    end_fret: Signal<u8>,
     tuning: Signal<Vec<Note>>,
     config: Signal<FretboardVisualConfig>,
     fret_states: Signal<FretStateSignals>,
@@ -41,7 +41,7 @@ impl FretboardModel {
     }
   }
 
-  pub fn get_num_frets_untracked(&self) -> usize {
+  pub fn get_num_frets_untracked(&self) -> u8 {
     self.end_fret.get_untracked() - self.start_fret.get_untracked() + 1
   }
 
@@ -49,11 +49,11 @@ impl FretboardModel {
     self.tuning
   }
 
-  pub fn get_start_fret(&self) -> Signal<usize> {
+  pub fn get_start_fret(&self) -> Signal<u8> {
     self.start_fret
   }
 
-  pub fn get_end_fret(&self) -> Signal<usize> {
+  pub fn get_end_fret(&self) -> Signal<u8> {
     self.end_fret
   }
 
@@ -98,7 +98,7 @@ impl FretboardModel {
     });
   }
 
-  pub fn get_min_fret(&self) -> Signal<usize> {
+  pub fn get_min_fret(&self) -> Signal<u8> {
     let start_fret = self.start_fret;
     let config = self.config;
 
@@ -109,13 +109,13 @@ impl FretboardModel {
     })
   }
 
-  pub fn get_min_fret_untracked(&self) -> usize {
+  pub fn get_min_fret_untracked(&self) -> u8 {
     let start_fret = self.start_fret.get_untracked();
     let extra_frets = self.config.get_untracked().extra_frets.get_untracked();
     start_fret.saturating_sub(extra_frets)
   }
 
-  pub fn get_max_visible_fret(&self) -> Signal<usize> {
+  pub fn get_max_visible_fret(&self) -> Signal<u8> {
     let end_fret = self.end_fret;
     let config = self.config;
     let extra_frets = Signal::derive(move || config.get().extra_frets.get());
@@ -123,7 +123,7 @@ impl FretboardModel {
     Signal::derive(move || end_fret.get() + extra_frets.get())
   }
 
-  pub fn get_max_visible_fret_untracked(&self) -> usize {
+  pub fn get_max_visible_fret_untracked(&self) -> u8 {
     let end_fret = self.end_fret.get_untracked();
     let extra_frets = self.config.get_untracked().extra_frets.get_untracked();
     end_fret + extra_frets

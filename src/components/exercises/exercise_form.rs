@@ -75,8 +75,8 @@ pub fn ExerciseForm(
   let (root_note, set_root_note) = signal(initial_root_note.unwrap_or(Note::C));
   let (scale_type, set_scale_type) =
     signal(initial_scale_type.unwrap_or(ScaleType::Hepatonic(HeptaScaleType::Major)));
-  let (min_fret, set_min_fret) = signal(initial_fret_range.map(|(min, _)| min).unwrap_or(0));
-  let (max_fret, set_max_fret) = signal(initial_fret_range.map(|(_, max)| max).unwrap_or(12));
+  let min_fret = RwSignal::new(initial_fret_range.map(|(min, _)| min).unwrap_or(0));
+  let max_fret = RwSignal::new(initial_fret_range.map(|(_, max)| max).unwrap_or(12));
 
   // Validation and error states
   let (errors, set_errors) = signal(Vec::<String>::new());
@@ -311,9 +311,7 @@ pub fn ExerciseForm(
           scale_type=scale_type
           on_scale_type_change=Callback::new(move |scale| set_scale_type.set(scale))
           min_fret=min_fret
-          on_min_fret_change=Callback::new(move |fret| set_min_fret.set(fret))
           max_fret=max_fret
-          on_max_fret_change=Callback::new(move |fret| set_max_fret.set(fret))
         />
       </div>
 

@@ -1,5 +1,6 @@
 use crate::{
-  components::fretboard::FretboardModelAdapter, models::fretboard::FretboardModelBuilder,
+  components::{fretboard::FretboardModelAdapter, ui::FretRangeSelector},
+  models::fretboard::FretboardModelBuilder,
 };
 
 use super::{constants::*, PositionPresetButtons};
@@ -13,18 +14,15 @@ pub fn ExerciseTypeSpecificFields(
   on_root_note_change: Callback<Note>,
   scale_type: ReadSignal<ScaleType>,
   on_scale_type_change: Callback<ScaleType>,
-  min_fret: ReadSignal<u8>,
-  on_min_fret_change: Callback<u8>,
-  max_fret: ReadSignal<u8>,
-  on_max_fret_change: Callback<u8>,
+  min_fret: RwSignal<u8>,
+  max_fret: RwSignal<u8>,
 ) -> impl IntoView {
   // Handle preset selection
   let on_preset_select = Callback::new(move |(min, max): (u8, u8)| {
-    on_min_fret_change.run(min);
-    on_max_fret_change.run(max);
+    min_fret.set(min);
+    max_fret.set(max);
   });
 
-  // TODO: reuse FretRangeSelector component
   view! {
     // Conditional fields for Scale and Triad types
     {move || {
@@ -98,40 +96,8 @@ pub fn ExerciseTypeSpecificFields(
             </div>
           </div>
 
-          // TODO reuse FretRangeSelector component
           // Fret range
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div>
-              <label class="block mb-1 text-sm font-medium text-gray-700">Min Fret</label>
-              <input
-                type="number"
-                min="0"
-                max="24"
-                class="py-2 px-3 w-full rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                prop:value=move || min_fret.get().to_string()
-                on:input=move |e| {
-                  if let Ok(val) = event_target_value(&e).parse::<u8>() {
-                    on_min_fret_change.run(val.min(24));
-                  }
-                }
-              />
-            </div>
-            <div>
-              <label class="block mb-1 text-sm font-medium text-gray-700">Max Fret</label>
-              <input
-                type="number"
-                min="0"
-                max="24"
-                class="py-2 px-3 w-full rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                prop:value=move || max_fret.get().to_string()
-                on:input=move |e| {
-                  if let Ok(val) = event_target_value(&e).parse::<u8>() {
-                    on_max_fret_change.run(val.min(24));
-                  }
-                }
-              />
-            </div>
-          </div>
+          <FretRangeSelector start_fret=min_fret end_fret=max_fret label="Playable Range" />
 
           // Position presets
           <PositionPresetButtons on_preset_select />
@@ -143,8 +109,8 @@ pub fn ExerciseTypeSpecificFields(
             <div class="p-4 mx-auto max-w-2xl bg-gray-50 rounded-lg">
               <FretboardModelAdapter model=Signal::derive(move || {
                 FretboardModelBuilder::new()
-                  .start_fret(Signal::derive(move || min_fret.get() as usize))
-                  .end_fret(Signal::derive(move || max_fret.get() as usize))
+                  .start_fret(Signal::derive(move || min_fret.get()))
+                  .end_fret(Signal::derive(move || max_fret.get()))
                   .build()
               }) />
             </div>

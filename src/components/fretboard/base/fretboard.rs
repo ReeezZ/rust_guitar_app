@@ -20,10 +20,10 @@ use leptos::prelude::*;
 pub fn Fretboard(
   /// First fret in the active/playable range
   #[prop(into)]
-  start_fret: Signal<usize>,
+  start_fret: Signal<u8>,
   /// Last fret in the active/playable range
   #[prop(into)]
-  end_fret: Signal<usize>,
+  end_fret: Signal<u8>,
   /// Number of guitar strings (default: 6)
   #[prop(into)]
   tuning: Signal<Vec<Note>>,
@@ -55,7 +55,7 @@ pub fn Fretboard(
   let max_visible_fret = Memo::new(move |_| end_fret.get() + extra_frets.get());
 
   let full_fret_positions =
-    Memo::new(move |_| calculate_fret_positions(svg_width, max_visible_fret.get() as u8 + 2));
+    Memo::new(move |_| calculate_fret_positions(svg_width, max_visible_fret.get() + 2));
 
   let string_spacing =
     Memo::new(move |_| calculate_string_spacing(num_strings.get(), svg_height.get()));

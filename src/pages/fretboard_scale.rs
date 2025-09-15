@@ -5,9 +5,9 @@ use crate::music::scales::ScaleType;
 use crate::music::{heptatonic_scales::HeptaScaleType, Scale};
 use crate::{
   components::{
-    fret_range_selector::FretRangeSelector,
     fretboard::{FretboardModelAdapter, FretboardVisualConfigBuilder},
     music_selectors::{NoteSelector, ScaleTypeSelector},
+    ui::FretRangeSelector,
   },
   models::fretboard::{default_tuning, FretboardModelBuilder, FretboardModelExt},
 };
@@ -16,11 +16,11 @@ use leptos::{prelude::*, wasm_bindgen::JsCast};
 /// Page demonstrating the SVG fretboard with scale display functionality
 #[component]
 pub fn FretboardScalePage() -> impl IntoView {
-  let start_fret = RwSignal::new(2_usize);
-  let end_fret = RwSignal::new(7_usize);
+  let start_fret = RwSignal::new(2_u8);
+  let end_fret = RwSignal::new(7_u8);
 
   // Extra frets for visual context
-  let extra_frets = RwSignal::new(2_usize);
+  let extra_frets = RwSignal::new(2_u8);
 
   let (scale, set_scale) = signal(Scale::new(
     Note::C,
@@ -190,7 +190,7 @@ pub fn FretboardScalePage() -> impl IntoView {
             on:input=move |ev| {
               let target = ev.target().unwrap();
               let input: web_sys::HtmlInputElement = target.dyn_into().unwrap();
-              if let Ok(val) = input.value().parse::<usize>() {
+              if let Ok(val) = input.value().parse::<u8>() {
                 extra_frets.set(val);
               }
             }
