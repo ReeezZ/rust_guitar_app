@@ -24,6 +24,7 @@ pub fn ExerciseTypeSpecificFields(
     on_max_fret_change.run(max);
   });
 
+  // TODO: reuse FretRangeSelector component
   view! {
     // Conditional fields for Scale and Triad types
     {move || {
@@ -97,6 +98,7 @@ pub fn ExerciseTypeSpecificFields(
             </div>
           </div>
 
+          // TODO reuse FretRangeSelector component
           // Fret range
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>

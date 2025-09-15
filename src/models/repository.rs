@@ -65,25 +65,25 @@ impl Default for LocalStorageExerciseRepository {
 impl ExerciseRepository for LocalStorageExerciseRepository {
   fn save(&self, exercise: &Exercise) -> Result<(), RepositoryError> {
     // crate::models::storage::save_exercise(exercise).map_err(RepositoryError::ValidationError)
-    // todo!()
+    // TODO: Implement persistence
     Ok(())
   }
 
   fn update(&self, exercise: &Exercise) -> Result<(), RepositoryError> {
     // crate::models::storage::update_exercise(exercise).map_err(RepositoryError::ValidationError)
-    // todo!()
+    // TODO: Implement persistence
     Ok(())
   }
 
   fn delete(&self, id: &str) -> Result<(), RepositoryError> {
     // crate::models::storage::delete_exercise(id).map_err(RepositoryError::ValidationError)
-    // todo!()
+    // TODO: Implement persistence
     Ok(())
   }
 
   fn find_by_id(&self, id: &str) -> Result<Exercise, RepositoryError> {
     // Ok(crate::models::storage::load_exercise_by_id(id))
-    // todo!()
+    // TODO: Implement persistence
     Ok(Exercise {
       name: "Sample Exercise".to_string(),
       description: Some("This is a sample exercise.".to_string()),
@@ -98,7 +98,7 @@ impl ExerciseRepository for LocalStorageExerciseRepository {
 
   fn find_all(&self) -> Result<Vec<Exercise>, RepositoryError> {
     // Ok(crate::models::storage::load_exercises())
-    // todo!()
+    // TODO: Implement persistence
     Ok(Vec::new())
   }
 
@@ -106,7 +106,7 @@ impl ExerciseRepository for LocalStorageExerciseRepository {
     // Ok(crate::models::storage::exercise_name_exists(
     //   name, exclude_id,
     // ))
-    // todo!()
+    // TODO: Implement persistence
     Ok(false)
   }
 }

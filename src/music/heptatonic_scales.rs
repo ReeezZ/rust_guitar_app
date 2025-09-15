@@ -21,7 +21,7 @@ pub enum HeptaScaleDegree {
 pub enum HeptaScaleType {
   Major,
   Minor,
-  // TODO add more scale types, the list below is not complete
+  // TODO: add more scale types, the list below is not complete
   // MelodicMinor,
   // HarmonicMinor,
   // Dorian,
