@@ -22,7 +22,7 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
         <Meta name="viewport" content="width=device-width, initial-scale=1" />
         <AutoReload options=options.clone() />
         <HydrationScripts options />
-        <link rel="stylesheet" id="leptos" href="/styles/output.css" />
+        <link rel="stylesheet" id="leptos" href="/pkg/rust_guitar_app.css" />
         <MetaTags />
       </head>
       <body>

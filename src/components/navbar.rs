@@ -1,41 +1,5 @@
-use codee::string::FromToStringCodec;
 use leptos::prelude::*;
 use leptos_router::hooks::use_location;
-use leptos_use::storage::use_local_storage;
-
-#[component]
-pub fn ThemeToggle() -> impl IntoView {
-  // Create signals that work on both server and client
-  let (is_dark, set_is_dark) = signal(false);
-
-  // Use Effect to access localStorage only on the client
-  Effect::new(move |_| {
-    // This only runs on the client (browser)
-    let (stored_is_dark, set_stored_is_dark, _remove_stored_is_dark) =
-      use_local_storage::<bool, FromToStringCodec>("is_dark");
-
-    // Sync with stored value on initial load
-    set_is_dark.set(stored_is_dark.get_untracked());
-
-    // Create a separate effect to watch for changes and persist them
-    Effect::new(move |_| {
-      let current_dark = is_dark.get();
-      set_stored_is_dark.set(current_dark);
-    });
-  });
-
-  view! {
-    <label class="switch" style="float: right; margin-right: 1rem">
-      <input
-        name="color-scheme"
-        checked=move || is_dark.get()
-        on:input=move |_| set_is_dark.set(!is_dark.get())
-        type="checkbox"
-      />
-      <div class="slider round"></div>
-    </label>
-  }
-}
 
 #[component]
 pub fn NavbarLinks() -> impl IntoView {
@@ -45,65 +9,49 @@ pub fn NavbarLinks() -> impl IntoView {
   view! {
     <ul class="flex items-center">
       <li>
-        <a href="/" class=move || if pathname() == "/" { "nav-link active" } else { "nav-link" }>
-          Home
-        </a>
+        <NavbarElement path="/" is_active=Signal::derive(move || pathname() == "/") text="Home" />
       </li>
       <li>
-        <a
-          href="/exercises"
-          class=move || { if pathname() == "/exercises" { "nav-link active" } else { "nav-link" } }
-        >
-          <span>Exercises</span>
-        </a>
+        <NavbarElement
+          path="/exercises"
+          is_active=Signal::derive(move || pathname() == "/exercises")
+          text="Exercises"
+        />
       </li>
       <li>
-        <a
-          href="/fretboard_trainer"
-          class=move || {
-            if pathname() == "/fretboard_trainer" { "nav-link active" } else { "nav-link" }
-          }
-        >
-          <span>Fretboard Trainer</span>
-        </a>
+        <NavbarElement
+          path="/fretboard_trainer"
+          is_active=Signal::derive(move || pathname() == "/fretboard_trainer")
+          text="Fretboard Trainer"
+        />
       </li>
       <li>
-        <a
-          href="/fretboard_dev"
-          class=move || {
-            if pathname() == "/fretboard_dev" { "nav-link active" } else { "nav-link" }
-          }
-        >
-          <span>Fretboard Dev</span>
-        </a>
+        <NavbarElement
+          path="/fretboard_dev"
+          is_active=Signal::derive(move || pathname() == "/fretboard_dev")
+          text="Fretboard Dev"
+        />
       </li>
       <li>
-        <a
-          href="/fretboard_scale"
-          class=move || {
-            if pathname() == "/fretboard_scale" { "nav-link active" } else { "nav-link" }
-          }
-        >
-          <span>Scale Display</span>
-        </a>
+        <NavbarElement
+          path="/fretboard_scale"
+          is_active=Signal::derive(move || pathname() == "/fretboard_scale")
+          text="Scale Display"
+        />
       </li>
       <li>
-        <a
-          href="/fretboard_config_examples"
-          class=move || {
-            if pathname() == "/fretboard_config_examples" { "nav-link active" } else { "nav-link" }
-          }
-        >
-          <span>Fretboard Config Examples</span>
-        </a>
+        <NavbarElement
+          path="/fretboard_config_examples"
+          text="Fretboard Config Examples"
+          is_active=Signal::derive(move || pathname() == "/fretboard_config_examples")
+        />
       </li>
       <li>
-        <a
-          href="/about"
-          class=move || { if pathname() == "/about" { "nav-link active" } else { "nav-link" } }
-        >
-          <span>About</span>
-        </a>
+        <NavbarElement
+          path="/about"
+          text="About"
+          is_active=Signal::derive(move || pathname() == "/about")
+        />
       </li>
     </ul>
   }
@@ -112,9 +60,26 @@ pub fn NavbarLinks() -> impl IntoView {
 #[component]
 pub fn Navbar() -> impl IntoView {
   view! {
-    <div class="flex z-50 p-4 grow h-fit navbar">
+    <div class="flex z-50 p-4 grow h-fit">
       <NavbarLinks />
-      <ThemeToggle />
     </div>
+  }
+}
+
+#[component]
+pub fn NavbarElement(
+  #[prop()] path: &'static str,
+  #[prop()] text: &'static str,
+  #[prop(into)] is_active: Signal<bool>,
+) -> impl IntoView {
+  view! {
+    <a
+      href=path
+      class="p-3 m-1"
+      class=(["text-white", "bg-blue-500"], move || is_active.get())
+      class=(["hover:bg-gray-200"], move || !is_active.get())
+    >
+      <span>{text}</span>
+    </a>
   }
 }
