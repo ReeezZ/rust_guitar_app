@@ -1,5 +1,7 @@
 use leptos::prelude::*;
 
+use crate::components::ui::{Button, ButtonVariant};
+
 #[component]
 pub fn ExerciseTypeChangeConfirmation(
   show: ReadSignal<bool>,
@@ -7,36 +9,31 @@ pub fn ExerciseTypeChangeConfirmation(
   on_cancel: Callback<()>,
 ) -> impl IntoView {
   view! {
-      {move || {
-          if show.get() {
-              view! {
-                  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                      <div class="bg-white p-6 rounded-lg max-w-md mx-4">
-                          <h3 class="text-lg font-semibold text-gray-800 mb-3">Confirm Exercise Type Change</h3>
-                          <p class="text-gray-600 mb-4">
-                              Changing the exercise type will reset type-specific settings (root note, scale type, fret range).
-                              Are you sure you want to continue?
-                          </p>
-                          <div class="flex justify-end space-x-3">
-                              <button
-                                  class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
-                                  on:click=move |_| on_cancel.run(())
-                              >
-                                  Cancel
-                              </button>
-                              <button
-                                  class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-                                  on:click=move |_| on_confirm.run(())
-                              >
-                                  Continue
-                              </button>
-                          </div>
-                      </div>
-                  </div>
-              }.into_any()
-          } else {
-              view! { <div></div> }.into_any()
-          }
-      }}
+    {move || {
+      if show.get() {
+        view! {
+          <div class="flex fixed inset-0 z-50 justify-center items-center bg-black bg-opacity-50">
+            <div class="p-6 mx-4 max-w-md bg-white rounded-lg">
+              <h3 class="mb-3 text-lg font-semibold text-gray-800">Confirm Exercise Type Change</h3>
+              <p class="mb-4 text-gray-600">
+                Changing the exercise type will reset type-specific settings (root note, scale type, fret range).
+                Are you sure you want to continue?
+              </p>
+              <div class="flex justify-end space-x-3">
+                <Button variant=ButtonVariant::Primary on_click=move || on_cancel.run(())>
+                  Cancel
+                </Button>
+                <Button variant=ButtonVariant::Danger on_click=move || on_confirm.run(())>
+                  Continue
+                </Button>
+              </div>
+            </div>
+          </div>
+        }
+          .into_any()
+      } else {
+        view! { <div></div> }.into_any()
+      }
+    }}
   }
 }

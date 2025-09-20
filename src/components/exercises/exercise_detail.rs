@@ -1,4 +1,5 @@
 use super::practice_session::PracticeSession;
+use crate::components::ui::{Button, ButtonVariant};
 use crate::models::exercise::{Exercise, ExerciseType};
 use crate::models::repository::{get_exercise_repository, ExerciseRepository};
 use leptos::prelude::*;
@@ -122,18 +123,18 @@ fn ExerciseDetailChecked(
                           rows="3"
                         />
                         <div class="flex justify-end space-x-2">
-                          <button
-                            class="py-1 px-3 text-sm text-gray-600 rounded border border-gray-300 hover:bg-gray-50"
-                            on:click=move |_| cancel_description_edit()
+                          <Button
+                            variant=ButtonVariant::Secondary
+                            on_click=move || cancel_description_edit()
                           >
                             "Cancel"
-                          </button>
-                          <button
-                            class="py-1 px-3 text-sm text-white bg-blue-500 rounded hover:bg-blue-600"
-                            on:click=move |_| save_description_edit()
+                          </Button>
+                          <Button
+                            variant=ButtonVariant::Primary
+                            on_click=move || save_description_edit()
                           >
                             "Save"
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     }
@@ -289,13 +290,14 @@ fn Title(
                       ExerciseType::Scale { .. } | ExerciseType::Triad { .. } => {
                         // Only show generate button for Scale and Triad types
                         view! {
-                          <button
-                            class="py-1 px-3 text-sm text-blue-600 rounded border border-blue-600 hover:bg-blue-50"
-                            on:click=move |_| generate_title()
-                            title="Generate title from exercise details"
+                          <Button
+                            variant=ButtonVariant::Primary
+                            on_click=generate_title
+                            // TODO: Maybe the buttons should take 'static str as param instead of String
+                            title="Generate title from exercise details".to_string()
                           >
                             "Generate"
-                          </button>
+                          </Button>
                         }
                           .into_any()
                       }
@@ -305,18 +307,12 @@ fn Title(
                 }
               </div>
               <div class="flex space-x-2">
-                <button
-                  class="py-1 px-3 text-sm text-gray-600 rounded border border-gray-300 hover:bg-gray-50"
-                  on:click=move |_| cancel_title_edit()
-                >
+                <Button variant=ButtonVariant::Secondary on_click=move || cancel_title_edit()>
                   "Cancel"
-                </button>
-                <button
-                  class="py-1 px-3 text-sm text-white bg-blue-500 rounded hover:bg-blue-600"
-                  on:click=move |_| save_title_edit()
-                >
+                </Button>
+                <Button variant=ButtonVariant::Primary on_click=move || save_title_edit()>
                   "Save"
-                </button>
+                </Button>
               </div>
             </div>
           </div>

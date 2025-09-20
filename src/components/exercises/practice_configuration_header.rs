@@ -1,5 +1,9 @@
 use crate::{
-  components::{exercises::PositionPresetButtons, fretboard::base::MAX_FRETS},
+  components::{
+    exercises::PositionPresetButtons,
+    fretboard::base::MAX_FRETS,
+    ui::{Button, ButtonVariant},
+  },
   models::exercise::Exercise,
 };
 use crate::{models::exercise::ExerciseType, music::notes::NoteExt, music::Note, music::ScaleType};
@@ -97,18 +101,18 @@ fn RootNoteSelection(
   view! {
     <div class="flex relative gap-2 items-center">
       <span class="font-medium text-gray-700">"Root:"</span>
-      <button
-        class="py-1 px-2 text-xs font-medium text-indigo-800 bg-indigo-100 rounded transition-colors cursor-pointer hover:bg-indigo-200"
-        on:click=move |_| {
+      <Button
+        variant=ButtonVariant::Primary
+        on_click=move || {
           show_scale_type_modal.set(false);
           show_fret_range_modal.set(false);
           temp_selected_note.set(None);
           show_root_note_modal.set(!show_root_note_modal.get());
         }
-        title="Click to change root note"
+        title="Click to change root note".to_string()
       >
         {root_note.to_string()}
-      </button>
+      </Button>
 
       // Root note dropdown
       <Show when=move || show_root_note_modal.get()>
@@ -118,20 +122,24 @@ fn RootNoteSelection(
             {move || {
               Note::all_notes()
                 .iter()
-                .map(|&note| {
+                .map(move |&note| {
                   let note_str = note.to_short_string();
                   let is_root_note = note == root_note;
-                  let is_current_root = note == temp_selected_note.get().unwrap_or(root_note);
-
+                  let is_current_root = move || {
+                    note == temp_selected_note.get().unwrap_or(root_note)
+                  };
                   view! {
                     <button
-                      class=if is_current_root {
-                        "my-1 text-xs font-bold rounded border-2 border-indigo-600 bg-indigo-600 text-white transition-colors"
-                      } else if is_root_note {
-                        "my-1 text-xs font-bold rounded border-2 border-green-600 bg-green-600 text-white transition-colors"
-                      } else {
-                        "my-1 text-xs font-medium rounded border border-gray-300 bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
-                      }
+                      class="my-1 text-xs text-gray-700 rounded border-2 transition-colors hover:bg-gray-200"
+                      class=(
+                        ["border-indigo-600", "bg-blue-600"],
+                        move || is_root_note && !is_current_root(),
+                      )
+                      class=(["border-green-600", "bg-green-600"], move || is_current_root())
+                      class=(
+                        ["border-gray-300", "bg-gray-100"],
+                        move || !is_root_note && !is_current_root(),
+                      )
                       on:click=move |_| {
                         temp_selected_note.set(Some(note));
                       }
@@ -156,7 +164,7 @@ fn RootNoteSelection(
               "Cancel"
             </button>
             <button
-              class="px-1 my-1 text-sm text-white bg-blue-600 rounded transition-colors hover:bg-blue-700 disabled:bg-gray-400"
+              class="px-1 my-1 text-sm text-white bg-blue-500 rounded transition-colors hover:bg-blue-700 disabled:bg-gray-400"
               disabled=move || temp_selected_note.get().is_none()
               on:click=move |_| { on_confirm_note_change() }
             >
@@ -206,10 +214,10 @@ fn ScaleSelection(
           >
             <button
               class=move || {
-                if button_scale_type == scale_type {
+                if button_scale_type == temporary_selected_scale.get() {
+                  "my-1 text-xs font-bold rounded border-2 border-blue-500 bg-blue-500 text-white transition-colors"
+                } else if button_scale_type == scale_type {
                   "my-1 text-xs font-bold rounded border-2 border-purple-600 bg-purple-600 text-white transition-colors"
-                } else if button_scale_type == temporary_selected_scale.get() {
-                  "my-1 text-xs font-bold rounded border-2 border-blue-600 bg-blue-600 text-white transition-colors"
                 } else {
                   "my-1 text-xs font-medium rounded border border-gray-300 bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
                 }

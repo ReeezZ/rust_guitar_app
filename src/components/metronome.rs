@@ -2,7 +2,10 @@ use leptos::prelude::*;
 use leptos_use::{use_interval_fn, utils::Pausable};
 use web_sys::{AudioContext, OscillatorType};
 
-use crate::audio::AudioManager;
+use crate::{
+  audio::AudioManager,
+  components::ui::{Button, ButtonVariant},
+};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum MetronomeState {
@@ -62,7 +65,7 @@ pub fn Metronome(
   } = use_interval_fn(tick, interval_signal);
 
   // Start/stop metronome
-  let toggle_metronome = move |_| {
+  let toggle_metronome = move || {
     match metronome_state.get_untracked() {
       MetronomeState::Stopped => {
         set_current_beat.set(1);
@@ -94,30 +97,30 @@ pub fn Metronome(
       <div class="text-center">
         // BPM Display and Control
         <div class="flex justify-center items-center mb-4">
-          <button
-            class="flex justify-center items-center w-8 h-8 text-sm font-bold bg-gray-200 rounded-full hover:bg-gray-300"
-            on:click=move |_| {
+          <Button
+            variant=ButtonVariant::Secondary
+            on_click=move || {
               let new_bpm = (bpm.get().saturating_sub(5)).max(30);
               handle_bpm_change(new_bpm);
             }
           >
             "−"
-          </button>
+          </Button>
 
           <div class="flex-1 mx-4 text-center">
             <div class="text-2xl font-bold text-gray-800">{move || bpm.get().to_string()}</div>
             <div class="text-xs text-gray-500">"BPM"</div>
           </div>
 
-          <button
-            class="flex justify-center items-center w-8 h-8 text-sm font-bold bg-gray-200 rounded-full hover:bg-gray-300"
-            on:click=move |_| {
+          <Button
+            variant=ButtonVariant::Secondary
+            on_click=move || {
               let new_bpm = (bpm.get() + 5).min(250);
               handle_bpm_change(new_bpm);
             }
           >
             "+"
-          </button>
+          </Button>
         </div>
 
         // Beat indicator (4 dots for 4/4 time)
@@ -146,18 +149,14 @@ pub fn Metronome(
 
         // Start/Stop button - centered
         <div class="flex justify-center mb-3">
-          <button
-            class=move || {
+          <Button
+            variant=Signal::derive(move || {
               match metronome_state.get() {
-                MetronomeState::Running => {
-                  "bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg"
-                }
-                MetronomeState::Stopped => {
-                  "bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
-                }
+                MetronomeState::Running => ButtonVariant::Danger,
+                MetronomeState::Stopped => ButtonVariant::Primary,
               }
-            }
-            on:click=toggle_metronome
+            })
+            on_click=toggle_metronome
           >
             {move || {
               match metronome_state.get() {
@@ -165,7 +164,7 @@ pub fn Metronome(
                 MetronomeState::Stopped => "Start",
               }
             }}
-          </button>
+          </Button>
         </div>
 
         // State indicator

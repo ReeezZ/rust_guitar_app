@@ -122,26 +122,26 @@ pub fn FretboardScalePage() -> impl IntoView {
           >
             "C Major (7-10)"
           </Button>
-          <button
-            class="py-2 px-4 text-white bg-green-500 rounded hover:bg-green-600"
-            on:click=move |_| {
+          <Button
+            variant=ButtonVariant::Primary
+            on_click=move || {
               start_fret.set(1);
               end_fret.set(4);
               update_scale(Scale::new(Note::D, ScaleType::Hepatonic(HeptaScaleType::Minor)));
             }
           >
             "A Minor (1-4, no opens)"
-          </button>
-          <button
-            class="py-2 px-4 text-white bg-purple-500 rounded hover:bg-purple-600"
-            on:click=move |_| {
+          </Button>
+          <Button
+            variant=ButtonVariant::Primary
+            on_click=move || {
               start_fret.set(0);
               end_fret.set(10);
               update_scale(Scale::new(Note::E, ScaleType::Hepatonic(HeptaScaleType::Major)));
             }
           >
             "Open strings only"
-          </button>
+          </Button>
         </div>
       </div>
 

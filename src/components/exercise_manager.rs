@@ -1,4 +1,5 @@
 use crate::components::exercises::{ExerciseForm, FormMode};
+use crate::components::ui::{Button, ButtonVariant};
 use crate::models::exercise::Exercise;
 use crate::models::repository::{get_exercise_repository, ExerciseRepository};
 use leptos::prelude::*;
@@ -55,12 +56,9 @@ pub fn ExerciseManager() -> impl IntoView {
     <div class="p-6 mx-auto max-w-4xl">
       <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-gray-800">"My Exercises"</h1>
-        <button
-          class="py-2 px-4 font-bold text-white bg-blue-500 rounded hover:bg-blue-700"
-          on:click=move |_| set_show_form.set(!show_form.get())
-        >
+        <Button variant=ButtonVariant::Primary on_click=move || set_show_form.set(!show_form.get())>
           {move || if show_form.get() { "Cancel" } else { "Add Exercise" }}
-        </button>
+        </Button>
       </div>
 
       // Add Exercise Form
@@ -103,16 +101,16 @@ pub fn ExerciseManager() -> impl IntoView {
                 >
                   "View"
                 </a>
-                <button
-                  class="py-1.5 px-2 text-sm font-medium text-red-500 hover:text-red-700"
-                  on:click={
+                <Button
+                  variant=ButtonVariant::Danger
+                  on_click={
                     let exercise_id = exercise.id.clone();
                     let exercise_name = exercise.name.clone();
-                    move |_| show_delete_dialog(exercise_id.clone(), exercise_name.clone())
+                    move || show_delete_dialog(exercise_id.clone(), exercise_name.clone())
                   }
                 >
                   "Delete"
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -146,18 +144,12 @@ pub fn ExerciseManager() -> impl IntoView {
                   </p>
                   <p class="mb-6 text-sm text-gray-500">"This action cannot be undone."</p>
                   <div class="flex justify-end space-x-3">
-                    <button
-                      class="py-2 px-4 text-gray-600 rounded-md border border-gray-300 hover:bg-gray-50"
-                      on:click=move |_| cancel_delete()
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      class="py-2 px-4 text-white bg-red-500 rounded-md hover:bg-red-600"
-                      on:click=move |_| confirm_delete()
-                    >
+                    <Button variant=ButtonVariant::Secondary on_click=move || cancel_delete()>
+                      "Cancel"
+                    </Button>
+                    <Button variant=ButtonVariant::Danger on_click=move || confirm_delete()>
                       Delete
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>

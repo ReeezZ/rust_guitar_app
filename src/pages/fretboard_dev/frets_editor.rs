@@ -1,7 +1,10 @@
 use leptos::prelude::*;
 
 use super::helper::get_fret_positions;
-use crate::components::fretboard::{FretStateColor, FretStateSignals};
+use crate::components::{
+  fretboard::{FretStateColor, FretStateSignals},
+  ui::{Button, ButtonVariant},
+};
 
 #[component]
 pub(super) fn FretsEditor(
@@ -10,7 +13,7 @@ pub(super) fn FretsEditor(
   #[prop(into)] color: RwSignal<FretStateColor>,
   #[prop(into)] hidden: RwSignal<bool>,
 ) -> impl IntoView {
-  let reset_sample = move |_| frets.set(get_fret_positions());
+  let reset_sample = move || frets.set(get_fret_positions());
 
   view! {
     <div class="p-4 mt-4 space-y-3 bg-gray-50 rounded border">
@@ -63,9 +66,9 @@ pub(super) fn FretsEditor(
           />
           <span>"Hidden"</span>
         </label>
-        <button class="py-1 px-3 text-gray-800 bg-gray-300 rounded" on:click=reset_sample>
+        <Button variant=ButtonVariant::Secondary on_click=reset_sample>
           "Reset Sample"
-        </button>
+        </Button>
       </div>
     </div>
   }

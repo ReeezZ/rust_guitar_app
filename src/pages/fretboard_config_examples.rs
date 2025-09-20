@@ -1,4 +1,4 @@
-use crate::components::ui::FretRangeSelector;
+use crate::components::ui::{Button, ButtonVariant, FretRangeSelector};
 use crate::music::Note;
 /// Interactive fretboard configuration playground
 ///
@@ -62,29 +62,29 @@ pub fn FretboardConfigExamples() -> impl IntoView {
       <div class="p-2 bg-green-50 rounded-lg border">
         <h3 class="mb-4 text-lg font-semibold">"⚡ Quick Presets"</h3>
         <div class="flex flex-wrap gap-2 justify-center items-center">
-          <button
-            class="py-2 px-4 text-white bg-green-500 rounded hover:bg-green-600"
-            on:click=move |_| {
+          <Button
+            variant=ButtonVariant::Primary
+            on_click=move || {
               num_strings.set(6);
               svg_aspect_ratio.set(3.0);
               marker_preset.set("standard".to_string());
             }
           >
             "🎸 Standard Guitar"
-          </button>
-          <button
-            class="py-2 px-4 text-white bg-green-500 rounded hover:bg-green-600"
-            on:click=move |_| {
+          </Button>
+          <Button
+            variant=ButtonVariant::Primary
+            on_click=move || {
               num_strings.set(4);
               svg_aspect_ratio.set(4.0);
               marker_preset.set("standard".to_string());
             }
           >
             "🎵 Bass Guitar"
-          </button>
-          <button
-            class="py-2 px-4 text-white bg-green-500 rounded hover:bg-green-600"
-            on:click=move |_| {
+          </Button>
+          <Button
+            variant=ButtonVariant::Primary
+            on_click=move || {
               num_strings.set(7);
               svg_aspect_ratio.set(2.8);
               extra_frets.set(2);
@@ -92,20 +92,20 @@ pub fn FretboardConfigExamples() -> impl IntoView {
             }
           >
             "🎸 7-String"
-          </button>
-          <button
-            class="py-2 px-4 text-white bg-green-500 rounded hover:bg-green-600"
-            on:click=move |_| {
+          </Button>
+          <Button
+            variant=ButtonVariant::Primary
+            on_click=move || {
               svg_aspect_ratio.set(2.2);
               fret_margin_percentage.set(0.02);
               nut_width.set(10.0);
             }
           >
             "� Compact"
-          </button>
-          <button
-            class="py-2 px-4 text-white bg-green-500 rounded hover:bg-green-600"
-            on:click=move |_| {
+          </Button>
+          <Button
+            variant=ButtonVariant::Primary
+            on_click=move || {
               svg_aspect_ratio.set(5.0);
               extra_frets.set(3);
               fret_margin_percentage.set(0.08);
@@ -113,7 +113,7 @@ pub fn FretboardConfigExamples() -> impl IntoView {
             }
           >
             "📺 Ultra-wide"
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -264,67 +264,57 @@ pub fn FretboardConfigExamples() -> impl IntoView {
             // Markers - compact layout
             <div class="p-1 rounded-lg border">
               <h3 class="mb-3 text-base font-semibold">"🎯 Fret Markers"</h3>
-              <div class="flex gap-2 justify-center items-center">
-                <button
-                  class=move || {
-                    format!(
-                      "inline-block px-2 py-1 rounded text-xs m-1 {}",
-                      if marker_preset.get() == "standard" {
-                        "bg-blue-500 text-white"
-                      } else {
-                        "bg-gray-200 hover:bg-gray-300"
-                      },
-                    )
-                  }
-                  on:click=move |_| marker_preset.set("standard".to_string())
+              <div class="flex flex-wrap justify-center items-center">
+                <Button
+                  variant=Signal::derive(move || {
+                    if marker_preset.get() == "standard" {
+                      ButtonVariant::Primary
+                    } else {
+                      ButtonVariant::Secondary
+                    }
+                  })
+                  on_click=move || marker_preset.set("standard".to_string())
                 >
+
                   "Standard"
-                </button>
-                <button
-                  class=move || {
-                    format!(
-                      "inline-block px-2 py-1 rounded text-xs m-1 {}",
-                      if marker_preset.get() == "octaves" {
-                        "bg-blue-500 text-white"
-                      } else {
-                        "bg-gray-200 hover:bg-gray-300"
-                      },
-                    )
-                  }
-                  on:click=move |_| marker_preset.set("octaves".to_string())
+                </Button>
+                <Button
+                  variant=Signal::derive(move || {
+                    if marker_preset.get() == "octaves" {
+                      ButtonVariant::Primary
+                    } else {
+                      ButtonVariant::Secondary
+                    }
+                  })
+                  on_click=move || marker_preset.set("octaves".to_string())
                 >
+
                   "Octaves"
-                </button>
-                <button
-                  class=move || {
-                    format!(
-                      "inline-block px-2 py-1 rounded text-xs m-1 {}",
-                      if marker_preset.get() == "pentatonic" {
-                        "bg-blue-500 text-white"
-                      } else {
-                        "bg-gray-200 hover:bg-gray-300"
-                      },
-                    )
-                  }
-                  on:click=move |_| marker_preset.set("pentatonic".to_string())
+                </Button>
+                <Button
+                  variant=Signal::derive(move || {
+                    if marker_preset.get() == "pentatonic" {
+                      ButtonVariant::Primary
+                    } else {
+                      ButtonVariant::Secondary
+                    }
+                  })
+                  on_click=move || marker_preset.set("pentatonic".to_string())
                 >
                   "Pentatonic"
-                </button>
-                <button
-                  class=move || {
-                    format!(
-                      "inline-block px-2 py-1 rounded text-xs m-1 {}",
-                      if marker_preset.get() == "none" {
-                        "bg-blue-500 text-white"
-                      } else {
-                        "bg-gray-200 hover:bg-gray-300"
-                      },
-                    )
-                  }
-                  on:click=move |_| marker_preset.set("none".to_string())
+                </Button>
+                <Button
+                  variant=Signal::derive(move || {
+                    if marker_preset.get() == "none" {
+                      ButtonVariant::Primary
+                    } else {
+                      ButtonVariant::Secondary
+                    }
+                  })
+                  on_click=move || marker_preset.set("none".to_string())
                 >
                   "None"
-                </button>
+                </Button>
               </div>
             </div>
           </div>
