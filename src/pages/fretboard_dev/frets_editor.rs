@@ -16,7 +16,7 @@ pub(super) fn FretsEditor(
   let reset_sample = move || frets.set(get_fret_positions());
 
   view! {
-    <div class="p-4 mt-4 space-y-3 bg-gray-50 rounded border">
+    <div class="p-4 my-4 space-y-3 bg-gray-50 rounded border dark:bg-gray-950">
       <h2 class="font-semibold">"Edit Fret State"</h2>
       <div class="flex flex-wrap gap-4 items-end">
         <label class="flex flex-col text-sm">

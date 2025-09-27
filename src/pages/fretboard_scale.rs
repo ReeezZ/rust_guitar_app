@@ -58,9 +58,9 @@ pub fn FretboardScalePage() -> impl IntoView {
       <h1 class="text-3xl font-bold">"SVG Fretboard with Scale Display"</h1>
 
       // Current scale info display
-      <div class="p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+      <div class="p-4 bg-blue-50 rounded-lg border-2 border-blue-200 dark:border-blue-700 dark:bg-blue-950">
         <h3 class="mb-2 text-lg font-semibold">"Current Scale"</h3>
-        <div class="text-sm text-gray-700">
+        <div class="text-sm">
           <p>
             <strong>"Root:"</strong>
             {move || root_note.get().to_string()}
@@ -78,8 +78,8 @@ pub fn FretboardScalePage() -> impl IntoView {
       </div>
 
       // Quick scale presets
-      <div class="p-4 bg-yellow-50 rounded-lg border-2 border-yellow-200">
-        <h3 class="mb-3 text-lg font-semibold">"Quick Presets"</h3>
+      <div class="p-4 bg-yellow-50 rounded-lg border-2 border-yellow-200 dark:border-yellow-700 dark:bg-yellow-950">
+        <h3 class="mb-3 text-lg font-semibold text-center">"Quick Presets"</h3>
         <div class="flex flex-wrap gap-2">
           <Button
             variant=ButtonVariant::Primary
@@ -145,12 +145,7 @@ pub fn FretboardScalePage() -> impl IntoView {
         </div>
       </div>
 
-      // Main fretboard display
-      //
       <FretboardModelAdapter model />
-      // />
-      // Show 2 extra frets beyond the end fret
-      <div class="p-4 bg-gray-50 rounded-lg border-2 border-gray-200"></div>
 
       // Scale configuration controls
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -199,24 +194,6 @@ pub fn FretboardScalePage() -> impl IntoView {
         </div>
       </div>
 
-      // Legend
-      <div class="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
-        <h3 class="mb-3 text-lg font-semibold">"Legend"</h3>
-        <div class="flex flex-wrap gap-6">
-          <div class="flex gap-2 items-center">
-            <div class="w-6 h-6 bg-red-500 rounded-full border-2 border-red-700"></div>
-            <span>"Root Note"</span>
-          </div>
-          <div class="flex gap-2 items-center">
-            <div class="w-5 h-5 bg-blue-500 rounded-full border-2 border-blue-700"></div>
-            <span>"Scale Notes"</span>
-          </div>
-          <div class="flex gap-2 items-center">
-            <div class="w-4 h-4 bg-gray-400 rounded-full opacity-50"></div>
-            <span>"Fret Markers"</span>
-          </div>
-        </div>
-      </div>
     </div>
   }
 }

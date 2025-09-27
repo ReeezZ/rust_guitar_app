@@ -58,8 +58,8 @@ pub fn SharedModelDemo() -> impl IntoView {
   });
 
   view! {
-    <h1 class="mb-2 text-xl font-bold">"Fretboard Dev: FretboardWithNotes"</h1>
-    <p class="mb-4 text-sm text-gray-600">
+    <h1 class="mt-2 text-xl font-bold">"Fretboard Dev: FretboardWithNotes"</h1>
+    <p class="my-4 text-sm">
       Test page showing a variety of FretState values (Normal, Colored, Hidden).
     </p>
     <FretsEditor frets label color hidden />

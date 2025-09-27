@@ -55,7 +55,7 @@ pub fn ExerciseManager() -> impl IntoView {
   view! {
     <div class="p-6 mx-auto max-w-4xl">
       <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">"My Exercises"</h1>
+        <h1 class="text-3xl font-bold">"My Exercises"</h1>
         <Button variant=ButtonVariant::Primary on_click=move || set_show_form.set(!show_form.get())>
           {move || if show_form.get() { "Cancel" } else { "Add Exercise" }}
         </Button>

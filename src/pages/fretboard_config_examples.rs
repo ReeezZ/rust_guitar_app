@@ -59,8 +59,8 @@ pub fn FretboardConfigExamples() -> impl IntoView {
       <h2 class="text-2xl font-bold">"Interactive Fretboard Configuration"</h2>
 
       // Quick presets
-      <div class="p-2 bg-green-50 rounded-lg border">
-        <h3 class="mb-4 text-lg font-semibold">"⚡ Quick Presets"</h3>
+      <div class="p-2 bg-green-50 rounded-lg border dark:bg-green-950">
+        <h3 class="mb-4 text-lg font-semibold text-center">"⚡ Quick Presets"</h3>
         <div class="flex flex-wrap gap-2 justify-center items-center">
           <Button
             variant=ButtonVariant::Primary
@@ -120,7 +120,7 @@ pub fn FretboardConfigExamples() -> impl IntoView {
       // Main layout: fretboard and controls side by side on large screens
       <div class="flex flex-col gap-6 xl:flex-row">
         // Main fretboard display - responsive sizing, not too constrained
-        <div class="p-4 bg-blue-50 rounded-lg border-2 border-blue-200 xl:min-w-0 xl:flex-[2]">
+        <div class="p-4 bg-blue-50 rounded-lg border-2 border-blue-200 xl:min-w-0 dark:border-blue-700 xl:flex-[2] dark:bg-blue-950">
           <FretboardModelAdapter model />
 
         </div>
@@ -129,36 +129,38 @@ pub fn FretboardConfigExamples() -> impl IntoView {
         <div class="xl:flex-1 xl:max-w-lg">
           // Configuration controls organized in compact sections
           <div class="space-y-4">
-            <FretRangeSelector start_fret end_fret label="Fret range" />
+            <div class="flex flex-row gap-2 w-full grow">
+              <FretRangeSelector start_fret end_fret label="Fret range" />
 
-            // Instrument Configuration - compact horizontal layout
-            <div class="p-1 rounded-lg border">
-              <h3 class="mb-3 text-base font-semibold">"🎸 Instrument"</h3>
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="block mb-1 text-xs font-medium">
-                    "Strings: " <span class="font-bold">{num_strings}</span>
-                  </label>
-                  <input
-                    type="range"
-                    min="2"
-                    max=MAX_STRINGS
-                    class="w-full"
-                    prop:value=num_strings
-                    on:input=move |ev| {
-                      if let Ok(val) = event_target_value(&ev).parse::<u8>() {
-                        num_strings.set(val);
+              // Instrument Configuration - compact horizontal layout
+              <div class="p-1 rounded-lg border">
+                <h3 class="mb-3 text-base font-semibold">"🎸 Instrument"</h3>
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block mb-1 text-xs font-medium">
+                      "Strings: " <span class="font-bold">{num_strings}</span>
+                    </label>
+                    <input
+                      type="range"
+                      min="2"
+                      max=MAX_STRINGS
+                      class="w-full"
+                      prop:value=num_strings
+                      on:input=move |ev| {
+                        if let Ok(val) = event_target_value(&ev).parse::<u8>() {
+                          num_strings.set(val);
+                        }
                       }
-                    }
-                  />
-                  <div class="mt-1 text-xs text-gray-600">
-                    {move || match num_strings.get() {
-                      4 => "Bass",
-                      6 => "Guitar",
-                      7 => "7-String",
-                      8 => "8-String",
-                      _ => "Custom",
-                    }}
+                    />
+                    <div class="mt-1 text-xs">
+                      {move || match num_strings.get() {
+                        4 => "Bass",
+                        6 => "Guitar",
+                        7 => "7-String",
+                        8 => "8-String",
+                        _ => "Custom",
+                      }}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -264,7 +266,7 @@ pub fn FretboardConfigExamples() -> impl IntoView {
             // Markers - compact layout
             <div class="p-1 rounded-lg border">
               <h3 class="mb-3 text-base font-semibold">"🎯 Fret Markers"</h3>
-              <div class="flex flex-wrap justify-center items-center">
+              <div class="flex flex-wrap gap-3 justify-center items-center">
                 <Button
                   variant=Signal::derive(move || {
                     if marker_preset.get() == "standard" {
