@@ -328,9 +328,12 @@ fn FretRangeSelection(
               </div>
 
               <div>
-                <PositionPresetButtons on_preset_select=move |min, max| {
-                  fret_range.set((min, max));
-                } />
+                <PositionPresetButtons
+                  on_preset_select=move |min, max| {
+                    fret_range.set((min, max));
+                  }
+                  current_range=fret_range
+                />
               </div>
               <div class="flex justify-center items-center">
                 <button

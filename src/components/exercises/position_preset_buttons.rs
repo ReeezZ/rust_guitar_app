@@ -1,7 +1,12 @@
 use leptos::prelude::*;
 
+use crate::components::ui::{Button, ButtonVariant};
+
 #[component]
-pub fn PositionPresetButtons(#[prop(into)] on_preset_select: Callback<(u8, u8)>) -> impl IntoView {
+pub fn PositionPresetButtons(
+  #[prop(into)] on_preset_select: Callback<(u8, u8)>,
+  #[prop(into)] current_range: Signal<(u8, u8)>,
+) -> impl IntoView {
   view! {
     <div class="p-1 mt-2 text-center bg-gray-500 rounded-md border border-gray-400">
       <label class="justify-center text-sm font-medium text-center">"Position Presets"</label>
@@ -10,27 +15,32 @@ pub fn PositionPresetButtons(#[prop(into)] on_preset_select: Callback<(u8, u8)>)
           label="R".to_string()
           range=(0, 4)
           on_preset_select=on_preset_select
+          current_range
         />
         <PositionPresetButton
           label="1".to_string()
           range=(2, 6)
           on_preset_select=on_preset_select
+          current_range
         />
 
         <PositionPresetButton
           label="2".to_string()
           range=(4, 8)
           on_preset_select=on_preset_select
+          current_range
         />
         <PositionPresetButton
           label="3".to_string()
           range=(6, 10)
           on_preset_select=on_preset_select
+          current_range
         />
         <PositionPresetButton
           label="4".to_string()
           range=(8, 12)
           on_preset_select=on_preset_select
+          current_range
         />
       </div>
     </div>
@@ -42,14 +52,16 @@ fn PositionPresetButton(
   #[prop(into)] label: String,
   #[prop(into)] range: (u8, u8),
   #[prop(into)] on_preset_select: Callback<(u8, u8)>,
+  #[prop(into)] current_range: Signal<(u8, u8)>,
 ) -> impl IntoView {
   view! {
-    <button
-      type="button"
-      class="p-2 text-sm font-medium bg-white rounded-md border border-gray-300 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-      on:click=move |_| on_preset_select.run(range)
+    <Button
+      variant=Signal::derive(move || {
+        if range == current_range.get() { ButtonVariant::Special } else { ButtonVariant::Secondary }
+      })
+      on_click=Callback::new(move |_| on_preset_select.run(range))
     >
-      {label}
-    </button>
+      {label.clone()}
+    </Button>
   }
 }

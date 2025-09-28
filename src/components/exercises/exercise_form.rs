@@ -246,7 +246,7 @@ pub fn ExerciseForm(
           view! { <div></div> }.into_any()
         } else {
           view! {
-            <div class="p-3 mb-4 rounded border border-red-200 dark:bg-red-700 dark:border-red-800 bg-reg-50">
+            <div class="p-3 mb-4 bg-red-50 rounded border border-red-200 dark:bg-red-700 dark:border-red-800">
               {errors
                 .into_iter()
                 .map(|error| {

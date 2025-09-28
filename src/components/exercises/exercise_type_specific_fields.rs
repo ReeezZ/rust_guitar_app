@@ -32,7 +32,7 @@ pub fn ExerciseTypeSpecificFields(
       }
 
       view! {
-        <div class="p-4 space-y-4 bg-gray-50 rounded-md">
+        <div class="p-4 space-y-4 bg-gray-200 rounded-md dark:bg-gray-800">
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             // Root note selector
             <div>
@@ -100,7 +100,10 @@ pub fn ExerciseTypeSpecificFields(
           <FretRangeSelector start_fret=min_fret end_fret=max_fret label="Playable Range" />
 
           // Position presets
-          <PositionPresetButtons on_preset_select />
+          <PositionPresetButtons
+            on_preset_select
+            current_range=Signal::derive(move || (min_fret.get(), max_fret.get()))
+          />
 
           // Fretboard preview for scales
           <div>
