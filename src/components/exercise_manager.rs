@@ -85,10 +85,8 @@ pub fn ExerciseManager() -> impl IntoView {
           <div class="p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
             <div class="flex justify-between items-center">
               <div>
-                <h3 class="text-lg font-semibold text-gray-800">{exercise.name.clone()}</h3>
-                <p class="mt-1 text-sm text-gray-600">
-                  "Type: " {exercise.exercise_type.type_name()}
-                </p>
+                <h3 class="text-lg font-semibold">{exercise.name.clone()}</h3>
+                <p class="mt-1 text-sm">"Type: " {exercise.exercise_type.type_name()}</p>
                 {exercise
                   .description
                   .as_ref()
@@ -122,7 +120,7 @@ pub fn ExerciseManager() -> impl IntoView {
             .is_empty()
             .then(|| {
               view! {
-                <div class="py-8 text-center text-gray-500">
+                <div class="py-8 text-center">
                   <p>"No exercises yet. Create your first exercise to get started!"</p>
                 </div>
               }
@@ -138,11 +136,11 @@ pub fn ExerciseManager() -> impl IntoView {
               <div class="flex fixed inset-0 z-50 justify-center items-center bg-black bg-opacity-50">
                 <div class="p-6 mx-4 max-w-md bg-white rounded-lg">
                   <h3 class="mb-3 text-lg font-semibold text-gray-800">Delete Exercise</h3>
-                  <p class="mb-4 text-gray-600">
+                  <p class="mb-4">
                     "Are you sure you want to delete '"
                     <span class="font-semibold">{exercise_name}</span> "'?"
                   </p>
-                  <p class="mb-6 text-sm text-gray-500">"This action cannot be undone."</p>
+                  <p class="mb-6 text-sm">"This action cannot be undone."</p>
                   <div class="flex justify-end space-x-3">
                     <Button variant=ButtonVariant::Secondary on_click=move || cancel_delete()>
                       "Cancel"

@@ -1,6 +1,7 @@
 use crate::components::exercises::{
   constants::*, ExerciseTypeChangeConfirmation, ExerciseTypeSpecificFields,
 };
+use crate::components::ui::{Button, ButtonVariant};
 use crate::models::{
   exercise::{Exercise, ExerciseType},
   repository::{get_exercise_repository, ExerciseRepository},
@@ -177,7 +178,7 @@ pub fn ExerciseForm(
   };
 
   // Save handler
-  let handle_save = move |_| {
+  let handle_save = move || {
     let validation_errors = validate_form();
     if !validation_errors.is_empty() {
       set_errors.set(validation_errors);
@@ -228,15 +229,15 @@ pub fn ExerciseForm(
   };
 
   // Cancel handler
-  let handle_cancel = move |_| {
+  let handle_cancel = move || {
     if let Some(callback) = on_cancel {
       callback.run(());
     }
   };
 
   view! {
-    <div class="p-6 bg-white rounded-lg border border-gray-200">
-      <h3 class="mb-4 text-lg font-semibold text-gray-800">{form_title}</h3>
+    <div class="p-6 rounded-lg border border-gray-200">
+      <h3 class="mb-4 text-lg font-semibold">{form_title}</h3>
 
       // Error display
       {move || {
@@ -245,11 +246,11 @@ pub fn ExerciseForm(
           view! { <div></div> }.into_any()
         } else {
           view! {
-            <div class="p-3 mb-4 bg-red-50 rounded border border-red-200">
+            <div class="p-3 mb-4 rounded border border-red-200 dark:bg-red-700 dark:border-red-800 bg-reg-50">
               {errors
                 .into_iter()
                 .map(|error| {
-                  view! { <div class="text-sm text-red-700">{error}</div> }
+                  view! { <div class="text-sm text-red-700 dark:text-red-200">{error}</div> }
                 })
                 .collect::<Vec<_>>()}
             </div>
@@ -261,7 +262,7 @@ pub fn ExerciseForm(
       <div class="space-y-4">
         // Basic form fields - inline (simple enough to not need separate component)
         <div>
-          <label class="block mb-1 text-sm font-medium text-gray-700">Name</label>
+          <label class="block mb-1 text-sm font-medium">Name</label>
           <input
             type="text"
             class="py-2 px-3 w-full rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -272,7 +273,7 @@ pub fn ExerciseForm(
         </div>
 
         <div>
-          <label class="block mb-1 text-sm font-medium text-gray-700">Description</label>
+          <label class="block mb-1 text-sm font-medium">Description</label>
           <textarea
             class="py-2 px-3 w-full rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             prop:value=move || description.get()
@@ -283,7 +284,7 @@ pub fn ExerciseForm(
         </div>
 
         <div>
-          <label class="block mb-1 text-sm font-medium text-gray-700">Exercise Type</label>
+          <label class="block mb-1 text-sm font-medium">Exercise Type</label>
           <select
             class="py-2 px-3 w-full rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             on:change=move |e| handle_type_change(event_target_value(&e))
@@ -317,21 +318,16 @@ pub fn ExerciseForm(
 
       // Action buttons - inline (just 2 buttons, simpler than separate component)
       <div class="flex justify-end mt-6 space-x-3">
-        <button
-          class="py-2 px-4 text-gray-600 rounded-md border border-gray-300 hover:bg-gray-50"
-          on:click=handle_cancel
-        >
-          Cancel
-        </button>
-        <button
-          class="py-2 px-4 text-white bg-blue-500 rounded-md hover:bg-blue-600"
-          on:click=handle_save
-        >
+        <Button variant=ButtonVariant::Secondary on_click=handle_cancel>
+          "Cancel"
+        </Button>
+        <Button variant=ButtonVariant::Primary on_click=handle_save>
           {match mode_for_button {
             FormMode::Create => "Create",
             FormMode::Edit(_) => "Update",
           }}
-        </button>
+        </Button>
+
       </div>
 
       // Type change confirmation dialog - extracted to component

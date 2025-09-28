@@ -36,7 +36,7 @@ pub fn ExerciseTypeSpecificFields(
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             // Root note selector
             <div>
-              <label class="block mb-1 text-sm font-medium text-gray-700">Root Note</label>
+              <label class="block mb-1 text-sm font-medium">Root Note</label>
               <select
                 class="py-2 px-3 w-full rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 prop:value=move || format!("{:?}", root_note.get())
@@ -64,7 +64,7 @@ pub fn ExerciseTypeSpecificFields(
 
             // Scale type selector (simplified for now)
             <div>
-              <label class="block mb-1 text-sm font-medium text-gray-700">Scale Type</label>
+              <label class="block mb-1 text-sm font-medium">"Type"</label>
               <select
                 class="py-2 px-3 w-full rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 on:change=move |e| {
@@ -104,7 +104,7 @@ pub fn ExerciseTypeSpecificFields(
 
           // Fretboard preview for scales
           <div>
-            <label class="block mb-2 text-sm font-medium text-gray-700">Preview</label>
+            <label class="block mb-2 text-sm font-medium">Preview</label>
             //
             <div class="p-4 mx-auto max-w-2xl bg-gray-50 rounded-lg">
               <FretboardModelAdapter model=Signal::derive(move || {
