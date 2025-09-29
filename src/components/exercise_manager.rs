@@ -1,4 +1,4 @@
-use crate::components::exercises::{ExerciseForm, FormMode};
+use crate::components::exercises::SongExerciseForm;
 use crate::components::ui::{Button, ButtonVariant};
 use crate::models::exercise::Exercise;
 use crate::models::repository::{get_exercise_repository, ExerciseRepository};
@@ -66,11 +66,7 @@ pub fn ExerciseManager() -> impl IntoView {
         if show_form.get() {
           view! {
             <div class="mb-6">
-              <ExerciseForm
-                mode=FormMode::Create
-                on_save=handle_exercise_save
-                on_cancel=handle_form_cancel
-              />
+              <SongExerciseForm on_save=handle_exercise_save on_cancel=handle_form_cancel />
             </div>
           }
             .into_any()

@@ -6,3 +6,4 @@ pub mod fretboard_scale;
 pub mod fretboard_trainer;
 pub mod home;
 pub mod not_found;
+pub mod scale_exercise;

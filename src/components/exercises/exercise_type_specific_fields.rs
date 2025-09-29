@@ -3,13 +3,12 @@ use crate::{
   models::fretboard::FretboardModelBuilder,
 };
 
-use super::{constants::*, PositionPresetButtons};
+use super::PositionPresetButtons;
 use crate::music::{heptatonic_scales::HeptaScaleType, notes::Note, scales::ScaleType};
 use leptos::prelude::*;
 
 #[component]
-pub fn ExerciseTypeSpecificFields(
-  exercise_type: ReadSignal<String>,
+pub fn StartScaleExerciseConfiguration(
   root_note: ReadSignal<Note>,
   on_root_note_change: Callback<Note>,
   scale_type: ReadSignal<ScaleType>,
@@ -26,10 +25,6 @@ pub fn ExerciseTypeSpecificFields(
   view! {
     // Conditional fields for Scale and Triad types
     {move || {
-      let ex_type = exercise_type.get();
-      if !has_specific_settings(&ex_type) {
-        return view! { <div></div> }.into_any();
-      }
 
       view! {
         <div class="p-4 space-y-4 bg-gray-200 rounded-md dark:bg-gray-800">
