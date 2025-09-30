@@ -12,7 +12,7 @@ pub enum ButtonVariant {
 #[component]
 pub fn Button(
   #[prop(into)] variant: Signal<ButtonVariant>,
-  #[prop(into)] on_click: Callback<()>,
+  #[prop(optional, into)] on_click: Option<Callback<()>>,
   #[prop(optional)] title: String,
   children: Children,
 ) -> impl IntoView {
@@ -30,7 +30,9 @@ pub fn Button(
       class=move || format!("{} justify-center py-2 px-4 rounded", class())
       title=title
       on:click=move |_| {
-        on_click.run(());
+        if let Some(on_click) = on_click {
+          on_click.run(());
+        }
       }
     >
       {children()}
