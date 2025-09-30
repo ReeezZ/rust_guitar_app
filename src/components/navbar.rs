@@ -54,10 +54,10 @@ pub fn ThemeToggle() -> impl IntoView {
     <Toggle
       is_checked=Signal::derive(move || mode.get() == ColorMode::Dark)
       on_pressed=Callback::new(move |_| {
-        let new_mode = if mode.get() == ColorMode::Dark {
-          ColorMode::Light
-        } else {
+        let new_mode = if mode.get() != ColorMode::Dark {
           ColorMode::Dark
+        } else {
+          ColorMode::Light
         };
         set_mode.set(new_mode);
       })
