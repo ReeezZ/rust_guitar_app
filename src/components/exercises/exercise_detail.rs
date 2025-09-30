@@ -234,13 +234,6 @@ fn Title(
       } => {
         format!("{root_note} {scale_type} Scale")
       }
-      ExerciseType::Triad {
-        root_note,
-        scale_type,
-        ..
-      } => {
-        format!("{root_note} {scale_type} Triad")
-      }
       _ => "Exercise".to_string(),
     }
   };
@@ -287,7 +280,7 @@ fn Title(
                   let exercise_type = exercise.get().exercise_type.clone();
                   move || {
                     match exercise_type {
-                      ExerciseType::Scale { .. } | ExerciseType::Triad { .. } => {
+                      ExerciseType::Scale { .. } => {
                         // Only show generate button for Scale and Triad types
                         view! {
                           <Button

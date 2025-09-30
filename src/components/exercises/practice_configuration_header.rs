@@ -30,8 +30,7 @@ pub fn ConfigurationHeader(
         </div>
 
         {match exercise.get().exercise_type {
-          ExerciseType::Scale { root_note, scale_type, fret_range }
-          | ExerciseType::Triad { root_note, scale_type, fret_range } => {
+          ExerciseType::Scale { root_note, scale_type, fret_range } => {
             view! {
               <>
                 <RootNoteSelection

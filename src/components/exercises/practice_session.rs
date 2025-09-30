@@ -256,11 +256,6 @@ fn FretboardSection(exercise: Signal<Exercise>) -> impl IntoView {
           root_note,
           scale_type,
           fret_range,
-        }
-        | ExerciseType::Triad {
-          root_note,
-          scale_type,
-          fret_range,
         } => {
           view! {
             <div class="mt-6">

@@ -3,7 +3,7 @@ use leptos::prelude::*;
 
 pub struct SongFormData {
   name: String,
-  // TODO:
+  // TODO: cross check in exercises model song
   // current BPM
   // target BPM
   // links
