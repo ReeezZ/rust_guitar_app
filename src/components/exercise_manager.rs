@@ -1,11 +1,10 @@
 use crate::components::exercises::SongExerciseForm;
 use crate::components::ui::{Button, ButtonVariant};
-use crate::models::exercise::Exercise;
 use crate::models::repository::{get_exercise_repository, ExerciseRepository};
 use leptos::prelude::*;
 
 #[component]
-pub fn ExerciseManager() -> impl IntoView {
+pub fn SongsList() -> impl IntoView {
   let (exercises, set_exercises) = signal({
     let repo = get_exercise_repository();
     repo.find_all().unwrap_or_default()
@@ -38,12 +37,14 @@ pub fn ExerciseManager() -> impl IntoView {
   };
 
   // Handle exercise save from form
-  let handle_exercise_save = Callback::new(move |exercise: Exercise| {
-    set_exercises.update(|exercises| {
-      // Remove existing exercise if updating, then add the new one
-      exercises.retain(|e| e.id != exercise.id);
-      exercises.push(exercise);
-    });
+  let handle_exercise_save = Callback::new(move |_| {
+    // TODO:
+    // implement saving
+    // set_exercises.update(|exercises| {
+    // Remove existing exercise if updating, then add the new one
+    // exercises.retain(|e| e.id != exercise.id);
+    // exercises.push(exercise);
+    // });
     set_show_form.set(false);
   });
 

@@ -1,15 +1,18 @@
-use crate::components::exercises::StartScaleExerciseConfiguration;
 use crate::components::ui::{Button, ButtonVariant};
-use crate::models::{
-  exercise::{Exercise, ExerciseType},
-  repository::{get_exercise_repository, ExerciseRepository},
-};
-use crate::music::{heptatonic_scales::HeptaScaleType, notes::Note, scales::ScaleType};
 use leptos::prelude::*;
+
+pub struct SongFormData {
+  name: String,
+  // TODO:
+  // current BPM
+  // target BPM
+  // links
+  // description
+}
 
 #[component]
 pub fn SongExerciseForm(
-  #[prop(optional)] on_save: Option<Callback<Exercise>>,
+  #[prop(optional)] on_save: Option<Callback<SongFormData>>,
   #[prop(optional)] on_cancel: Option<Callback<()>>,
 ) -> impl IntoView {
   // Clone mode for use in closures
@@ -22,6 +25,7 @@ pub fn SongExerciseForm(
   // Validation and error states
   let (errors, set_errors) = signal(Vec::<String>::new());
 
+  // Maybe this is a candidate for ErrorBoundary: https://book.leptos.dev/view/07_errors.html
   // Validation function
   let validate_form = {
     move || -> Vec<String> {
@@ -53,13 +57,16 @@ pub fn SongExerciseForm(
     }
 
     set_errors.set(Vec::new());
-
+    let exercise = SongFormData {
+      name: name.get().trim().to_string(),
+    };
     // Save to storage
-    let repo = get_exercise_repository();
+    // TODO: should move this to parent i guess, we hage the callback already
+    // let repo = get_exercise_repository();
 
     // Call the callback
     if let Some(callback) = on_save {
-      // callback.run(exercise);
+      callback.run(exercise);
     }
   };
 

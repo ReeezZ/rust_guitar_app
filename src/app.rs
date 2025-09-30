@@ -9,7 +9,7 @@ use crate::{
     exercise_detail::ExerciseDetailPage, exercises::ExercisesPage,
     fretboard_config_examples::FretboardConfigExamples, fretboard_dev::FretboardDevPage,
     fretboard_scale::FretboardScalePage, fretboard_trainer::FretboardTrainerPage, home::Home,
-    not_found::NotFound,
+    not_found::NotFound, scale_exercise::ScaleExercisePage,
   },
 };
 
@@ -52,6 +52,7 @@ pub fn App() -> impl IntoView {
               <Route path=path!("/") view=Home />
               <Route path=path!("/exercises") view=ExercisesPage />
               <Route path=path!("/exercises/:id") view=ExerciseDetailPage />
+              <Route path=path!("/exercise/scale") view=ScaleExercisePage />
               <Route path=path!("/fretboard_trainer") view=FretboardTrainerPage />
               <Route path=path!("/fretboard_dev") view=FretboardDevPage />
               <Route path=path!("/fretboard_scale") view=FretboardScalePage />
