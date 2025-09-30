@@ -1,12 +1,12 @@
 use crate::components::exercises::SongExerciseForm;
 use crate::components::ui::{Button, ButtonVariant};
-use crate::models::repository::{get_exercise_repository, ExerciseRepository};
+use crate::models::repository::{get_songs_repository, SongsRepository};
 use leptos::prelude::*;
 
 #[component]
 pub fn SongsList() -> impl IntoView {
-  let (exercises, set_exercises) = signal({
-    let repo = get_exercise_repository();
+  let (songs, set_songs) = signal({
+    let repo = get_songs_repository();
     repo.find_all().unwrap_or_default()
   });
   let (show_form, set_show_form) = signal(false);
@@ -22,9 +22,9 @@ pub fn SongsList() -> impl IntoView {
   // Confirm deletion
   let confirm_delete = move || {
     if let Some((exercise_id, _)) = pending_delete_exercise.get() {
-      let repo = get_exercise_repository();
+      let repo = get_songs_repository();
       let _ = repo.delete(&exercise_id); // Ignore errors for now
-      set_exercises.update(|exercises| exercises.retain(|e| e.id != exercise_id));
+      set_songs.update(|exercises| exercises.retain(|e| e.id != exercise_id));
       set_show_delete_confirmation.set(false);
       set_pending_delete_exercise.set(None);
     }
@@ -40,10 +40,10 @@ pub fn SongsList() -> impl IntoView {
   let handle_exercise_save = Callback::new(move |_| {
     // TODO:
     // implement saving
-    // set_exercises.update(|exercises| {
+    // set_songs.update(|exercises| {
     // Remove existing exercise if updating, then add the new one
-    // exercises.retain(|e| e.id != exercise.id);
-    // exercises.push(exercise);
+    // songs.retain(|e| e.id != exercise.id);
+    // songs.push(exercise);
     // });
     set_show_form.set(false);
   });
@@ -56,7 +56,7 @@ pub fn SongsList() -> impl IntoView {
   view! {
     <div class="p-6 mx-auto max-w-4xl">
       <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold">"My Exercises"</h1>
+        <h1 class="text-3xl font-bold">"My songs"</h1>
         <Button variant=ButtonVariant::Primary on_click=move || set_show_form.set(!show_form.get())>
           {move || if show_form.get() { "Cancel" } else { "Add Exercise" }}
         </Button>
@@ -76,22 +76,20 @@ pub fn SongsList() -> impl IntoView {
         }
       }}
 
-      // Exercise List
       <div class="space-y-4">
-        <For each=move || exercises.get() key=|exercise| exercise.id.clone() let:exercise>
+        <For each=move || songs.get() key=|song| song.id.clone() let:song>
           <div class="p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
             <div class="flex justify-between items-center">
               <div>
-                <h3 class="text-lg font-semibold">{exercise.name.clone()}</h3>
-                <p class="mt-1 text-sm">"Type: " {exercise.exercise_type.type_name()}</p>
-                {exercise
+                <h3 class="text-lg font-semibold">{song.name.clone()}</h3>
+                {song
                   .description
                   .as_ref()
                   .map(|desc| view! { <p class="mt-1 text-sm text-gray-500">{desc.clone()}</p> })}
               </div>
               <div class="flex items-center space-x-2">
                 <a
-                  href=format!("/exercises/{id}", id = exercise.id)
+                  href=format!("/songs/{id}", id = song.id)
                   class="flex justify-center items-center py-1.5 px-3 text-sm font-medium text-white bg-blue-500 rounded hover:bg-blue-700"
                 >
                   "View"
@@ -99,8 +97,8 @@ pub fn SongsList() -> impl IntoView {
                 <Button
                   variant=ButtonVariant::Danger
                   on_click={
-                    let exercise_id = exercise.id.clone();
-                    let exercise_name = exercise.name.clone();
+                    let exercise_id = song.id.clone();
+                    let exercise_name = song.name.clone();
                     move || show_delete_dialog(exercise_id.clone(), exercise_name.clone())
                   }
                 >
@@ -112,13 +110,13 @@ pub fn SongsList() -> impl IntoView {
         </For>
 
         {move || {
-          exercises
+          songs
             .get()
             .is_empty()
             .then(|| {
               view! {
                 <div class="py-8 text-center">
-                  <p>"No exercises yet. Create your first exercise to get started!"</p>
+                  <p>"No songs yet. Create your first exercise to get started!"</p>
                 </div>
               }
             })

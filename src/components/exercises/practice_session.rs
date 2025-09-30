@@ -7,7 +7,7 @@ use std::time::Duration;
 use super::ConfigurationHeader;
 use crate::components::fretboard::FretboardModelAdapter;
 use crate::components::metronome::Metronome;
-use crate::models::exercise::{Exercise, ExerciseType};
+use crate::models::exercise::Exercise;
 use crate::models::fretboard::{FretboardModelBuilder, FretboardModelExt};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -21,8 +21,10 @@ pub enum TimerState {
 pub fn PracticeSession(
   #[prop(optional)] target_time: Option<Duration>,
   /// Optional exercise for exercise-specific features like fretboard display
+  #[prop(into)]
   exercise: Signal<Exercise>,
   /// Optional callback for when exercise is updated
+  // TODO: maybe this should be split differently for exercise types
   #[prop(optional)]
   on_exercise_update: Option<Callback<Exercise>>,
   /// Optional callback when BPM changes
@@ -251,12 +253,8 @@ fn FretboardSection(exercise: Signal<Exercise>) -> impl IntoView {
 
   {
     move || {
-      match exercise.get().exercise_type {
-        ExerciseType::Scale {
-          root_note,
-          scale_type,
-          fret_range,
-        } => {
+      match exercise.get() {
+        Exercise::Scale(scale) => {
           view! {
             <div class="mt-6">
               // Toggle fretboard visibility
@@ -274,10 +272,10 @@ fn FretboardSection(exercise: Signal<Exercise>) -> impl IntoView {
                 if show_fretboard.get() {
                   let fretboard_model = Memo::new(move |_| {
                     let model = FretboardModelBuilder::new()
-                      .start_fret_val(fret_range.0)
-                      .end_fret_val(fret_range.1)
+                      .start_fret_val(scale.fret_range.0)
+                      .end_fret_val(scale.fret_range.1)
                       .build();
-                    let current_scale = Scale::new(root_note, scale_type);
+                    let current_scale = Scale::new(scale.root_note, scale.scale_type);
                     model.update_from_scale(current_scale);
                     model
                   });

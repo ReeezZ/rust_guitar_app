@@ -4,9 +4,9 @@ use crate::{
     fretboard::base::MAX_FRETS,
     ui::{Button, ButtonVariant},
   },
-  models::exercise::Exercise,
+  models::exercise::{Exercise, ScaleExercise},
 };
-use crate::{models::exercise::ExerciseType, music::notes::NoteExt, music::Note, music::ScaleType};
+use crate::{music::notes::NoteExt, music::Note, music::ScaleType};
 use leptos::prelude::*;
 
 #[component]
@@ -22,15 +22,10 @@ pub fn ConfigurationHeader(
   view! {
     <div class="p-3 mb-6 bg-gray-50 rounded-lg">
       <div class="flex flex-wrap gap-4 items-center text-sm">
-        <div class="flex gap-2 items-center">
-          <span class="font-medium text-gray-700">"Type:"</span>
-          <span class="py-1 px-2 text-xs font-medium text-blue-800 bg-blue-100 rounded">
-            {exercise.get().exercise_type.type_name()}
-          </span>
-        </div>
 
-        {match exercise.get().exercise_type {
-          ExerciseType::Scale { root_note, scale_type, fret_range } => {
+        {match exercise.get() {
+          Exercise::Scale(scale) => {
+            let ScaleExercise { root_note, scale_type, fret_range } = scale;
             view! {
               <>
                 <RootNoteSelection
@@ -63,11 +58,9 @@ pub fn ConfigurationHeader(
               .into_any()
           }
           _ => ().into_any(),
-        }}
-
-        <div class="flex gap-2 items-center">
+        }} <div class="flex gap-2 items-center">
           <span class="font-medium text-gray-700">"Details:"</span>
-          <span class="text-xs text-gray-600">{exercise.get().exercise_type.to_string()}</span>
+          <span class="text-xs text-gray-600">{exercise.get().to_string()}</span>
         </div>
 
       </div>
@@ -92,7 +85,7 @@ fn RootNoteSelection(
       temp_selected_note.set(Some(selected_note));
       show_root_note_modal.set(false);
       let mut exercise = exercise.get().clone();
-      exercise.exercise_type.set_root_note(selected_note);
+      exercise.set_root_note(selected_note);
       on_exercise_update.run(exercise);
     }
   };
@@ -233,7 +226,7 @@ fn ScaleSelection(
             class="py-1 px-3 text-xs text-white bg-blue-600 rounded hover:bg-blue-700"
             on:click=move |_| {
               let mut exercise = exercise.get().clone();
-              exercise.exercise_type.set_scale_type(temporary_selected_scale.get());
+              exercise.set_scale_type(temporary_selected_scale.get());
               show_scale_type_modal.set(false);
               on_exercise_update.run(exercise);
             }
@@ -339,7 +332,7 @@ fn FretRangeSelection(
                   class="py-1 px-3 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700"
                   on:click=move |_| {
                     let mut exercise = exercise.get().clone();
-                    exercise.exercise_type.set_fret_range(fret_range.get());
+                    exercise.set_fret_range(fret_range.get());
                     on_exercise_update.run(exercise);
                   }
                 >

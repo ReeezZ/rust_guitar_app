@@ -4,162 +4,112 @@ use crate::music::{
 };
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-pub enum ExerciseType {
-  Scale {
-    root_note: Note,
-    scale_type: ScaleType,
-    fret_range: (u8, u8), // (min_fret, max_fret)
-  },
-  Song {
-    id: String,
-    name: String,
-    author: Option<String>,
-    current_bpm: Option<usize>,
-    target_bpm: Option<usize>,
-  },
+pub struct ScaleExercise {
+  // TODO: replace root_note and scale_type with Scale, but the Scale type is terrible atm
+  pub root_note: Note,
+  pub scale_type: ScaleType,
+  pub fret_range: (u8, u8), // (min_fret, max_fret)
+}
+
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+pub struct Song {
+  pub id: String,
+  pub name: String,
+  pub description: Option<String>,
+  pub author: Option<String>,
+  pub current_bpm: Option<usize>,
+  pub target_bpm: Option<usize>,
+}
+
+impl Song {
+  pub fn new(id: String, name: String) -> Self {
+    Self {
+      id,
+      name,
+      description: None,
+      author: None,
+      current_bpm: None,
+      target_bpm: None,
+    }
+  }
+}
+
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+pub enum Exercise {
+  Scale(ScaleExercise),
+  Song(Song),
   // TODO add more types like triads
 }
 
-impl ExerciseType {
+impl std::fmt::Display for Exercise {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    match self {
+      Exercise::Scale(scale) => {
+        write!(
+          f,
+          "{} {} (frets {}-{})",
+          scale.root_note, scale.scale_type, scale.fret_range.0, scale.fret_range.1
+        )
+      }
+      Exercise::Song { .. } => write!(f, "Song"),
+    }
+  }
+}
+
+impl Exercise {
   /// Get the scale if this exercise type uses one
   pub fn get_scale(&self) -> Option<Scale> {
     match self {
-      ExerciseType::Scale {
-        root_note,
-        scale_type,
-        ..
-      } => Some(Scale::new(*root_note, *scale_type)),
-      ExerciseType::Song { .. } => None,
+      Exercise::Scale(scale) => Some(Scale::new(scale.root_note, scale.scale_type)),
+      Exercise::Song { .. } => None,
     }
   }
 
   pub fn create_id(&self) -> String {
     match self {
-      ExerciseType::Scale {
-        root_note,
-        scale_type,
-        fret_range,
-      } => format!(
+      Exercise::Scale(scale) => format!(
         "scale_{}_{}_{}-{}",
-        root_note, scale_type, fret_range.0, fret_range.1
+        scale.root_note, scale.scale_type, scale.fret_range.0, scale.fret_range.1
       ),
-      ExerciseType::Song { .. } => "song".to_string(),
+      Exercise::Song { .. } => "song".to_string(),
     }
   }
 
   /// Get the fret range if this exercise type uses one
   pub fn get_fret_range(&self) -> Option<(u8, u8)> {
     match self {
-      ExerciseType::Scale { fret_range, .. } => Some(*fret_range),
-      ExerciseType::Song { .. } => None,
+      Exercise::Scale(scale) => Some(scale.fret_range),
+      Exercise::Song { .. } => None,
     }
   }
 
   /// Display name for the exercise type
   pub fn type_name(&self) -> &'static str {
     match self {
-      ExerciseType::Scale { .. } => "Scale",
-      ExerciseType::Song { .. } => "Song",
+      Exercise::Scale { .. } => "Scale",
+      Exercise::Song { .. } => "Song",
     }
   }
 
   pub fn set_root_note(&mut self, new_root: Note) {
     match self {
-      ExerciseType::Scale { root_note, .. } => *root_note = new_root,
-      ExerciseType::Song { .. } => {}
+      Exercise::Scale(scale) => scale.root_note = new_root,
+      Exercise::Song { .. } => {}
     }
   }
 
   // TODO: could return bool to indicate if there was a change made
   pub fn set_scale_type(&mut self, new_scale_type: ScaleType) {
     match self {
-      ExerciseType::Scale { scale_type, .. } => *scale_type = new_scale_type,
-      ExerciseType::Song { .. } => {}
+      Exercise::Scale(scale) => scale.scale_type = new_scale_type,
+      Exercise::Song { .. } => {}
     }
   }
 
   pub fn set_fret_range(&mut self, new_range: (u8, u8)) {
     match self {
-      ExerciseType::Scale { fret_range, .. } => *fret_range = new_range,
-      ExerciseType::Song { .. } => {}
+      Exercise::Scale(scale) => scale.fret_range = new_range,
+      Exercise::Song { .. } => {}
     }
-  }
-}
-
-impl std::fmt::Display for ExerciseType {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    match self {
-      ExerciseType::Scale {
-        root_note,
-        scale_type,
-        fret_range,
-      } => {
-        write!(
-          f,
-          "{} {} (frets {}-{})",
-          root_note, scale_type, fret_range.0, fret_range.1
-        )
-      }
-      ExerciseType::Song { .. } => write!(f, "Song"),
-    }
-  }
-}
-
-/// A practice exercise
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-pub struct Exercise {
-  pub id: String,
-  pub name: String,
-  pub exercise_type: ExerciseType,
-  pub description: Option<String>,
-}
-
-impl Exercise {
-  pub fn new(name: String, exercise_type: ExerciseType) -> Self {
-    Self {
-      id: exercise_type.create_id(),
-      name,
-      exercise_type,
-      description: None,
-    }
-  }
-
-  pub fn with_description(mut self, description: String) -> Self {
-    self.description = Some(description);
-    self
-  }
-}
-
-#[cfg(test)]
-mod tests {
-  #[cfg(target_arch = "wasm32")]
-  use super::*;
-
-  #[test]
-  #[cfg(target_arch = "wasm32")]
-  fn test_scale_exercise_creation() {
-    let exercise = Exercise::new(
-      "C Major Scale Practice".to_string(),
-      ExerciseType::Scale {
-        root_note: Note::C,
-        scale_type: ScaleType::Hepatonic(crate::music::heptatonic_scales::HeptaScaleType::Major),
-        fret_range: (0, 5),
-      },
-    );
-
-    assert_eq!(exercise.name, "C Major Scale Practice");
-    assert_eq!(exercise.exercise_type.type_name(), "Scale");
-    assert_eq!(exercise.exercise_type.get_fret_range(), Some((0, 5)));
-    assert!(exercise.exercise_type.get_scale().is_some());
-  }
-
-  #[test]
-  #[cfg(target_arch = "wasm32")]
-  fn test_technique_exercise_creation() {
-    let exercise = Exercise::new("Alternate Picking".to_string(), ExerciseType::Technique);
-
-    assert_eq!(exercise.exercise_type.type_name(), "Technique");
-    assert_eq!(exercise.exercise_type.get_fret_range(), None);
-    assert!(exercise.exercise_type.get_scale().is_none());
   }
 }

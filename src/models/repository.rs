@@ -2,7 +2,7 @@
 #![allow(unused)]
 
 use crate::{
-  models::exercise::{Exercise, ExerciseType},
+  models::exercise::{Exercise, Song},
   music::{heptatonic_scales::HeptaScaleType, Note, Scale, ScaleExt, ScaleType},
 };
 
@@ -26,84 +26,73 @@ impl std::fmt::Display for RepositoryError {
   }
 }
 
-/// Repository trait for exercise persistence
-pub trait ExerciseRepository {
-  /// Save a new exercise
-  fn save(&self, exercise: &Exercise) -> Result<(), RepositoryError>;
+/// Repository trait for song persistence
+pub trait SongsRepository {
+  fn save(&self, song: &Song) -> Result<(), RepositoryError>;
 
-  /// Update an existing exercise
-  fn update(&self, exercise: &Exercise) -> Result<(), RepositoryError>;
+  fn update(&self, song: &Song) -> Result<(), RepositoryError>;
 
-  /// Delete an exercise by ID
   fn delete(&self, id: &str) -> Result<(), RepositoryError>;
 
-  /// Find an exercise by ID
-  fn find_by_id(&self, id: &str) -> Result<Exercise, RepositoryError>;
+  fn find_by_id(&self, id: &str) -> Result<Song, RepositoryError>;
 
-  /// Find all exercises
-  fn find_all(&self) -> Result<Vec<Exercise>, RepositoryError>;
+  fn find_all(&self) -> Result<Vec<Song>, RepositoryError>;
 
-  /// Check if an exercise name exists (excluding a specific ID)
+  /// Check if an song name exists (excluding a specific ID)
   fn name_exists(&self, name: &str, exclude_id: Option<&str>) -> Result<bool, RepositoryError>;
 }
 
-/// Local storage implementation of ExerciseRepository
-pub struct LocalStorageExerciseRepository;
+/// Local storage implementation of songRepository
+pub struct LocalStorageSongRepository;
 
-impl LocalStorageExerciseRepository {
+impl LocalStorageSongRepository {
   pub fn new() -> Self {
     Self
   }
 }
 
-impl Default for LocalStorageExerciseRepository {
+impl Default for LocalStorageSongRepository {
   fn default() -> Self {
     Self::new()
   }
 }
 
-impl ExerciseRepository for LocalStorageExerciseRepository {
-  fn save(&self, exercise: &Exercise) -> Result<(), RepositoryError> {
-    // crate::models::storage::save_exercise(exercise).map_err(RepositoryError::ValidationError)
+impl SongsRepository for LocalStorageSongRepository {
+  fn save(&self, song: &Song) -> Result<(), RepositoryError> {
+    // crate::models::storage::save_song(song).map_err(RepositoryError::ValidationError)
     // TODO: Implement persistence
     Ok(())
   }
 
-  fn update(&self, exercise: &Exercise) -> Result<(), RepositoryError> {
-    // crate::models::storage::update_exercise(exercise).map_err(RepositoryError::ValidationError)
+  fn update(&self, song: &Song) -> Result<(), RepositoryError> {
+    // crate::models::storage::update_song(song).map_err(RepositoryError::ValidationError)
     // TODO: Implement persistence
     Ok(())
   }
 
   fn delete(&self, id: &str) -> Result<(), RepositoryError> {
-    // crate::models::storage::delete_exercise(id).map_err(RepositoryError::ValidationError)
+    // crate::models::storage::delete_song(id).map_err(RepositoryError::ValidationError)
     // TODO: Implement persistence
     Ok(())
   }
 
-  fn find_by_id(&self, id: &str) -> Result<Exercise, RepositoryError> {
-    // Ok(crate::models::storage::load_exercise_by_id(id))
+  fn find_by_id(&self, id: &str) -> Result<Song, RepositoryError> {
+    // Ok(crate::models::storage::load_song_by_id(id))
     // TODO: Implement persistence
-    Ok(Exercise {
-      name: "Sample Exercise".to_string(),
-      description: Some("This is a sample exercise.".to_string()),
-      id: "sample-id".to_string(),
-      exercise_type: ExerciseType::Scale {
-        root_note: Note::E,
-        scale_type: ScaleType::Hepatonic(HeptaScaleType::Major),
-        fret_range: (1, 5),
-      },
-    })
+    Ok(Song::new(
+      "Sample song".to_string(),
+      "sample-id".to_string(),
+    ))
   }
 
-  fn find_all(&self) -> Result<Vec<Exercise>, RepositoryError> {
-    // Ok(crate::models::storage::load_exercises())
+  fn find_all(&self) -> Result<Vec<Song>, RepositoryError> {
+    // Ok(crate::models::storage::load_songs())
     // TODO: Implement persistence
     Ok(Vec::new())
   }
 
   fn name_exists(&self, name: &str, exclude_id: Option<&str>) -> Result<bool, RepositoryError> {
-    // Ok(crate::models::storage::exercise_name_exists(
+    // Ok(crate::models::storage::song_name_exists(
     //   name, exclude_id,
     // ))
     // TODO: Implement persistence
@@ -112,14 +101,15 @@ impl ExerciseRepository for LocalStorageExerciseRepository {
 }
 
 /// Global repository instance - can be swapped for different implementations
-pub fn get_exercise_repository() -> impl ExerciseRepository {
-  LocalStorageExerciseRepository::new()
+pub fn get_songs_repository() -> impl SongsRepository {
+  LocalStorageSongRepository::new()
 }
 
 // Future: could return different implementations based on config
-// pub fn get_exercise_repository() -> Box<dyn ExerciseRepository> {
+// pub fn get_song_repository() -> Box<dyn songRepository> {
 //   match std::env::var("STORAGE_TYPE").as_deref() {
-//     Ok("remote") => Box::new(RemoteExerciseRepository::new()),
-//     _ => Box::new(LocalStorageExerciseRepository::new()),
+//
+//     Ok("remote") => Box::new(RemotesongRepository::new()),
+//     _ => Box::new(LocalStoragesongRepository::new()),
 //   }
 // }
