@@ -42,8 +42,8 @@ impl IntoParam for ScaleType {
 struct ScaleExerciseParams {
   root_note: Note,
   scale_type: ScaleType,
-  start_fret: Option<u8>,
-  end_fret: Option<u8>,
+  min_fret: Option<u8>,
+  max_fret: Option<u8>,
 }
 
 #[component]
