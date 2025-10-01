@@ -6,7 +6,11 @@ use leptos_router::{
   params::{IntoParam, Params},
 };
 
-use crate::music::{heptatonic_scales::HeptaScaleType, Note, ScaleType};
+use crate::{
+  components::exercises::practice_session::PracticeSession,
+  models::exercise::{Exercise, ScaleExercise},
+  music::{heptatonic_scales::HeptaScaleType, Note, ScaleType},
+};
 
 impl IntoParam for Note {
   fn into_param(
@@ -38,7 +42,7 @@ impl IntoParam for ScaleType {
   }
 }
 
-#[derive(Params, PartialEq, Debug)]
+#[derive(Clone, Copy, Params, PartialEq, Debug)]
 struct ScaleExerciseParams {
   root_note: Note,
   scale_type: ScaleType,
@@ -49,12 +53,34 @@ struct ScaleExerciseParams {
 #[component]
 pub fn ScaleExercisePage() -> impl IntoView {
   let query = use_query::<ScaleExerciseParams>();
+  let scale = move || {
+    let scale_params = match query.get() {
+      Ok(scale_params) => {
+        leptos::logging::log!("OK: Got params: {:?}", scale_params);
+        scale_params
+      }
+      Err(err) => {
+        leptos::logging::log!("ERROR: Failed to get params: {:?}", err);
+        ScaleExerciseParams {
+          root_note: Note::C,
+          scale_type: ScaleType::Hepatonic(HeptaScaleType::Major),
+          min_fret: Some(0),
+          max_fret: Some(12),
+        }
+      }
+    };
 
-  match query.read().as_ref() {
-    Ok(scale_params) => {
-      leptos::logging::log!("OK: Got params: {:?}", scale_params);
+    ScaleExercise {
+      root_note: scale_params.root_note,
+      scale_type: scale_params.scale_type,
+      fret_range: (
+        scale_params.min_fret.unwrap_or(0),
+        scale_params.max_fret.unwrap_or(12),
+      ),
     }
-    Err(err) => leptos::logging::log!("ERROR: Failed to get params: {:?}", err),
+  };
+
+  view! {
+    <PracticeSession exercise=Signal::derive(move || Exercise::Scale(scale()))></PracticeSession>
   }
-  // TODO:
 }
