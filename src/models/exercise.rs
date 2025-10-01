@@ -3,7 +3,7 @@ use crate::music::{
   scales::{Scale, ScaleType},
 };
 
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Copy, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct ScaleExercise {
   // TODO: replace root_note and scale_type with Scale, but the Scale type is terrible atm
   pub root_note: Note,
