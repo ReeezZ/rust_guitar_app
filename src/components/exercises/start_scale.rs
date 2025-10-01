@@ -2,7 +2,7 @@ use leptos::prelude::*;
 
 use crate::{
   components::{
-    exercises::StartScaleExerciseConfiguration,
+    exercises::ScaleExerciseForm,
     ui::{Button, ButtonVariant},
   },
   music::{heptatonic_scales::HeptaScaleType, Note, ScaleType},
@@ -31,7 +31,7 @@ pub fn StartScale() -> impl IntoView {
         </Button>
       </div>
       <Show when=move || show_dialog.get()>
-        <StartScaleExerciseConfiguration
+        <ScaleExerciseForm
           root_note=root_note.read_only()
           on_root_note_change=Callback::new(move |note| root_note.set(note))
           scale_type=scale_type.read_only()

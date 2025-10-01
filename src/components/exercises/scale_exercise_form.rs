@@ -8,11 +8,11 @@ use crate::{
 };
 
 use super::PositionPresetButtons;
-use crate::music::{heptatonic_scales::HeptaScaleType, notes::Note, scales::ScaleType};
+use crate::music::{scales::ScaleType, Note};
 use leptos::prelude::*;
 
 #[component]
-pub fn StartScaleExerciseConfiguration(
+pub fn ScaleExerciseForm(
   root_note: ReadSignal<Note>,
   on_root_note_change: Callback<Note>,
   scale_type: ReadSignal<ScaleType>,
