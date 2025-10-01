@@ -1,5 +1,9 @@
 use crate::{
-  components::{fretboard::FretboardModelAdapter, ui::FretRangeSelector},
+  components::{
+    fretboard::FretboardModelAdapter,
+    music_selectors::{NoteSelector, ScaleTypeSelector},
+    ui::FretRangeSelector,
+  },
   models::fretboard::FretboardModelBuilder,
 };
 
@@ -30,65 +34,19 @@ pub fn StartScaleExerciseConfiguration(
         <div class="p-4 space-y-4 bg-gray-200 rounded-md dark:bg-gray-800">
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             // Root note selector
-            <div>
-              <label class="block mb-1 text-sm font-medium">Root Note</label>
-              <select
-                class="py-2 px-3 w-full rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                prop:value=move || format!("{:?}", root_note.get())
-                on:change=move |e| {
-                  let value = event_target_value(&e);
-                  if let Ok(note) = value.parse::<Note>() {
-                    on_root_note_change.run(note);
-                  }
-                }
-              >
-                <option value="C">C</option>
-                <option value="Cs">"C#"</option>
-                <option value="D">D</option>
-                <option value="Ds">"D#"</option>
-                <option value="E">E</option>
-                <option value="F">F</option>
-                <option value="Fs">"F#"</option>
-                <option value="G">G</option>
-                <option value="Gs">"G#"</option>
-                <option value="A">A</option>
-                <option value="As">"A#"</option>
-                <option value="B">B</option>
-              </select>
-            </div>
+            <NoteSelector
+              value=root_note.into()
+              on_note_changed=on_root_note_change
+              label="Root Note"
+            />
 
             // Scale type selector (simplified for now)
-            <div>
-              <label class="block mb-1 text-sm font-medium">"Type"</label>
-              <select
-                class="py-2 px-3 w-full rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                on:change=move |e| {
-                  let value = event_target_value(&e);
-                  match value.as_str() {
-                    "Major" => on_scale_type_change.run(ScaleType::Hepatonic(HeptaScaleType::Major)),
-                    "Minor" => on_scale_type_change.run(ScaleType::Hepatonic(HeptaScaleType::Minor)),
-                    _ => on_scale_type_change.run(ScaleType::Hepatonic(HeptaScaleType::Major)),
-                  }
-                }
-              >
-                <option
-                  value="Major"
-                  selected=move || {
-                    matches!(scale_type.get(), ScaleType::Hepatonic(HeptaScaleType::Major))
-                  }
-                >
-                  Major
-                </option>
-                <option
-                  value="Minor"
-                  selected=move || {
-                    matches!(scale_type.get(), ScaleType::Hepatonic(HeptaScaleType::Minor))
-                  }
-                >
-                  Natural Minor
-                </option>
-              </select>
-            </div>
+            <ScaleTypeSelector
+              value=scale_type.into()
+              on_scale_changed=on_scale_type_change
+              label="Scale Type"
+            />
+
           </div>
 
           // Fret range
