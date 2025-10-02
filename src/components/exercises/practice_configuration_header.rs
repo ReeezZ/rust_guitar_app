@@ -4,7 +4,7 @@ use crate::{
     fretboard::base::MAX_FRETS,
     ui::{
       title::{HeadingLevel, Title},
-      Button, ButtonVariant,
+      Button, ButtonVariant, FretRangeSelector,
     },
   },
   models::exercise::{Exercise, ScaleExercise},
@@ -273,72 +273,45 @@ fn FretRangeSelection(
         show_fret_range_modal.get()
       }>
         {
-          let fret_range = RwSignal::new((active_min_fret, active_max_fret));
-          let min_fret = move || fret_range.get().0;
-          let max_fret = move || fret_range.get().1;
+          let min_fret = RwSignal::new(active_min_fret);
+          let max_fret = RwSignal::new(active_max_fret);
           view! {
-            <div class="absolute left-0 top-full z-10 p-2 mt-1 bg-white rounded-lg border border-gray-300 shadow-lg min-w-[200px]">
+            <div class="absolute left-0 top-full z-10 p-2 mt-1 bg-white rounded-lg border border-gray-500 shadow-lg dark:bg-black min-w-[200px]">
               <h4 class="text-sm font-semibold">"Set Fret Range"</h4>
-
+              <FretRangeSelector
+                start_fret=min_fret
+                end_fret=max_fret
+                label="Set fret range"
+              ></FretRangeSelector>
               // Fret range
-              <div class="flex flex-row gap-2 justify-center items-center">
-                <div>
-                  <label class="block mx-1 mb-1 text-sm font-medium text-gray-700">Min Fret</label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="24"
-                    class="rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    prop:value=move || min_fret().to_string()
-                    on:input=move |e| {
-                      if let Ok(val) = event_target_value(&e).parse::<u8>() {
-                        fret_range.set((val, max_fret()));
-                      }
-                    }
-                  />
-                </div>
-                <div>
-                  <label class="block mx-1 mb-1 text-sm font-medium text-gray-700">Max Fret</label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="24"
-                    class="rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    prop:value=move || max_fret().to_string()
-                    on:input=move |e| {
-                      if let Ok(val) = event_target_value(&e).parse::<u8>() {
-                        fret_range.set((min_fret(), val.min(MAX_FRETS as u8)));
-                      }
-                    }
-                  />
-                </div>
-              </div>
 
               <div>
                 <PositionPresetButtons
                   on_preset_select=move |min, max| {
-                    fret_range.set((min, max));
+                    min_fret.set(min);
+                    max_fret.set(max);
                   }
-                  current_range=fret_range
+                  current_range=Signal::derive(move || (min_fret.get(), max_fret.get()))
                 />
               </div>
               <div class="flex justify-center items-center">
-                <button
-                  class="py-1 px-3 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700"
-                  on:click=move |_| {
+                <Button
+                  variant=ButtonVariant::Primary
+                  on_click=move || {
                     let mut exercise = exercise.get().clone();
-                    exercise.set_fret_range(fret_range.get());
+                    exercise.set_fret_range((min_fret.get(), max_fret.get()));
                     on_exercise_update.run(exercise);
                   }
                 >
                   "Apply"
-                </button>
-                <button
-                  class="py-1 px-3 text-xs text-gray-600 bg-gray-200 rounded hover:bg-gray-300"
-                  on:click=move |_| show_fret_range_modal.set(false)
+                </Button>
+
+                <Button
+                  on_click=move || show_fret_range_modal.set(false)
+                  variant=ButtonVariant::Secondary
                 >
                   "Close"
-                </button>
+                </Button>
               </div>
             </div>
           }
