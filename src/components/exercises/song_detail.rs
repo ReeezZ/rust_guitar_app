@@ -100,7 +100,7 @@ fn SongDetailChecked(
               <div class="flex justify-between items-start mb-4">
                 // Title section with inline editing
                 <div class="flex-1 mr-4">
-                  <Title song=song on_title_change=handle_title_change />
+                  <SongTitle song=song on_title_change=handle_title_change />
                 </div>
               </div>
 
@@ -220,7 +220,7 @@ fn SongDetailChecked(
 }
 
 #[component]
-fn Title(
+fn SongTitle(
   #[prop(into)] song: Signal<Song>,
   #[prop(into)] on_title_change: Callback<String>,
 ) -> impl IntoView {
