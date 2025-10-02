@@ -93,7 +93,7 @@ pub fn Metronome(
   };
 
   view! {
-    <div class="p-4 bg-white rounded-lg border border-gray-200">
+    <div class="p-4 bg-white rounded-lg border border-gray-500 dark:bg-black">
       <div class="text-center">
         // BPM Display and Control
         <div class="flex justify-center items-center mb-4">
@@ -108,7 +108,7 @@ pub fn Metronome(
           </Button>
 
           <div class="flex-1 mx-4 text-center">
-            <div class="text-2xl font-bold text-gray-800">{move || bpm.get().to_string()}</div>
+            <div class="text-2xl font-bold text-gray-500">{move || bpm.get().to_string()}</div>
             <div class="text-xs text-gray-500">"BPM"</div>
           </div>
 
