@@ -62,7 +62,7 @@ pub fn ScaleExerciseForm(
           <div>
             <label class="block mb-2 text-sm font-medium">Preview</label>
             //
-            <div class="p-4 mx-auto max-w-2xl bg-gray-50 rounded-lg">
+            <div class="p-4 mx-auto max-w-2xl bg-gray-50 rounded-lg dark:bg-gray-900">
               <FretboardModelAdapter model=Signal::derive(move || {
                 FretboardModelBuilder::new()
                   .start_fret(Signal::derive(move || min_fret.get()))

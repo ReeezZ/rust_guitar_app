@@ -1,3 +1,5 @@
+use crate::components::ui::title::{HeadingLevel, Title};
+use crate::components::ui::{Button, ButtonVariant};
 use crate::music::Scale;
 use leptos::prelude::*;
 use leptos_use::use_interval_fn;
@@ -35,8 +37,8 @@ pub fn PracticeSession(
   let timer_state = RwSignal::new(TimerState::Stopped);
 
   view! {
-    <div class="p-6 bg-white rounded-lg border border-gray-200">
-      <h3 class="mb-4 text-lg font-semibold text-gray-800">"Practice Session"</h3>
+    <div class="p-6 rounded-lg border border-gray-200 dark:border-gray-800">
+      <h3 class="mb-4 text-lg font-semibold">"Practice Session"</h3>
 
       <ConfigurationHeader
         exercise
@@ -124,10 +126,10 @@ fn TimerSection(
   view! {
     <div>
       <div class="flex justify-between items-center mb-3">
-        <h4 class="font-semibold text-gray-700 text-md">"Timer"</h4>
+        <Title text="Timer" level=HeadingLevel::H4 />
       </div>
 
-      <div class="p-4 bg-white rounded-lg border border-gray-200">
+      <div class="p-4 bg-white rounded-lg border border-gray-200 dark:bg-black dark:border-gray-700">
         <div class="text-center">
           // Timer display
           <div class=move || {
@@ -135,7 +137,7 @@ fn TimerSection(
             if is_target_reached() {
               format!("{base_classes} text-green-600")
             } else {
-              format!("{base_classes} text-gray-800")
+              format!("{base_classes} text-gray-500")
             }
           }>{formatted_time}</div>
 
@@ -145,7 +147,7 @@ fn TimerSection(
               let target_mins = target.as_secs() / 60;
               let target_secs = target.as_secs() % 60;
               view! {
-                <p class="mb-4 text-sm text-gray-600">
+                <p class="mb-4 text-sm">
                   "Target: " {format!("{target_mins:02}:{target_secs:02}")}
                   {move || if is_target_reached() { " ✓" } else { "" }}
                 </p>
@@ -221,13 +223,14 @@ fn MetronomeSection(on_bpm_change: Option<Callback<u32>>) -> impl IntoView {
     <div>
       // Toggle metronome visibility
       <div class="flex justify-between items-center mb-3">
-        <h4 class="font-semibold text-gray-700 text-md">"Metronome"</h4>
-        <button
-          class="py-1 px-2 text-xs bg-gray-200 rounded hover:bg-gray-300"
-          on:click=move |_| set_show_metronome.update(|show| *show = !*show)
+        <Title text="Metronome" level=HeadingLevel::H4 />
+        <Button
+          variant=ButtonVariant::Secondary
+          on_click=move || set_show_metronome.update(|show| *show = !*show)
         >
           {move || if show_metronome.get() { "Hide" } else { "Show" }}
-        </button>
+        </Button>
+
       </div>
 
       {move || {
@@ -259,13 +262,14 @@ fn FretboardSection(exercise: Signal<Exercise>) -> impl IntoView {
             <div class="mt-6">
               // Toggle fretboard visibility
               <div class="flex justify-between items-center mb-3">
-                <h4 class="font-semibold text-gray-700 text-md">"Fretboard"</h4>
-                <button
-                  class="py-1 px-2 text-xs bg-gray-200 rounded hover:bg-gray-300"
-                  on:click=move |_| set_show_fretboard.update(|show| *show = !*show)
+                <h4 class="font-semibold text-md">"Fretboard"</h4>
+                <Button
+                  variant=ButtonVariant::Secondary
+                  on_click=move || set_show_fretboard.update(|show| *show = !*show)
                 >
                   {move || if show_fretboard.get() { "Hide" } else { "Show" }}
-                </button>
+                </Button>
+
               </div>
 
               {move || {
@@ -282,7 +286,7 @@ fn FretboardSection(exercise: Signal<Exercise>) -> impl IntoView {
                   // TODO bad for performance: initialize model once and just update
 
                   view! {
-                    <div class="p-4 bg-gray-50 rounded-lg">
+                    <div class="p-4 rounded-lg">
                       <FretboardModelAdapter model=fretboard_model />
                     </div>
                   }

@@ -2,7 +2,10 @@ use crate::{
   components::{
     exercises::PositionPresetButtons,
     fretboard::base::MAX_FRETS,
-    ui::{Button, ButtonVariant},
+    ui::{
+      title::{HeadingLevel, Title},
+      Button, ButtonVariant,
+    },
   },
   models::exercise::{Exercise, ScaleExercise},
 };
@@ -20,7 +23,7 @@ pub fn ConfigurationHeader(
   let show_fret_range_modal = RwSignal::new(false);
 
   view! {
-    <div class="p-3 mb-6 bg-gray-50 rounded-lg">
+    <div class="p-3 mb-6 bg-gray-50 rounded-lg dark:bg-gray-950">
       <div class="flex flex-wrap gap-4 items-center text-sm">
 
         {match exercise.get() {
@@ -37,12 +40,10 @@ pub fn ConfigurationHeader(
                   on_exercise_update
                 />
                 <ScaleSelection
-                  exercise
                   scale_type
                   show_fret_range_modal
                   show_root_note_modal
                   show_scale_type_modal
-                  on_exercise_update
                 />
                 <FretRangeSelection
                   exercise
@@ -59,8 +60,8 @@ pub fn ConfigurationHeader(
           }
           _ => ().into_any(),
         }} <div class="flex gap-2 items-center">
-          <span class="font-medium text-gray-700">"Details:"</span>
-          <span class="text-xs text-gray-600">{exercise.get().to_string()}</span>
+          <span class="font-medium">"Details:"</span>
+          <span class="text-xs">{exercise.get().to_string()}</span>
         </div>
 
       </div>
@@ -92,7 +93,7 @@ fn RootNoteSelection(
 
   view! {
     <div class="flex relative gap-2 items-center">
-      <span class="font-medium text-gray-700">"Root:"</span>
+      <span class="font-medium">"Root:"</span>
       <Button
         variant=ButtonVariant::Primary
         on_click=move || {
@@ -108,36 +109,34 @@ fn RootNoteSelection(
 
       // Root note dropdown
       <Show when=move || show_root_note_modal.get()>
-        <div class="absolute left-1/2 top-full z-10 mt-1 w-32 bg-white rounded-lg border border-gray-300 shadow-lg transform -translate-x-1/2">
-          <h4 class="mb-1 text-xs font-semibold text-center">"Root Note"</h4>
-          <div class="flex flex-col">
+        <div class="absolute left-1/2 top-full z-10 mt-1 w-32 bg-white rounded-lg border border-gray-300 shadow-lg transform -translate-x-1/2 dark:bg-black dark:border-gray-700">
+          <Title level=HeadingLevel::H6 text="Select Root Note" />
+          <div class="flex flex-col justify-center items-center p-2 m-2">
             {move || {
               Note::all_notes()
                 .iter()
                 .map(move |&note| {
-                  let note_str = note.to_short_string();
                   let is_root_note = note == root_note;
                   let is_current_root = move || {
                     note == temp_selected_note.get().unwrap_or(root_note)
                   };
                   view! {
-                    <button
-                      class="my-1 text-xs text-gray-700 rounded border-2 transition-colors hover:bg-gray-200"
-                      class=(
-                        ["border-indigo-600", "bg-blue-600"],
-                        move || is_root_note && !is_current_root(),
-                      )
-                      class=(["border-green-600", "bg-green-600"], move || is_current_root())
-                      class=(
-                        ["border-gray-300", "bg-gray-100"],
-                        move || !is_root_note && !is_current_root(),
-                      )
-                      on:click=move |_| {
+                    <Button
+                      variant=Signal::derive(move || {
+                        if is_root_note {
+                          ButtonVariant::Primary
+                        } else if is_current_root() {
+                          ButtonVariant::Special
+                        } else {
+                          ButtonVariant::Secondary
+                        }
+                      })
+                      on_click=move || {
                         temp_selected_note.set(Some(note));
                       }
                     >
-                      {note_str}
-                    </button>
+                      {note.to_short_string()}
+                    </Button>
                   }
                 })
                 .collect::<Vec<_>>()
@@ -171,75 +170,72 @@ fn RootNoteSelection(
 
 #[component]
 fn ScaleSelection(
-  exercise: Signal<Exercise>,
   show_root_note_modal: RwSignal<bool>,
   show_fret_range_modal: RwSignal<bool>,
   show_scale_type_modal: RwSignal<bool>,
-  on_exercise_update: Callback<Exercise>,
   scale_type: ScaleType,
 ) -> impl IntoView {
   let temporary_selected_scale = RwSignal::new(scale_type);
 
   view! {
-    <div class="flex relative gap-2 items-center">
-      <span class="font-medium text-gray-700">"Scale:"</span>
-      <button
-        class="py-1 px-2 text-xs font-medium text-purple-800 bg-purple-100 rounded transition-colors cursor-pointer hover:bg-purple-200"
-        on:click=move |_| {
+    <div class="flex relative items-center">
+      <span class="font-medium">"Scale:"</span>
+      <Button
+        variant=ButtonVariant::Special
+        on_click=move || {
           show_root_note_modal.set(false);
           show_fret_range_modal.set(false);
           show_scale_type_modal.set(!show_scale_type_modal.get());
         }
-        title="Click to change scale type"
+        title="Click to change scale type".to_string()
       >
         {scale_type.to_string()}
-      </button>
+      </Button>
 
       // Scale type dropdown
       <Show when=move || show_scale_type_modal.get()>
-        <div class="absolute left-0 top-full z-10 p-4 mt-1 bg-white rounded-lg border border-gray-300 shadow-lg min-w-[200px]">
-          <h4 class="mb-2 text-sm font-semibold">"Select Scale Type"</h4>
-          <For
-            each=move || ScaleType::all_scale_types()
-            key=|scale_type| scale_type.to_string()
-            let(button_scale_type)
-          >
-            <button
-              class=move || {
-                if button_scale_type == temporary_selected_scale.get() {
-                  "my-1 text-xs font-bold rounded border-2 border-blue-500 bg-blue-500 text-white transition-colors"
-                } else if button_scale_type == scale_type {
-                  "my-1 text-xs font-bold rounded border-2 border-purple-600 bg-purple-600 text-white transition-colors"
-                } else {
-                  "my-1 text-xs font-medium rounded border border-gray-300 bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+        <div class="absolute left-0 top-full z-10 p-4 mt-1 bg-white rounded-lg border border-gray-300 shadow-lg dark:bg-black min-w-[200px]">
+          <Title level=HeadingLevel::H4 text="Select Scale Type" />
+          <div class="flex flex-row justify-center items-center mb-4">
+            <For
+              each=move || ScaleType::all_scale_types()
+              key=|scale_type| scale_type.to_string()
+              let(button_scale_type)
+            >
+              <Button
+                variant=Signal::derive(move || {
+                  if button_scale_type == scale_type {
+                    ButtonVariant::Primary
+                  } else if button_scale_type == temporary_selected_scale.get() {
+                    ButtonVariant::Special
+                  } else {
+                    ButtonVariant::Secondary
+                  }
+                })
+                on_click=move || {
+                  temporary_selected_scale.set(button_scale_type);
                 }
-              }
-              on:click=move |_| {
-                temporary_selected_scale.set(button_scale_type);
+              >
+                {button_scale_type.to_string()}
+              </Button>
+
+            </For>
+          </div>
+          <div class="flex gap-2 justify-center items-center">
+            <Button
+              disabled=Signal::derive(move || temporary_selected_scale.get() == scale_type)
+              variant=ButtonVariant::Primary
+              on_click=move || {
+                temporary_selected_scale.set(scale_type);
+                show_scale_type_modal.set(false);
               }
             >
-              {button_scale_type.to_string()}
-            </button>
-          </For>
-
-          <button
-            class="py-1 px-3 text-xs text-white bg-blue-600 rounded hover:bg-blue-700"
-            on:click=move |_| {
-              let mut exercise = exercise.get().clone();
-              exercise.set_scale_type(temporary_selected_scale.get());
-              show_scale_type_modal.set(false);
-              on_exercise_update.run(exercise);
-            }
-          >
-            "OK"
-          </button>
-
-          <button
-            class="px-1 my-1 text-sm text-gray-800 bg-red-100 rounded transition-colors hover:bg-red-300"
-            on:click=move |_| show_scale_type_modal.set(false)
-          >
-            "Cancel"
-          </button>
+              "OK"
+            </Button>
+            <Button variant=ButtonVariant::Danger on_click=move || show_scale_type_modal.set(false)>
+              "Cancel"
+            </Button>
+          </div>
         </div>
       </Show>
     </div>
@@ -258,20 +254,19 @@ fn FretRangeSelection(
 ) -> impl IntoView {
   view! {
     <div class="flex relative gap-2 items-center">
-      <span class="font-medium text-gray-700">"Frets:"</span>
-      <button
-        class="py-1 px-2 text-xs font-medium text-orange-800 bg-orange-100 rounded transition-colors cursor-pointer hover:bg-orange-200"
-        on:click=move |_| {
+      <span class="font-medium">"Frets:"</span>
+      <Button
+        variant=ButtonVariant::Danger
+        on_click=move || {
           show_root_note_modal.set(false);
           show_scale_type_modal.set(false);
           show_fret_range_modal.set(!show_fret_range_modal.get());
         }
-        title="Click to change fret range"
       >
         {active_min_fret}
         {"-"}
         {active_max_fret}
-      </button>
+      </Button>
 
       // Fret range dropdown
       <Show when=move || {
