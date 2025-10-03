@@ -16,6 +16,7 @@ use leptos::prelude::*;
 pub fn ConfigurationHeader(
   exercise: Signal<Exercise>,
   on_exercise_update: Callback<Exercise>,
+  #[prop(into)] can_edit: Signal<bool>,
 ) -> impl IntoView {
   // Modal states for exercise configuration
   let show_root_note_modal = RwSignal::new(false);
@@ -38,12 +39,14 @@ pub fn ConfigurationHeader(
                   show_root_note_modal
                   show_scale_type_modal
                   on_exercise_update
+                  can_edit
                 />
                 <ScaleSelection
                   scale_type
                   show_fret_range_modal
                   show_root_note_modal
                   show_scale_type_modal
+                  can_edit
                 />
                 <FretRangeSelection
                   exercise
@@ -53,6 +56,7 @@ pub fn ConfigurationHeader(
                   on_exercise_update
                   active_min_fret=fret_range.0
                   active_max_fret=fret_range.1
+                  can_edit
                 />
               </>
             }
@@ -77,6 +81,7 @@ fn RootNoteSelection(
   show_fret_range_modal: RwSignal<bool>,
   on_exercise_update: Callback<Exercise>,
   root_note: Note,
+  #[prop(into)] can_edit: Signal<bool>,
 ) -> impl IntoView {
   // Temporary selection state for root note modal
   let temp_selected_note = RwSignal::new(None::<Note>);
@@ -96,6 +101,7 @@ fn RootNoteSelection(
       <span class="font-medium">"Root:"</span>
       <Button
         variant=ButtonVariant::Primary
+        disabled=Signal::derive(move || !can_edit.get())
         on_click=move || {
           show_scale_type_modal.set(false);
           show_fret_range_modal.set(false);
@@ -158,7 +164,7 @@ fn RootNoteSelection(
             <Button
               on_click=move || { on_confirm_note_change() }
               variant=ButtonVariant::Primary
-              disabled=Signal::derive(move || temp_selected_note.get().is_none())
+              disabled=Signal::derive(move || temp_selected_note.get().is_none() || !can_edit.get())
             >
               "OK"
             </Button>
@@ -176,6 +182,7 @@ fn ScaleSelection(
   show_fret_range_modal: RwSignal<bool>,
   show_scale_type_modal: RwSignal<bool>,
   scale_type: ScaleType,
+  #[prop(into)] can_edit: Signal<bool>,
 ) -> impl IntoView {
   let temporary_selected_scale = RwSignal::new(scale_type);
 
@@ -184,6 +191,7 @@ fn ScaleSelection(
       <span class="font-medium">"Scale:"</span>
       <Button
         variant=ButtonVariant::Colored(ButtonColor::Purple)
+        disabled=Signal::derive(move || !can_edit.get())
         on_click=move || {
           show_root_note_modal.set(false);
           show_fret_range_modal.set(false);
@@ -225,7 +233,9 @@ fn ScaleSelection(
           </div>
           <div class="flex gap-2 justify-center items-center">
             <Button
-              disabled=Signal::derive(move || temporary_selected_scale.get() == scale_type)
+              disabled=Signal::derive(move || {
+                temporary_selected_scale.get() == scale_type || !can_edit.get()
+              })
               variant=ButtonVariant::Primary
               on_click=move || {
                 temporary_selected_scale.set(scale_type);
@@ -253,11 +263,13 @@ fn FretRangeSelection(
   active_min_fret: u8,
   active_max_fret: u8,
   on_exercise_update: Callback<Exercise>,
+  #[prop(into)] can_edit: Signal<bool>,
 ) -> impl IntoView {
   view! {
     <div class="flex relative gap-2 items-center">
       <span class="font-medium">"Frets:"</span>
       <Button
+        disabled=Signal::derive(move || !can_edit.get())
         variant=ButtonVariant::Danger
         on_click=move || {
           show_root_note_modal.set(false);
@@ -298,6 +310,7 @@ fn FretRangeSelection(
               </div>
               <div class="flex justify-center items-center">
                 <Button
+                  disabled=Signal::derive(move || !can_edit.get())
                   variant=ButtonVariant::Primary
                   on_click=move || {
                     let mut exercise = exercise.get().clone();

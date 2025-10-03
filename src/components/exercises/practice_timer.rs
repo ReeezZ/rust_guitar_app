@@ -12,7 +12,10 @@ pub enum TimerState {
 }
 
 #[component]
-pub fn PracticeTimer(#[prop()] target_time: Option<Duration>) -> impl IntoView {
+pub fn PracticeTimer(
+  #[prop()] target_time: Option<Duration>,
+  #[prop(optional)] on_timer_state_changed: Option<Callback<TimerState>>,
+) -> impl IntoView {
   let (elapsed_seconds, set_elapsed_seconds) = signal(0u64);
   let (timer_state, set_timer_state) = signal(TimerState::Stopped);
 
@@ -53,14 +56,23 @@ pub fn PracticeTimer(#[prop()] target_time: Option<Duration>) -> impl IntoView {
       TimerState::Stopped => {
         set_elapsed_seconds.set(0);
         set_timer_state.set(TimerState::Running);
+        if let Some(callback) = on_timer_state_changed {
+          callback.run(TimerState::Running);
+        }
         resume_fn(); // Start the interval
       }
       TimerState::Paused => {
         set_timer_state.set(TimerState::Running);
+        if let Some(callback) = on_timer_state_changed {
+          callback.run(TimerState::Running);
+        }
         resume_fn(); // Resume the interval
       }
       TimerState::Running => {
         set_timer_state.set(TimerState::Paused);
+        if let Some(callback) = on_timer_state_changed {
+          callback.run(TimerState::Paused);
+        }
         pause_fn(); // Pause the interval
       }
     }
@@ -68,6 +80,9 @@ pub fn PracticeTimer(#[prop()] target_time: Option<Duration>) -> impl IntoView {
 
   let stop_timer = move || {
     set_timer_state.set(TimerState::Stopped);
+    if let Some(callback) = on_timer_state_changed {
+      callback.run(TimerState::Stopped);
+    }
     set_elapsed_seconds.set(0);
     pause_fn2(); // Stop the interval
   };

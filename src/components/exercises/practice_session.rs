@@ -1,4 +1,4 @@
-use crate::components::exercises::practice_timer::PracticeTimer;
+use crate::components::exercises::practice_timer::{PracticeTimer, TimerState};
 use crate::components::ui::title::{HeadingLevel, Title};
 use crate::components::ui::{Button, ButtonVariant};
 use crate::music::Scale;
@@ -10,13 +10,6 @@ use crate::components::fretboard::FretboardModelAdapter;
 use crate::components::metronome::Metronome;
 use crate::models::exercise::Exercise;
 use crate::models::fretboard::{FretboardModelBuilder, FretboardModelExt};
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum TimerState {
-  Stopped,
-  Running,
-  Paused,
-}
 
 #[component]
 pub fn PracticeSession(
@@ -32,17 +25,26 @@ pub fn PracticeSession(
   #[prop(optional)]
   on_bpm_change: Option<Callback<u32>>,
 ) -> impl IntoView {
+  let can_edit = RwSignal::new(true); // For future use: lock editing during active session
   view! {
     <div class="p-6 rounded-lg border border-gray-200 dark:border-gray-800">
       <h3 class="mb-4 text-lg font-semibold">"Practice Session"</h3>
 
       <ConfigurationHeader
         exercise
+        can_edit
         on_exercise_update=on_exercise_update.unwrap_or_else(|| Callback::new(|_| {}))
       />
 
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <PracticeTimer target_time />
+        <PracticeTimer
+          target_time
+          on_timer_state_changed=Callback::new(move |timer_state| match timer_state {
+            TimerState::Stopped => can_edit.set(true),
+            TimerState::Running => can_edit.set(false),
+            TimerState::Paused => can_edit.set(false),
+          })
+        />
 
         <MetronomeSection on_bpm_change />
       </div>
