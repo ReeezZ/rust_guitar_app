@@ -1,10 +1,12 @@
-use crate::components::{exercise_manager::SongsList, exercises::start_scale::StartScale};
+use crate::components::{
+  exercise_manager::SongsList, exercises::scale::start_scale::StartScaleDialog,
+};
 use leptos::prelude::*;
 
 #[component]
 pub fn ExercisesPage() -> impl IntoView {
   view! {
-    <StartScale />
+    <StartScaleDialog />
     <SongsList />
   }
 }

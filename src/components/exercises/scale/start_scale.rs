@@ -2,14 +2,14 @@ use leptos::prelude::*;
 
 use crate::{
   components::{
-    exercises::ScaleExerciseForm,
+    exercises::scale::ScaleExerciseForm,
     ui::{button::ButtonColor, Button, ButtonVariant},
   },
   music::{heptatonic_scales::HeptaScaleType, Note, ScaleType},
 };
 
 #[component]
-pub fn StartScale() -> impl IntoView {
+pub fn StartScaleDialog() -> impl IntoView {
   let show_dialog = RwSignal::new(false);
   let root_note = RwSignal::new(Note::C);
   let scale_type = RwSignal::new(ScaleType::Hepatonic(HeptaScaleType::Minor));

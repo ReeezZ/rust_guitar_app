@@ -1,6 +1,6 @@
 use crate::{
   components::{
-    exercises::PositionPresetButtons,
+    exercises::scale::PositionPresetButtons,
     ui::{
       button::ButtonColor,
       title::{HeadingLevel, Title},

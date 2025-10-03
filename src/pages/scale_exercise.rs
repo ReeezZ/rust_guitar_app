@@ -7,7 +7,7 @@ use leptos_router::{
 };
 
 use crate::{
-  components::exercises::practice_session::ScalePracticeSession,
+  components::exercises::scale::scale_practice_session::ScalePracticeSession,
   models::exercise::ScaleExercise,
   music::{heptatonic_scales::HeptaScaleType, Note, ScaleType},
 };
