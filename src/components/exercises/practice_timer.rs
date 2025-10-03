@@ -73,17 +73,17 @@ pub fn PracticeTimer(#[prop()] target_time: Option<Duration>) -> impl IntoView {
   };
 
   view! {
-    <div class="p-6 bg-white rounded-lg border border-gray-200">
-      <h3 class="mb-4 text-lg font-semibold text-gray-800">"Practice Timer"</h3>
+    <div class="p-6 bg-white rounded-lg border border-gray-500 dark:bg-black">
+      <h3 class="mb-4 text-lg font-semibold text-center">"Practice Timer"</h3>
 
       <div class="text-center">
         // Timer display
         <div class=move || {
           let base_classes = "text-6xl font-mono font-bold mb-6";
           if is_target_reached() {
-            format!("{base_classes} text-green-600")
+            format!("{base_classes} text-green-500")
           } else {
-            format!("{base_classes} text-gray-800")
+            format!("{base_classes} ")
           }
         }>{formatted_time}</div>
 
