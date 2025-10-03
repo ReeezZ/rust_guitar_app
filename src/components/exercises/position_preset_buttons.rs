@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 
-use crate::components::ui::{Button, ButtonVariant};
+use crate::components::ui::{button::ButtonColor, Button, ButtonVariant};
 
 #[component]
 pub fn PositionPresetButtons(
@@ -57,7 +57,11 @@ fn PositionPresetButton(
   view! {
     <Button
       variant=Signal::derive(move || {
-        if range == current_range.get() { ButtonVariant::Special } else { ButtonVariant::Secondary }
+        if range == current_range.get() {
+          ButtonVariant::Colored(ButtonColor::Purple)
+        } else {
+          ButtonVariant::Secondary
+        }
       })
       on_click=Callback::new(move |_| on_preset_select.run(range))
     >

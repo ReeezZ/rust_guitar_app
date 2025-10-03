@@ -3,7 +3,7 @@ use leptos::prelude::*;
 use crate::{
   components::{
     exercises::ScaleExerciseForm,
-    ui::{Button, ButtonVariant},
+    ui::{button::ButtonColor, Button, ButtonVariant},
   },
   music::{heptatonic_scales::HeptaScaleType, Note, ScaleType},
 };
@@ -21,7 +21,11 @@ pub fn StartScale() -> impl IntoView {
       <div class="flex justify-center mb-4">
         <Button
           variant=Signal::derive(move || {
-            if show_dialog.get() { ButtonVariant::Special } else { ButtonVariant::Primary }
+            if show_dialog.get() {
+              ButtonVariant::Colored(ButtonColor::Purple)
+            } else {
+              ButtonVariant::Primary
+            }
           })
           on_click=move || {
             show_dialog.set(!show_dialog.get());

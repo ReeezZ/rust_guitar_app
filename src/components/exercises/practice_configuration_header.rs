@@ -1,8 +1,8 @@
 use crate::{
   components::{
     exercises::PositionPresetButtons,
-    fretboard::base::MAX_FRETS,
     ui::{
+      button::ButtonColor,
       title::{HeadingLevel, Title},
       Button, ButtonVariant, FretRangeSelector,
     },
@@ -126,7 +126,7 @@ fn RootNoteSelection(
                         if is_root_note {
                           ButtonVariant::Primary
                         } else if is_current_root() {
-                          ButtonVariant::Special
+                          ButtonVariant::Colored(ButtonColor::Purple)
                         } else {
                           ButtonVariant::Secondary
                         }
@@ -145,22 +145,24 @@ fn RootNoteSelection(
 
           // Action buttons
           <div class="flex flex-col justify-end mt-2">
-            <button
-              class="px-1 my-1 text-sm text-gray-800 bg-red-100 rounded transition-colors hover:bg-red-300"
-              on:click=move |_| {
+            <Button
+              on_click=move || {
                 temp_selected_note.set(None);
                 show_root_note_modal.set(false);
               }
+              variant=ButtonVariant::Secondary
             >
               "Cancel"
-            </button>
-            <button
-              class="px-1 my-1 text-sm text-white bg-blue-500 rounded transition-colors hover:bg-blue-700 disabled:bg-gray-400"
-              disabled=move || temp_selected_note.get().is_none()
-              on:click=move |_| { on_confirm_note_change() }
+            </Button>
+
+            <Button
+              on_click=move || { on_confirm_note_change() }
+              variant=ButtonVariant::Primary
+              disabled=Signal::derive(move || temp_selected_note.get().is_none())
             >
               "OK"
-            </button>
+            </Button>
+
           </div>
         </div>
       </Show>
@@ -181,7 +183,7 @@ fn ScaleSelection(
     <div class="flex relative items-center">
       <span class="font-medium">"Scale:"</span>
       <Button
-        variant=ButtonVariant::Special
+        variant=ButtonVariant::Colored(ButtonColor::Purple)
         on_click=move || {
           show_root_note_modal.set(false);
           show_fret_range_modal.set(false);
@@ -207,7 +209,7 @@ fn ScaleSelection(
                   if button_scale_type == scale_type {
                     ButtonVariant::Primary
                   } else if button_scale_type == temporary_selected_scale.get() {
-                    ButtonVariant::Special
+                    ButtonVariant::Colored(ButtonColor::Purple)
                   } else {
                     ButtonVariant::Secondary
                   }

@@ -2,6 +2,8 @@ use leptos::prelude::*;
 use leptos_use::use_interval_fn;
 use std::time::Duration;
 
+use crate::components::ui::{button::ButtonColor, Button, ButtonVariant};
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum TimerState {
   Stopped,
@@ -10,7 +12,7 @@ pub enum TimerState {
 }
 
 #[component]
-pub fn PracticeTimer(#[prop(optional)] target_time: Option<Duration>) -> impl IntoView {
+pub fn PracticeTimer(#[prop()] target_time: Option<Duration>) -> impl IntoView {
   let (elapsed_seconds, set_elapsed_seconds) = signal(0u64);
   let (timer_state, set_timer_state) = signal(TimerState::Stopped);
 
@@ -46,7 +48,7 @@ pub fn PracticeTimer(#[prop(optional)] target_time: Option<Duration>) -> impl In
     }
   };
 
-  let start_timer = move |_| {
+  let start_timer = move || {
     match timer_state.get() {
       TimerState::Stopped => {
         set_elapsed_seconds.set(0);
@@ -64,85 +66,83 @@ pub fn PracticeTimer(#[prop(optional)] target_time: Option<Duration>) -> impl In
     }
   };
 
-  let stop_timer = move |_| {
+  let stop_timer = move || {
     set_timer_state.set(TimerState::Stopped);
     set_elapsed_seconds.set(0);
     pause_fn2(); // Stop the interval
   };
 
   view! {
-      <div class="bg-white p-6 rounded-lg border border-gray-200">
-          <h3 class="text-lg font-semibold text-gray-800 mb-4">"Practice Timer"</h3>
+    <div class="p-6 bg-white rounded-lg border border-gray-200">
+      <h3 class="mb-4 text-lg font-semibold text-gray-800">"Practice Timer"</h3>
 
-          <div class="text-center">
-              // Timer display
-              <div class={move || {
-                  let base_classes = "text-6xl font-mono font-bold mb-6";
-                  if is_target_reached() {
-                      format!("{base_classes} text-green-600")
-                  } else {
-                      format!("{base_classes} text-gray-800")
-                  }
-              }}>
-                  {formatted_time}
-              </div>
+      <div class="text-center">
+        // Timer display
+        <div class=move || {
+          let base_classes = "text-6xl font-mono font-bold mb-6";
+          if is_target_reached() {
+            format!("{base_classes} text-green-600")
+          } else {
+            format!("{base_classes} text-gray-800")
+          }
+        }>{formatted_time}</div>
 
-              // Target time display
-              {move || {
-                  if let Some(target) = target_time {
-                      let target_mins = target.as_secs() / 60;
-                      let target_secs = target.as_secs() % 60;
-                      view! {
-                          <p class="text-sm text-gray-600 mb-4">
-                              "Target: " {format!("{target_mins:02}:{target_secs:02}")}
-                              {move || if is_target_reached() { " ✓" } else { "" }}
-                          </p>
-                      }.into_any()
-                  } else {
-                      view! { <div></div> }.into_any()
-                  }
-              }}
-
-              // Control buttons
-              <div class="flex justify-center space-x-4">
-                  <button
-                      class={move || {
-                          match timer_state.get() {
-                              TimerState::Running => "bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded-lg",
-                              _ => "bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg"
-                          }
-                      }}
-                      on:click=start_timer
-                  >
-                      {move || {
-                          match timer_state.get() {
-                              TimerState::Running => "Pause",
-                              TimerState::Paused => "Resume",
-                              TimerState::Stopped => "Start"
-                          }
-                      }}
-                  </button>
-
-                  <button
-                      class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg disabled:bg-gray-400"
-                      on:click=stop_timer
-                      disabled={move || timer_state.get() == TimerState::Stopped}
-                  >
-                      "Stop"
-                  </button>
-              </div>
-
-              // Timer state indicator
-              <p class="text-xs text-gray-500 mt-2">
-                  {move || {
-                      match timer_state.get() {
-                          TimerState::Stopped => "Ready to start",
-                          TimerState::Running => "Timer running...",
-                          TimerState::Paused => "Timer paused"
-                      }
-                  }}
+        // Target time display
+        {move || {
+          if let Some(target) = target_time {
+            let target_mins = target.as_secs() / 60;
+            let target_secs = target.as_secs() % 60;
+            view! {
+              <p class="mb-4 text-sm text-gray-600">
+                "Target: " {format!("{target_mins:02}:{target_secs:02}")}
+                {move || if is_target_reached() { " ✓" } else { "" }}
               </p>
-          </div>
+            }
+              .into_any()
+          } else {
+            view! { <div></div> }.into_any()
+          }
+        }}
+
+        // Control buttons
+        <div class="flex justify-center space-x-4">
+          <Button
+            variant=Signal::derive(move || match timer_state.get() {
+              TimerState::Running => ButtonVariant::Colored(ButtonColor::Yellow),
+              _ => ButtonVariant::Colored(ButtonColor::Green),
+            })
+            on_click=start_timer
+          >
+            {move || {
+              match timer_state.get() {
+                TimerState::Running => "Pause",
+                TimerState::Paused => "Resume",
+                TimerState::Stopped => "Start",
+              }
+            }}
+          </Button>
+
+          <Button
+            variant=ButtonVariant::Danger
+            on_click=stop_timer
+            disabled=Signal::derive(move || timer_state.get() == TimerState::Stopped)
+          >
+            "Stop"
+          </Button>
+
+        </div>
+
+        // Timer state indicator
+        <p class="mt-2 text-xs text-gray-500">
+          {move || {
+            match timer_state.get() {
+              TimerState::Stopped => "Ready to start",
+              TimerState::Running => "Timer running...",
+              TimerState::Paused => "Timer paused",
+            }
+          }}
+        </p>
       </div>
+    </div>
   }
 }

@@ -49,7 +49,7 @@ pub fn SongsList() -> impl IntoView {
   });
 
   // Handle form cancel
-  let handle_form_cancel = Callback::new(move |_: ()| {
+  let handle_form_cancel = Callback::new(move |_| {
     set_show_form.set(false);
   });
 

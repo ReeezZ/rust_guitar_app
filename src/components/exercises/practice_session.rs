@@ -1,9 +1,8 @@
+use crate::components::exercises::practice_timer::PracticeTimer;
 use crate::components::ui::title::{HeadingLevel, Title};
 use crate::components::ui::{Button, ButtonVariant};
 use crate::music::Scale;
 use leptos::prelude::*;
-use leptos_use::use_interval_fn;
-use leptos_use::utils::Pausable;
 use std::time::Duration;
 
 use super::ConfigurationHeader;
@@ -33,9 +32,6 @@ pub fn PracticeSession(
   #[prop(optional)]
   on_bpm_change: Option<Callback<u32>>,
 ) -> impl IntoView {
-  let elapsed_seconds = RwSignal::new(0u64);
-  let timer_state = RwSignal::new(TimerState::Stopped);
-
   view! {
     <div class="p-6 rounded-lg border border-gray-200 dark:border-gray-800">
       <h3 class="mb-4 text-lg font-semibold">"Practice Session"</h3>
@@ -46,163 +42,12 @@ pub fn PracticeSession(
       />
 
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <TimerSection elapsed_seconds target_time timer_state />
+        <PracticeTimer target_time />
 
         <MetronomeSection on_bpm_change />
       </div>
 
       <FretboardSection exercise />
-    </div>
-  }
-}
-
-#[component]
-fn TimerSection(
-  target_time: Option<Duration>,
-  timer_state: RwSignal<TimerState>,
-  elapsed_seconds: RwSignal<u64>,
-) -> impl IntoView {
-  // Check if target time is reached
-  let is_target_reached = move || {
-    if let Some(target) = target_time {
-      elapsed_seconds.get() >= target.as_secs()
-    } else {
-      false
-    }
-  };
-
-  // Set up interval for timer ticking
-  let Pausable {
-    pause,
-    resume,
-    is_active: _,
-  } = use_interval_fn(
-    move || {
-      if timer_state.get() == TimerState::Running {
-        elapsed_seconds.update(|t| *t += 1);
-      }
-    },
-    1000, // 1 second interval
-  );
-
-  let pause_clone = pause.clone();
-
-  let stop_timer = {
-    move |_| {
-      timer_state.set(TimerState::Stopped);
-      elapsed_seconds.set(0);
-      pause_clone(); // Stop the interval
-    }
-  };
-
-  let start_timer = {
-    move |_| {
-      match timer_state.get() {
-        TimerState::Stopped => {
-          elapsed_seconds.set(0);
-          timer_state.set(TimerState::Running);
-          resume(); // Start the interval
-        }
-        TimerState::Paused => {
-          timer_state.set(TimerState::Running);
-          resume(); // Resume the interval
-        }
-        TimerState::Running => {
-          timer_state.set(TimerState::Paused);
-          pause(); // Pause the interval
-        }
-      }
-    }
-  };
-
-  // Format elapsed time as MM:SS
-  let formatted_time = move || {
-    let seconds = elapsed_seconds.get();
-    let minutes = seconds / 60;
-    let secs = seconds % 60;
-    format!("{minutes:02}:{secs:02}")
-  };
-
-  view! {
-    <div>
-      <div class="flex justify-between items-center mb-3">
-        <Title text="Timer" level=HeadingLevel::H4 />
-      </div>
-
-      <div class="p-4 bg-white rounded-lg border border-gray-200 dark:bg-black dark:border-gray-700">
-        <div class="text-center">
-          // Timer display
-          <div class=move || {
-            let base_classes = "text-4xl lg:text-6xl font-mono font-bold mb-4";
-            if is_target_reached() {
-              format!("{base_classes} text-green-600")
-            } else {
-              format!("{base_classes} text-gray-500")
-            }
-          }>{formatted_time}</div>
-
-          // Target time display
-          {move || {
-            if let Some(target) = target_time {
-              let target_mins = target.as_secs() / 60;
-              let target_secs = target.as_secs() % 60;
-              view! {
-                <p class="mb-4 text-sm">
-                  "Target: " {format!("{target_mins:02}:{target_secs:02}")}
-                  {move || if is_target_reached() { " ✓" } else { "" }}
-                </p>
-              }
-                .into_any()
-            } else {
-              view! { <div></div> }.into_any()
-            }
-          }}
-
-          // Control buttons
-          <div class="flex justify-center mb-3 space-x-3">
-            <button
-              class=move || {
-                match timer_state.get() {
-                  TimerState::Running => {
-                    "bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg text-sm"
-                  }
-                  _ => {
-                    "bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg text-sm"
-                  }
-                }
-              }
-              on:click=start_timer
-            >
-              {move || {
-                match timer_state.get() {
-                  TimerState::Running => "Pause",
-                  TimerState::Paused => "Resume",
-                  TimerState::Stopped => "Start",
-                }
-              }}
-            </button>
-
-            <button
-              class="py-2 px-4 text-sm font-bold text-white bg-red-500 rounded-lg hover:bg-red-600 disabled:bg-gray-400"
-              on:click=stop_timer
-              disabled=move || timer_state.get() == TimerState::Stopped
-            >
-              "Stop"
-            </button>
-          </div>
-
-          // Timer state indicator
-          <p class="text-xs text-gray-500">
-            {move || {
-              match timer_state.get() {
-                TimerState::Stopped => "Ready to start",
-                TimerState::Running => "Timer running...",
-                TimerState::Paused => "Timer paused",
-              }
-            }}
-          </p>
-        </div>
-      </div>
     </div>
   }
 }
