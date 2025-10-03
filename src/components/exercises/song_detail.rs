@@ -1,6 +1,5 @@
-use super::practice_session::PracticeSession;
 use crate::components::ui::{Button, ButtonVariant};
-use crate::models::exercise::{Exercise, Song};
+use crate::models::exercise::Song;
 use crate::models::repository::{get_songs_repository, SongsRepository};
 use leptos::prelude::*;
 
@@ -186,32 +185,9 @@ fn SongDetailChecked(
                   }
                 }}
               </div>
-
-            // Colored configuration buttons with dropdowns - REMOVED
-            // Now handled by the PracticeSession component
             </div>
 
-            // Practice Session Section
-            <div class="p-6 bg-gray-50 rounded-lg">
-              <PracticeSession
-                target_time=std::time::Duration::from_secs(15 * 60)
-                exercise=Signal::derive(move || Exercise::Song(song.get()))
-                // TODO: yeah we should split this....
-                on_exercise_update=Callback::new(move |updated_exercise: Exercise| {
-                  match updated_exercise {
-                    Exercise::Song(updated_song) => {
-                      let repo = get_songs_repository();
-                      if let Err(e) = repo.update(&updated_song) {
-                        leptos::logging::error!("Failed to update song: {:?}", e);
-                      } else {
-                        on_song_change.run(updated_song);
-                      }
-                    }
-                    _ => leptos::logging::warn!("Received unexpected exercise type in SongDetail"),
-                  }
-                })
-              />
-            </div>
+          // TODO: We can create a SongPracticeSession similat to what we have in ScaleExercise
           </div>
         }
       }}

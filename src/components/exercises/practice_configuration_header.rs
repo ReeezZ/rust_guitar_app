@@ -7,15 +7,15 @@ use crate::{
       Button, ButtonVariant, FretRangeSelector,
     },
   },
-  models::exercise::{Exercise, ScaleExercise},
+  models::exercise::ScaleExercise,
 };
 use crate::{music::notes::NoteExt, music::Note, music::ScaleType};
 use leptos::prelude::*;
 
 #[component]
 pub fn ConfigurationHeader(
-  exercise: Signal<Exercise>,
-  on_exercise_update: Callback<Exercise>,
+  exercise: Signal<ScaleExercise>,
+  on_exercise_update: Callback<ScaleExercise>,
   #[prop(into)] can_edit: Signal<bool>,
 ) -> impl IntoView {
   // Modal states for exercise configuration
@@ -23,47 +23,43 @@ pub fn ConfigurationHeader(
   let show_scale_type_modal = RwSignal::new(false);
   let show_fret_range_modal = RwSignal::new(false);
 
+  let root_note = Signal::derive(move || exercise.get().root_note);
+  let scale_type = Signal::derive(move || exercise.get().scale_type);
+  let fret_range = Signal::derive(move || exercise.get().fret_range);
+
   view! {
     <div class="p-3 mb-6 bg-gray-50 rounded-lg dark:bg-gray-950">
       <div class="flex flex-wrap gap-4 items-center text-sm">
 
-        {match exercise.get() {
-          Exercise::Scale(scale) => {
-            let ScaleExercise { root_note, scale_type, fret_range } = scale;
-            view! {
-              <>
-                <RootNoteSelection
-                  root_note
-                  exercise
-                  show_fret_range_modal
-                  show_root_note_modal
-                  show_scale_type_modal
-                  on_exercise_update
-                  can_edit
-                />
-                <ScaleSelection
-                  scale_type
-                  show_fret_range_modal
-                  show_root_note_modal
-                  show_scale_type_modal
-                  can_edit
-                />
-                <FretRangeSelection
-                  exercise
-                  show_fret_range_modal
-                  show_root_note_modal
-                  show_scale_type_modal
-                  on_exercise_update
-                  active_min_fret=fret_range.0
-                  active_max_fret=fret_range.1
-                  can_edit
-                />
-              </>
-            }
-              .into_any()
-          }
-          _ => ().into_any(),
-        }} <div class="flex gap-2 items-center">
+        <>
+          <RootNoteSelection
+            root_note=root_note.get()
+            exercise
+            show_fret_range_modal
+            show_root_note_modal
+            show_scale_type_modal
+            on_exercise_update
+            can_edit
+          />
+          <ScaleSelection
+            scale_type=scale_type.get()
+            show_fret_range_modal
+            show_root_note_modal
+            show_scale_type_modal
+            can_edit
+          />
+          <FretRangeSelection
+            exercise
+            show_fret_range_modal
+            show_root_note_modal
+            show_scale_type_modal
+            on_exercise_update
+            active_min_fret=fret_range.get().0
+            active_max_fret=fret_range.get().1
+            can_edit
+          />
+        </>
+        <div class="flex gap-2 items-center">
           <span class="font-medium">"Details:"</span>
           <span class="text-xs">{exercise.get().to_string()}</span>
         </div>
@@ -75,11 +71,11 @@ pub fn ConfigurationHeader(
 
 #[component]
 fn RootNoteSelection(
-  exercise: Signal<Exercise>,
+  exercise: Signal<ScaleExercise>,
   show_root_note_modal: RwSignal<bool>,
   show_scale_type_modal: RwSignal<bool>,
   show_fret_range_modal: RwSignal<bool>,
-  on_exercise_update: Callback<Exercise>,
+  on_exercise_update: Callback<ScaleExercise>,
   root_note: Note,
   #[prop(into)] can_edit: Signal<bool>,
 ) -> impl IntoView {
@@ -90,8 +86,8 @@ fn RootNoteSelection(
     if let Some(selected_note) = temp_selected_note.get() {
       temp_selected_note.set(Some(selected_note));
       show_root_note_modal.set(false);
-      let mut exercise = exercise.get().clone();
-      exercise.set_root_note(selected_note);
+      let mut exercise = exercise.get();
+      exercise.root_note = selected_note;
       on_exercise_update.run(exercise);
     }
   };
@@ -181,6 +177,7 @@ fn ScaleSelection(
   show_root_note_modal: RwSignal<bool>,
   show_fret_range_modal: RwSignal<bool>,
   show_scale_type_modal: RwSignal<bool>,
+  // TODO: should probably be a signal
   scale_type: ScaleType,
   #[prop(into)] can_edit: Signal<bool>,
 ) -> impl IntoView {
@@ -256,13 +253,13 @@ fn ScaleSelection(
 
 #[component]
 fn FretRangeSelection(
-  exercise: Signal<Exercise>,
+  exercise: Signal<ScaleExercise>,
   show_fret_range_modal: RwSignal<bool>,
   show_root_note_modal: RwSignal<bool>,
   show_scale_type_modal: RwSignal<bool>,
   active_min_fret: u8,
   active_max_fret: u8,
-  on_exercise_update: Callback<Exercise>,
+  on_exercise_update: Callback<ScaleExercise>,
   #[prop(into)] can_edit: Signal<bool>,
 ) -> impl IntoView {
   view! {
@@ -313,8 +310,8 @@ fn FretRangeSelection(
                   disabled=Signal::derive(move || !can_edit.get())
                   variant=ButtonVariant::Primary
                   on_click=move || {
-                    let mut exercise = exercise.get().clone();
-                    exercise.set_fret_range((min_fret.get(), max_fret.get()));
+                    let mut exercise = exercise.get();
+                    exercise.fret_range = (min_fret.get(), max_fret.get());
                     on_exercise_update.run(exercise);
                   }
                 >

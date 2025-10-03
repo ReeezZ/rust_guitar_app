@@ -7,8 +7,8 @@ use leptos_router::{
 };
 
 use crate::{
-  components::exercises::practice_session::PracticeSession,
-  models::exercise::{Exercise, ScaleExercise},
+  components::exercises::practice_session::ScalePracticeSession,
+  models::exercise::ScaleExercise,
   music::{heptatonic_scales::HeptaScaleType, Note, ScaleType},
 };
 
@@ -53,7 +53,7 @@ struct ScaleExerciseParams {
 #[component]
 pub fn ScaleExercisePage() -> impl IntoView {
   let query = use_query::<ScaleExerciseParams>();
-  let scale = move || {
+  let scale = Signal::derive(move || {
     let scale_params = match query.get() {
       Ok(scale_params) => {
         leptos::logging::log!("OK: Got params: {:?}", scale_params);
@@ -78,9 +78,7 @@ pub fn ScaleExercisePage() -> impl IntoView {
         scale_params.max_fret.unwrap_or(12),
       ),
     }
-  };
+  });
 
-  view! {
-    <PracticeSession exercise=Signal::derive(move || Exercise::Scale(scale()))></PracticeSession>
-  }
+  view! { <ScalePracticeSession exercise=scale></ScalePracticeSession> }
 }

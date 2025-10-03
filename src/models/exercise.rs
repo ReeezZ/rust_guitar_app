@@ -11,6 +11,16 @@ pub struct ScaleExercise {
   pub fret_range: (u8, u8), // (min_fret, max_fret)
 }
 
+impl std::fmt::Display for ScaleExercise {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(
+      f,
+      "{} {} (frets {}-{})",
+      self.root_note, self.scale_type, self.fret_range.0, self.fret_range.1
+    )
+  }
+}
+
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct Song {
   pub id: String,
@@ -45,11 +55,7 @@ impl std::fmt::Display for Exercise {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     match self {
       Exercise::Scale(scale) => {
-        write!(
-          f,
-          "{} {} (frets {}-{})",
-          scale.root_note, scale.scale_type, scale.fret_range.0, scale.fret_range.1
-        )
+        write!(f, "{}", scale)
       }
       Exercise::Song { .. } => write!(f, "Song"),
     }

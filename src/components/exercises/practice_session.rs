@@ -8,24 +8,23 @@ use std::time::Duration;
 use super::ConfigurationHeader;
 use crate::components::fretboard::FretboardModelAdapter;
 use crate::components::metronome::Metronome;
-use crate::models::exercise::Exercise;
+use crate::models::exercise::ScaleExercise;
 use crate::models::fretboard::{FretboardModelBuilder, FretboardModelExt};
 
 #[component]
-pub fn PracticeSession(
+pub fn ScalePracticeSession(
   #[prop(optional)] target_time: Option<Duration>,
   /// Optional exercise for exercise-specific features like fretboard display
   #[prop(into)]
-  exercise: Signal<Exercise>,
+  exercise: Signal<ScaleExercise>,
   /// Optional callback for when exercise is updated
   // TODO: maybe this should be split differently for exercise types
   #[prop(optional)]
-  on_exercise_update: Option<Callback<Exercise>>,
-  /// Optional callback when BPM changes
-  #[prop(optional)]
-  on_bpm_change: Option<Callback<u32>>,
+  on_exercise_update: Option<Callback<ScaleExercise>>,
+  #[prop(optional)] on_bpm_change: Option<Callback<u32>>,
 ) -> impl IntoView {
-  let can_edit = RwSignal::new(true); // For future use: lock editing during active session
+  let can_edit = RwSignal::new(true);
+
   view! {
     <div class="p-6 rounded-lg border border-gray-200 dark:border-gray-800">
       <h3 class="mb-4 text-lg font-semibold">"Practice Session"</h3>
@@ -98,56 +97,46 @@ fn MetronomeSection(on_bpm_change: Option<Callback<u32>>) -> impl IntoView {
 }
 
 #[component]
-fn FretboardSection(exercise: Signal<Exercise>) -> impl IntoView {
+fn FretboardSection(exercise: Signal<ScaleExercise>) -> impl IntoView {
   let (show_fretboard, set_show_fretboard) = signal(true);
 
-  {
-    move || {
-      match exercise.get() {
-        Exercise::Scale(scale) => {
+  view! {
+    <div class="mt-6">
+      // Toggle fretboard visibility
+      <div class="flex justify-between items-center mb-3">
+        <h4 class="font-semibold text-md">"Fretboard"</h4>
+        <Button
+          variant=ButtonVariant::Secondary
+          on_click=move || set_show_fretboard.update(|show| *show = !*show)
+        >
+          {move || if show_fretboard.get() { "Hide" } else { "Show" }}
+        </Button>
+
+      </div>
+
+      {move || {
+        if show_fretboard.get() {
+          let fretboard_model = Memo::new(move |_| {
+            let model = FretboardModelBuilder::new()
+              .start_fret_val(exercise.get().fret_range.0)
+              .end_fret_val(exercise.get().fret_range.1)
+              .build();
+            let current_scale = Scale::new(exercise.get().root_note, exercise.get().scale_type);
+            model.update_from_scale(current_scale);
+            model
+          });
+          // TODO bad for performance: initialize model once and just update
+
           view! {
-            <div class="mt-6">
-              // Toggle fretboard visibility
-              <div class="flex justify-between items-center mb-3">
-                <h4 class="font-semibold text-md">"Fretboard"</h4>
-                <Button
-                  variant=ButtonVariant::Secondary
-                  on_click=move || set_show_fretboard.update(|show| *show = !*show)
-                >
-                  {move || if show_fretboard.get() { "Hide" } else { "Show" }}
-                </Button>
-
-              </div>
-
-              {move || {
-                if show_fretboard.get() {
-                  let fretboard_model = Memo::new(move |_| {
-                    let model = FretboardModelBuilder::new()
-                      .start_fret_val(scale.fret_range.0)
-                      .end_fret_val(scale.fret_range.1)
-                      .build();
-                    let current_scale = Scale::new(scale.root_note, scale.scale_type);
-                    model.update_from_scale(current_scale);
-                    model
-                  });
-                  // TODO bad for performance: initialize model once and just update
-
-                  view! {
-                    <div class="p-4 rounded-lg">
-                      <FretboardModelAdapter model=fretboard_model />
-                    </div>
-                  }
-                    .into_any()
-                } else {
-                  ().into_any()
-                }
-              }}
+            <div class="p-4 rounded-lg">
+              <FretboardModelAdapter model=fretboard_model />
             </div>
           }
-          .into_any()
+            .into_any()
+        } else {
+          ().into_any()
         }
-        _ => ().into_any(),
-      }
-    }
+      }}
+    </div>
   }
 }
