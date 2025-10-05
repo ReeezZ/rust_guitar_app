@@ -110,7 +110,7 @@ pub fn SongExerciseForm(
             class="py-2 px-3 w-full rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             prop:value=move || name.get()
             on:input=move |e| name.set(event_target_value(&e))
-            placeholder="Enter exercise name"
+            placeholder="Enter song name"
           />
         </div>
 
@@ -120,7 +120,7 @@ pub fn SongExerciseForm(
             class="py-2 px-3 w-full rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             prop:value=move || description.get()
             on:input=move |e| description.set(event_target_value(&e))
-            placeholder="Enter exercise description (optional)"
+            placeholder="Enter song description (optional)"
             rows="3"
           />
         </div>

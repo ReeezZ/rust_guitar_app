@@ -58,7 +58,7 @@ pub fn SongsList() -> impl IntoView {
       <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold">"My songs"</h1>
         <Button variant=ButtonVariant::Primary on_click=move || set_show_form.set(!show_form.get())>
-          {move || if show_form.get() { "Cancel" } else { "Add Exercise" }}
+          {move || if show_form.get() { "Cancel" } else { "Add Song" }}
         </Button>
       </div>
 
@@ -116,7 +116,7 @@ pub fn SongsList() -> impl IntoView {
             .then(|| {
               view! {
                 <div class="py-8 text-center">
-                  <p>"No songs yet. Create your first exercise to get started!"</p>
+                  <p>"No songs yet :("</p>
                 </div>
               }
             })
