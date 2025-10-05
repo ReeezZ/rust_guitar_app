@@ -1,3 +1,4 @@
+pub mod dev_page;
 pub mod exercise_detail;
 pub mod exercises;
 pub mod fretboard_config_examples;

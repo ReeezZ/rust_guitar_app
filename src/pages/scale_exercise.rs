@@ -1,84 +1,38 @@
-use std::str::FromStr;
-
 use leptos::prelude::*;
-use leptos_router::{
-  hooks::use_query,
-  params::{IntoParam, Params},
-};
+use leptos_router::hooks::query_signal;
 
 use crate::{
   components::exercises::scale::scale_practice_session::ScalePracticeSession,
-  models::exercise::ScaleExercise,
   music::{heptatonic_scales::HeptaScaleType, Note, ScaleType},
 };
 
-impl IntoParam for Note {
-  fn into_param(
-    value: Option<&str>,
-    name: &str,
-  ) -> Result<Self, leptos_router::params::ParamsError> {
-    if value.is_none() {
-      return Err(leptos_router::params::ParamsError::MissingParam(
-        name.to_string(),
-      ));
-    }
-
-    Ok(Note::from_str(value.unwrap()).unwrap_or(Note::C))
-  }
-}
-
-impl IntoParam for ScaleType {
-  fn into_param(
-    value: Option<&str>,
-    name: &str,
-  ) -> Result<Self, leptos_router::params::ParamsError> {
-    if value.is_none() {
-      return Err(leptos_router::params::ParamsError::MissingParam(
-        name.to_string(),
-      ));
-    }
-
-    Ok(ScaleType::from_str(value.unwrap()).unwrap_or(ScaleType::Hepatonic(HeptaScaleType::Major)))
-  }
-}
-
-#[derive(Clone, Copy, Params, PartialEq, Debug)]
-struct ScaleExerciseParams {
-  root_note: Note,
-  scale_type: ScaleType,
-  min_fret: Option<u8>,
-  max_fret: Option<u8>,
-}
-
 #[component]
 pub fn ScaleExercisePage() -> impl IntoView {
-  let query = use_query::<ScaleExerciseParams>();
-  let scale = Signal::derive(move || {
-    let scale_params = match query.get() {
-      Ok(scale_params) => {
-        leptos::logging::log!("OK: Got params: {:?}", scale_params);
-        scale_params
-      }
-      Err(err) => {
-        leptos::logging::log!("ERROR: Failed to get params: {:?}", err);
-        ScaleExerciseParams {
-          root_note: Note::C,
-          scale_type: ScaleType::Hepatonic(HeptaScaleType::Major),
-          min_fret: Some(0),
-          max_fret: Some(12),
-        }
-      }
-    };
+  // let scale_exercise_params = use_query::<ScaleExerciseParams>();
+  let (root_note, set_root_note) = query_signal::<Note>("root_note");
+  let (scale_type, set_scale_type) = query_signal::<ScaleType>("scale_type");
+  let (min_fret, set_min_fret) = query_signal::<u8>("min_fret");
+  let (max_fret, set_max_fret) = query_signal::<u8>("max_fret");
 
-    ScaleExercise {
-      root_note: scale_params.root_note,
-      scale_type: scale_params.scale_type,
-      fret_range: (
-        scale_params.min_fret.unwrap_or(0),
-        scale_params.max_fret.unwrap_or(12),
-      ),
-    }
+  let root_note = Signal::derive(move || root_note.get().unwrap_or(Note::C));
+  let scale_type = Signal::derive(move || {
+    scale_type
+      .get()
+      .unwrap_or(ScaleType::Hepatonic(HeptaScaleType::Major))
   });
+  let min_fret = Signal::derive(move || min_fret.get().unwrap_or(0));
+  let max_fret = Signal::derive(move || max_fret.get().unwrap_or(12));
 
-  view! { <ScalePracticeSession exercise=scale></ScalePracticeSession> }
+  view! {
+    <ScalePracticeSession
+      root_note
+      on_root_note_changed=Callback::new(move |note| set_root_note.set(Some(note)))
+      scale_type
+      on_scale_type_changed=Callback::new(move |scale| set_scale_type.set(Some(scale)))
+      min_fret
+      on_min_fret_changed=Callback::new(move |fret| set_min_fret.set(Some(fret)))
+      max_fret
+      on_max_fret_changed=Callback::new(move |fret| set_max_fret.set(Some(fret)))
+    ></ScalePracticeSession>
+  }
 }

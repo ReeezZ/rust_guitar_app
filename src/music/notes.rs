@@ -1,6 +1,6 @@
 use std::{fmt, str::FromStr};
 
-#[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Note {
   C,
   CSharpOrDFlat,

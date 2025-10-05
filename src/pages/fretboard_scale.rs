@@ -168,7 +168,13 @@ pub fn FretboardScalePage() -> impl IntoView {
         />
 
         // Fret range control with dual sliders
-        <FretRangeSelector start_fret end_fret label="Playable Range" />
+        <FretRangeSelector
+          start_fret
+          on_start_fret_changed=Callback::new(move |val| start_fret.set(val))
+          end_fret
+          on_end_fret_changed=Callback::new(move |val| end_fret.set(val))
+          label="Playable Range"
+        />
 
         // Extra frets control
         <div class="space-y-2">

@@ -5,8 +5,10 @@ use leptos::wasm_bindgen::JsCast;
 /// Checks that start_fret <= end_fret
 #[component]
 pub fn FretRangeSelector(
-  #[prop(into)] start_fret: RwSignal<u8>,
-  #[prop(into)] end_fret: RwSignal<u8>,
+  #[prop(into)] start_fret: Signal<u8>,
+  #[prop(into)] on_start_fret_changed: Callback<u8>,
+  #[prop(into)] end_fret: Signal<u8>,
+  #[prop(into)] on_end_fret_changed: Callback<u8>,
   /// Label for the control
   label: &'static str,
   /// Minimum possible fret value
@@ -56,7 +58,7 @@ pub fn FretRangeSelector(
             let input: web_sys::HtmlInputElement = target.dyn_into().unwrap();
             if let Ok(val) = input.value().parse::<u8>() {
               if val <= end_fret.get_untracked() {
-                start_fret.set(val);
+                on_start_fret_changed.run(val);
               }
             }
           }
@@ -77,7 +79,7 @@ pub fn FretRangeSelector(
             let input: web_sys::HtmlInputElement = target.dyn_into().unwrap();
             if let Ok(val) = input.value().parse::<u8>() {
               if val >= start_fret.get_untracked() {
-                end_fret.set(val);
+                on_end_fret_changed.run(val);
               }
             }
           }

@@ -38,6 +38,11 @@ pub fn NavbarLinks() -> impl IntoView {
         is_active=Signal::derive(move || pathname() == "/fretboard_config_examples")
       />
       <NavbarElement
+        path="/dev"
+        text="Dev"
+        is_active=Signal::derive(move || pathname() == "/dev")
+      />
+      <NavbarElement
         path="/about"
         text="About"
         is_active=Signal::derive(move || pathname() == "/about")

@@ -50,7 +50,13 @@ pub fn ScaleExerciseForm(
           </div>
 
           // Fret range
-          <FretRangeSelector start_fret=min_fret end_fret=max_fret label="Playable Range" />
+          <FretRangeSelector
+            start_fret=min_fret.read_only()
+            on_start_fret_changed=Callback::new(move |fret| min_fret.set(fret))
+            end_fret=max_fret.read_only()
+            on_end_fret_changed=Callback::new(move |fret| max_fret.set(fret))
+            label="Playable Range"
+          />
 
           // Position presets
           <PositionPresetButtons

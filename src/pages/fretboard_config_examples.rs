@@ -130,7 +130,13 @@ pub fn FretboardConfigExamples() -> impl IntoView {
           // Configuration controls organized in compact sections
           <div class="space-y-4">
             <div class="flex flex-row gap-2 w-full grow">
-              <FretRangeSelector start_fret end_fret label="Fret range" />
+              <FretRangeSelector
+                start_fret
+                on_start_fret_changed=Callback::new(move |val| start_fret.set(val))
+                end_fret
+                on_end_fret_changed=Callback::new(move |val| end_fret.set(val))
+                label="Fret range"
+              />
 
               // Instrument Configuration - compact horizontal layout
               <div class="p-1 rounded-lg border">

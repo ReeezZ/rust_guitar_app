@@ -1,21 +1,24 @@
-use crate::{
-  components::{
-    exercises::scale::PositionPresetButtons,
-    ui::{
-      button::ButtonColor,
-      title::{HeadingLevel, Title},
-      Button, ButtonVariant, FretRangeSelector,
-    },
+use crate::components::{
+  exercises::scale::PositionPresetButtons,
+  ui::{
+    button::ButtonColor,
+    title::{HeadingLevel, Title},
+    Button, ButtonVariant, FretRangeSelector,
   },
-  models::exercise::ScaleExercise,
 };
 use crate::{music::notes::NoteExt, music::Note, music::ScaleType};
 use leptos::prelude::*;
 
 #[component]
 pub fn ConfigurationHeader(
-  exercise: Signal<ScaleExercise>,
-  on_exercise_update: Callback<ScaleExercise>,
+  #[prop(into)] root_note: Signal<Note>,
+  #[prop(into)] scale_type: Signal<ScaleType>,
+  #[prop(into)] min_fret: Signal<u8>,
+  #[prop(into)] max_fret: Signal<u8>,
+  on_root_note_changed: Callback<Note>,
+  on_scale_type_changed: Callback<ScaleType>,
+  on_min_fret_changed: Callback<u8>,
+  on_max_fret_changed: Callback<u8>,
   #[prop(into)] can_edit: Signal<bool>,
 ) -> impl IntoView {
   // Modal states for exercise configuration
@@ -23,46 +26,38 @@ pub fn ConfigurationHeader(
   let show_scale_type_modal = RwSignal::new(false);
   let show_fret_range_modal = RwSignal::new(false);
 
-  let root_note = Signal::derive(move || exercise.get().root_note);
-  let scale_type = Signal::derive(move || exercise.get().scale_type);
-  let fret_range = Signal::derive(move || exercise.get().fret_range);
-
   view! {
     <div class="p-3 mb-6 bg-gray-50 rounded-lg dark:bg-gray-950">
       <div class="flex flex-wrap gap-4 items-center text-sm">
 
         <>
           <RootNoteSelection
-            root_note=root_note.get()
-            exercise
+            root_note
+            on_root_note_changed
             show_fret_range_modal
             show_root_note_modal
             show_scale_type_modal
-            on_exercise_update
             can_edit
           />
           <ScaleSelection
-            scale_type=scale_type.get()
+            scale_type
             show_fret_range_modal
             show_root_note_modal
             show_scale_type_modal
+            on_scale_type_changed
             can_edit
           />
           <FretRangeSelection
-            exercise
             show_fret_range_modal
             show_root_note_modal
             show_scale_type_modal
-            on_exercise_update
-            active_min_fret=fret_range.get().0
-            active_max_fret=fret_range.get().1
+            min_fret
+            on_min_fret_changed
+            max_fret
+            on_max_fret_changed
             can_edit
           />
         </>
-        <div class="flex gap-2 items-center">
-          <span class="font-medium">"Details:"</span>
-          <span class="text-xs">{exercise.get().to_string()}</span>
-        </div>
 
       </div>
     </div>
@@ -70,13 +65,12 @@ pub fn ConfigurationHeader(
 }
 
 #[component]
-fn RootNoteSelection(
-  exercise: Signal<ScaleExercise>,
+pub fn RootNoteSelection(
   show_root_note_modal: RwSignal<bool>,
   show_scale_type_modal: RwSignal<bool>,
   show_fret_range_modal: RwSignal<bool>,
-  on_exercise_update: Callback<ScaleExercise>,
-  root_note: Note,
+  on_root_note_changed: Callback<Note>,
+  #[prop(into)] root_note: Signal<Note>,
   #[prop(into)] can_edit: Signal<bool>,
 ) -> impl IntoView {
   // Temporary selection state for root note modal
@@ -84,11 +78,8 @@ fn RootNoteSelection(
 
   let on_confirm_note_change = move || {
     if let Some(selected_note) = temp_selected_note.get() {
-      temp_selected_note.set(Some(selected_note));
       show_root_note_modal.set(false);
-      let mut exercise = exercise.get();
-      exercise.root_note = selected_note;
-      on_exercise_update.run(exercise);
+      on_root_note_changed.run(selected_note);
     }
   };
 
@@ -106,7 +97,7 @@ fn RootNoteSelection(
         }
         title="Click to change root note".to_string()
       >
-        {root_note.to_string()}
+        {move || root_note.get().to_string()}
       </Button>
 
       // Root note dropdown
@@ -118,9 +109,9 @@ fn RootNoteSelection(
               Note::all_notes()
                 .iter()
                 .map(move |&note| {
-                  let is_root_note = note == root_note;
+                  let is_root_note = note == root_note.get();
                   let is_current_root = move || {
-                    note == temp_selected_note.get().unwrap_or(root_note)
+                    note == temp_selected_note.get().unwrap_or(root_note.get())
                   };
                   view! {
                     <Button
@@ -145,7 +136,6 @@ fn RootNoteSelection(
             }}
           </div>
 
-          // Action buttons
           <div class="flex flex-col justify-end mt-2">
             <Button
               on_click=move || {
@@ -158,7 +148,7 @@ fn RootNoteSelection(
             </Button>
 
             <Button
-              on_click=move || { on_confirm_note_change() }
+              on_click=on_confirm_note_change
               variant=ButtonVariant::Primary
               disabled=Signal::derive(move || temp_selected_note.get().is_none() || !can_edit.get())
             >
@@ -177,11 +167,16 @@ fn ScaleSelection(
   show_root_note_modal: RwSignal<bool>,
   show_fret_range_modal: RwSignal<bool>,
   show_scale_type_modal: RwSignal<bool>,
-  // TODO: should probably be a signal
-  scale_type: ScaleType,
+  scale_type: Signal<ScaleType>,
+  on_scale_type_changed: Callback<ScaleType>,
   #[prop(into)] can_edit: Signal<bool>,
 ) -> impl IntoView {
-  let temporary_selected_scale = RwSignal::new(scale_type);
+  let temporary_selected_scale = RwSignal::new(scale_type.get());
+
+  let on_confirm = move || {
+    show_scale_type_modal.set(false);
+    on_scale_type_changed.run(temporary_selected_scale.get());
+  };
 
   view! {
     <div class="flex relative items-center">
@@ -196,7 +191,7 @@ fn ScaleSelection(
         }
         title="Click to change scale type".to_string()
       >
-        {scale_type.to_string()}
+        {move || scale_type.get().to_string()}
       </Button>
 
       // Scale type dropdown
@@ -211,7 +206,7 @@ fn ScaleSelection(
             >
               <Button
                 variant=Signal::derive(move || {
-                  if button_scale_type == scale_type {
+                  if button_scale_type == scale_type.get() {
                     ButtonVariant::Primary
                   } else if button_scale_type == temporary_selected_scale.get() {
                     ButtonVariant::Colored(ButtonColor::Purple)
@@ -231,13 +226,10 @@ fn ScaleSelection(
           <div class="flex gap-2 justify-center items-center">
             <Button
               disabled=Signal::derive(move || {
-                temporary_selected_scale.get() == scale_type || !can_edit.get()
+                temporary_selected_scale.get() == scale_type.get() || !can_edit.get()
               })
               variant=ButtonVariant::Primary
-              on_click=move || {
-                temporary_selected_scale.set(scale_type);
-                show_scale_type_modal.set(false);
-              }
+              on_click=on_confirm
             >
               "OK"
             </Button>
@@ -253,15 +245,18 @@ fn ScaleSelection(
 
 #[component]
 fn FretRangeSelection(
-  exercise: Signal<ScaleExercise>,
   show_fret_range_modal: RwSignal<bool>,
   show_root_note_modal: RwSignal<bool>,
   show_scale_type_modal: RwSignal<bool>,
-  active_min_fret: u8,
-  active_max_fret: u8,
-  on_exercise_update: Callback<ScaleExercise>,
+  #[prop(into)] min_fret: Signal<u8>,
+  #[prop(into)] on_min_fret_changed: Callback<u8>,
+  #[prop(into)] max_fret: Signal<u8>,
+  #[prop(into)] on_max_fret_changed: Callback<u8>,
   #[prop(into)] can_edit: Signal<bool>,
 ) -> impl IntoView {
+  let selected_min_fret = RwSignal::new(min_fret.get());
+  let selected_max_fret = RwSignal::new(max_fret.get());
+
   view! {
     <div class="flex relative gap-2 items-center">
       <span class="font-medium">"Frets:"</span>
@@ -274,60 +269,60 @@ fn FretRangeSelection(
           show_fret_range_modal.set(!show_fret_range_modal.get());
         }
       >
-        {active_min_fret}
+        {move || min_fret.get()}
         {"-"}
-        {active_max_fret}
+        {move || max_fret.get()}
       </Button>
 
-      // Fret range dropdown
-      <Show when=move || {
-        show_fret_range_modal.get()
-      }>
-        {
-          let min_fret = RwSignal::new(active_min_fret);
-          let max_fret = RwSignal::new(active_max_fret);
-          view! {
-            <div class="absolute left-0 top-full z-10 p-2 mt-1 bg-white rounded-lg border border-gray-500 shadow-lg dark:bg-black min-w-[200px]">
-              <h4 class="text-sm font-semibold">"Set Fret Range"</h4>
-              <FretRangeSelector
-                start_fret=min_fret
-                end_fret=max_fret
-                label="Set fret range"
-              ></FretRangeSelector>
-              // Fret range
+      <Show when=move || show_fret_range_modal.get()>
+        <div class="absolute left-0 top-full z-10 p-2 mt-1 bg-white rounded-lg border border-gray-500 shadow-lg dark:bg-black min-w-[200px]">
+          <h4 class="text-sm font-semibold">"Set Fret Range"</h4>
+          <FretRangeSelector
+            start_fret=selected_min_fret
+            on_start_fret_changed=Callback::new(move |new_start| {
+              selected_min_fret.set(new_start)
+            })
+            end_fret=selected_max_fret
+            on_end_fret_changed=Callback::new(move |new_end| { selected_max_fret.set(new_end) })
+            label="Set fret range"
+          ></FretRangeSelector>
 
-              <div>
-                <PositionPresetButtons
-                  on_preset_select=move |min, max| {
-                    min_fret.set(min);
-                    max_fret.set(max);
-                  }
-                  current_range=Signal::derive(move || (min_fret.get(), max_fret.get()))
-                />
-              </div>
-              <div class="flex justify-center items-center">
-                <Button
-                  disabled=Signal::derive(move || !can_edit.get())
-                  variant=ButtonVariant::Primary
-                  on_click=move || {
-                    let mut exercise = exercise.get();
-                    exercise.fret_range = (min_fret.get(), max_fret.get());
-                    on_exercise_update.run(exercise);
-                  }
-                >
-                  "Apply"
-                </Button>
+          <div>
+            <PositionPresetButtons
+              on_preset_select=move |min, max| {
+                selected_min_fret.set(min);
+                selected_max_fret.set(max);
+              }
+              current_range=Signal::derive(move || (
+                selected_min_fret.get(),
+                selected_max_fret.get(),
+              ))
+            />
+          </div>
+          <div class="flex justify-center items-center">
+            <Button
+              on_click=move || {
+                on_min_fret_changed.run(selected_min_fret.get());
+                on_max_fret_changed.run(selected_max_fret.get());
+                show_fret_range_modal.set(false);
+              }
+              variant=ButtonVariant::Primary
+              disabled=Signal::derive(move || {
+                (selected_min_fret.get() == min_fret.get()
+                  && selected_max_fret.get() == max_fret.get()) || !can_edit.get()
+              })
+            >
+              "OK"
+            </Button>
 
-                <Button
-                  on_click=move || show_fret_range_modal.set(false)
-                  variant=ButtonVariant::Secondary
-                >
-                  "Close"
-                </Button>
-              </div>
-            </div>
-          }
-        }
+            <Button
+              on_click=move || show_fret_range_modal.set(false)
+              variant=ButtonVariant::Secondary
+            >
+              "Close"
+            </Button>
+          </div>
+        </div>
       </Show>
     </div>
   }

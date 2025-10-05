@@ -6,7 +6,7 @@ use leptos_use::{use_color_mode_with_options, ColorMode, UseColorModeOptions, Us
 use crate::{
   components::navbar::Navbar,
   pages::{
-    exercise_detail::ExerciseDetailPage, exercises::ExercisesPage,
+    dev_page::DevPage, exercise_detail::ExerciseDetailPage, exercises::ExercisesPage,
     fretboard_config_examples::FretboardConfigExamples, fretboard_dev::FretboardDevPage,
     fretboard_scale::FretboardScalePage, fretboard_trainer::FretboardTrainerPage, home::Home,
     not_found::NotFound, scale_exercise::ScaleExercisePage,
@@ -50,6 +50,7 @@ pub fn App() -> impl IntoView {
           <main>
             <Routes fallback=|| view! { <NotFound /> }>
               <Route path=path!("/") view=Home />
+              <Route path=path!("/dev") view=DevPage />
               <Route path=path!("/exercises") view=ExercisesPage />
               <Route path=path!("/exercises/:id") view=ExerciseDetailPage />
               <Route path=path!("/exercise/scale") view=ScaleExercisePage />
