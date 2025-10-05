@@ -110,6 +110,17 @@ fn FretboardSection(
 ) -> impl IntoView {
   let (show_fretboard, set_show_fretboard) = signal(true);
 
+  let fretboard_model = FretboardModelBuilder::new()
+    .start_fret(min_fret)
+    .end_fret(max_fret)
+    .build();
+
+  Effect::new(move |_| {
+    let _ = (min_fret.get(), max_fret.get()); // Depend on fret range changes
+    let current_scale = Scale::new(root_note.get(), scale_type.get());
+    fretboard_model.update_from_scale(current_scale);
+  });
+
   view! {
     <div class="mt-6">
       // Toggle fretboard visibility
@@ -121,32 +132,13 @@ fn FretboardSection(
         >
           {move || if show_fretboard.get() { "Hide" } else { "Show" }}
         </Button>
-
       </div>
 
-      {move || {
-        if show_fretboard.get() {
-          let current_scale = Scale::new(root_note.get(), scale_type.get());
-          let fretboard_model = Memo::new(move |_| {
-            let model = FretboardModelBuilder::new()
-              .start_fret_val(min_fret.get())
-              .end_fret_val(max_fret.get())
-              .build();
-            model.update_from_scale(current_scale);
-            model
-          });
-          // TODO bad for performance: initialize model once and just update
-
-          view! {
-            <div class="p-4 rounded-lg">
-              <FretboardModelAdapter model=fretboard_model />
-            </div>
-          }
-            .into_any()
-        } else {
-          ().into_any()
-        }
-      }}
+      <Show when=move || show_fretboard.get()>
+        <div class="p-4 rounded-lg">
+          <FretboardModelAdapter model=fretboard_model />
+        </div>
+      </Show>
     </div>
   }
 }
