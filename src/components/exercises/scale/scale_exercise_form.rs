@@ -4,7 +4,8 @@ use crate::{
     music_selectors::{NoteSelector, ScaleTypeSelector},
     ui::FretRangeSelector,
   },
-  models::fretboard::FretboardModelBuilder,
+  models::fretboard::{FretboardModelBuilder, FretboardModelExt},
+  music::Scale,
 };
 
 use super::PositionPresetButtons;
@@ -24,6 +25,16 @@ pub fn ScaleExerciseForm(
   let on_preset_select = Callback::new(move |(min, max): (u8, u8)| {
     min_fret.set(min);
     max_fret.set(max);
+  });
+
+  let fretboard_model = FretboardModelBuilder::new()
+    .start_fret(min_fret.into())
+    .end_fret(max_fret.into())
+    .build();
+
+  Effect::new(move |_| {
+    let _ = (min_fret.get(), max_fret.get()); // Depend on fret range changes
+    fretboard_model.update_from_scale(Scale::new(root_note.get(), scale_type.get()));
   });
 
   view! {
@@ -69,12 +80,7 @@ pub fn ScaleExerciseForm(
             <label class="block mb-2 text-sm font-medium">Preview</label>
             //
             <div class="p-4 mx-auto max-w-2xl bg-gray-50 rounded-lg dark:bg-gray-900">
-              <FretboardModelAdapter model=Signal::derive(move || {
-                FretboardModelBuilder::new()
-                  .start_fret(Signal::derive(move || min_fret.get()))
-                  .end_fret(Signal::derive(move || max_fret.get()))
-                  .build()
-              }) />
+              <FretboardModelAdapter model=fretboard_model />
             </div>
           </div>
         </div>
